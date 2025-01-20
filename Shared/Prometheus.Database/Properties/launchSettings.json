@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Prometheus.Database": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "database_string": "server=localhost;user=root;password=Gnosis!2020;database=prometheus_erp;convert zero datetime=True;TreatTinyAsBoolean=True"
+      }
+    }
+  }
+}

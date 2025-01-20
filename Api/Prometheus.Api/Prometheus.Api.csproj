@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+    <ItemGroup>
+	    <ProjectReference Include="..\..\Shared\Prometheus.Database\Prometheus.Database.csproj" />
+	    <ProjectReference Include="..\..\Shared\Prometheus.Models\Prometheus.Models.csproj" />
+	    <ProjectReference Include="..\..\Shared\Prometheus.Module\Prometheus.Module.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Models\Module\Address\ListProfiles\" />
+      <Folder Include="Models\Module\Contact\ListProfile\" />
+      <Folder Include="Models\Module\Customer\ListProfile\" />
+      <Folder Include="Models\Module\Lead\ListProfiles\" />
+      <Folder Include="Models\Module\Opportunity\ListProfiles\" />
+      <Folder Include="Models\Module\Product\ListProfiles\" />
+      <Folder Include="Models\Module\Transaction\ListProfiles\" />
+    </ItemGroup>
+
+</Project>
