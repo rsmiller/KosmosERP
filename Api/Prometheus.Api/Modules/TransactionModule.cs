@@ -10,6 +10,8 @@ using Prometheus.Models;
 using Prometheus.Module;
 using Prometheus.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Api.Models.Module.Lead.Dto;
+using Prometheus.Api.Models.Module.Product.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -42,6 +44,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_transaction");
         var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_transaction");
         var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_transaction");
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_transaction");
 
         if (read_permission == false)
         {
@@ -84,6 +87,20 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
             _Context.SaveChanges();
         }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Transaction",
+                internal_permission_name = "Delete_transaction",
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+        }
     }
 
     public Transaction? Get(int object_id)
@@ -115,6 +132,11 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_transaction", write: true);
+        if (!permission_result)
+            return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
+
+
         var newTransaction = this.MapForCreate(commandModel);
 
         _Context.Transactions.Add(newTransaction);
@@ -124,12 +146,15 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         return new Response<TransactionDto>(dto);
     }
 
-    // 5) Edit
     public async Task<Response<TransactionDto>> Edit(TransactionEditCommand commandModel)
     {
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_transaction", edit: true);
+        if (!permission_result)
+            return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
@@ -181,6 +206,14 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
     public async Task<Response<TransactionDto>> Delete(TransactionDeleteCommand commandModel)
     {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_transaction", delete: true);
+        if (!permission_result)
+            return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);

@@ -11,6 +11,9 @@ using Prometheus.Models;
 using Prometheus.Module;
 using Prometheus.Api.Models.Module.Transaction.Command.Create;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Api.Models.Module.Transaction.Dto;
+using Prometheus.Api.Models.Module.Contact.Dto;
+using Prometheus.Api.Models.Module.Customer.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -43,6 +46,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_address");
         var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_address");
         var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_address");
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_address");
 
         if (read_permission == false)
         {
@@ -85,6 +89,20 @@ public class AddressModule : BaseERPModule, IAddressModule
 
             _Context.SaveChanges();
         }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Address",
+                internal_permission_name = "delete_address",
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+        }
     }
 
     public Address? Get(int object_id)
@@ -116,6 +134,10 @@ public class AddressModule : BaseERPModule, IAddressModule
         if (!validationResult.Success)
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_address", write: true);
+        if (!permission_result)
+            return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var newAddress = this.MapForCreate(commandModel);
 
         _Context.Addresses.Add(newAddress);
@@ -130,6 +152,10 @@ public class AddressModule : BaseERPModule, IAddressModule
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_address", edit: true);
+        if (!permission_result)
+            return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
@@ -166,6 +192,15 @@ public class AddressModule : BaseERPModule, IAddressModule
 
     public async Task<Response<AddressDto>> Delete(AddressDeleteCommand commandModel)
     {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_address", delete: true);
+        if (!permission_result)
+            return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<AddressDto>("Address not found", ResultCode.NotFound);

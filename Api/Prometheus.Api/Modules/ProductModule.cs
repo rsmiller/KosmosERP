@@ -22,29 +22,167 @@ namespace Prometheus.Api.Modules
     public class ProductModule : BaseERPModule, IProductModule
     {
         public override Guid ModuleIdentifier => Guid.Parse("b8b0d255-3901-4007-b9c7-b0678f89c955");
+        public override string ModuleName => "Products";
 
-        private IBaseERPContext _IContext;
+        private IBaseERPContext _Context;
 
         public ProductModule(IBaseERPContext context) : base(context)
         {
-            _IContext = context;
+            _Context = context;
+        }
+
+        public override void SeedPermissions()
+        {
+            var role = _Context.Roles.Any(m => m.name == "Product Users");
+            var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_product");
+            var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_product");
+            var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_product");
+            var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_product");
+
+            if (role == false)
+            {
+                _Context.Roles.Add(new Role()
+                {
+                    name = "Product Users",
+                    created_by = 1,
+                    created_on = DateTime.Now,
+                    updated_by = 1,
+                    updated_on = DateTime.Now,
+                });
+
+                _Context.SaveChanges();
+            }
+
+            var role_id = _Context.Roles.Where(m => m.name == "Product Users").Select(m => m.id).Single();
+
+            if (read_permission == false)
+            {
+                _Context.ModulePermissions.Add(new ModulePermission()
+                {
+                    permission_name = "Read Product",
+                    internal_permission_name = "read_product",
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    read = true,
+                });
+
+                _Context.SaveChanges();
+
+                var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_product").Select(m => m.id).Single();
+
+                _Context.RolePermissions.Add(new RolePermission()
+                {
+                    role_id = role_id,
+                    module_permission_id = read_perm_id,
+                    created_by = 1,
+                    created_on = DateTime.Now,
+                    updated_by = 1,
+                    updated_on = DateTime.Now,
+                });
+
+                _Context.SaveChanges();
+            }
+
+            if (create_permission == false)
+            {
+                _Context.ModulePermissions.Add(new ModulePermission()
+                {
+                    permission_name = "Create Product",
+                    internal_permission_name = "create_product",
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    write = true
+                });
+
+                _Context.SaveChanges();
+
+                var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_product").Select(m => m.id).Single();
+
+                _Context.RolePermissions.Add(new RolePermission()
+                {
+                    role_id = role_id,
+                    module_permission_id = create_perm_id,
+                    created_by = 1,
+                    created_on = DateTime.Now,
+                    updated_by = 1,
+                    updated_on = DateTime.Now,
+                });
+
+                _Context.SaveChanges();
+            }
+
+            if (edit_permission == false)
+            {
+                _Context.ModulePermissions.Add(new ModulePermission()
+                {
+                    permission_name = "Edit Product",
+                    internal_permission_name = "edit_product",
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    edit = true
+                });
+
+                _Context.SaveChanges();
+
+                var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_product").Select(m => m.id).Single();
+
+                _Context.RolePermissions.Add(new RolePermission()
+                {
+                    role_id = role_id,
+                    module_permission_id = edit_perm_id,
+                    created_by = 1,
+                    created_on = DateTime.Now,
+                    updated_by = 1,
+                    updated_on = DateTime.Now,
+                });
+
+                _Context.SaveChanges();
+            }
+
+            if (delete_permission == false)
+            {
+                _Context.ModulePermissions.Add(new ModulePermission()
+                {
+                    permission_name = "Delete Product",
+                    internal_permission_name = "delete_product",
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    delete = true
+                });
+
+                _Context.SaveChanges();
+
+                var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_product").Select(m => m.id).Single();
+
+                _Context.RolePermissions.Add(new RolePermission()
+                {
+                    role_id = role_id,
+                    module_permission_id = delete_perm_id,
+                    created_by = 1,
+                    created_on = DateTime.Now,
+                    updated_by = 1,
+                    updated_on = DateTime.Now,
+                });
+
+                _Context.SaveChanges();
+            }
         }
 
         public Database.Models.Product? Get(int object_id)
         {
-            return _IContext.Products.SingleOrDefault(m => m.id == object_id);
+            return _Context.Products.SingleOrDefault(m => m.id == object_id);
         }
 
         public async Task<Database.Models.Product?> GetAsync(int object_id)
         {
-            return await _IContext.Products.SingleOrDefaultAsync(m => m.id == object_id);
+            return await _Context.Products.SingleOrDefaultAsync(m => m.id == object_id);
         }
 
         public async Task<Response<ProductDto>> GetDto(int object_id)
         {
             Response<ProductDto> response = new Response<ProductDto>();
 
-            var result = await _IContext.Products.SingleOrDefaultAsync(m => m.id == object_id);
+            var result = await _Context.Products.SingleOrDefaultAsync(m => m.id == object_id);
             if (result == null)
             {
                 response.SetException("Product not found", ResultCode.NotFound);
@@ -64,6 +202,10 @@ namespace Prometheus.Api.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_product", write: true);
+            if (!permission_result)
+                return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
+
             try
             {
                 var alreadyExists = ProductExists(commandModel);
@@ -73,8 +215,8 @@ namespace Prometheus.Api.Modules
 
                 var item = MapToDatabaseModel(commandModel);
 
-                await _IContext.Products.AddAsync(item);
-                await _IContext.SaveChangesAsync();
+                await _Context.Products.AddAsync(item);
+                await _Context.SaveChangesAsync();
 
                 var dto = await GetDto(item.id);
 
@@ -88,11 +230,31 @@ namespace Prometheus.Api.Modules
 
         public async Task<Response<ProductDto>> Edit(ProductEditCommand commandModel)
         {
+            if (commandModel == null)
+                return new Response<ProductDto>(ResultCode.NullItemInput);
+
+            var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+            if (!validationResult.Success)
+                return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_product", write: true);
+            if (!permission_result)
+                return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
+
             throw new NotImplementedException();
         }
 
         public async Task<Response<ProductDto>> Delete(ProductDeleteCommand commandModel)
         {
+            var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+            if (!validationResult.Success)
+                return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_product", delete: true);
+            if (!permission_result)
+                return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
+
+
             var existingEntity = await GetAsync(commandModel.id);
             if (existingEntity == null)
                 return new Response<ProductDto>("Product not found", ResultCode.NotFound);
@@ -101,8 +263,8 @@ namespace Prometheus.Api.Modules
             existingEntity.deleted_on = DateTime.Now;
             existingEntity.deleted_by = commandModel.calling_user_id;
 
-            _IContext.Products.Update(existingEntity);
-            await _IContext.SaveChangesAsync();
+            _Context.Products.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
             var dto = await MapToDto(existingEntity);
             return new Response<ProductDto>(dto);
@@ -120,7 +282,7 @@ namespace Prometheus.Api.Modules
 
         public async Task<ProductListDto> MapToListDto(Database.Models.Product databaseModel)
         {
-            var vendor_name = await _IContext.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleAsync();
+            var vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleAsync();
 
             var dto = new ProductListDto()
             {
@@ -182,7 +344,7 @@ namespace Prometheus.Api.Modules
                 external_description = databaseModel.external_description,
             };
 
-            var attributes = await _IContext.ProductAttributes.Where(m => m.product_id == databaseModel.id).ToListAsync();
+            var attributes = await _Context.ProductAttributes.Where(m => m.product_id == databaseModel.id).ToListAsync();
             foreach (var attribute in attributes)
                 dto.product_attributes.Add(MapToProductAttributeDto(attribute));
 

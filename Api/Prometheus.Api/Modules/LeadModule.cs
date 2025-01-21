@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Prometheus.Api.Models.Module.Customer.Dto;
 using Prometheus.Api.Models.Module.Lead.Command.Create;
 using Prometheus.Api.Models.Module.Lead.Command.Delete;
 using Prometheus.Api.Models.Module.Lead.Command.Edit;
@@ -148,7 +149,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 internal_permission_name = "delete_lead",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
-                edit = true
+                delete = true
             });
 
             _Context.SaveChanges();
@@ -229,6 +230,11 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_lead", edit: true);
+        if (!permission_result)
+            return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
+
+
         // Retrieve the existing entity
         var existingEntity = await _Context.Leads.SingleOrDefaultAsync(m => m.id == commandModel.id);
         if (existingEntity == null)
@@ -296,9 +302,12 @@ public class LeadModule : BaseERPModule, ILeadModule
         return new Response<LeadDto>(dto);
     }
 
-    // 6) Delete (soft-delete example)
     public async Task<Response<LeadDto>> Delete(LeadDeleteCommand commandModel)
     {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
+
         var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_lead", delete: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
@@ -307,7 +316,6 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (existingEntity == null)
             return new Response<LeadDto>("Lead not found", ResultCode.NotFound);
 
-        // Soft-delete instead of physical removal
         existingEntity.is_deleted = true;
         existingEntity.deleted_on = DateTime.Now;
         existingEntity.deleted_by = commandModel.calling_user_id;
@@ -315,7 +323,6 @@ public class LeadModule : BaseERPModule, ILeadModule
         _Context.Leads.Update(existingEntity);
         await _Context.SaveChangesAsync();
 
-        // Return final state as DTO
         var dto = await MapToDto(existingEntity);
         return new Response<LeadDto>(dto);
     }

@@ -10,6 +10,8 @@ using Prometheus.Api.Models.Module.Opportunity.Command.Create;
 using Prometheus.Api.Models.Module.Opportunity.Command.Edit;
 using Prometheus.Api.Models.Module.Opportunity.Command.Delete;
 using Prometheus.Api.Models.Module.Opportunity.Command.Find;
+using Prometheus.Api.Models.Module.Customer.Dto;
+using Prometheus.Api.Models.Module.Lead.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -153,7 +155,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 internal_permission_name = "delete_opportunity",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
-                edit = true
+                delete = true
             });
 
             _Context.SaveChanges();
@@ -202,6 +204,10 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (!validationResult.Success)
             return new Response<OpportunityDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_opportunity", write: true);
+        if (!permission_result)
+            return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var record = this.MapToDatabaseModel(commandModel);
         record.owner_id = commandModel.calling_user_id;
 
@@ -217,6 +223,10 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<OpportunityDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_opportunity", edit: true);
+        if (!permission_result)
+            return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
@@ -264,6 +274,10 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
     public async Task<Response<OpportunityDto>> Delete(OpportunityDeleteCommand commandModel)
     {
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_opportunity", delete: true);
+        if (!permission_result)
+            return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<OpportunityDto>("Opportunity not found", ResultCode.NotFound);

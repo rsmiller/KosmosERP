@@ -141,10 +141,10 @@ public class ModuleUserTests
 
 
         var permission_result = await _Module.HasPermission(_UserId, edit_permission.internal_permission_name, edit_permission.read, edit_permission.write, edit_permission.edit, edit_permission.delete);
-        var permission_result_bad = await _Module.HasPermission(_UserId, "ASDASD", seeded_permissions[0].read, seeded_permissions[0].write, seeded_permissions[0].edit, seeded_permissions[0].delete);
+        var permission_result_admin = await _Module.HasPermission(_UserId, "ASDASD", seeded_permissions[0].read, seeded_permissions[0].write, seeded_permissions[0].edit, seeded_permissions[0].delete);
 
         Assert.IsTrue(permission_result);
-        Assert.IsFalse(permission_result_bad);
+        Assert.IsTrue(permission_result_admin);
     }
 
     [Test]

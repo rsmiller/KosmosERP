@@ -65,6 +65,7 @@ builder.Services.AddScoped<ILeadModule, LeadModule>();
 builder.Services.AddScoped<IContactModule, ContactModule>();
 
 builder.Services.AddScoped<IProductModule, ProductModule>();
+builder.Services.AddScoped<IVendorModule, VendorModule>();
 builder.Services.AddScoped<ITransactionModule, TransactionModule>();
 
 builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("database_string")));

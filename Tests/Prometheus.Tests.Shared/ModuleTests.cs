@@ -34,7 +34,7 @@ public class ModuleTests
             employee_number = "10001",
             department = 1,
             guid = Guid.NewGuid().ToString(),
-            is_admin = true,
+            is_admin = false,
             created_by = 1,
             created_on = DateTime.Now,
             updated_by = 1,
@@ -215,6 +215,8 @@ public class ModuleTests
     {
         var base_module = new BaseERPModule(_Context);
         base_module.ModuleIdentifier = Guid.Parse(_ModuleId);
+
+
 
         var has_permission = await base_module.HasPermission(_User.id, "delete_user", delete: true);
 

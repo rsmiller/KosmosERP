@@ -17,27 +17,7 @@ public class Vendor : BaseDatabaseModel
     public string? vendor_description { get; set; }
 
     [Required]
-    [MaxLength(250)]
-    public string street_address1 { get; set; }
-
-    [MaxLength(250)]
-    public string? street_address2 { get; set; }
-
-    [Required]
-    [MaxLength(75)]
-    public string city { get; set; }
-
-    [Required]
-    [MaxLength(4)]
-    public string state { get; set; }
-
-    [Required]
-    [MaxLength(10)]
-    public string postal_code { get; set; }
-
-    [Required]
-    [MaxLength(4)]
-    public string country { get; set; }
+    public int address_id { get; set; }
 
     [Required]
     [MaxLength(25)]

@@ -10,6 +10,9 @@ using Prometheus.Api.Models.Module.Customer.Command.Delete;
 using Prometheus.Api.Models.Module.Customer.Dto;
 using Prometheus.Api.Models.Module.Customer.Command.Find;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Api.Models.Module.Contact.Dto;
+using Prometheus.Api.Models.Module.Address.Dto;
+using Prometheus.Api.Models.Module.Lead.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -43,6 +46,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_customer");
         var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_customer");
         var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_customer");
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_customer");
 
         if (role == false)
         {
@@ -143,6 +147,34 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
             _Context.SaveChanges();
         }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Customer",
+                internal_permission_name = "delete_customer",
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_customer").Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
     }
 
     public Customer? Get(int object_id)
@@ -173,6 +205,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (!validationResult.Success)
             return new Response<CustomerDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_customer", write: true);
+        if (!permission_result)
+            return new Response<CustomerDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var newCustomer = this.MapForCreate(commandModel);
 
         _Context.Customers.Add(newCustomer);
@@ -187,6 +223,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<CustomerDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_customer", edit: true);
+        if (!permission_result)
+            return new Response<CustomerDto>("Invalid permission", ResultCode.InvalidPermission);
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
@@ -226,6 +266,14 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
     public async Task<Response<CustomerDto>> Delete(CustomerDeleteCommand commandModel)
     {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<CustomerDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_customer", delete: true);
+        if (!permission_result)
+            return new Response<CustomerDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<CustomerDto>("Customer not found", ResultCode.NotFound);

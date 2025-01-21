@@ -10,6 +10,8 @@ using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Api.Models.Module.Address.Dto;
+using Prometheus.Api.Models.Module.Vendor.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -43,6 +45,7 @@ public class ContactModule : BaseERPModule, IContactModule
         var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_contact");
         var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_contact");
         var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_contact");
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_contact");
 
         if (role == false)
         {
@@ -143,6 +146,34 @@ public class ContactModule : BaseERPModule, IContactModule
 
             _Context.SaveChanges();
         }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Contact",
+                internal_permission_name = "delete_contact",
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_contact").Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
     }
 
     public Contact? Get(int object_id)
@@ -188,6 +219,11 @@ public class ContactModule : BaseERPModule, IContactModule
         if (!validationResult.Success)
             return new Response<ContactDto>(validationResult.Exception, ResultCode.DataValidationError);
 
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_contact", edit: true);
+        if (!permission_result)
+            return new Response<ContactDto>("Invalid permission", ResultCode.InvalidPermission);
+
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<ContactDto>("Contact not found", ResultCode.NotFound);
@@ -225,6 +261,14 @@ public class ContactModule : BaseERPModule, IContactModule
 
     public async Task<Response<ContactDto>> Delete(ContactDeleteCommand commandModel)
     {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<ContactDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_contract", delete: true);
+        if (!permission_result)
+            return new Response<ContactDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<ContactDto>("Contact not found", ResultCode.NotFound);

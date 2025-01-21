@@ -291,16 +291,29 @@ public class DatabaseTests
     [Test]
     public async Task VendorProducts()
     {
-        var vendor_model = new Vendor()
+        var address_model = new Address()
         {
-            vendor_name = "Vendor",
             street_address1 = "123 St",
             city = "City",
             state = "TX",
             postal_code = "77777",
             country = "USA",
+            created_by = 1,
+            created_on = DateTime.Now,
+            updated_by = 1,
+            updated_on = DateTime.Now
+        };
+
+        await _Context.Addresses.AddAsync(address_model);
+        await _Context.SaveChangesAsync();
+
+        var vendor_model = new Vendor()
+        {
+            vendor_name = "Vendor",
+            
             phone = "123-456-7890",
             category = "Cat1",
+            address_id = address_model.id,
             created_by = 1,
             created_on = DateTime.Now,
             updated_by = 1,
@@ -744,14 +757,26 @@ public class DatabaseTests
     [Test]
     public async Task PurchaseOrders()
     {
-        var vendor_model = new Vendor()
+        var address_model = new Address()
         {
-            vendor_name = "Vendor",
             street_address1 = "123 St",
             city = "City",
             state = "TX",
             postal_code = "77777",
             country = "USA",
+            created_by = 1,
+            created_on = DateTime.Now,
+            updated_by = 1,
+            updated_on = DateTime.Now
+        };
+
+        await _Context.Addresses.AddAsync(address_model);
+        await _Context.SaveChangesAsync();
+
+        var vendor_model = new Vendor()
+        {
+            vendor_name = "Vendor",
+            address_id = address_model.id,
             phone = "123-456-7890",
             category = "Cat1",
             created_by = 1,

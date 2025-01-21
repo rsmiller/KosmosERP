@@ -12,6 +12,7 @@ using Prometheus.Api.Models.Module.User.Command.Create;
 using Prometheus.Api.Models.Module.User.Command.Delete;
 using Prometheus.Api.Models.Module.User.Command.Edit;
 using Prometheus.Api.Models.Module.User.Command.Find;
+using Prometheus.Api.Models.Module.Lead.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -43,6 +44,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         var read_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_user");
         var create_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_user");
         var edit_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_user");
+        var delete_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_user");
         var system_user = _IContext.Users.Any(m => m.username == "system");
 
         if(admin_role == false)
@@ -146,7 +148,36 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.SaveChanges();
         }
 
-        if(system_user == false)
+        if (delete_user_permission == false)
+        {
+            _IContext.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete User",
+                internal_permission_name = "delete_user",
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _IContext.SaveChanges();
+
+            var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
+            var delete_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == "delete_user").Select(m => m.id).Single();
+
+            _IContext.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_user_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _IContext.SaveChanges();
+        }
+
+        if (system_user == false)
         {
             string new_password = Guid.NewGuid().ToString().Substring(0, 13);
 
@@ -553,9 +584,29 @@ public partial class UserModule : BaseERPModule, IUserModule
         }
     }
 
-    public Task<Response<UserDto>> Delete(UserDeleteCommand commandModel)
+    public async Task<Response<UserDto>> Delete(UserDeleteCommand commandModel)
     {
-        throw new NotImplementedException();
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<UserDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_user", delete: true);
+        if (!permission_result)
+            return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
+
+        var existingEntity = await _IContext.Users.SingleOrDefaultAsync(m => m.id == commandModel.id);
+        if (existingEntity == null)
+            return new Response<UserDto>("User not found", ResultCode.NotFound);
+
+        existingEntity.is_deleted = true;
+        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        _IContext.Users.Update(existingEntity);
+        await _IContext.SaveChangesAsync();
+
+        var dto = await MapToDto(existingEntity);
+        return new Response<UserDto>(dto);
     }
 
     public async Task<PagingResult<UserListDto>> Find(PagingSortingParameters parameters, UserFindCommand commandModel)
