@@ -22,7 +22,7 @@ ContactListDto,
 ContactCreateCommand,
 ContactEditCommand,
 ContactDeleteCommand,
-ContactFindCommand>
+ContactFindCommand>, IBaseERPModule
 {
     // Add any contact-specific methods if needed
 }

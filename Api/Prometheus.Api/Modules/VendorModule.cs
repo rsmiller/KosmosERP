@@ -10,9 +10,6 @@ using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
-using Prometheus.Api.Models.Module.Contact.Command.Create;
-using Prometheus.Api.Models.Module.Contact.Dto;
-using Prometheus.Api.Models.Module.Customer.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -23,7 +20,7 @@ VendorListDto,
 VendorCreateCommand,
 VendorEditCommand,
 VendorDeleteCommand,
-VendorFindCommand>
+VendorFindCommand>, IBaseERPModule
 {
     // Add any vendor-specific methods if needed
 }

@@ -14,7 +14,7 @@ using Prometheus.Module;
 
 namespace Prometheus.Api.Modules
 {
-    public interface IProductModule : IERPModule<Database.Models.Product, ProductDto, ProductListDto, ProductCreateCommand, ProductEditCommand, ProductDeleteCommand, ProductFindCommand>
+    public interface IProductModule : IERPModule<Database.Models.Product, ProductDto, ProductListDto, ProductCreateCommand, ProductEditCommand, ProductDeleteCommand, ProductFindCommand>, IBaseERPModule
     {
 
     }

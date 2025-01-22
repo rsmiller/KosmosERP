@@ -22,7 +22,7 @@ public interface IOpportunityModule : IERPModule<
     OpportunityCreateCommand,
     OpportunityEditCommand,
     OpportunityDeleteCommand,
-    OpportunityFindCommand>
+    OpportunityFindCommand>, IBaseERPModule
 {
     // Add any opportunity-specific methods here if needed
 }

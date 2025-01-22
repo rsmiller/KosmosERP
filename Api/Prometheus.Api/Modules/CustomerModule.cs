@@ -10,9 +10,6 @@ using Prometheus.Api.Models.Module.Customer.Command.Delete;
 using Prometheus.Api.Models.Module.Customer.Dto;
 using Prometheus.Api.Models.Module.Customer.Command.Find;
 using Microsoft.EntityFrameworkCore;
-using Prometheus.Api.Models.Module.Contact.Dto;
-using Prometheus.Api.Models.Module.Address.Dto;
-using Prometheus.Api.Models.Module.Lead.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -23,7 +20,7 @@ CustomerListDto,
 CustomerCreateCommand,
 CustomerEditCommand,
 CustomerDeleteCommand,
-CustomerFindCommand>
+CustomerFindCommand>, IBaseERPModule
 {
     // Add any customer-specific methods if needed
 }

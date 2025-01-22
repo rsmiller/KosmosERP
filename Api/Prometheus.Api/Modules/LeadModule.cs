@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Prometheus.Api.Models.Module.Customer.Dto;
 using Prometheus.Api.Models.Module.Lead.Command.Create;
 using Prometheus.Api.Models.Module.Lead.Command.Delete;
 using Prometheus.Api.Models.Module.Lead.Command.Edit;
 using Prometheus.Api.Models.Module.Lead.Command.Find;
 using Prometheus.Api.Models.Module.Lead.Dto;
-using Prometheus.Api.Models.Module.Product.Dto;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;
@@ -16,7 +14,7 @@ using Prometheus.Module;
 namespace Prometheus.Api.Modules;
 
 public interface ILeadModule
-        : IERPModule<Lead, LeadDto, LeadListDto, LeadCreateCommand, LeadEditCommand, LeadDeleteCommand, LeadFindCommand>
+        : IERPModule<Lead, LeadDto, LeadListDto, LeadCreateCommand, LeadEditCommand, LeadDeleteCommand, LeadFindCommand>, IBaseERPModule
 {
     // Add any lead-specific methods here if needed
 }

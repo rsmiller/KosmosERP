@@ -24,7 +24,7 @@ public interface IAddressModule : IERPModule<
     AddressCreateCommand,
     AddressEditCommand,
     AddressDeleteCommand,
-    AddressFindCommand>
+    AddressFindCommand>, IBaseERPModule
 {
     // Add any address-specific methods here if needed
 }

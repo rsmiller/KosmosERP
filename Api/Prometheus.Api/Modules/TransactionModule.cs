@@ -10,8 +10,6 @@ using Prometheus.Models;
 using Prometheus.Module;
 using Prometheus.Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Prometheus.Api.Models.Module.Lead.Dto;
-using Prometheus.Api.Models.Module.Product.Dto;
 
 namespace Prometheus.Api.Modules;
 
@@ -22,7 +20,7 @@ public interface ITransactionModule : IERPModule<
     TransactionCreateCommand,
     TransactionEditCommand,
     TransactionDeleteCommand,
-    TransactionFindCommand>
+    TransactionFindCommand>, IBaseERPModule
 {
     // Add any Transaction-specific methods here if needed
 }

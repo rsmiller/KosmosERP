@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Prometheus.Api.Models.Module.User.Command.Create;
+using Prometheus.Api.Models.Module.User.Command.Delete;
 using Prometheus.Api.Models.Module.User.Command.Edit;
 using Prometheus.Api.Models.Module.User.Command.Find;
 using Prometheus.Api.Models.Module.User.Dto;
@@ -10,7 +12,7 @@ using Prometheus.Module;
 
 namespace Prometheus.Api.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
     public class UserController : ERPApiController
@@ -123,6 +125,21 @@ namespace Prometheus.Api.Controllers
         public async Task<ActionResult> GetUsersByDepartmentName([FromQuery] int department_id)
         {
             var result = await _Module.GetUsersByDepartment(department_id);
+
+            return new JsonResult(result);
+        }
+
+
+        [HttpDelete("DeleteUser", Name = "DeleteUser")]
+        [ProducesResponseType(typeof(Response<UserDto>), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult> Delete([FromBody] UserDeleteCommand deleteCommand)
+        {
+            var result = await _Module.Delete(deleteCommand);
+
+            if (!result.Success)
+                return BadRequest(result);
 
             return new JsonResult(result);
         }
