@@ -44,17 +44,17 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     public override void SeedPermissions()
     {
-        var role = _Context.Roles.Any(m => m.name == "PO Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_purchase_orders");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_purchase_orders");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_purchase_orders");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_purchase_orders");
+        var role = _Context.Roles.Any(m => m.name == "Shipping Users");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_shipping");
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_shipping");
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_shipping");
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_shipping");
 
         if (role == false)
         {
             _Context.Roles.Add(new Role()
             {
-                name = "PO Users",
+                name = "Shipping Users",
                 created_by = 1,
                 created_on = DateTime.Now,
                 updated_by = 1,
@@ -64,14 +64,14 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.SaveChanges();
         }
 
-        var role_id = _Context.Roles.Where(m => m.name == "PO Users").Select(m => m.id).Single();
+        var role_id = _Context.Roles.Where(m => m.name == "Shipping Users").Select(m => m.id).Single();
 
         if (read_permission == false)
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Read Purchase Orders",
-                internal_permission_name = "read_purchase_orders",
+                permission_name = "Read Shipments",
+                internal_permission_name = "read_shipping",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -79,7 +79,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_purchase_orders").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_shipping").Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -98,8 +98,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Create Purchase Orders",
-                internal_permission_name = "create_purchase_orders",
+                permission_name = "Create Shipment",
+                internal_permission_name = "create_shipping",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -107,7 +107,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_purchase_orders").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_shipping").Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -126,8 +126,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Edit Purchase Orders",
-                internal_permission_name = "edit_purchase_orders",
+                permission_name = "Edit Shipment",
+                internal_permission_name = "edit_shipping",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -135,7 +135,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_purchase_orders").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_shipping").Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -154,8 +154,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Delete Purchase Orders",
-                internal_permission_name = "delete_purchase_orders",
+                permission_name = "Delete Shipment",
+                internal_permission_name = "delete_shipping",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -163,7 +163,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_purchase_orders").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_shipping").Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
