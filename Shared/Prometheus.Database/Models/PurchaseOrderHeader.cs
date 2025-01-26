@@ -18,9 +18,6 @@ public class PurchaseOrderHeader : BaseDatabaseModel
     [Required]
     public int po_number { get; set; }
 
-    [MaxLength(20)]
-    public string? po_quote_number { get; set; }
-
     [MaxLength(500)]
     public string? deleted_reason { get; set; }
 

@@ -14,16 +14,16 @@ public class Country : BaseDatabaseModel
     public string iso3 { get; set; }
 
     [MaxLength(10)]
-    public string phonecode { get; set; }
+    public string? phonecode { get; set; }
 
     [MaxLength(25)]
-    public string currency { get; set; }
+    public string? currency { get; set; }
 
     [MaxLength(5)]
-    public string currency_symbol { get; set; }
+    public string? currency_symbol { get; set; }
 
     [MaxLength(50)]
-    public string region { get; set; }
+    public string? region { get; set; }
 
     [NotMapped]
     public List<State> states { get; set; } = new List<State>();

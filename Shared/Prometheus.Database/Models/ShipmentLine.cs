@@ -13,6 +13,9 @@ public class ShipmentLine : BaseDatabaseModel
     public int order_line_id { get; set; }
 
     [Required]
+    public int revision_number { get; set; } = 1;
+
+    [Required]
     public int units_to_ship { get; set; } = 0;
 
     [Required]

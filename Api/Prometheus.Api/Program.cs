@@ -58,11 +58,16 @@ builder.Services.AddSingleton<IAuthenticationSettings>(authenticationSettings);
 builder.Services.AddScoped<ITokenModule, TokenModule>();
 builder.Services.AddScoped<IUserModule, UserModule>();
 builder.Services.AddScoped<IAddressModule, AddressModule>();
+builder.Services.AddScoped<IStateModule, StateModule>();
+builder.Services.AddScoped<ICountryModule, CountryModule>();
 
 builder.Services.AddScoped<ICustomerModule, CustomerModule>();
 builder.Services.AddScoped<IOpportunityModule, OpportunityModule>();
 builder.Services.AddScoped<ILeadModule, LeadModule>();
 builder.Services.AddScoped<IContactModule, ContactModule>();
+
+builder.Services.AddScoped<IShipmentModule, ShipmentModule>();
+builder.Services.AddScoped<IPurchaseOrderModule, PurchaseOrderModule>();
 
 builder.Services.AddScoped<IProductModule, ProductModule>();
 builder.Services.AddScoped<IVendorModule, VendorModule>();

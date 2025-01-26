@@ -9,6 +9,9 @@ using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Api.Models.Module.Country.Dto;
+using Prometheus.Api.Models.Module.Country.Command.Delete;
+using Prometheus.Api.Models.Module.Country.Command.Create;
 
 namespace Prometheus.Api.Modules;
 
@@ -26,6 +29,9 @@ StateFindCommand>, IBaseERPModule
 
 public class StateModule : BaseERPModule, IStateModule
 {
+    public override Guid ModuleIdentifier => Guid.Parse("87fa499a-1240-43fe-8457-11d367d4eb2e");
+    public override string ModuleName => "State";
+
     private readonly IBaseERPContext _Context;
 
     public StateModule(IBaseERPContext context) : base(context)
@@ -54,12 +60,15 @@ public class StateModule : BaseERPModule, IStateModule
         return new Response<StateDto>(dto);
     }
 
-    // 4) Create
     public async Task<Response<StateDto>> Create(StateCreateCommand commandModel)
     {
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<StateDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_country", write: true);
+        if (!permission_result)
+            return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
         // Build new State entity from command
         var newState = this.MapForCreate(commandModel);
@@ -71,12 +80,15 @@ public class StateModule : BaseERPModule, IStateModule
         return new Response<StateDto>(dto);
     }
 
-    // 5) Edit
     public async Task<Response<StateDto>> Edit(StateEditCommand commandModel)
     {
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<StateDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_country", edit: true);
+        if (!permission_result)
+            return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
@@ -105,6 +117,10 @@ public class StateModule : BaseERPModule, IStateModule
 
     public async Task<Response<StateDto>> Delete(StateDeleteCommand commandModel)
     {
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_country", delete: true);
+        if (!permission_result)
+            return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
+
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<StateDto>("State not found", ResultCode.NotFound);
