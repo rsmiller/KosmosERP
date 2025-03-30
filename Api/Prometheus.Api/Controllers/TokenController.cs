@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Prometheus.Api.Models.Module.Token.ListProfiles;
-using Prometheus.Api.Modules;
+using Prometheus.BusinessLayer.Models.Module.Token.ListProfiles;
+using Prometheus.BusinessLayer.Modules;
 using Prometheus.Models;
 
 namespace Prometheus.Api.Controllers;

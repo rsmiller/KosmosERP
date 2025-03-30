@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prometheus.Api", "Api\Prometheus.Api\Prometheus.Api.csproj", "{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prometheus.BusinessLayer", "Shared\Prometheus.BusinessLayer\Prometheus.BusinessLayer.csproj", "{15F69216-C66E-4CE8-9585-F64CE0C5BD9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15F69216-C66E-4CE8-9585-F64CE0C5BD9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15F69216-C66E-4CE8-9585-F64CE0C5BD9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15F69216-C66E-4CE8-9585-F64CE0C5BD9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15F69216-C66E-4CE8-9585-F64CE0C5BD9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{91BD059B-6784-4B4A-9CE8-DCC59833075F} = {36DF740F-5133-4ADE-9ADF-88A70F02F81D}
 		{865CA2B8-ED30-4C97-AFD2-72DC1EBA646F} = {F17A1C3E-DF6E-459E-A1F8-0C3AAE81E07D}
 		{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B} = {79485724-A16D-4A1D-B75B-DD62B3BABEF4}
+		{15F69216-C66E-4CE8-9585-F64CE0C5BD9B} = {36DF740F-5133-4ADE-9ADF-88A70F02F81D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1C19E3D2-C3E7-4269-9E2B-E70B3CC18D90}

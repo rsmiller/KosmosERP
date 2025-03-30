@@ -37,5 +37,5 @@ public class Customer : BaseDatabaseModel
     public string guid { get; set; } = Guid.NewGuid().ToString();
 
     [NotMapped]
-    public List<Address> addresses { get; set; } = new List<Address>();
+    public List<CustomerAddress> addresses { get; set; } = new List<CustomerAddress>();
 }

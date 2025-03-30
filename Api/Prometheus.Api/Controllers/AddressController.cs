@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Prometheus.Api.Models.Module.Address.Dto;
-using Prometheus.Api.Models.Module.Address.Command.Create;
-using Prometheus.Api.Models.Module.Address.Command.Delete;
-using Prometheus.Api.Models.Module.Address.Command.Edit;
-using Prometheus.Api.Models.Module.Address.Command.Find;
-using Prometheus.Api.Modules;
+using Prometheus.BusinessLayer.Models.Module.Address.Dto;
+using Prometheus.BusinessLayer.Models.Module.Address.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Address.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Address.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Address.Command.Find;
 using Prometheus.Models;
 using Prometheus.Module;
-using Prometheus.Api.Models.Module.User.ListProfiles;
+using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
+using Prometheus.BusinessLayer.Modules;
 
 namespace Prometheus.Api.Controllers
 {

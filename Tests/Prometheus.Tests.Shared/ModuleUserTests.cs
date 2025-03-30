@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Prometheus.Api.Models.Module.User.Command.Create;
-using Prometheus.Api.Models.Module.User.Command.Edit;
-using Prometheus.Api.Models.Module.User.Command.Find;
-using Prometheus.Api.Modules;
+using Prometheus.BusinessLayer.Models.Module.User.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.User.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.User.Command.Find;
+using Prometheus.BusinessLayer.Modules;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;

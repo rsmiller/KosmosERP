@@ -11,24 +11,10 @@
   </ItemGroup>
 
     <ItemGroup>
+	    <ProjectReference Include="..\..\Shared\Prometheus.BusinessLayer\Prometheus.BusinessLayer.csproj" />
 	    <ProjectReference Include="..\..\Shared\Prometheus.Database\Prometheus.Database.csproj" />
 	    <ProjectReference Include="..\..\Shared\Prometheus.Models\Prometheus.Models.csproj" />
 	    <ProjectReference Include="..\..\Shared\Prometheus.Module\Prometheus.Module.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Models\Module\Address\ListProfiles\" />
-      <Folder Include="Models\Module\Contact\ListProfile\" />
-      <Folder Include="Models\Module\Country\ListProfile\" />
-      <Folder Include="Models\Module\Customer\ListProfile\" />
-      <Folder Include="Models\Module\Lead\ListProfiles\" />
-      <Folder Include="Models\Module\Opportunity\ListProfiles\" />
-      <Folder Include="Models\Module\Product\ListProfiles\" />
-      <Folder Include="Models\Module\PurchaseOrder\ListProfile\" />
-      <Folder Include="Models\Module\Shipment\ListProfiles\" />
-      <Folder Include="Models\Module\State\ListProfile\" />
-      <Folder Include="Models\Module\Transaction\ListProfiles\" />
-      <Folder Include="Models\Module\Vendor\ListProfile\" />
     </ItemGroup>
 
 </Project>

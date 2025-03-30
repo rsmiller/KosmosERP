@@ -12,5 +12,7 @@ public class AddressConfiguration : BaseConfiguration<Address>
 
         builder.ToTable("addresses");
         builder.HasIndex(m => m.guid);
+
+        
     }
 }

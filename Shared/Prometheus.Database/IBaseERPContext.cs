@@ -19,6 +19,7 @@ namespace Prometheus.Database
         DbSet<RolePermission> RolePermissions { get; set; }
         DbSet<Vendor> Vendors { get; set; }
         DbSet<Customer> Customers { get; set; }
+        DbSet<CustomerAddress> CustomerAddresses { get; set; }
         DbSet<Address> Addresses { get; set; }
         DbSet<OrderHeader> Orders { get; set; }
         DbSet<OrderLine> OrderLines { get; set; }

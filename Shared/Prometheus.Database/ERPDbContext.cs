@@ -32,6 +32,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new VendorConfiguration());
         modelBuilder.ApplyConfiguration(new CustomerConfiguration());
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
+        modelBuilder.ApplyConfiguration(new CustomerAddressConfiguration());
         modelBuilder.ApplyConfiguration(new OrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderLineConfiguration());
         modelBuilder.ApplyConfiguration(new OrderLineAttributeConfiguration());
@@ -73,6 +74,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Vendor> Vendors { get; set; }
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<CustomerAddress> CustomerAddresses { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<OrderHeader> Orders { get; set; }
     public DbSet<OrderLine> OrderLines { get; set; }

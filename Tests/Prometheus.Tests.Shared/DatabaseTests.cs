@@ -420,6 +420,30 @@ public class DatabaseTests
         await _Context.Addresses.AddAsync(address_model2);
         await _Context.SaveChangesAsync();
 
+        var customer_address_model1 = new CustomerAddress()
+        {
+            customer_id = customer_model.id,
+            address_id = address_model1.id,
+            created_by = 1,
+            created_on = DateTime.Now,
+            updated_by = 1,
+            updated_on = DateTime.Now
+        };
+
+        var customer_address_model2 = new CustomerAddress()
+        {
+            customer_id = customer_model.id,
+            address_id = address_model2.id,
+            created_by = 1,
+            created_on = DateTime.Now,
+            updated_by = 1,
+            updated_on = DateTime.Now
+        };
+
+        await _Context.CustomerAddresses.AddAsync(customer_address_model1);
+        await _Context.CustomerAddresses.AddAsync(customer_address_model2);
+        await _Context.SaveChangesAsync();
+
         customer_model = await _Context.Customers.FirstAsync();
 
         Assert.That(customer_model.addresses.Count() == 2);
