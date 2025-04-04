@@ -9,6 +9,9 @@ public class APInvoiceLine : BaseDatabaseModel
     public int ap_invoice_header_id { get; set; }
 
     [Required]
+    public int line_number { get; set; }
+
+    [Required]
     [Precision(14, 3)]
     public decimal line_total { get; set; } = 0;
 
@@ -22,10 +25,10 @@ public class APInvoiceLine : BaseDatabaseModel
     [MaxLength(1000)]
     public string description { get; set; }
 
-    [Required]
+    public int? purchase_order_receive_line_id { get; set; }
+
     public int? association_object_id { get; set; }
 
-    [Required]
     public int? association_object_line_id { get; set; }
 
     [Required]

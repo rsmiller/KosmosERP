@@ -1,8 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Prometheus.Database.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using Prometheus.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Create;
 
 namespace Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Create;
@@ -31,15 +29,24 @@ public class APInvoiceHeaderCreateCommand : DataCommand
     [MaxLength(1000)]
     public string? memo { get; set; }
 
+    public int? purchase_order_receive_id { get; set; }
+
     [Required]
     public bool packing_list_is_required { get; set; } = false;
 
+    public int? association_object_id { get; set; }
+
+    [Required]
+    public bool association_is_purchase_order { get; set; } = false;
+
+    [Required]
+    public bool association_is_sales_order { get; set; } = false;
+
+    [Required]
+    public bool association_is_ar_invoice { get; set; } = false;
+
     [Required]
     public bool is_paid { get; set; } = false;
-
-    [Required]
-    public string guid { get; set; } = Guid.NewGuid().ToString();
-
-
+    
     public List<APInvoiceLineCreateCommand> ap_invoice_lines { get; set; } = new List<APInvoiceLineCreateCommand>();
 }

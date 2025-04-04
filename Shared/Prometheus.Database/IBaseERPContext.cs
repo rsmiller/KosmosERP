@@ -21,7 +21,7 @@ namespace Prometheus.Database
         DbSet<Customer> Customers { get; set; }
         DbSet<CustomerAddress> CustomerAddresses { get; set; }
         DbSet<Address> Addresses { get; set; }
-        DbSet<OrderHeader> Orders { get; set; }
+        DbSet<OrderHeader> OrderHeaders { get; set; }
         DbSet<OrderLine> OrderLines { get; set; }
         DbSet<APInvoiceHeader> APInvoiceHeaders { get; set; }
         DbSet<APInvoiceLine> APInvoiceLines { get; set; }

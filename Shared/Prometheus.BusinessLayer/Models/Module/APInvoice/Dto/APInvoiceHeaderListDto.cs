@@ -22,4 +22,6 @@ public class APInvoiceHeaderListDto : BaseDto
     public bool is_paid { get; set; } = false;
 
     public string guid { get; set; }
+
+    public string? vendor_name { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Prometheus.Models;
+﻿using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
+using Prometheus.Models;
 
 namespace Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Dto;
 
@@ -16,10 +17,24 @@ public class APInvoiceHeaderDto : BaseDto
     public decimal invoice_total { get; set; }
 
     public string? memo { get; set; }
+    
+    public int? purchase_order_receive_id { get; set; }
+
+    public int? association_object_id { get; set; }
+
+    public bool association_is_purchase_order { get; set; }
+
+    public bool association_is_sales_order { get; set; }
+
+    public bool association_is_ar_invoice { get; set; }
 
     public bool packing_list_is_required { get; set; } = false;
 
     public bool is_paid { get; set; } = false;
 
     public string guid { get; set; }
+
+    public string? vendor_name { get; set; }
+
+    public List<APInvoiceLineDto> ap_invoice_lines { get; set; } = new List<APInvoiceLineDto>();
 }

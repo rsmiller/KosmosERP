@@ -76,7 +76,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<Customer> Customers { get; set; }
     public DbSet<CustomerAddress> CustomerAddresses { get; set; }
     public DbSet<Address> Addresses { get; set; }
-    public DbSet<OrderHeader> Orders { get; set; }
+    public DbSet<OrderHeader> OrderHeaders { get; set; }
     public DbSet<OrderLine> OrderLines { get; set; }
     public DbSet<OrderLineAttribute> OrderLineAttributes { get; set; }
     public DbSet<APInvoiceHeader> APInvoiceHeaders { get; set; }

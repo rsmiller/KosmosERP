@@ -28,6 +28,16 @@ public class APInvoiceHeader : BaseDatabaseModel
     [MaxLength(1000)]
     public string? memo { get; set; }
 
+    public int? purchase_order_receive_id { get; set; }
+
+    public int? association_object_id { get; set; }
+
+    public bool association_is_purchase_order { get; set; } = false;
+
+    public bool association_is_sales_order { get; set; } = false;
+
+    public bool association_is_ar_invoice { get; set; } = false;
+
     [Required]
     public bool packing_list_is_required { get; set; } = false;
 

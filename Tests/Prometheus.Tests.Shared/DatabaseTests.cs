@@ -485,7 +485,7 @@ public class DatabaseTests
             updated_on = DateTime.Now
         };
 
-        await _Context.Orders.AddAsync(order_model);
+        await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
 
         var order_line = new OrderLine()
@@ -530,7 +530,7 @@ public class DatabaseTests
         await _Context.OrderLineAttributes.AddAsync(line_attribute2);
         await _Context.SaveChangesAsync();
 
-        order_model = await _Context.Orders.SingleAsync(m => m.id == order_model.id);
+        order_model = await _Context.OrderHeaders.SingleAsync(m => m.id == order_model.id);
 
         Assert.That(order_model.order_lines.Count() == 1);
         Assert.That(order_model.order_lines[0].attributes.Count() == 2);
@@ -603,7 +603,7 @@ public class DatabaseTests
             updated_on = DateTime.Now
         };
 
-        await _Context.Orders.AddAsync(order_model);
+        await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
 
         var order_line_model = new OrderLine()
@@ -701,7 +701,7 @@ public class DatabaseTests
             updated_on = DateTime.Now
         };
 
-        await _Context.Orders.AddAsync(order_model);
+        await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
 
         var order_line_model = new OrderLine()
