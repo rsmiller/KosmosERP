@@ -12,12 +12,12 @@ The point of this project is to give anyone in the world who needs an internal E
 - MySQL
 - Entity Framework Core w/ Migrations
 - Monolith for small business needs
-- Run in am Azure Web App, AKS, a VM, IIS, whatever
+- Run in Azure Web App, AKS, a VM, IIS, whatever
 
 ## Current State
 As of 3/9/2025
 - Database models are 90% of what an average company will need
-- Database is currently configured for MySQL to save costs. Swap our builder.Services.AddDbContext in Program.cs. Configurations may need to change in Shared\Prometheus.Database\Configurations if errors are thrown because og Guid mismatch.
+- Database is currently configured for MySQL to save costs. Swap our builder.Services.AddDbContext in Program.cs. Configurations may need to be changed in Shared\Prometheus.Database\Configurations if errors are thrown because og Guid mismatch.
 - Migrations are available for use. Look in Shared\Prometheus.Database for commands
 - Unit tests are functional and will catch general items
 - Started development on the Api monolith.
