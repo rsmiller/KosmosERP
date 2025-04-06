@@ -21,7 +21,6 @@ public interface IShipmentModule : IERPModule<
     ShipmentHeaderDeleteCommand,
     ShipmentHeaderFindCommand>, IBaseERPModule
 {
-    // Any ShipmentHeader-specific methods can be added here
     ShipmentLine? GetLine(int object_id);
     Task<ShipmentLine?> GetLineAsync(int object_id);
     Task<Response<ShipmentLineDto>> GetLineDto(int object_id);

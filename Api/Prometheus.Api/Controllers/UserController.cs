@@ -10,138 +10,136 @@ using Prometheus.BusinessLayer.Modules;
 using Prometheus.Models;
 using Prometheus.Module;
 
-namespace Prometheus.Api.Controllers
+namespace Prometheus.Api.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/v1/[controller]")]
+public class UserController : ERPApiController
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class UserController : ERPApiController
+    private IUserModule _Module;
+
+    public UserController(IUserModule userModule) : base(userModule)
     {
-        private IUserModule _Module;
+        _Module = userModule;
+    }
 
-        public UserController(IUserModule userModule) : base(userModule)
+    
+    [HttpGet("GetUser", Name = "GetUser")]
+    [ProducesResponseType(typeof(Response<UserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Get([FromQuery] int id)
+    {
+        var result = await _Module.GetDto(id);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpGet("GetUserBySessionId", Name = "GetUserBySessionId")]
+    [ProducesResponseType(typeof(Response<UserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> GetUserBySessionId([FromQuery] string session_id)
+    {
+        var result = await _Module.GetBySession(session_id);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpGet("AuthenticateUser", Name = "AuthenticateUser")]
+    [ProducesResponseType(typeof(Response<AuthenticatedUserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Authenticate([FromQuery] AuthenticateListProfile listProfile)
+    {
+        var result = await _Module.Authenticate(listProfile.username, listProfile.password);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpPost("FindUser", Name = "FindUser")]
+    [ProducesResponseType(typeof(PagingResult<UserListDto>), 200)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] UserFindCommand command)
+    {
+        try
         {
-            _Module = userModule;
-        }
-
-        
-        [HttpGet("GetUser", Name = "GetUser")]
-        [ProducesResponseType(typeof(Response<UserDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult> Get([FromQuery] int id)
-        {
-            var result = await _Module.GetDto(id);
-
-            return new JsonResult(result);
-        }
-
-        [HttpGet("GetUserBySessionId", Name = "GetUserBySessionId")]
-        [ProducesResponseType(typeof(Response<UserDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult> GetUserBySessionId([FromQuery] string session_id)
-        {
-            var result = await _Module.GetBySession(session_id);
-
-            return new JsonResult(result);
-        }
-
-        [HttpGet("AuthenticateUser", Name = "AuthenticateUser")]
-        [ProducesResponseType(typeof(Response<AuthenticatedUserDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult> Authenticate([FromQuery] AuthenticateListProfile listProfile)
-        {
-            var result = await _Module.Authenticate(listProfile.username, listProfile.password);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return new JsonResult(result);
-        }
-
-        [HttpPost("FindUser", Name = "FindUser")]
-        [ProducesResponseType(typeof(PagingResult<UserListDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] UserFindCommand command)
-        {
-            try
+            if (command != null)
             {
-                if (command != null)
-                {
-                    var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
+                var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
 
-                    var result = await _Module.Find(sortingParams, command);
+                var result = await _Module.Find(sortingParams, command);
 
-                    return Ok(result);
-                }
-                else
-                {
-                    return StatusCode(500, "Api body is null");
-                }
+                return Ok(result);
             }
-            catch (Exception e)
+            else
             {
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Api body is null");
             }
         }
-
-        [HttpPost("CreateUser", Name = "CreateUser")]
-        [ProducesResponseType(typeof(Response<UserDto>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Create([FromBody] UserCreateCommand createCommand)
+        catch (Exception e)
         {
-            var result = await _Module.Create(createCommand);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return new JsonResult(result);
+            return StatusCode(500, e.Message);
         }
+    }
 
-        [HttpPut("UpdateUser", Name = "UpdateUser")]
-        [ProducesResponseType(typeof(Response<UserDto>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Edit([FromBody] UserEditCommand editCommand)
-        {
-            var result = await _Module.Edit(editCommand);
+    [HttpPost("CreateUser", Name = "CreateUser")]
+    [ProducesResponseType(typeof(Response<UserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Create([FromBody] UserCreateCommand createCommand)
+    {
+        var result = await _Module.Create(createCommand);
 
-            if (!result.Success)
-                return BadRequest(result);
+        if (!result.Success)
+            return BadRequest(result);
 
-            return new JsonResult(result);
-        }
+        return Ok(result);
+    }
 
-        [HttpGet("GetUsersByDepartment", Name = "GetUsersByDepartment")]
-        [ProducesResponseType(typeof(Response<UserDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult> GetUsersByDepartmentName([FromQuery] int department_id)
-        {
-            var result = await _Module.GetUsersByDepartment(department_id);
+    [HttpPut("UpdateUser", Name = "UpdateUser")]
+    [ProducesResponseType(typeof(Response<UserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Edit([FromBody] UserEditCommand editCommand)
+    {
+        var result = await _Module.Edit(editCommand);
 
-            return new JsonResult(result);
-        }
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpGet("GetUsersByDepartment", Name = "GetUsersByDepartment")]
+    [ProducesResponseType(typeof(Response<UserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> GetUsersByDepartmentName([FromQuery] int department_id)
+    {
+        var result = await _Module.GetUsersByDepartment(department_id);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
 
 
-        [HttpDelete("DeleteUser", Name = "DeleteUser")]
-        [ProducesResponseType(typeof(Response<UserDto>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Delete([FromBody] UserDeleteCommand deleteCommand)
-        {
-            var result = await _Module.Delete(deleteCommand);
+    [HttpDelete("DeleteUser", Name = "DeleteUser")]
+    [ProducesResponseType(typeof(Response<UserDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Delete([FromBody] UserDeleteCommand deleteCommand)
+    {
+        var result = await _Module.Delete(deleteCommand);
 
-            if (!result.Success)
-                return BadRequest(result);
+        if (!result.Success)
+            return BadRequest(result);
 
-            return new JsonResult(result);
-        }
+        return Ok(result);
     }
 }

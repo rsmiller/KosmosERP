@@ -15,17 +15,21 @@ using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 
 namespace Prometheus.Api.Modules;
 
 public interface IAPInvoiceModule : IERPModule<APInvoiceHeader, APInvoiceHeaderDto, APInvoiceHeaderListDto, APInvoiceHeaderCreateCommand, APInvoiceHeaderEditCommand, APInvoiceHeaderDeleteCommand, APInvoiceHeaderFindCommand>, IBaseERPModule
 {
+    Task<Response<APInvoiceLineDto>> GetLineDto(int object_id);
     Task<Response<APInvoiceLineDto>> CreateLine(APInvoiceLineCreateCommand commandModel);
     Task<Response<APInvoiceLineDto>> EditLine(APInvoiceLineEditCommand commandModel);
     Task<Response<APInvoiceLineDto>> DeleteLine(APInvoiceLineDeleteCommand commandModel);
-    Task<Response<APInvoiceHeaderDto>> AssociateHeaderObject(APInvoiceAssoicationCommand associationCommand);
-    Task<Response<APInvoiceLineDto>> AssociateLineObject(APInvoiceAssoicationCommand associationCommand);
-    Task<Response<APInvoiceHeaderDto>> AssociateReceivedPO (APInvoiceAssociatePOCommand associationCommand);
+    Task<Response<APInvoiceHeaderDto>> AssociateHeaderObject(APInvoiceAssoicationCommand commandModel);
+    Task<Response<APInvoiceLineDto>> AssociateLineObject(APInvoiceAssoicationCommand commandModel);
+    Task<Response<APInvoiceHeaderDto>> AssociateReceivedPO (APInvoiceAssociatePOCommand commandModel);
+    Task<Response<List<APInvoiceAssociationDto>>> GetAssociations(APInvoiceAssociationsFindCommand commandModel);
 }
 
 public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
@@ -410,9 +414,6 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (existingEntity.description != commandModel.description)
             existingEntity.description = commandModel.description;
 
-        if (existingEntity.purchase_order_receive_line_id != commandModel.purchase_order_receive_line_id && commandModel.purchase_order_receive_line_id.HasValue)
-            existingEntity.purchase_order_receive_line_id = commandModel.purchase_order_receive_line_id.Value;
-
         if (commandModel.association_object_id.HasValue)
             existingEntity.association_object_id = commandModel.association_object_id.Value;
 
@@ -736,6 +737,24 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         throw new NotImplementedException();
     }
 
+    public async Task<Response<List<APInvoiceAssociationDto>>> GetAssociations(APInvoiceAssociationsFindCommand commandModel)
+    {
+        Response<List<APInvoiceAssociationDto>> response = new Response<List<APInvoiceAssociationDto>>();
+        response.Data = new List<APInvoiceAssociationDto>();
+
+        try
+        {
+
+        }
+        catch (Exception ex)
+        {
+            await LogError(50, this.GetType().Name, nameof(GetAssociations), ex);
+            return new Response<List<APInvoiceAssociationDto>>(ex.Message, ResultCode.Error);
+        }
+
+        return response;
+    }
+
     public async Task<APInvoiceHeaderListDto> MapToListDto(APInvoiceHeader databaseModel)
     {
         var dto = new APInvoiceHeaderListDto()
@@ -809,7 +828,6 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             qty_invoiced = databaseModel.qty_invoiced,
             gl_account_id = databaseModel.gl_account_id,
             description = databaseModel.description,
-            purchase_order_receive_line_id = databaseModel.purchase_order_receive_line_id,
             association_object_id = databaseModel.association_object_id,
             association_object_line_id = databaseModel.association_object_line_id,
             association_is_purchase_order = databaseModel.association_is_purchase_order,
@@ -822,13 +840,40 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             is_deleted = databaseModel.is_deleted
         };
 
-        var lines = await _Context.PurchaseOrderReceiveLines
-            .Where(m => m.id == databaseModel.purchase_order_receive_line_id && !m.is_deleted)
-            .ToListAsync();
-        sdfsdfsdf
+        if(databaseModel.association_object_id.HasValue && databaseModel.association_is_purchase_order)
+        {
+            var receive_lines = (from por in _Context.PurchaseOrderReceiveHeaders
+                                 join pol in _Context.PurchaseOrderReceiveLines on por.id equals pol.purchase_order_receive_header_id
+                                 where por.purchase_order_id == databaseModel.association_object_id
+                                 select new { por, pol }).ToList();
+
+            foreach (var line in receive_lines)
+            {
+
+            }
+        }
+
+        
             //TODO; Need assocaite table structure for receive to po matching
 
         return dto;
+    }
+
+    private async Task<List<PurchaseOrderReceiveLine>> GetPurchaseOrderReceiveData(int association_object_id)
+    {
+        List<PurchaseOrderReceiveLine> response = new List<PurchaseOrderReceiveLine>();
+
+        var purchase_order_header = await _Context.PurchaseOrderHeaders
+            .Where(m => m.id == association_object_id)
+            .SingleOrDefaultAsync();
+
+        if(purchase_order_header != null)
+        {
+            
+        }
+        
+
+        return response;
     }
 
     public async Task<APInvoiceLineListDto> MapToLineListDto(APInvoiceLine databaseModel)
@@ -843,7 +888,6 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             description = databaseModel.description,
             association_object_id = databaseModel.association_object_id,
             association_object_line_id = databaseModel.association_object_line_id,
-            purchase_order_receive_line_id = databaseModel.purchase_order_receive_line_id,
             guid = databaseModel.guid,
             id = databaseModel.id,
             created_on = databaseModel.created_on,
@@ -889,7 +933,6 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             qty_invoiced = createCommand.qty_invoiced,
             gl_account_id = createCommand.gl_account_id,
             description = createCommand.description,
-            purchase_order_receive_line_id = createCommand.purchase_order_receive_line_id,
             association_object_id = createCommand.association_object_id,
             association_object_line_id = createCommand.association_object_line_id,
             association_is_purchase_order = createCommand.association_is_purchase_order,

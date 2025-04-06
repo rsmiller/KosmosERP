@@ -1,4 +1,4 @@
-﻿using Prometheus.Database.Models;
+﻿using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Dto;
 using Prometheus.Models;
 
 namespace Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
@@ -17,8 +17,6 @@ public class APInvoiceLineDto : BaseDto
 
     public string description { get; set; }
 
-    public int? purchase_order_receive_line_id { get; set; }
-
     public int? association_object_id { get; set; }
 
     public int? association_object_line_id { get; set; }
@@ -29,5 +27,5 @@ public class APInvoiceLineDto : BaseDto
 
     public bool association_is_ar_invoice { get; set; }
 
-    public List<PurchaseOrderReceiveLine> receive_lines { get; set; } = new List<PurchaseOrderReceiveLine>();
+    public List<PurchaseOrderReceiveLineDto> receive_lines { get; set; } = new List<PurchaseOrderReceiveLineDto>();
 }

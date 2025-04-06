@@ -27,21 +27,16 @@ namespace Prometheus.Api.Controllers
         
         [HttpGet("GetAddress", Name = "GetAddress")]
         [ProducesResponseType(typeof(Response<AddressDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
         public async Task<ActionResult> Get([FromQuery] int id)
         {
             var result = await _Module.GetDto(id);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
 
         [HttpPost("FindAddress", Name = "FindAddress")]
         [ProducesResponseType(typeof(PagingResult<AddressListDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] AddressFindCommand command)
         {
             try
@@ -68,7 +63,6 @@ namespace Prometheus.Api.Controllers
         [HttpPost("CreateAddress", Name = "CreateAddress")]
         [ProducesResponseType(typeof(Response<AddressDto>), 200)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Create([FromBody] AddressCreateCommand createCommand)
         {
             var result = await _Module.Create(createCommand);
@@ -76,13 +70,12 @@ namespace Prometheus.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
 
         [HttpPut("UpdateAddress", Name = "UpdateAddress")]
         [ProducesResponseType(typeof(Response<AddressDto>), 200)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Edit([FromBody] AddressEditCommand editCommand)
         {
             var result = await _Module.Edit(editCommand);
@@ -90,13 +83,12 @@ namespace Prometheus.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
 
         [HttpDelete("DeleteAddress", Name = "DeleteAddress")]
         [ProducesResponseType(typeof(Response<AddressDto>), 200)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Delete([FromBody] AddressDeleteCommand deleteCommand)
         {
             var result = await _Module.Delete(deleteCommand);
@@ -104,7 +96,7 @@ namespace Prometheus.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
     }
 }

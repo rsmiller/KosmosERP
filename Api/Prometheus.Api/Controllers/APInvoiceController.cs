@@ -33,39 +33,53 @@ public class APInvoiceController : ERPApiController
 
     [HttpGet("GetAPInvoice", Name = "GetAPInvoice")]
     [ProducesResponseType(typeof(Response<APInvoiceHeaderDto>), 200)]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(401)]
+    [ProducesResponseType(500)]
     public async Task<ActionResult> Get([FromQuery] int id)
     {
         var result = await _Module.GetDto(id);
 
-        return new JsonResult(result);
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
     }
 
 
     [HttpPost("AssociateAPInvoice", Name = "AssociateAPInvoice")]
     [ProducesResponseType(typeof(PagingResult<APInvoiceHeaderDto>), 200)]
+    [ProducesResponseType(400)]
     public async Task<ActionResult> AssociateAPInvoiceHeaderObject([FromBody] APInvoiceAssoicationCommand command)
     {
         var result = await _Module.AssociateHeaderObject(command);
+
+        if (!result.Success)
+            return BadRequest(result);
 
         return Ok(result);
     }
 
     [HttpPost("AssociateAPInvoiceLine", Name = "AssociateAPInvoiceLine")]
     [ProducesResponseType(typeof(PagingResult<APInvoiceLineDto>), 200)]
+    [ProducesResponseType(400)]
     public async Task<ActionResult> AssociateAPInvoiceLine([FromBody] APInvoiceAssoicationCommand command)
     {
         var result = await _Module.AssociateHeaderObject(command);
+
+        if (!result.Success)
+            return BadRequest(result);
 
         return Ok(result);
     }
 
     [HttpPost("AssociateReceivedPO", Name = "AssociateReceivedPO")]
     [ProducesResponseType(typeof(PagingResult<APInvoiceLineDto>), 200)]
+    [ProducesResponseType(400)]
     public async Task<ActionResult> AssociateReceivedPO([FromBody] APInvoiceAssociatePOCommand command)
     {
         var result = await _Module.AssociateReceivedPO(command);
+
+        if (!result.Success)
+            return BadRequest(result);
 
         return Ok(result);
     }
@@ -106,7 +120,7 @@ public class APInvoiceController : ERPApiController
         if (!result.Success)
             return BadRequest(result);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 
     [HttpPost("CreateAPInvoiceLine", Name = "CreateAPInvoiceLine")]
@@ -119,7 +133,7 @@ public class APInvoiceController : ERPApiController
         if (!result.Success)
             return BadRequest(result);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 
     [HttpPut("UpdateAPInvoice", Name = "UpdateAPInvoice")]
@@ -132,7 +146,7 @@ public class APInvoiceController : ERPApiController
         if (!result.Success)
             return BadRequest(result);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 
     [HttpPut("UpdateAPInvoiceLine", Name = "UpdateAPInvoiceLine")]
@@ -145,7 +159,7 @@ public class APInvoiceController : ERPApiController
         if (!result.Success)
             return BadRequest(result);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 
     [HttpDelete("DeleteAPInvoice", Name = "DeleteAPInvoice")]
@@ -158,7 +172,7 @@ public class APInvoiceController : ERPApiController
         if (!result.Success)
             return BadRequest(result);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 
     [HttpDelete("DeleteAPInvoiceLine", Name = "DeleteAPInvoiceLine")]
@@ -171,6 +185,6 @@ public class APInvoiceController : ERPApiController
         if (!result.Success)
             return BadRequest(result);
 
-        return new JsonResult(result);
+        return Ok(result);
     }
 }

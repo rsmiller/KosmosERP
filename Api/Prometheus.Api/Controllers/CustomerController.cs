@@ -27,21 +27,20 @@ namespace Prometheus.Api.Controllers
         
         [HttpGet("GetCustomer", Name = "GetCustomer")]
         [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
+        [ProducesResponseType(400)]
         public async Task<ActionResult> Get([FromQuery] int id)
         {
             var result = await _Module.GetDto(id);
 
-            return new JsonResult(result);
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
         [HttpPost("FindCustomer", Name = "FindCustomer")]
         [ProducesResponseType(typeof(PagingResult<CustomerListDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] CustomerFindCommand command)
         {
             try
@@ -68,7 +67,6 @@ namespace Prometheus.Api.Controllers
         [HttpPost("CreateCustomer", Name = "CreateCustomer")]
         [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Create([FromBody] CustomerCreateCommand createCommand)
         {
             var result = await _Module.Create(createCommand);
@@ -76,13 +74,12 @@ namespace Prometheus.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
 
         [HttpPut("UpdateCustomer", Name = "UpdateCustomer")]
         [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Edit([FromBody] CustomerEditCommand editCommand)
         {
             var result = await _Module.Edit(editCommand);
@@ -90,13 +87,12 @@ namespace Prometheus.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
 
         [HttpDelete("DeleteCustomer", Name = "DeleteCustomer")]
         [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult> Delete([FromBody] CustomerDeleteCommand deleteCommand)
         {
             var result = await _Module.Delete(deleteCommand);
@@ -104,7 +100,7 @@ namespace Prometheus.Api.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return new JsonResult(result);
+            return Ok(result);
         }
     }
 }

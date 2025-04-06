@@ -19,6 +19,4 @@ public class APInvoiceLineListDto : BaseDto
     public int? association_object_id { get; set; }
 
     public int? association_object_line_id { get; set; }
-
-    public int? purchase_order_receive_line_id { get; set; }
 }

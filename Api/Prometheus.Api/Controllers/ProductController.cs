@@ -10,101 +10,96 @@ using Prometheus.Models;
 using Prometheus.Module;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
 
-namespace Prometheus.Api.Controllers
+namespace Prometheus.Api.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/v1/[controller]")]
+public class ProductController : ERPApiController
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class ProductController : ERPApiController
+    private IProductModule _Module;
+
+    public ProductController(IProductModule module) : base(module)
     {
-        private IProductModule _Module;
+        _Module = module;
+    }
 
-        public ProductController(IProductModule module) : base(module)
+    
+    [HttpGet("GetProduct", Name = "GetProduct")]
+    [ProducesResponseType(typeof(Response<ProductDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Get([FromQuery] int id)
+    {
+        var result = await _Module.GetDto(id);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpPost("FindProduct", Name = "FindProduct")]
+    [ProducesResponseType(typeof(PagingResult<ProductListDto>), 200)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] ProductFindCommand command)
+    {
+        try
         {
-            _Module = module;
-        }
-
-        
-        [HttpGet("GetProduct", Name = "GetProduct")]
-        [ProducesResponseType(typeof(Response<ProductDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult> Get([FromQuery] int id)
-        {
-            var result = await _Module.GetDto(id);
-
-            return new JsonResult(result);
-        }
-
-        [HttpPost("FindProduct", Name = "FindProduct")]
-        [ProducesResponseType(typeof(PagingResult<ProductListDto>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] ProductFindCommand command)
-        {
-            try
+            if (command != null)
             {
-                if (command != null)
-                {
-                    var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
+                var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
 
-                    var result = await _Module.Find(sortingParams, command);
+                var result = await _Module.Find(sortingParams, command);
 
-                    return Ok(result);
-                }
-                else
-                {
-                    return StatusCode(500, "Api body is null");
-                }
+                return Ok(result);
             }
-            catch (Exception e)
+            else
             {
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Api body is null");
             }
         }
-
-        [HttpPost("CreateProduct", Name = "CreateProduct")]
-        [ProducesResponseType(typeof(Response<ProductDto>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Create([FromBody] ProductCreateCommand createCommand)
+        catch (Exception e)
         {
-            var result = await _Module.Create(createCommand);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return new JsonResult(result);
+            return StatusCode(500, e.Message);
         }
+    }
 
-        [HttpPut("UpdateProduct", Name = "UpdateProduct")]
-        [ProducesResponseType(typeof(Response<ProductDto>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Edit([FromBody] ProductEditCommand editCommand)
-        {
-            var result = await _Module.Edit(editCommand);
+    [HttpPost("CreateProduct", Name = "CreateProduct")]
+    [ProducesResponseType(typeof(Response<ProductDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Create([FromBody] ProductCreateCommand createCommand)
+    {
+        var result = await _Module.Create(createCommand);
 
-            if (!result.Success)
-                return BadRequest(result);
+        if (!result.Success)
+            return BadRequest(result);
 
-            return new JsonResult(result);
-        }
+        return Ok(result);
+    }
 
-        [HttpDelete("DeleteProduct", Name = "DeleteProduct")]
-        [ProducesResponseType(typeof(Response<ProductDto>), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> Delete([FromBody] ProductDeleteCommand deleteCommand)
-        {
-            var result = await _Module.Delete(deleteCommand);
+    [HttpPut("UpdateProduct", Name = "UpdateProduct")]
+    [ProducesResponseType(typeof(Response<ProductDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Edit([FromBody] ProductEditCommand editCommand)
+    {
+        var result = await _Module.Edit(editCommand);
 
-            if (!result.Success)
-                return BadRequest(result);
+        if (!result.Success)
+            return BadRequest(result);
 
-            return new JsonResult(result);
-        }
+        return Ok(result);
+    }
+
+    [HttpDelete("DeleteProduct", Name = "DeleteProduct")]
+    [ProducesResponseType(typeof(Response<ProductDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Delete([FromBody] ProductDeleteCommand deleteCommand)
+    {
+        var result = await _Module.Delete(deleteCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
     }
 }
