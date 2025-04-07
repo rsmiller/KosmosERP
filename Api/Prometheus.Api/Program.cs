@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Prometheus.Api.Modules;
 using Prometheus.BusinessLayer.Modules;
 using Prometheus.Database;
-using Prometheus.Database.Models;
 using Prometheus.Models;
 using Prometheus.Models.Interfaces;
 using Prometheus.Module;
@@ -67,13 +67,20 @@ builder.Services.AddScoped<ILeadModule, LeadModule>();
 builder.Services.AddScoped<IContactModule, ContactModule>();
 
 builder.Services.AddScoped<IShipmentModule, ShipmentModule>();
+
+builder.Services.AddScoped<IOrderModule, OrderModule>();
 builder.Services.AddScoped<IPurchaseOrderModule, PurchaseOrderModule>();
+builder.Services.AddScoped<IPurchaseOrderReceiveModule, PurchaseOrderReceiveModule>();
+builder.Services.AddScoped<IAPInvoiceModule, APInvoiceModule>();
+builder.Services.AddScoped<IARInvoiceModule, ARInvoiceModule>();
+
+builder.Services.AddScoped<IDocumentUploadModule, DocumentUploadModule>();
 
 builder.Services.AddScoped<IProductModule, ProductModule>();
 builder.Services.AddScoped<IVendorModule, VendorModule>();
 builder.Services.AddScoped<ITransactionModule, TransactionModule>();
 
-builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("database_string")));
+builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("DatabaseConnectionString")));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Add authentication

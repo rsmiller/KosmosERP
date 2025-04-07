@@ -23,7 +23,7 @@ public interface IPurchaseOrderReceiveModule : IERPModule<PurchaseOrderReceiveHe
 
 public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveModule
 {
-    public override Guid ModuleIdentifier => Guid.Parse("");
+    public override Guid ModuleIdentifier => Guid.Parse("bdaa14c4-64d8-44f3-b1ad-d272c408832f");
     public override string ModuleName => "PurchaseOrderReceive";
 
     private IBaseERPContext _Context;
