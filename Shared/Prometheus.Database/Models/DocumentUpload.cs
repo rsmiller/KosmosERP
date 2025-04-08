@@ -9,7 +9,7 @@ public class DocumentUpload : BaseDatabaseModel
     public int rev_num { get; set; } = 1;
 
     [Required]
-    public int document_object_id { get; set; } = 1;
+    public int document_object_id { get; set; }
 
     [Required]
     [MaxLength(50)]

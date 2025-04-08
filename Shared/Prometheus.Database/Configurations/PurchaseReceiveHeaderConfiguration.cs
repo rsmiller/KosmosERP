@@ -23,5 +23,6 @@ public class PurchaseReceiveHeaderConfiguration : BaseConfiguration<PurchaseOrde
 
         builder.HasOne<PurchaseOrderHeader>(x => x.purchase_order).WithMany().HasForeignKey(x => x.purchase_order_id).HasPrincipalKey(c => c.id);
         builder.HasMany<PurchaseOrderReceiveLine>(x => x.purchase_order_receive_lines).WithOne().HasForeignKey(x => x.purchase_order_receive_header_id).HasPrincipalKey(c => c.id);
+        builder.HasMany<PurchaseOrderReceiveUpload>(x => x.purchase_order_receive_uploads).WithOne().HasForeignKey(x => x.purchase_order_receive_header_id).HasPrincipalKey(c => c.id);
     }
 }

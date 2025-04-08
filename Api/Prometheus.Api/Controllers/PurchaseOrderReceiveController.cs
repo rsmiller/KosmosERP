@@ -103,6 +103,19 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
+    [HttpPost("CreatePurchaseOrderReceiveUpload", Name = "CreatePurchaseOrderReceiveUpload")]
+    [ProducesResponseType(typeof(Response<PurchaseOrderReceiveUploadDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> CreatePurchaseOrderReceiveUpload([FromBody] PurchaseOrderReceiveUploadCreateCommand createCommand)
+    {
+        var result = await _Module.CreateUpload(createCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
     [HttpPut("UpdatePurchaseOrderReceiveHeader", Name = "UpdatePurchaseOrderReceiveHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -143,12 +156,26 @@ public class PurchaseOrderReceiveController : ERPApiController
     }
 
     [HttpDelete("DeletePurchaseOrderReceiveLine", Name = "DeletePurchaseOrderReceiveLine")]
-    [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
+    [ProducesResponseType(typeof(Response<PurchaseOrderReceiveLineDto>), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<ActionResult> DeleteLine([FromBody] PurchaseOrderReceiveLineDeleteCommand deleteCommand)
     {
         var result = await _Module.DeleteLine(deleteCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpDelete("DeletePurchaseOrderReceiveUpload", Name = "DeletePurchaseOrderReceiveUpload")]
+    [ProducesResponseType(typeof(Response<PurchaseOrderReceiveUploadDto>), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<ActionResult> DeletePurchaseOrderReceiveUpload([FromBody] PurchaseOrderReceiveUploadDeleteCommand deleteCommand)
+    {
+        var result = await _Module.DeleteUpload(deleteCommand);
 
         if (!result.Success)
             return BadRequest(result);

@@ -20,7 +20,6 @@ public class PurchaseOrderReceiveHeaderDto : BaseDto
     public DateTime? canceled_on { get; set; }
     public int? canceled_by { get; set; }
 
-    public string guid { get; set; }
-
     public List<PurchaseOrderReceiveLineDto> received_lines { get; set; } = new List<PurchaseOrderReceiveLineDto>();
+    public List<PurchaseOrderReceiveUploadDto> received_uploads { get; set; } = new List<PurchaseOrderReceiveUploadDto>();
 }

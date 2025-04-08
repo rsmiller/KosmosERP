@@ -36,4 +36,7 @@ public class PurchaseOrderReceiveHeader : BaseDatabaseModel
 
     [NotMapped]
     public List<PurchaseOrderReceiveLine> purchase_order_receive_lines { get; set; } = new List<PurchaseOrderReceiveLine>();
+
+    [NotMapped]
+    public List<PurchaseOrderReceiveUpload> purchase_order_receive_uploads { get; set; } = new List<PurchaseOrderReceiveUpload>();
 }

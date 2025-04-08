@@ -19,6 +19,4 @@ public class PurchaseOrderReceiveHeaderListDto : BaseDto
     public DateTime? completed_on { get; set; }
     public DateTime? canceled_on { get; set; }
     public int? canceled_by { get; set; }
-
-    public string guid { get; set; }
 }

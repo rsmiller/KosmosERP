@@ -39,6 +39,7 @@ namespace Prometheus.Database
         DbSet<PurchaseOrderLine> PurchaseOrderLines { get; set; }
         DbSet<PurchaseOrderReceiveHeader> PurchaseOrderReceiveHeaders { get; set; }
         DbSet<PurchaseOrderReceiveLine> PurchaseOrderReceiveLines { get; set; }
+        DbSet<PurchaseOrderReceiveUpload> PurchaseOrderReceiveUploads { get; set; }
         DbSet<ShipmentHeader> ShipmentHeaders { get; set; }
         DbSet<ShipmentLine> ShipmentLines { get; set; }
         DbSet<DocumentUpload> DocumentUploads { get; set; }

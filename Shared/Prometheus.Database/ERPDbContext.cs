@@ -54,6 +54,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new PurchaseOrderLineConfiguration());
         modelBuilder.ApplyConfiguration(new PurchaseReceiveHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new PurchaseReceiveLineConfiguration());
+        modelBuilder.ApplyConfiguration(new PurchaseReceiveUploadConfiguration());
         modelBuilder.ApplyConfiguration(new ShipmentHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new ShipmentLineConfiguration());
         modelBuilder.ApplyConfiguration(new StateConfiguration());
@@ -94,6 +95,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<PurchaseOrderLine> PurchaseOrderLines { get; set; }
     public DbSet<PurchaseOrderReceiveHeader> PurchaseOrderReceiveHeaders { get; set; }
     public DbSet<PurchaseOrderReceiveLine> PurchaseOrderReceiveLines { get; set; }
+    public DbSet<PurchaseOrderReceiveUpload> PurchaseOrderReceiveUploads { get; set; }
     public DbSet<ShipmentHeader> ShipmentHeaders { get; set; }
     public DbSet<ShipmentLine> ShipmentLines { get; set; }
     public DbSet<DocumentUpload> DocumentUploads { get; set; }
