@@ -46,7 +46,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
     public override void SeedPermissions()
     {
-        var role = _Context.Roles.Any(m => m.name == "APInvoiceHeader Users");
+        var role = _Context.Roles.Any(m => m.name == "AP Invoice Users");
         var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_apinvoiceheader");
         var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_apinvoiceheader");
         var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_apinvoiceheader");
@@ -56,7 +56,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             _Context.Roles.Add(new Role()
             {
-                name = "APInvoiceHeader Users",
+                name = "AP Invoice Users",
                 created_by = 1,
                 created_on = DateTime.Now,
                 updated_by = 1,
@@ -66,13 +66,13 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             _Context.SaveChanges();
         }
 
-        var role_id = _Context.Roles.Where(m => m.name == "APInvoiceHeader Users").Select(m => m.id).Single();
+        var role_id = _Context.Roles.Where(m => m.name == "AP Invoice Users").Select(m => m.id).Single();
 
         if (read_permission == false)
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Read APInvoiceHeader",
+                permission_name = "Read AP Invoice",
                 internal_permission_name = "read_apinvoiceheader",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
@@ -100,7 +100,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Create APInvoiceHeader",
+                permission_name = "Create AP Invoice",
                 internal_permission_name = "create_apinvoiceheader",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
@@ -128,7 +128,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Edit APInvoiceHeader",
+                permission_name = "Edit AP Invoice",
                 internal_permission_name = "edit_apinvoiceheader",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
@@ -156,7 +156,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
-                permission_name = "Delete APInvoiceHeader",
+                permission_name = "Delete AP Invoice",
                 internal_permission_name = "delete_apinvoiceheader",
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
@@ -258,9 +258,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             // Now do lines
             foreach(var ap_line in commandModel.ap_invoice_lines)
             {
-                var db_line = MapToLineDatabaseModel(ap_line, item.id);
-                db_line.created_by = commandModel.calling_user_id;
-                db_line.updated_by = commandModel.calling_user_id;
+                var db_line = MapToLineDatabaseModel(ap_line, item.id, commandModel.calling_user_id);
 
                 await _Context.APInvoiceLines.AddAsync(db_line);
                 await _Context.SaveChangesAsync();
@@ -295,7 +293,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var item = MapToLineDatabaseModel(commandModel, commandModel.ap_invoice_header_id.Value);
+            var item = MapToLineDatabaseModel(commandModel, commandModel.ap_invoice_header_id.Value, commandModel.calling_user_id);
 
             await _Context.APInvoiceLines.AddAsync(item);
             await _Context.SaveChangesAsync();
@@ -923,7 +921,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         };
     }
 
-    public APInvoiceLine MapToLineDatabaseModel(APInvoiceLineCreateCommand createCommand, int ap_invoice_header_id)
+    public APInvoiceLine MapToLineDatabaseModel(APInvoiceLineCreateCommand createCommand, int ap_invoice_header_id, int calling_user_id)
     {
         return new APInvoiceLine()
         {
@@ -941,6 +939,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             guid = Guid.NewGuid().ToString(),
             created_on = DateTime.Now,
             updated_on = DateTime.Now,
+            created_by = calling_user_id,
+            updated_by = calling_user_id,
             is_deleted = false
         };
     }

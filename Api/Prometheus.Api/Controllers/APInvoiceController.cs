@@ -13,7 +13,6 @@ using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
-using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
 
 namespace Prometheus.Api.Controllers;
@@ -111,7 +110,7 @@ public class APInvoiceController : ERPApiController
     }
 
     [HttpPost("CreateAPInvoice", Name = "CreateAPInvoice")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<APInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] APInvoiceHeaderCreateCommand createCommand)
     {
@@ -124,7 +123,7 @@ public class APInvoiceController : ERPApiController
     }
 
     [HttpPost("CreateAPInvoiceLine", Name = "CreateAPInvoiceLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<APInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> CreateLine([FromBody] APInvoiceLineCreateCommand createCommand)
     {
@@ -137,7 +136,7 @@ public class APInvoiceController : ERPApiController
     }
 
     [HttpPut("UpdateAPInvoice", Name = "UpdateAPInvoice")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<APInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] APInvoiceHeaderEditCommand editCommand)
     {
@@ -150,7 +149,7 @@ public class APInvoiceController : ERPApiController
     }
 
     [HttpPut("UpdateAPInvoiceLine", Name = "UpdateAPInvoiceLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<APInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> EditLine([FromBody] APInvoiceLineEditCommand editCommand)
     {
@@ -163,7 +162,7 @@ public class APInvoiceController : ERPApiController
     }
 
     [HttpDelete("DeleteAPInvoice", Name = "DeleteAPInvoice")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<APInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] APInvoiceHeaderDeleteCommand deleteCommand)
     {
@@ -176,7 +175,7 @@ public class APInvoiceController : ERPApiController
     }
 
     [HttpDelete("DeleteAPInvoiceLine", Name = "DeleteAPInvoiceLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<APInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> DeleteLine([FromBody] APInvoiceLineDeleteCommand deleteCommand)
     {

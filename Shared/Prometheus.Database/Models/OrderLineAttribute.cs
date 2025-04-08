@@ -21,4 +21,8 @@ public class OrderLineAttribute : BaseDatabaseModel
 
     [MaxLength(50)]
     public string? attribute_value3 { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string guid { get; set; } = Guid.NewGuid().ToString();
 }

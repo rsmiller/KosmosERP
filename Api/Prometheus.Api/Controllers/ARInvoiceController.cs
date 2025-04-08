@@ -8,7 +8,6 @@ using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Dto;
-using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
 
 
@@ -67,7 +66,7 @@ public class ARInvoiceController : ERPApiController
     }
 
     [HttpPost("CreateARInvoice", Name = "CreateARInvoice")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] ARInvoiceHeaderCreateCommand createCommand)
     {
@@ -80,7 +79,7 @@ public class ARInvoiceController : ERPApiController
     }
 
     [HttpPost("CreateARInvoiceLine", Name = "CreateARInvoiceLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<ARInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> CreateLine([FromBody] ARInvoiceLineCreateCommand createCommand)
     {
@@ -93,7 +92,7 @@ public class ARInvoiceController : ERPApiController
     }
 
     [HttpPut("UpdateARInvoice", Name = "UpdateARInvoice")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] ARInvoiceHeaderEditCommand editCommand)
     {
@@ -106,7 +105,7 @@ public class ARInvoiceController : ERPApiController
     }
 
     [HttpPut("UpdateARInvoiceLine", Name = "UpdateARInvoiceLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<ARInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> EditLine([FromBody] ARInvoiceLineEditCommand editCommand)
     {
@@ -119,7 +118,7 @@ public class ARInvoiceController : ERPApiController
     }
 
     [HttpDelete("DeleteARInvoice", Name = "DeleteARInvoice")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] ARInvoiceHeaderDeleteCommand deleteCommand)
     {
@@ -132,7 +131,7 @@ public class ARInvoiceController : ERPApiController
     }
 
     [HttpDelete("DeleteARInvoiceLine", Name = "DeleteARInvoiceLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<ARInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> DeleteLine([FromBody] ARInvoiceLineDeleteCommand deleteCommand)
     {

@@ -17,6 +17,10 @@ public class OrderLine : BaseDatabaseModel
     public int? opportunity_line_id { get; set; }
 
     [Required]
+    [MaxLength(250)]
+    public string line_description { get; set; }
+
+    [Required]
     public int quantity { get; set; }
 
     [Precision(14, 3)]

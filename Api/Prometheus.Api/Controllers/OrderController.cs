@@ -8,7 +8,6 @@ using Prometheus.BusinessLayer.Models.Module.Order.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Order.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Order.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Order.Dto;
-using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
 
 
@@ -67,7 +66,7 @@ public class OrderController : ERPApiController
     }
 
     [HttpPost("CreateOrder", Name = "CreateOrder")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] OrderHeaderCreateCommand createCommand)
     {
@@ -80,7 +79,7 @@ public class OrderController : ERPApiController
     }
 
     [HttpPost("CreateOrderLine", Name = "CreateOrderLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<OrderLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> CreateLine([FromBody] OrderLineCreateCommand createCommand)
     {
@@ -92,8 +91,21 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
+    [HttpPost("CreateOrderLineAttribute", Name = "CreateOrderLineAttribute")]
+    [ProducesResponseType(typeof(Response<OrderLineAttributeDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> CreateOrderLineAttribute([FromBody] OrderLineAttributeCreateCommand createCommand)
+    {
+        var result = await _Module.CreateAttribute(createCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
     [HttpPut("UpdateOrder", Name = "UpdateOrder")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] OrderHeaderEditCommand editCommand)
     {
@@ -106,7 +118,7 @@ public class OrderController : ERPApiController
     }
 
     [HttpPut("UpdateOrderLine", Name = "UpdateOrderLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<OrderLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> EditLine([FromBody] OrderLineEditCommand editCommand)
     {
@@ -118,8 +130,21 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
+    [HttpPut("UpdateOrderLineAttribute", Name = "UpdateOrderLineAttribute")]
+    [ProducesResponseType(typeof(Response<OrderLineAttributeDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> UpdateOrderLineAttribute([FromBody] OrderLineAttributeEditCommand editCommand)
+    {
+        var result = await _Module.EditAttribute(editCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
     [HttpDelete("DeleteOrder", Name = "DeleteOrder")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] OrderHeaderDeleteCommand deleteCommand)
     {
@@ -132,11 +157,24 @@ public class OrderController : ERPApiController
     }
 
     [HttpDelete("DeleteOrderLine", Name = "DeleteOrderLine")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [ProducesResponseType(typeof(Response<OrderLineDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> DeleteLine([FromBody] OrderLineDeleteCommand deleteCommand)
     {
         var result = await _Module.DeleteLine(deleteCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [HttpDelete("DeleteOrderLineAttribute", Name = "DeleteOrderLineAttribute")]
+    [ProducesResponseType(typeof(Response<OrderLineAttributeDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> DeleteOrderLineAttribute([FromBody] OrderLineAttributeDeleteCommand deleteCommand)
+    {
+        var result = await _Module.DeleteAttribute(deleteCommand);
 
         if (!result.Success)
             return BadRequest(result);

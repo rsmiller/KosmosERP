@@ -23,6 +23,7 @@ namespace Prometheus.Database
         DbSet<Address> Addresses { get; set; }
         DbSet<OrderHeader> OrderHeaders { get; set; }
         DbSet<OrderLine> OrderLines { get; set; }
+        DbSet<OrderLineAttribute> OrderLineAttributes { get; set; }
         DbSet<APInvoiceHeader> APInvoiceHeaders { get; set; }
         DbSet<APInvoiceLine> APInvoiceLines { get; set; }
         DbSet<ARInvoiceHeader> ARInvoiceHeaders { get; set; }
