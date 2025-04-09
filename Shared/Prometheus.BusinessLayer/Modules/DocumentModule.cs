@@ -8,12 +8,14 @@ using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Dto;
+using Microsoft.AspNetCore.Http;
 
 namespace Prometheus.BusinessLayer.Modules;
 
 public interface IDocumentUploadModule : IERPModule<DocumentUpload, DocumentUploadDto, DocumentUploadListDto, DocumentUploadCreateCommand, DocumentUploadEditCommand, DocumentUploadDeleteCommand, DocumentUploadFindCommand>, IBaseERPModule
 {
-
+	Task<Response<DocumentUploadDto>> CreateOverride(IFormFile file, DocumentUploadCreateCommand commandModel);
+    
 }
 
 public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
@@ -22,32 +24,46 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 	public override string ModuleName => "DocumentUpload";
 
 	private IBaseERPContext _Context;
+	private IFileStorageSettings? _StorageSettings;
 
-	public DocumentUploadModule(IBaseERPContext context) : base(context)
+    public DocumentUploadModule(IBaseERPContext context) : base(context)
+    {
+        _Context = context;
+    }
+
+    public DocumentUploadModule(IBaseERPContext context, IFileStorageSettings storageSettings) : base(context)
 	{
 		_Context = context;
-	}
+        _StorageSettings = storageSettings;
+
+    }
 
 	public override void SeedPermissions()
 	{
 	}
 
-	public Task<Response<DocumentUploadDto>> Create(DocumentUploadCreateCommand commandModel)
+    public async Task<Response<DocumentUploadDto>> CreateOverride(IFormFile file, DocumentUploadCreateCommand commandModel)
+	{
+        throw new NotImplementedException();
+    }
+
+
+    public async Task<Response<DocumentUploadDto>> Create(DocumentUploadCreateCommand commandModel)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<Response<DocumentUploadDto>> Delete(DocumentUploadDeleteCommand commandModel)
+	public async Task<Response<DocumentUploadDto>> Delete(DocumentUploadDeleteCommand commandModel)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<Response<DocumentUploadDto>> Edit(DocumentUploadEditCommand commandModel)
+	public async Task<Response<DocumentUploadDto>> Edit(DocumentUploadEditCommand commandModel)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<PagingResult<DocumentUploadListDto>> Find(PagingSortingParameters parameters, DocumentUploadFindCommand commandModel)
+	public async Task<PagingResult<DocumentUploadListDto>> Find(PagingSortingParameters parameters, DocumentUploadFindCommand commandModel)
 	{
 		throw new NotImplementedException();
 	}
@@ -57,17 +73,20 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 		throw new NotImplementedException();
 	}
 
-	public Task<DocumentUpload?> GetAsync(int object_id)
+	public async Task<DocumentUpload?> GetAsync(int object_id)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<Response<DocumentUploadDto>> GetDto(int object_id)
+	public async Task<Response<DocumentUploadDto>> GetDto(int object_id)
 	{
-		throw new NotImplementedException();
+		var s = _StorageSettings == null ? "" : "asdasdasd";
+
+		return new Response<DocumentUploadDto>(s, ResultCode.AlreadyExists);
+		//throw new NotImplementedException();
 	}
 
-	public Task<Response<List<DocumentUploadListDto>>> GlobalSearch(PagingSortingParameters parameters, string wildcard)
+	public async Task<Response<List<DocumentUploadListDto>>> GlobalSearch(PagingSortingParameters parameters, string wildcard)
 	{
 		throw new NotImplementedException();
 	}
@@ -77,12 +96,12 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 		throw new NotImplementedException();
 	}
 
-	public Task<DocumentUploadDto> MapToDto(DocumentUpload databaseModel)
+	public async Task<DocumentUploadDto> MapToDto(DocumentUpload databaseModel)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<DocumentUploadListDto> MapToListDto(DocumentUpload databaseModel)
+	public async Task<DocumentUploadListDto> MapToListDto(DocumentUpload databaseModel)
 	{
 		throw new NotImplementedException();
 	}

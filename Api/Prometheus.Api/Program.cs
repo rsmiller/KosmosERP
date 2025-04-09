@@ -11,6 +11,11 @@ using Prometheus.Module;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+/// For development debug
+Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost;uid=auser;pwd=12345;database=prometheus_erp");
+
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -54,6 +59,25 @@ var authenticationSettings = new AuthenticationSettings()
 };
 
 builder.Services.AddSingleton<IAuthenticationSettings>(authenticationSettings);
+
+
+var storageAccountSettings = new FileStorageSettings()
+{
+    account_provider = Environment.GetEnvironmentVariable("FileStorageAccountProvider"),
+    azure_connection_string = Environment.GetEnvironmentVariable("AzureConnectionString"),
+    azure_container_name = Environment.GetEnvironmentVariable("AzureContainerName"),
+    azure_access_key = Environment.GetEnvironmentVariable("AzureAccessKey"),
+    aws_access_key = Environment.GetEnvironmentVariable("AWSAccessKey"),
+    aws_secret_key = Environment.GetEnvironmentVariable("AWSSecretKey"),
+    aws_bucket_name = Environment.GetEnvironmentVariable("AWSBucketName"),
+    aws_region = Environment.GetEnvironmentVariable("AWSRegion"),
+    gpc_json_file_path = Environment.GetEnvironmentVariable("GPCJsonFilePath"),
+    gpc_bucket_name = Environment.GetEnvironmentVariable("GPCBucketName")
+};
+
+builder.Services.AddSingleton<IFileStorageSettings>(storageAccountSettings);
+
+
 
 builder.Services.AddScoped<ITokenModule, TokenModule>();
 builder.Services.AddScoped<IUserModule, UserModule>();
