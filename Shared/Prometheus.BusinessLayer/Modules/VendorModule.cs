@@ -1,15 +1,16 @@
-﻿using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Vendor.Dto;
-using Prometheus.Database.Models;
+﻿using Prometheus.Database.Models;
 using Prometheus.Database;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.Vendor.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -22,7 +23,7 @@ VendorEditCommand,
 VendorDeleteCommand,
 VendorFindCommand>, IBaseERPModule
 {
-    // Add any vendor-specific methods if needed
+
 }
 
 public class VendorModule : BaseERPModule, IVendorModule
@@ -37,6 +38,143 @@ public class VendorModule : BaseERPModule, IVendorModule
     {
         _Context = context;
         _AddressModule = address_module;
+    }
+
+    public override void SeedPermissions()
+    {
+        var role = _Context.Roles.Any(m => m.name == "Vendor Users");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == VendorPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == VendorPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == VendorPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == VendorPermissions.Delete);
+
+        if (role == false)
+        {
+            _Context.Roles.Add(new Role()
+            {
+                name = "Vendor Users",
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        var role_id = _Context.Roles.Where(m => m.name == "Vendor Users").Select(m => m.id).Single();
+
+        if (read_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Read Vendor",
+                internal_permission_name = VendorPermissions.Read,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                read = true,
+            });
+
+            _Context.SaveChanges();
+
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Read).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = read_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        if (create_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Create Vendor",
+                internal_permission_name = VendorPermissions.Create,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                write = true
+            });
+
+            _Context.SaveChanges();
+
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Create).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = create_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        if (edit_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Edit Vendor",
+                internal_permission_name = VendorPermissions.Edit,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                edit = true
+            });
+
+            _Context.SaveChanges();
+
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Edit).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = edit_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Vendor",
+                internal_permission_name = VendorPermissions.Delete,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Delete).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
     }
 
     public Vendor? Get(int object_id)
@@ -65,11 +203,11 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!validationResult.Success)
             return new Response<VendorDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var vendor_permission_result = await base.HasPermission(commandModel.calling_user_id, "create_vendor", write: true);
+        var vendor_permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Create, write: true);
         if (!vendor_permission_result)
             return new Response<VendorDto>("Invalid vendor permission", ResultCode.InvalidPermission);
 
-        var address_permission_result = await base.HasPermission(commandModel.calling_user_id, "create_address", write: true);
+        var address_permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Create, write: true);
         if (!address_permission_result)
             return new Response<VendorDto>("Invalid address permission", ResultCode.InvalidPermission);
 
@@ -99,7 +237,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!validationResult.Success)
             return new Response<VendorDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_vendor", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<VendorDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -169,7 +307,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!validationResult.Success)
             return new Response<VendorDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_vendor", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<VendorDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -193,7 +331,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         var response = new PagingResult<VendorListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_vendor", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

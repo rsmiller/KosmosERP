@@ -10,6 +10,7 @@ using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -39,17 +40,17 @@ public class AddressModule : BaseERPModule, IAddressModule
 
     public override void SeedPermissions()
     {
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_address");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_address");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_address");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_address");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == AddressPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == AddressPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == AddressPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == AddressPermissions.Delete);
 
         if (read_permission == false)
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Address",
-                internal_permission_name = "read_address",
+                internal_permission_name = AddressPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -63,7 +64,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Address",
-                internal_permission_name = "create_address",
+                internal_permission_name = AddressPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -77,7 +78,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Address",
-                internal_permission_name = "edit_address",
+                internal_permission_name = AddressPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -91,7 +92,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Address",
-                internal_permission_name = "delete_address",
+                internal_permission_name = AddressPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -130,7 +131,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         if (!validationResult.Success)
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_address", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Create, write: true);
         if (!permission_result)
             return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -149,7 +150,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         if (!validationResult.Success)
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_address", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -193,7 +194,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_address", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -220,7 +221,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         try
         {
             // Example permission check
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_address", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

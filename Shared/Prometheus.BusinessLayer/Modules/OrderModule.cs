@@ -1,15 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Prometheus.BusinessLayer.Models.Module.Order.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Order.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Order.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Order.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Order.Dto;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Module;
+using Prometheus.BusinessLayer.Models.Module.Order.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Order.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Order.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Order.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.Order.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -39,10 +40,10 @@ public class OrderModule : BaseERPModule, IOrderModule
 	public override void SeedPermissions()
 	{
         var role = _Context.Roles.Any(m => m.name == "Sales Order Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_salesorder");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_salesorder");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_salesorder");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_salesorder");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OrderPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OrderPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OrderPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OrderPermissions.Delete);
 
         if (role == false)
         {
@@ -65,7 +66,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Sales Order",
-                internal_permission_name = "read_salesorder",
+                internal_permission_name = OrderPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -73,7 +74,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_salesorder").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -93,7 +94,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Sales Order",
-                internal_permission_name = "create_salesorder",
+                internal_permission_name = OrderPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -101,7 +102,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_salesorder").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -121,7 +122,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Sales Order",
-                internal_permission_name = "edit_salesorder",
+                internal_permission_name = OrderPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -129,7 +130,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_salesorder").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -149,7 +150,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Sales Order",
-                internal_permission_name = "delete_salesorder",
+                internal_permission_name = OrderPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -157,7 +158,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_salesorder").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -248,7 +249,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_salesorder", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -289,7 +290,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_salesorder", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -317,7 +318,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_salesorder", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -508,7 +509,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_salesorder", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -538,7 +539,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_salesorder", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -580,7 +581,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_salesorder", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -608,7 +609,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_salesorder", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OrderLineAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -638,7 +639,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_salesorder", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -678,7 +679,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_salesorder", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 

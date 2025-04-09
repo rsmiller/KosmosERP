@@ -12,7 +12,7 @@ using Prometheus.BusinessLayer.Models.Module.User.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Lead.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -41,10 +41,10 @@ public partial class UserModule : BaseERPModule, IUserModule
     public override void SeedPermissions()
     {
         var admin_role = _IContext.Roles.Any(m => m.name == "Administrators");
-        var read_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_user");
-        var create_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_user");
-        var edit_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_user");
-        var delete_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_user");
+        var read_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == UserPermissions.Read);
+        var create_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == UserPermissions.Create);
+        var edit_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == UserPermissions.Edit);
+        var delete_user_permission = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == UserPermissions.Delete);
         var system_user = _IContext.Users.Any(m => m.username == "system");
 
         if(admin_role == false)
@@ -66,7 +66,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read User",
-                internal_permission_name = "read_user",
+                internal_permission_name = UserPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -75,7 +75,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.SaveChanges();
 
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
-            var read_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == "read_user").Select(m => m.id).Single();
+            var read_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Read).Select(m => m.id).Single();
 
             _IContext.RolePermissions.Add(new RolePermission()
             {
@@ -95,7 +95,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create User",
-                internal_permission_name = "create_user",
+                internal_permission_name = UserPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -104,7 +104,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.SaveChanges();
 
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
-            var create_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == "create_user").Select(m => m.id).Single();
+            var create_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Create).Select(m => m.id).Single();
 
             _IContext.RolePermissions.Add(new RolePermission()
             {
@@ -124,7 +124,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit User",
-                internal_permission_name = "edit_user",
+                internal_permission_name = UserPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -133,7 +133,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.SaveChanges();
 
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
-            var edit_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == "edit_user").Select(m => m.id).Single();
+            var edit_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Edit).Select(m => m.id).Single();
 
             _IContext.RolePermissions.Add(new RolePermission()
             {
@@ -153,7 +153,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete User",
-                internal_permission_name = "delete_user",
+                internal_permission_name = UserPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -162,7 +162,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.SaveChanges();
 
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
-            var delete_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == "delete_user").Select(m => m.id).Single();
+            var delete_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Delete).Select(m => m.id).Single();
 
             _IContext.RolePermissions.Add(new RolePermission()
             {
@@ -422,7 +422,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (!validationResult.Success)
             return new Response<bool>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_user", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Edit, write: true);
         if (!permission_result)
             return new Response<bool>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -462,7 +462,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (!validationResult.Success)
             return new Response<UserDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_user", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Create, write: true);
         if (!permission_result)
             return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -503,7 +503,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (existingEntity == null)
             return new Response<UserDto>("User not found", ResultCode.NotFound);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_user", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -590,7 +590,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (!validationResult.Success)
             return new Response<UserDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_user", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -615,7 +615,7 @@ public partial class UserModule : BaseERPModule, IUserModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_user", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Read, read: true);
             if (!permission_result)
                 return new PagingResult<UserListDto>("Invalid permission", ResultCode.InvalidPermission);
 

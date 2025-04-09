@@ -1,15 +1,17 @@
-﻿using Prometheus.BusinessLayer.Models.Module.Contact.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
+﻿using Microsoft.EntityFrameworkCore;
+using Prometheus.Models.Permissions;
 using Prometheus.Database.Models;
 using Prometheus.Database;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
-using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Models.Module.Contact.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Contact.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Contact.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Contact.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
+
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -22,7 +24,7 @@ ContactEditCommand,
 ContactDeleteCommand,
 ContactFindCommand>, IBaseERPModule
 {
-    // Add any contact-specific methods if needed
+
 }
 
 public class ContactModule : BaseERPModule, IContactModule
@@ -40,10 +42,10 @@ public class ContactModule : BaseERPModule, IContactModule
     public override void SeedPermissions()
     {
         var role = _Context.Roles.Any(m => m.name == "Contact Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_contact");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_contact");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_contact");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_contact");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ContactPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ContactPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ContactPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ContactPermissions.Delete);
 
         if (role == false)
         {
@@ -66,7 +68,7 @@ public class ContactModule : BaseERPModule, IContactModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Contact",
-                internal_permission_name = "read_contact",
+                internal_permission_name = ContactPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -74,7 +76,7 @@ public class ContactModule : BaseERPModule, IContactModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_contact").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -94,7 +96,7 @@ public class ContactModule : BaseERPModule, IContactModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Contact",
-                internal_permission_name = "create_contact",
+                internal_permission_name = ContactPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -102,7 +104,7 @@ public class ContactModule : BaseERPModule, IContactModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_contact").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -122,7 +124,7 @@ public class ContactModule : BaseERPModule, IContactModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Contact",
-                internal_permission_name = "edit_contact",
+                internal_permission_name = ContactPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -130,7 +132,7 @@ public class ContactModule : BaseERPModule, IContactModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_contact").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -150,7 +152,7 @@ public class ContactModule : BaseERPModule, IContactModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Contact",
-                internal_permission_name = "delete_contact",
+                internal_permission_name = ContactPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -158,7 +160,7 @@ public class ContactModule : BaseERPModule, IContactModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_contact").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -217,7 +219,7 @@ public class ContactModule : BaseERPModule, IContactModule
         if (!validationResult.Success)
             return new Response<ContactDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_contact", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, ContactPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ContactDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -263,7 +265,7 @@ public class ContactModule : BaseERPModule, IContactModule
         if (!validationResult.Success)
             return new Response<ContactDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_contract", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, ContactPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ContactDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -287,7 +289,7 @@ public class ContactModule : BaseERPModule, IContactModule
         var response = new PagingResult<ContactListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_contact", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ContactPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

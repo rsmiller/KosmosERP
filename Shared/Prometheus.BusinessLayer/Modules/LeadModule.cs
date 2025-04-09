@@ -9,6 +9,7 @@ using Prometheus.Database.Models;
 using Prometheus.Models;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
+using Prometheus.Models.Permissions;
 using Prometheus.Module;
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -16,7 +17,7 @@ namespace Prometheus.BusinessLayer.Modules;
 public interface ILeadModule
         : IERPModule<Lead, LeadDto, LeadListDto, LeadCreateCommand, LeadEditCommand, LeadDeleteCommand, LeadFindCommand>, IBaseERPModule
 {
-    // Add any lead-specific methods here if needed
+
 }
 
 public class LeadModule : BaseERPModule, ILeadModule
@@ -34,10 +35,10 @@ public class LeadModule : BaseERPModule, ILeadModule
     public override void SeedPermissions()
     {
         var role = _Context.Roles.Any(m => m.name == "CRM Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_lead");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_lead");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_lead");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_lead");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == LeadPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == LeadPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == LeadPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == LeadPermissions.Delete);
         
         if (role == false)
         {
@@ -60,7 +61,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Lead",
-                internal_permission_name = "read_lead",
+                internal_permission_name = LeadPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -68,7 +69,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_lead").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -88,7 +89,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Lead",
-                internal_permission_name = "create_lead",
+                internal_permission_name = LeadPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -96,7 +97,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_lead").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -116,7 +117,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Lead",
-                internal_permission_name = "edit_lead",
+                internal_permission_name = LeadPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -124,7 +125,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_lead").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -144,7 +145,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Lead",
-                internal_permission_name = "delete_lead",
+                internal_permission_name = LeadPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -152,7 +153,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_lead").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -198,7 +199,7 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_lead", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Create, write: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -228,7 +229,7 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_lead", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -306,7 +307,7 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_lead", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -332,7 +333,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_lead", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Read, read: true);
             if (!permission_result)
                 return new PagingResult<LeadListDto>("Invalid permission", ResultCode.InvalidPermission);
 

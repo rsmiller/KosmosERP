@@ -1,17 +1,15 @@
-﻿using Prometheus.BusinessLayer.Models.Module.State.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.State.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.State.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.State.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.State.Dto;
+﻿using Microsoft.EntityFrameworkCore;
 using Prometheus.Database;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
-using Microsoft.EntityFrameworkCore;
-using Prometheus.BusinessLayer.Models.Module.Country.Dto;
-using Prometheus.BusinessLayer.Models.Module.Country.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Country.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.State.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.State.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.State.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.State.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.State.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -24,7 +22,7 @@ StateEditCommand,
 StateDeleteCommand,
 StateFindCommand>, IBaseERPModule
 {
-    // Add any custom methods for State here if needed
+
 }
 
 public class StateModule : BaseERPModule, IStateModule
@@ -66,7 +64,7 @@ public class StateModule : BaseERPModule, IStateModule
         if (!validationResult.Success)
             return new Response<StateDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_country", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Create, write: true);
         if (!permission_result)
             return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -86,7 +84,7 @@ public class StateModule : BaseERPModule, IStateModule
         if (!validationResult.Success)
             return new Response<StateDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_country", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -117,7 +115,7 @@ public class StateModule : BaseERPModule, IStateModule
 
     public async Task<Response<StateDto>> Delete(StateDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_country", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -143,7 +141,7 @@ public class StateModule : BaseERPModule, IStateModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_state", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

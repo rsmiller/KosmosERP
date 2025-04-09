@@ -1,15 +1,17 @@
-﻿using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Transaction.Dto;
-using Prometheus.Database;
+﻿using Prometheus.Database;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Prometheus.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Dto;
+using Prometheus.Models.Permissions;
+
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -22,7 +24,7 @@ public interface ITransactionModule : IERPModule<
     TransactionDeleteCommand,
     TransactionFindCommand>, IBaseERPModule
 {
-    // Add any Transaction-specific methods here if needed
+
 }
 
 public class TransactionModule : BaseERPModule, ITransactionModule
@@ -39,17 +41,36 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
     public override void SeedPermissions()
     {
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_transaction");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_transaction");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_transaction");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_transaction");
+        var role = _Context.Roles.Any(m => m.name == "Transaction Users");
+
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == TransactionPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == TransactionPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == TransactionPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == TransactionPermissions.Delete);
+
+        if (role == false)
+        {
+            _Context.Roles.Add(new Role()
+            {
+                name = "Transaction Users",
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        var role_id = _Context.Roles.Where(m => m.name == "Transaction Users").Select(m => m.id).Single();
+
 
         if (read_permission == false)
         {
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Transaction",
-                internal_permission_name = "read_transaction",
+                internal_permission_name = TransactionPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -63,10 +84,24 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Transaction",
-                internal_permission_name = "create_transaction",
+                internal_permission_name = TransactionPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
+            });
+
+            _Context.SaveChanges();
+
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == TransactionPermissions.Create).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = create_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
             });
 
             _Context.SaveChanges();
@@ -77,10 +112,24 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Transaction",
-                internal_permission_name = "edit_transaction",
+                internal_permission_name = TransactionPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
+            });
+
+            _Context.SaveChanges();
+
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == TransactionPermissions.Edit).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = edit_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
             });
 
             _Context.SaveChanges();
@@ -91,10 +140,24 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Transaction",
-                internal_permission_name = "Delete_transaction",
+                internal_permission_name = TransactionPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == TransactionPermissions.Delete).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
             });
 
             _Context.SaveChanges();
@@ -103,7 +166,6 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
     public Transaction? Get(int object_id)
     {
-        // Using SingleOrDefault instead of Find
         return _Context.Transactions
             .SingleOrDefault(m => m.id == object_id);
     }
@@ -130,7 +192,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_transaction", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Create, write: true);
         if (!permission_result)
             return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -150,7 +212,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_transaction", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -191,7 +253,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (commandModel.sold_unit_price.HasValue && existingEntity.sold_unit_price != commandModel.sold_unit_price)
             existingEntity.sold_unit_price = commandModel.sold_unit_price.Value;
 
-        // Update auditing fields
+
         existingEntity.updated_on = DateTime.Now;
         existingEntity.updated_by = commandModel.calling_user_id;
 
@@ -208,7 +270,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_transaction", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -233,8 +295,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
         try
         {
-            // Example permission check
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_transaction", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);
@@ -307,9 +368,6 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         return response;
     }
 
-    // -------------------------------------------------------------------
-    // MAP METHODS
-    // -------------------------------------------------------------------
 
     public async Task<TransactionListDto> MapToListDto(Transaction databaseModel)
     {

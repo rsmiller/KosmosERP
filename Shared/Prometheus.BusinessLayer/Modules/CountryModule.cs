@@ -1,15 +1,15 @@
-﻿using Prometheus.BusinessLayer.Models.Module.Country.Command.Create;
+﻿using Microsoft.EntityFrameworkCore;
+using Prometheus.Models;
+using Prometheus.Module;
+using Prometheus.Database;
+using Prometheus.Models.Helpers;
+using Prometheus.Models.Interfaces;
+using Prometheus.BusinessLayer.Models.Module.Country.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Country.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Country.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Country.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Country.Dto;
-using Prometheus.Database;
-using Prometheus.Models.Helpers;
-using Prometheus.Models.Interfaces;
-using Prometheus.Models;
-using Prometheus.Module;
-using Microsoft.EntityFrameworkCore;
-
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -22,7 +22,7 @@ CountryEditCommand,
 CountryDeleteCommand,
 CountryFindCommand>, IBaseERPModule
 {
-    // Add any custom methods for Country here if needed
+
 }
 
 public class CountryModule : BaseERPModule, ICountryModule
@@ -64,10 +64,6 @@ public class CountryModule : BaseERPModule, ICountryModule
         if (!validationResult.Success)
             return new Response<CountryDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_country", write: true);
-        if (!permission_result)
-            return new Response<CountryDto>("Invalid permission", ResultCode.InvalidPermission);
-
 
         // Build new Country entity from command
         var newCountry = this.MapForCreate(commandModel);
@@ -85,7 +81,7 @@ public class CountryModule : BaseERPModule, ICountryModule
         if (!validationResult.Success)
             return new Response<CountryDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_country", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, CountryPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<CountryDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -125,7 +121,7 @@ public class CountryModule : BaseERPModule, ICountryModule
 
     public async Task<Response<CountryDto>> Delete(CountryDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_country", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, CountryPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<CountryDto>("Invalid permission", ResultCode.InvalidPermission);
 

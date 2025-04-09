@@ -12,6 +12,7 @@ using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Customer.Dto;
 using Prometheus.BusinessLayer.Models.Module.Lead.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -42,10 +43,10 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
     public override void SeedPermissions()
     {
         var role = _Context.Roles.Any(m => m.name == "CRM Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_opportunity");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_opportunity");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_opportunity");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_opportunity");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OpportunityPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OpportunityPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OpportunityPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OpportunityPermissions.Delete);
 
         if (role == false)
         {
@@ -68,7 +69,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Opportunity",
-                internal_permission_name = "read_opportunity",
+                internal_permission_name = OpportunityPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -76,7 +77,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_opportunity").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -96,7 +97,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Opportunity",
-                internal_permission_name = "create_opportunity",
+                internal_permission_name = OpportunityPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -104,7 +105,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_opportunity").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -124,7 +125,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Opportunity",
-                internal_permission_name = "edit_opportunity",
+                internal_permission_name = OpportunityPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -132,7 +133,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_opportunity").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -152,7 +153,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Opportunity",
-                internal_permission_name = "delete_opportunity",
+                internal_permission_name = OpportunityPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -160,7 +161,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_opportunity").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -204,7 +205,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (!validationResult.Success)
             return new Response<OpportunityDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_opportunity", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -224,7 +225,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (!validationResult.Success)
             return new Response<OpportunityDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_opportunity", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -274,7 +275,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
     public async Task<Response<OpportunityDto>> Delete(OpportunityDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_opportunity", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -300,7 +301,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         try
         {
             // Example permission check (could be read_opportunity, etc.)
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_opportunity", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

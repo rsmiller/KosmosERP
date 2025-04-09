@@ -10,6 +10,7 @@ using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -22,7 +23,6 @@ public interface IPurchaseOrderModule : IERPModule<
     PurchaseOrderHeaderDeleteCommand,
     PurchaseOrderHeaderFindCommand>, IBaseERPModule
 {
-    // Add any custom methods for PO headers if needed
     PurchaseOrderLine? GetLine(int object_id);
     Task<PurchaseOrderLine?> GetLineAsync(int object_id);
     Task<Response<PurchaseOrderLineDto>> GetLineDto(int object_id);
@@ -46,10 +46,10 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
     public override void SeedPermissions()
     {
         var role = _Context.Roles.Any(m => m.name == "PO Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_purchase_orders");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_purchase_orders");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_purchase_orders");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_purchase_orders");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == PurchaseOrderPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == PurchaseOrderPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == PurchaseOrderPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == PurchaseOrderPermissions.Delete);
 
         if (role == false)
         {
@@ -72,7 +72,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Purchase Orders",
-                internal_permission_name = "read_purchase_orders",
+                internal_permission_name = PurchaseOrderPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -80,7 +80,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_purchase_orders").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -100,7 +100,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Purchase Orders",
-                internal_permission_name = "create_purchase_orders",
+                internal_permission_name = PurchaseOrderPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -108,7 +108,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_purchase_orders").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -128,7 +128,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Purchase Orders",
-                internal_permission_name = "edit_purchase_orders",
+                internal_permission_name = PurchaseOrderPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -136,7 +136,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_purchase_orders").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -156,7 +156,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Purchase Orders",
-                internal_permission_name = "delete_purchase_orders",
+                internal_permission_name = PurchaseOrderPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -164,7 +164,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_purchase_orders").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -225,7 +225,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         if (!validationResult.Success)
             return new Response<PurchaseOrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_purchase_order", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<PurchaseOrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -257,7 +257,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         if (!validationResult.Success)
             return new Response<PurchaseOrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_purchase_order", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<PurchaseOrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -276,7 +276,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         if (!validationResult.Success)
             return new Response<PurchaseOrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_purchase_order", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<PurchaseOrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -321,7 +321,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         if (!validationResult.Success)
             return new Response<PurchaseOrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_purchase_order", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<PurchaseOrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -403,7 +403,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_purchaseorderheader", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

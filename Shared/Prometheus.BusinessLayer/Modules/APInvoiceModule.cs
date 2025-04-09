@@ -17,6 +17,7 @@ using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
 using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.Api.Modules;
 
@@ -47,10 +48,10 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
     public override void SeedPermissions()
     {
         var role = _Context.Roles.Any(m => m.name == "AP Invoice Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_apinvoiceheader");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_apinvoiceheader");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_apinvoiceheader");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_apinvoiceheader");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == APInvoicePermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == APInvoicePermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == APInvoicePermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == APInvoicePermissions.Delete);
 
         if (role == false)
         {
@@ -73,7 +74,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read AP Invoice",
-                internal_permission_name = "read_apinvoiceheader",
+                internal_permission_name = APInvoicePermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -81,7 +82,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_apinvoiceheader").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -101,7 +102,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create AP Invoice",
-                internal_permission_name = "create_apinvoiceheader",
+                internal_permission_name = APInvoicePermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -109,7 +110,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_apinvoiceheader").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -129,7 +130,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit AP Invoice",
-                internal_permission_name = "edit_apinvoiceheader",
+                internal_permission_name = APInvoicePermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -137,7 +138,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_apinvoiceheader").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -157,7 +158,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete AP Invoice",
-                internal_permission_name = "delete_apinvoiceheader",
+                internal_permission_name = APInvoicePermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -165,7 +166,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_apinvoiceheader").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -240,7 +241,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_apinvoiceheader", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Create, write: true);
         if (!permission_result)
             return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -284,7 +285,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_apinvoiceheader", write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Create, write: true);
         if (!permission_result)
             return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -317,7 +318,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_apinvoiceheader", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -388,7 +389,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_apinvoiceheader", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -441,7 +442,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_apinvoiceheader", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -466,7 +467,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_apinvoiceheader", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -495,7 +496,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var permission_result = await base.HasPermission(associationCommand.calling_user_id, "edit_apinvoiceheader", edit: true);
+            var permission_result = await base.HasPermission(associationCommand.calling_user_id, APInvoicePermissions.Edit, edit: true);
             if (!permission_result)
                 return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -572,7 +573,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var permission_result = await base.HasPermission(associationCommand.calling_user_id, "edit_apinvoiceheader", edit: true);
+            var permission_result = await base.HasPermission(associationCommand.calling_user_id, APInvoicePermissions.Edit, edit: true);
             if (!permission_result)
                 return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -648,7 +649,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var permission_result = await base.HasPermission(associationCommand.calling_user_id, "edit_apinvoiceheader", edit: true);
+            var permission_result = await base.HasPermission(associationCommand.calling_user_id, APInvoicePermissions.Edit, edit: true);
             if (!permission_result)
                 return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 

@@ -9,6 +9,7 @@ using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Dto;
 using Microsoft.AspNetCore.Http;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -40,7 +41,140 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
 	public override void SeedPermissions()
 	{
-	}
+        var role = _Context.Roles.Any(m => m.name == "Document Users");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == DocumentPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == DocumentPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == DocumentPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == DocumentPermissions.Delete);
+
+        if (role == false)
+        {
+            _Context.Roles.Add(new Role()
+            {
+                name = "Document Users",
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        var role_id = _Context.Roles.Where(m => m.name == "Customer Users").Select(m => m.id).Single();
+
+        if (read_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Read Document",
+                internal_permission_name = DocumentPermissions.Read,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                read = true,
+            });
+
+            _Context.SaveChanges();
+
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Read).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = read_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        if (create_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Create Document",
+                internal_permission_name = DocumentPermissions.Create,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                write = true
+            });
+
+            _Context.SaveChanges();
+
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Create).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = create_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        if (edit_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Edit Document",
+                internal_permission_name = DocumentPermissions.Delete,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                edit = true
+            });
+
+            _Context.SaveChanges();
+
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Edit).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = edit_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Document",
+                internal_permission_name = DocumentPermissions.Delete,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Delete).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+                created_by = 1,
+                created_on = DateTime.Now,
+                updated_by = 1,
+                updated_on = DateTime.Now,
+            });
+
+            _Context.SaveChanges();
+        }
+    }
 
     public async Task<Response<DocumentUploadDto>> CreateOverride(IFormFile file, DocumentUploadCreateCommand commandModel)
 	{

@@ -1,14 +1,15 @@
-﻿using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Shipment.Dto;
+﻿using Microsoft.EntityFrameworkCore;
 using Prometheus.Database.Models;
 using Prometheus.Database;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
-using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.Shipment.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -32,7 +33,7 @@ public interface IShipmentModule : IERPModule<
 public class ShipmentModule : BaseERPModule, IShipmentModule
 {
     public override Guid ModuleIdentifier => Guid.Parse("9d624ee2-6433-49f0-bc6c-3e6978e2ac9c");
-    public override string ModuleName => "Shipment";
+    public override string ModuleName => "Shipments";
 
     private readonly IBaseERPContext _Context;
 
@@ -44,10 +45,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
     public override void SeedPermissions()
     {
         var role = _Context.Roles.Any(m => m.name == "Shipping Users");
-        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_shipping");
-        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_shipping");
-        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_shipping");
-        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_shipping");
+        var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ShipmentPermissions.Read);
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ShipmentPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ShipmentPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ShipmentPermissions.Delete);
 
         if (role == false)
         {
@@ -70,7 +71,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Read Shipments",
-                internal_permission_name = "read_shipping",
+                internal_permission_name = ShipmentPermissions.Read,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 read = true,
@@ -78,7 +79,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_shipping").Select(m => m.id).Single();
+            var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Read).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -98,7 +99,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Create Shipment",
-                internal_permission_name = "create_shipping",
+                internal_permission_name = ShipmentPermissions.Create,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 write = true
@@ -106,7 +107,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_shipping").Select(m => m.id).Single();
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Create).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -126,7 +127,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Shipment",
-                internal_permission_name = "edit_shipping",
+                internal_permission_name = ShipmentPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -134,7 +135,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_shipping").Select(m => m.id).Single();
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Edit).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -154,7 +155,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Delete Shipment",
-                internal_permission_name = "delete_shipping",
+                internal_permission_name = ShipmentPermissions.Delete,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 delete = true
@@ -162,7 +163,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.SaveChanges();
 
-            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_shipping").Select(m => m.id).Single();
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Delete).Select(m => m.id).Single();
 
             _Context.RolePermissions.Add(new RolePermission()
             {
@@ -227,7 +228,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (!validationResult.Success)
                 return new Response<ShipmentDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_shipment", write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Create, write: true);
             if (!permission_result)
                 return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -266,7 +267,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (!validationResult.Success)
                 return new Response<ShipmentLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_shipment", write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Create, write: true);
             if (!permission_result)
                 return new Response<ShipmentLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -291,7 +292,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (!validationResult.Success)
             return new Response<ShipmentDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_shipment", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -349,7 +350,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (!validationResult.Success)
             return new Response<ShipmentLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_shipment", edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ShipmentLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -390,7 +391,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     public async Task<Response<ShipmentDto>> Delete(ShipmentHeaderDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_shipment", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -411,7 +412,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     public async Task<Response<ShipmentLineDto>> DeleteLine(ShipmentLineDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_shipment", delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ShipmentLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -435,7 +436,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var response = new PagingResult<ShipmentListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "read_shipment", read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Edit, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

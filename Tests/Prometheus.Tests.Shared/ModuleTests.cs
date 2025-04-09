@@ -3,6 +3,7 @@ using Prometheus.BusinessLayer.Modules;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;
+using Prometheus.Models.Permissions;
 using Prometheus.Module;
 
 namespace Prometheus.Tests.Shared;
@@ -218,7 +219,7 @@ public class ModuleTests
 
 
 
-        var has_permission = await base_module.HasPermission(_User.id, "delete_user", delete: true);
+        var has_permission = await base_module.HasPermission(_User.id, UserPermissions.Delete, delete: true);
 
         Assert.NotNull(has_permission);
         Assert.IsFalse(has_permission);

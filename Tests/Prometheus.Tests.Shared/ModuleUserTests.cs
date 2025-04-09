@@ -6,6 +6,7 @@ using Prometheus.BusinessLayer.Modules;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.Tests.Shared;
 
@@ -103,8 +104,8 @@ public class ModuleUserTests
 
         Assert.That(seeded_permissions.Count > 0);
 
-        var edit_permission = seeded_permissions.Single(m => m.internal_permission_name == "edit_user");
-        var create_permission = seeded_permissions.Single(m => m.internal_permission_name == "create_user");
+        var edit_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Read);
+        var create_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Read);
 
         // Have to give the user edit permissions in order to assign them in the module
         var rolePermission = new RolePermission()
@@ -337,7 +338,7 @@ public class ModuleUserTests
     private async Task SetupForRead()
     {
         var seeded_permissions = await _Context.ModulePermissions.ToListAsync();
-        var read_permission = seeded_permissions.Single(m => m.internal_permission_name == "read_user");
+        var read_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Read);
 
         var rolePermission = new RolePermission()
         {
@@ -397,7 +398,7 @@ public class ModuleUserTests
     private async Task SetupForEdit()
     {
         var seeded_permissions = await _Context.ModulePermissions.ToListAsync();
-        var edit_permission = seeded_permissions.Single(m => m.internal_permission_name == "edit_user");
+        var edit_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Edit);
 
         var rolePermission = new RolePermission()
         {

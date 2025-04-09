@@ -1,16 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Prometheus.BusinessLayer.Models.Module.Opportunity.Dto;
-using Prometheus.BusinessLayer.Models.Module.Product.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Product.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Product.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Product.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Product.Dto;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Module;
+using Prometheus.BusinessLayer.Models.Module.Product.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Product.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Product.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Product.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.Product.Dto;
+using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules
 {
@@ -34,10 +34,10 @@ namespace Prometheus.BusinessLayer.Modules
         public override void SeedPermissions()
         {
             var role = _Context.Roles.Any(m => m.name == "Product Users");
-            var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "read_product");
-            var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "create_product");
-            var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "edit_product");
-            var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == "delete_product");
+            var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ProductPermissions.Read);
+            var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ProductPermissions.Create);
+            var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ProductPermissions.Edit);
+            var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == ProductPermissions.Delete);
 
             if (role == false)
             {
@@ -60,7 +60,7 @@ namespace Prometheus.BusinessLayer.Modules
                 _Context.ModulePermissions.Add(new ModulePermission()
                 {
                     permission_name = "Read Product",
-                    internal_permission_name = "read_product",
+                    internal_permission_name = ProductPermissions.Read,
                     module_id = this.ModuleIdentifier.ToString(),
                     module_name = this.ModuleName,
                     read = true,
@@ -68,7 +68,7 @@ namespace Prometheus.BusinessLayer.Modules
 
                 _Context.SaveChanges();
 
-                var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "read_product").Select(m => m.id).Single();
+                var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Read).Select(m => m.id).Single();
 
                 _Context.RolePermissions.Add(new RolePermission()
                 {
@@ -88,7 +88,7 @@ namespace Prometheus.BusinessLayer.Modules
                 _Context.ModulePermissions.Add(new ModulePermission()
                 {
                     permission_name = "Create Product",
-                    internal_permission_name = "create_product",
+                    internal_permission_name = ProductPermissions.Create,
                     module_id = this.ModuleIdentifier.ToString(),
                     module_name = this.ModuleName,
                     write = true
@@ -96,7 +96,7 @@ namespace Prometheus.BusinessLayer.Modules
 
                 _Context.SaveChanges();
 
-                var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "create_product").Select(m => m.id).Single();
+                var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Create).Select(m => m.id).Single();
 
                 _Context.RolePermissions.Add(new RolePermission()
                 {
@@ -116,7 +116,7 @@ namespace Prometheus.BusinessLayer.Modules
                 _Context.ModulePermissions.Add(new ModulePermission()
                 {
                     permission_name = "Edit Product",
-                    internal_permission_name = "edit_product",
+                    internal_permission_name = ProductPermissions.Edit,
                     module_id = this.ModuleIdentifier.ToString(),
                     module_name = this.ModuleName,
                     edit = true
@@ -124,7 +124,7 @@ namespace Prometheus.BusinessLayer.Modules
 
                 _Context.SaveChanges();
 
-                var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "edit_product").Select(m => m.id).Single();
+                var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Edit).Select(m => m.id).Single();
 
                 _Context.RolePermissions.Add(new RolePermission()
                 {
@@ -144,7 +144,7 @@ namespace Prometheus.BusinessLayer.Modules
                 _Context.ModulePermissions.Add(new ModulePermission()
                 {
                     permission_name = "Delete Product",
-                    internal_permission_name = "delete_product",
+                    internal_permission_name = ProductPermissions.Delete,
                     module_id = this.ModuleIdentifier.ToString(),
                     module_name = this.ModuleName,
                     delete = true
@@ -152,7 +152,7 @@ namespace Prometheus.BusinessLayer.Modules
 
                 _Context.SaveChanges();
 
-                var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == "delete_product").Select(m => m.id).Single();
+                var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Delete).Select(m => m.id).Single();
 
                 _Context.RolePermissions.Add(new RolePermission()
                 {
@@ -202,7 +202,7 @@ namespace Prometheus.BusinessLayer.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "create_product", write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ProductPermissions.Create, write: true);
             if (!permission_result)
                 return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -237,7 +237,7 @@ namespace Prometheus.BusinessLayer.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "edit_product", write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ProductPermissions.Edit, write: true);
             if (!permission_result)
                 return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -250,7 +250,7 @@ namespace Prometheus.BusinessLayer.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, "delete_product", delete: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, ProductPermissions.Delete, delete: true);
             if (!permission_result)
                 return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 
