@@ -19,6 +19,7 @@ public class ModuleUserTests
     public int _CreateRoleId { get; set; }
 
     public int _UserId { get; set; }
+    private string _SessionId = Guid.NewGuid().ToString();
 
     [SetUp]
     public void Setup()
@@ -53,6 +54,16 @@ public class ModuleUserTests
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
 
+        var userSession = new UserSessionState()
+        {
+            user_id = baseUser.id,
+            session_id = _SessionId,
+            created_on = DateTime.Now,
+            session_expires = DateTime.Now.AddMinutes(30),
+        };
+
+        _Context.UserSessionStates.Add(userSession);
+        _Context.SaveChanges();
 
         var editRoleModel = new Role()
         {
@@ -141,8 +152,8 @@ public class ModuleUserTests
         });
 
 
-        var permission_result = await _Module.HasPermission(_UserId, edit_permission.internal_permission_name, edit_permission.read, edit_permission.write, edit_permission.edit, edit_permission.delete);
-        var permission_result_admin = await _Module.HasPermission(_UserId, "ASDASD", seeded_permissions[0].read, seeded_permissions[0].write, seeded_permissions[0].edit, seeded_permissions[0].delete);
+        var permission_result = await _Module.HasPermission(_UserId, _SessionId, edit_permission.internal_permission_name, edit_permission.read, edit_permission.write, edit_permission.edit, edit_permission.delete);
+        var permission_result_admin = await _Module.HasPermission(_UserId, _SessionId, "ASDASD", seeded_permissions[0].read, seeded_permissions[0].write, seeded_permissions[0].edit, seeded_permissions[0].delete);
 
         Assert.IsTrue(permission_result);
         Assert.IsTrue(permission_result_admin);
@@ -166,6 +177,7 @@ public class ModuleUserTests
         var create_model = new UserCreateCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             first_name = "User",
             last_name = "last",
             username = "username",
@@ -196,6 +208,7 @@ public class ModuleUserTests
         var create_model = new UserCreateCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             first_name = "User",
             last_name = "last",
             username = "username",
@@ -227,6 +240,7 @@ public class ModuleUserTests
         var create_model = new UserCreateCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             first_name = "User",
             last_name = "last",
             username = "username",
@@ -244,6 +258,7 @@ public class ModuleUserTests
         var edit_model = new UserEditCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             id = create_response.Data.id,
             first_name = "User1",
             last_name = "last2",
@@ -282,6 +297,7 @@ public class ModuleUserTests
         var create_model = new UserCreateCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             first_name = "User",
             last_name = "last",
             username = "username",
@@ -307,6 +323,7 @@ public class ModuleUserTests
         }, new UserFindCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             wildcard = create_model.first_name
         });
 
@@ -327,6 +344,7 @@ public class ModuleUserTests
         }, new UserFindCommand()
         {
             calling_user_id = _UserId,
+            token = _SessionId,
             wildcard = "Derp"
         });
 
@@ -368,7 +386,7 @@ public class ModuleUserTests
     private async Task SetupForCreate()
     {
         var seeded_permissions = await _Context.ModulePermissions.ToListAsync();
-        var create_permission = seeded_permissions.Single(m => m.internal_permission_name == "create_user");
+        var create_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Create);
 
         var rolePermission = new RolePermission()
         {

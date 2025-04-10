@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Prometheus.Api.Modules;
+using Prometheus.BusinessLayer;
+using Prometheus.BusinessLayer.Interfaces;
 using Prometheus.BusinessLayer.Modules;
 using Prometheus.Database;
 using Prometheus.Models;
@@ -77,9 +79,19 @@ var storageAccountSettings = new FileStorageSettings()
 
 builder.Services.AddSingleton<IFileStorageSettings>(storageAccountSettings);
 
+if (!String.IsNullOrEmpty(storageAccountSettings.account_provider))
+{
+    var sorage_provider = StorageFactory.Create(storageAccountSettings);
 
+    if(sorage_provider != null)
+        builder.Services.AddSingleton<IStorageProvider>(sorage_provider);
+}
+
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 builder.Services.AddScoped<ITokenModule, TokenModule>();
+
 builder.Services.AddScoped<IUserModule, UserModule>();
 builder.Services.AddScoped<IAddressModule, AddressModule>();
 builder.Services.AddScoped<IStateModule, StateModule>();

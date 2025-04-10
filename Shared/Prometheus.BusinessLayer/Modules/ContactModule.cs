@@ -219,7 +219,7 @@ public class ContactModule : BaseERPModule, IContactModule
         if (!validationResult.Success)
             return new Response<ContactDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, ContactPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ContactPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ContactDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -265,7 +265,7 @@ public class ContactModule : BaseERPModule, IContactModule
         if (!validationResult.Success)
             return new Response<ContactDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, ContactPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ContactPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ContactDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -289,7 +289,7 @@ public class ContactModule : BaseERPModule, IContactModule
         var response = new PagingResult<ContactListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ContactPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ContactPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

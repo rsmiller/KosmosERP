@@ -14,4 +14,5 @@ public class FileStorageSettings : IFileStorageSettings
     public string? aws_region { get; set; }
     public string? gpc_json_file_path { get; set; }
     public string? gpc_bucket_name { get; set; }
+    public string? local_storage_path { get; set; }
 }

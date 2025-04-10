@@ -199,7 +199,7 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,LeadPermissions.Create, write: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -229,7 +229,7 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,LeadPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -307,7 +307,7 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (!validationResult.Success)
             return new Response<LeadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,LeadPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<LeadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -333,7 +333,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, LeadPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,LeadPermissions.Read, read: true);
             if (!permission_result)
                 return new PagingResult<LeadListDto>("Invalid permission", ResultCode.InvalidPermission);
 

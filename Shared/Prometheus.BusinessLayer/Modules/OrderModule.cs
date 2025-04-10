@@ -11,6 +11,9 @@ using Prometheus.BusinessLayer.Models.Module.Order.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Order.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Order.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -31,13 +34,21 @@ public class OrderModule : BaseERPModule, IOrderModule
 	public override string ModuleName => "SalesOrder";
 
 	private IBaseERPContext _Context;
+    private ITransactionModule? _TransactionModule;
 
-	public OrderModule(IBaseERPContext context) : base(context)
-	{
+    public OrderModule(IBaseERPContext context) : base(context)
+    {
 		_Context = context;
-	}
+    }
 
-	public override void SeedPermissions()
+    public OrderModule(IBaseERPContext context, ITransactionModule transactionModule) : base(context)
+    {
+        _Context = context;
+        _TransactionModule = transactionModule;
+    }
+
+    
+    public override void SeedPermissions()
 	{
         var role = _Context.Roles.Any(m => m.name == "Sales Order Users");
         var read_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == OrderPermissions.Read);
@@ -249,9 +260,12 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, OrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
+
+        if (_TransactionModule == null)
+            throw new Exception("Transaction module not available");
 
         try
         {
@@ -264,13 +278,32 @@ public class OrderModule : BaseERPModule, IOrderModule
             await _Context.OrderHeaders.AddAsync(item);
             await _Context.SaveChangesAsync();
 
+
             // Now do lines
-            foreach (var ap_line in commandModel.order_lines)
+            foreach (var order_line in commandModel.order_lines)
             {
-                var db_line = MapToLineDatabaseModel(ap_line, item.id, commandModel.calling_user_id);
+                var db_line = MapToLineDatabaseModel(order_line, item.id, commandModel.calling_user_id);
 
                 await _Context.OrderLines.AddAsync(db_line);
                 await _Context.SaveChangesAsync();
+
+
+                // Transaction per line
+                var transaction_response = await _TransactionModule.Create(new TransactionCreateCommand()
+                {
+                    transaction_type = TransactionType.Input,
+                    transaction_date = DateTime.Now,
+                    object_reference_id = item.id,
+                    object_sub_reference_id = item.id,
+                    sold_unit_price = item.price,
+                    units_sold = order_line.quantity,
+                    product_id = order_line.product_id,
+                    calling_user_id = commandModel.calling_user_id,
+                    
+                });
+
+                if(transaction_response != null && !transaction_response.Success)
+                    throw new Exception(transaction_response.Exception);
             }
 
 
@@ -280,6 +313,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         }
         catch (Exception ex)
         {
+            await LogError(80, this.GetType().Name, nameof(Create), ex);
             return new Response<OrderHeaderDto>(ex.Message, ResultCode.Error);
         }
     }
@@ -290,7 +324,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -318,7 +352,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -326,6 +360,8 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderHeaderDto>("Order Header not found", ResultCode.NotFound);
 
+        if (_TransactionModule == null)
+            throw new Exception("Transaction module not available");
 
         // Check for validation issues with the lines
         foreach (var line in commandModel.order_lines)
@@ -350,80 +386,120 @@ public class OrderModule : BaseERPModule, IOrderModule
         }
 
 
-        if (commandModel.customer_id.HasValue && existingEntity.customer_id != commandModel.customer_id)
-            existingEntity.customer_id = commandModel.customer_id.Value;
-        if (commandModel.ship_to_address_id.HasValue && existingEntity.ship_to_address_id != commandModel.ship_to_address_id)
-            existingEntity.customer_id = commandModel.ship_to_address_id.Value;
-        if (commandModel.shipping_method_id.HasValue && existingEntity.shipping_method_id != commandModel.shipping_method_id)
-            existingEntity.shipping_method_id = commandModel.shipping_method_id.Value;
-        if (commandModel.pay_method_id.HasValue && existingEntity.pay_method_id != commandModel.pay_method_id)
-            existingEntity.pay_method_id = commandModel.pay_method_id.Value;
-        if (commandModel.opportunity_id.HasValue && existingEntity.opportunity_id != commandModel.opportunity_id)
-            existingEntity.opportunity_id = commandModel.opportunity_id.Value;
-        if(existingEntity.order_type != commandModel.order_type)
-            existingEntity.order_type = commandModel.order_type;
-        if(commandModel.order_date.HasValue && existingEntity.order_date != commandModel.order_date)
-            existingEntity.order_date = commandModel.order_date.Value;
-        if (commandModel.required_date.HasValue && existingEntity.required_date != commandModel.required_date)
-            existingEntity.required_date = commandModel.required_date.Value;
-        if (existingEntity.po_number != commandModel.po_number)
-            existingEntity.po_number = commandModel.po_number;
-        if (commandModel.tax.HasValue && existingEntity.tax != commandModel.tax)
-            existingEntity.tax = commandModel.tax.Value;
-        if (commandModel.shipping_cost.HasValue && existingEntity.shipping_cost != commandModel.shipping_cost)
-            existingEntity.shipping_cost = commandModel.shipping_cost.Value;
-
-
-        existingEntity.updated_on = DateTime.Now;
-        existingEntity.updated_by = commandModel.calling_user_id;
-
-        _Context.OrderHeaders.Update(existingEntity);
-        await _Context.SaveChangesAsync();
-
-        // Create or update lines
-        foreach(var line in commandModel.order_lines)
+        try
         {
-            // Edit lines
-            if(!line.id.HasValue)
+            if (commandModel.customer_id.HasValue && existingEntity.customer_id != commandModel.customer_id)
+                existingEntity.customer_id = commandModel.customer_id.Value;
+            if (commandModel.ship_to_address_id.HasValue && existingEntity.ship_to_address_id != commandModel.ship_to_address_id)
+                existingEntity.customer_id = commandModel.ship_to_address_id.Value;
+            if (commandModel.shipping_method_id.HasValue && existingEntity.shipping_method_id != commandModel.shipping_method_id)
+                existingEntity.shipping_method_id = commandModel.shipping_method_id.Value;
+            if (commandModel.pay_method_id.HasValue && existingEntity.pay_method_id != commandModel.pay_method_id)
+                existingEntity.pay_method_id = commandModel.pay_method_id.Value;
+            if (commandModel.opportunity_id.HasValue && existingEntity.opportunity_id != commandModel.opportunity_id)
+                existingEntity.opportunity_id = commandModel.opportunity_id.Value;
+            if(existingEntity.order_type != commandModel.order_type)
+                existingEntity.order_type = commandModel.order_type;
+            if(commandModel.order_date.HasValue && existingEntity.order_date != commandModel.order_date)
+                existingEntity.order_date = commandModel.order_date.Value;
+            if (commandModel.required_date.HasValue && existingEntity.required_date != commandModel.required_date)
+                existingEntity.required_date = commandModel.required_date.Value;
+            if (existingEntity.po_number != commandModel.po_number)
+                existingEntity.po_number = commandModel.po_number;
+            if (commandModel.tax.HasValue && existingEntity.tax != commandModel.tax)
+                existingEntity.tax = commandModel.tax.Value;
+            if (commandModel.shipping_cost.HasValue && existingEntity.shipping_cost != commandModel.shipping_cost)
+                existingEntity.shipping_cost = commandModel.shipping_cost.Value;
+
+
+            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_by = commandModel.calling_user_id;
+
+            _Context.OrderHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+            // Create or update lines
+            foreach(var line in commandModel.order_lines)
             {
-                var add_line = this.MapToLineDatabaseModel(line, existingEntity.id, commandModel.calling_user_id);
-                await _Context.OrderLines.AddAsync(add_line);
-                await _Context.SaveChangesAsync();
-
-
-                // Do attributes if available
-                if(line.attributes.Count > 0)
+                // Edit lines
+                if(!line.id.HasValue)
                 {
-                    var attibute_response = await BuildAndEditLineAttributes(line, add_line.id, commandModel.calling_user_id);
-                    
-                    if (!attibute_response.Success)
+                    var add_line = this.MapToLineDatabaseModel(line, existingEntity.id, commandModel.calling_user_id);
+                    await _Context.OrderLines.AddAsync(add_line);
+                    await _Context.SaveChangesAsync();
+
+
+                    // Do attributes if available
+                    if (line.attributes.Count > 0)
                     {
-                        return new Response<OrderHeaderDto>(attibute_response.Exception, ResultCode.Error);
-                    }   
+                        var attibute_response = await BuildAndEditLineAttributes(line, add_line.id, commandModel.calling_user_id);
+                    
+                        if (!attibute_response.Success)
+                        {
+                            return new Response<OrderHeaderDto>(attibute_response.Exception, ResultCode.Error);
+                        }   
+                    }
+
+
+                    // Transaction per line
+                    var transaction_response = await _TransactionModule.Create(new TransactionCreateCommand()
+                    {
+                        transaction_type = TransactionType.Input,
+                        transaction_date = DateTime.Now,
+                        object_reference_id = add_line.order_id,
+                        object_sub_reference_id = add_line.id,
+                        sold_unit_price = add_line.unit_price,
+                        units_sold = add_line.quantity,
+                        product_id = add_line.product_id,
+                        calling_user_id = commandModel.calling_user_id,
+                    });
+
+                    if (transaction_response != null && !transaction_response.Success)
+                        throw new Exception(transaction_response.Exception);
                 }
-            }
-            else
-            {
-                var edit_response = await this.EditLine(line);
-
-                if(!edit_response.Success)
-                    return new Response<OrderHeaderDto>(edit_response.Exception, ResultCode.Error);
-
-
-                // Build attributes if there are any
-                if (line.attributes.Count > 0)
+                else
                 {
-                    var attibute_response = await BuildAndEditLineAttributes(line, edit_response.Data.id, commandModel.calling_user_id);
+                    var edit_response = await this.EditLine(line);
 
-                    if (!attibute_response.Success)
-                        return new Response<OrderHeaderDto>(attibute_response.Exception, ResultCode.Error);
+                    if(!edit_response.Success)
+                        return new Response<OrderHeaderDto>(edit_response.Exception, ResultCode.Error);
+
+
+                    // Build attributes if there are any
+                    if (line.attributes.Count > 0)
+                    {
+                        var attibute_response = await BuildAndEditLineAttributes(line, edit_response.Data.id, commandModel.calling_user_id);
+
+                        if (!attibute_response.Success)
+                            return new Response<OrderHeaderDto>(attibute_response.Exception, ResultCode.Error);
+                    }
+
+
+                    // Transaction per line
+                    var transaction_response = await _TransactionModule.Edit(new TransactionEditCommand()
+                    {
+                        object_reference_id = edit_response.Data.order_id,
+                        object_sub_reference_id = edit_response.Data.id,
+                        sold_unit_price = edit_response.Data.unit_price,
+                        units_sold = edit_response.Data.quantity,
+                        product_id = edit_response.Data.product_id,
+                        calling_user_id = commandModel.calling_user_id,
+                    });
+
+                    if (transaction_response != null && !transaction_response.Success)
+                        throw new Exception(transaction_response.Exception);
                 }
             }
+
+            var dto = await MapToDto(existingEntity);
+
+            return new Response<OrderHeaderDto>(dto);
         }
-
-        var dto = await MapToDto(existingEntity);
-
-        return new Response<OrderHeaderDto>(dto);
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(CreateLine), ex);
+            return new Response<OrderHeaderDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     private async Task<Response<bool>> BuildAndEditLineAttributes(OrderLineEditCommand commandModel, int order_line_id, int calling_user_id)
@@ -509,12 +585,16 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
         if (!commandModel.order_id.HasValue)
             return new Response<OrderLineDto>("Order Header os a required field", ResultCode.DataValidationError);
+
+        if (_TransactionModule == null)
+            throw new Exception("Transaction module not available");
+
 
         try
         {
@@ -523,12 +603,31 @@ public class OrderModule : BaseERPModule, IOrderModule
             await _Context.OrderLines.AddAsync(item);
             await _Context.SaveChangesAsync();
 
+
+            // Transaction per line
+            var transaction_response = await _TransactionModule.Create(new TransactionCreateCommand()
+            {
+                transaction_type = TransactionType.Input,
+                transaction_date = DateTime.Now,
+                object_reference_id = item.order_id,
+                object_sub_reference_id = item.id,
+                sold_unit_price = item.unit_price,
+                units_sold = item.quantity,
+                product_id = item.product_id,
+                calling_user_id = commandModel.calling_user_id,
+            });
+
+            if (transaction_response != null && !transaction_response.Success)
+                throw new Exception(transaction_response.Exception);
+
+
             var dto = await GetLineDto(item.id);
 
             return new Response<OrderLineDto>(dto.Data);
         }
         catch (Exception ex)
         {
+            await LogError(80, this.GetType().Name, nameof(CreateLine), ex);
             return new Response<OrderLineDto>(ex.Message, ResultCode.Error);
         }
     }
@@ -539,7 +638,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -550,38 +649,66 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineDto>("Order Line not found", ResultCode.NotFound);
 
-        if (commandModel.product_id.HasValue && existingEntity.product_id != commandModel.product_id)
-            existingEntity.product_id = commandModel.product_id.Value;
-        if (commandModel.line_number.HasValue && existingEntity.line_number != commandModel.line_number)
-            existingEntity.line_number = commandModel.line_number.Value;
-        if (existingEntity.opportunity_line_id != commandModel.opportunity_line_id)
-            existingEntity.opportunity_line_id = commandModel.opportunity_line_id;
-        if (existingEntity.line_description != commandModel.line_description)
-            existingEntity.line_description = commandModel.line_description;
-        if (commandModel.quantity.HasValue && existingEntity.quantity != commandModel.quantity)
-            existingEntity.quantity = commandModel.quantity.Value;
-        if (commandModel.unit_price.HasValue && existingEntity.unit_price != commandModel.unit_price)
-            existingEntity.unit_price = commandModel.unit_price.Value;
+        if (_TransactionModule == null)
+            throw new Exception("Transaction module not available");
+
+        try
+        {
+
+            if (commandModel.product_id.HasValue && existingEntity.product_id != commandModel.product_id)
+                existingEntity.product_id = commandModel.product_id.Value;
+            if (commandModel.line_number.HasValue && existingEntity.line_number != commandModel.line_number)
+                existingEntity.line_number = commandModel.line_number.Value;
+            if (existingEntity.opportunity_line_id != commandModel.opportunity_line_id)
+                existingEntity.opportunity_line_id = commandModel.opportunity_line_id;
+            if (existingEntity.line_description != commandModel.line_description)
+                existingEntity.line_description = commandModel.line_description;
+            if (commandModel.quantity.HasValue && existingEntity.quantity != commandModel.quantity)
+                existingEntity.quantity = commandModel.quantity.Value;
+            if (commandModel.unit_price.HasValue && existingEntity.unit_price != commandModel.unit_price)
+                existingEntity.unit_price = commandModel.unit_price.Value;
 
 
-        existingEntity.updated_on = DateTime.Now;
-        existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_by = commandModel.calling_user_id;
 
-        _Context.OrderLines.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+            _Context.OrderLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        var dto = await MapToLineDto(existingEntity);
+            // Transaction per line
+            var transaction_response = await _TransactionModule.Edit(new TransactionEditCommand()
+            {
+                object_reference_id = existingEntity.order_id,
+                object_sub_reference_id = existingEntity.id,
+                sold_unit_price = existingEntity.unit_price,
+                units_sold = existingEntity.quantity,
+                product_id = existingEntity.product_id,
+                calling_user_id = commandModel.calling_user_id,
+            });
 
-        return new Response<OrderLineDto>(dto);
+            if (transaction_response != null && !transaction_response.Success)
+                throw new Exception(transaction_response.Exception);
+
+
+            var dto = await MapToLineDto(existingEntity);
+
+            return new Response<OrderLineDto>(dto);
+
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(EditLine), ex);
+            return new Response<OrderLineDto>(ex.Message, ResultCode.Error);
+        }
     }
-    
-	public async Task<Response<OrderLineDto>> DeleteLine(OrderLineDeleteCommand commandModel)
+
+    public async Task<Response<OrderLineDto>> DeleteLine(OrderLineDeleteCommand commandModel)
     {
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
             return new Response<OrderLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -589,15 +716,39 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineDto>("Order Line not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        if (_TransactionModule == null)
+            throw new Exception("Transaction module not available");
 
-        _Context.OrderLines.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+        try
+        {
+            existingEntity.is_deleted = true;
+            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_by = commandModel.calling_user_id;
 
-        var dto = await MapToLineDto(existingEntity);
-        return new Response<OrderLineDto>(dto);
+            _Context.OrderLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+
+            // Corrolate the transacation data
+            var system_user = await _Context.Users.FirstAsync(m => m.username == "system");
+            var transaction_response = await _TransactionModule.Delete(new TransactionDeleteCommand()
+            {
+                object_reference_id = existingEntity.order_id,
+                object_sub_reference_id = existingEntity.id,
+                calling_user_id = system_user.id,
+            });
+
+            if (transaction_response != null && !transaction_response.Success)
+                throw new Exception(transaction_response.Exception);
+
+            var dto = await MapToLineDto(existingEntity);
+            return new Response<OrderLineDto>(dto);
+        }
+        catch(Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(Create), ex);
+            return new Response<OrderLineDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<OrderLineAttributeDto>> CreateAttribute(OrderLineAttributeCreateCommand commandModel)
@@ -609,7 +760,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OrderLineAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -639,7 +790,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -679,7 +830,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!validationResult.Success)
             return new Response<OrderLineAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OrderPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OrderLineAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 

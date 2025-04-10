@@ -203,7 +203,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (!validationResult.Success)
             return new Response<CustomerDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, CustomerPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,CustomerPermissions.Create, write: true);
         if (!permission_result)
             return new Response<CustomerDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -222,7 +222,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (!validationResult.Success)
             return new Response<CustomerDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, CustomerPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,CustomerPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<CustomerDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -268,7 +268,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (!validationResult.Success)
             return new Response<CustomerDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, CustomerPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,CustomerPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<CustomerDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -292,7 +292,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         var response = new PagingResult<CustomerListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, CustomerPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,CustomerPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

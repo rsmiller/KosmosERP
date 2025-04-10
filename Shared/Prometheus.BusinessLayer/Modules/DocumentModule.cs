@@ -33,7 +33,7 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
     }
 
     public DocumentUploadModule(IBaseERPContext context, IFileStorageSettings storageSettings) : base(context)
-	{
+    {
 		_Context = context;
         _StorageSettings = storageSettings;
 

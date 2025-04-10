@@ -253,7 +253,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Create, write: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -306,7 +306,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -334,7 +334,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -453,7 +453,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Create, write: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -483,7 +483,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -523,7 +523,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -551,7 +551,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveUploadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Create, write: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveUploadDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -587,7 +587,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!validationResult.Success)
             return new Response<PurchaseOrderReceiveUploadDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, PurchaseOrderReceivePermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,PurchaseOrderReceivePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<PurchaseOrderReceiveUploadDto>("Invalid permission", ResultCode.InvalidPermission);
 

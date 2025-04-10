@@ -203,11 +203,11 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!validationResult.Success)
             return new Response<VendorDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var vendor_permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Create, write: true);
+        var vendor_permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,VendorPermissions.Create, write: true);
         if (!vendor_permission_result)
             return new Response<VendorDto>("Invalid vendor permission", ResultCode.InvalidPermission);
 
-        var address_permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Create, write: true);
+        var address_permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,AddressPermissions.Create, write: true);
         if (!address_permission_result)
             return new Response<VendorDto>("Invalid address permission", ResultCode.InvalidPermission);
 
@@ -237,7 +237,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!validationResult.Success)
             return new Response<VendorDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,VendorPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<VendorDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -307,7 +307,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!validationResult.Success)
             return new Response<VendorDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,VendorPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<VendorDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -331,7 +331,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         var response = new PagingResult<VendorListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, VendorPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,VendorPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

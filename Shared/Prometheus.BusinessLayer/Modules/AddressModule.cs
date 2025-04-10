@@ -131,7 +131,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         if (!validationResult.Success)
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,AddressPermissions.Create, write: true);
         if (!permission_result)
             return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -150,7 +150,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         if (!validationResult.Success)
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,AddressPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -194,7 +194,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             return new Response<AddressDto>(validationResult.Exception, ResultCode.DataValidationError);
 
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,AddressPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<AddressDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -221,7 +221,7 @@ public class AddressModule : BaseERPModule, IAddressModule
         try
         {
             // Example permission check
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, AddressPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,AddressPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

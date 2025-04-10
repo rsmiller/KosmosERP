@@ -64,7 +64,7 @@ public class StateModule : BaseERPModule, IStateModule
         if (!validationResult.Success)
             return new Response<StateDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,StatePermissions.Create, write: true);
         if (!permission_result)
             return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -84,7 +84,7 @@ public class StateModule : BaseERPModule, IStateModule
         if (!validationResult.Success)
             return new Response<StateDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,StatePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -115,7 +115,7 @@ public class StateModule : BaseERPModule, IStateModule
 
     public async Task<Response<StateDto>> Delete(StateDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,StatePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<StateDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -141,7 +141,7 @@ public class StateModule : BaseERPModule, IStateModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, StatePermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,StatePermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

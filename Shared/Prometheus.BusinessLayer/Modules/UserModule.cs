@@ -422,7 +422,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (!validationResult.Success)
             return new Response<bool>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Edit, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,UserPermissions.Edit, write: true);
         if (!permission_result)
             return new Response<bool>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -462,7 +462,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (!validationResult.Success)
             return new Response<UserDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,UserPermissions.Create, write: true);
         if (!permission_result)
             return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -503,7 +503,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (existingEntity == null)
             return new Response<UserDto>("User not found", ResultCode.NotFound);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,UserPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -590,7 +590,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (!validationResult.Success)
             return new Response<UserDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,UserPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<UserDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -615,7 +615,7 @@ public partial class UserModule : BaseERPModule, IUserModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, UserPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,UserPermissions.Read, read: true);
             if (!permission_result)
                 return new PagingResult<UserListDto>("Invalid permission", ResultCode.InvalidPermission);
 

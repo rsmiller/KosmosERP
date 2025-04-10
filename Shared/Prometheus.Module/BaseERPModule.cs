@@ -9,17 +9,17 @@ public interface IBaseERPModule
     Task<bool> LogError(int severity, string source, string method, Exception e);
     Task<bool> LogGeneral(string category, string message);
     Task<UserPermissionsSet> GetUserPermissions(int calling_user_id);
-    Task<bool> HasPermission(int calling_user_id, string permission_name, bool read = false, bool write = false, bool edit = false, bool delete = false);
+    Task<bool> HasPermission(int calling_user_id, string token, string permission_name, bool read = false, bool write = false, bool edit = false, bool delete = false);
     void SeedPermissions();
 }
 
 public class BaseERPModule : IBaseERPModule
 {
     private IBaseERPContext _ERPDbContext;
+
     public BaseERPModule(IBaseERPContext context)
     {
         _ERPDbContext = context;
-
     }
 
     public virtual Guid ModuleIdentifier { get; set; }
@@ -106,7 +106,7 @@ public class BaseERPModule : IBaseERPModule
         return response;
     }
 
-    public async Task<bool> HasPermission(int calling_user_id, string permission_name, bool read = false, bool write = false, bool edit = false, bool delete = false)
+    public async Task<bool> HasPermission(int calling_user_id, string token, string permission_name, bool read = false, bool write = false, bool edit = false, bool delete = false)
     {
         bool hasPermission = false;
 
@@ -115,8 +115,16 @@ public class BaseERPModule : IBaseERPModule
             if (this.ModuleIdentifier == Guid.Empty)
                 throw new Exception("A Modules ModuleIdentifier must have a value. Do not change a value once it has been set.");
 
-            var user = await _ERPDbContext.Users.Where(m => m.id == calling_user_id).Select(m => m.is_admin).SingleOrDefaultAsync();
-            if (user == true)
+            // Checking general login and if an admin
+            var user = await (from u in _ERPDbContext.Users 
+                             join us in _ERPDbContext.UserSessionStates on u.id equals us.user_id
+                             where us.session_id == token && us.user_id == calling_user_id
+                             select u).SingleOrDefaultAsync();
+
+            if (user == null)
+                return false;
+
+            if (user.is_admin == true)
                 return true;
 
             var assigned_module_permissions = await (from ur in _ERPDbContext.UserRoles

@@ -192,7 +192,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,TransactionPermissions.Create, write: true);
         if (!permission_result)
             return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -212,13 +212,42 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,TransactionPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
-        var existingEntity = await GetAsync(commandModel.id);
-        if (existingEntity == null)
-            return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        Transaction? existingEntity;
+
+        if (commandModel.id.HasValue)
+        {
+            existingEntity = await GetAsync(commandModel.id.Value);
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue && commandModel.object_sub_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id
+                                                                && m.object_sub_reference_id == commandModel.object_sub_reference_id
+                                                              ).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (!commandModel.object_reference_id.HasValue)
+        {
+            return new Response<TransactionDto>("You must supply an id or object_reference_id or a object_reference_id and a object_sub_reference_id", ResultCode.DataValidationError);
+        }
+        else
+        {
+            return new Response<TransactionDto>("An identifier is required to delete a transaction", ResultCode.DataValidationError);
+        }
+
+
 
         if (commandModel.product_id.HasValue && existingEntity.product_id != commandModel.product_id)
             existingEntity.product_id = commandModel.product_id.Value;
@@ -228,12 +257,6 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
         if (commandModel.transaction_date.HasValue && existingEntity.transaction_date != commandModel.transaction_date)
             existingEntity.transaction_date = commandModel.transaction_date.Value;
-
-        if (commandModel.object_reference_id.HasValue && existingEntity.object_reference_id != commandModel.object_reference_id)
-            existingEntity.object_reference_id = commandModel.object_reference_id.Value;
-
-        if (existingEntity.object_sub_reference_id != commandModel.object_sub_reference_id)
-            existingEntity.object_sub_reference_id = commandModel.object_sub_reference_id;
 
         if (commandModel.units_sold.HasValue && existingEntity.units_sold != commandModel.units_sold)
             existingEntity.units_sold = commandModel.units_sold.Value;
@@ -270,13 +293,42 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         if (!validationResult.Success)
             return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,TransactionPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<TransactionDto>("Invalid permission", ResultCode.InvalidPermission);
 
-        var existingEntity = await GetAsync(commandModel.id);
-        if (existingEntity == null)
-            return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+
+        Transaction? existingEntity;
+
+        if (commandModel.id.HasValue)
+        {
+            existingEntity = await GetAsync(commandModel.id.Value);
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue && commandModel.object_sub_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id
+                                                                && m.object_sub_reference_id == commandModel.object_sub_reference_id
+                                                              ).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (!commandModel.object_reference_id.HasValue)
+        {
+            return new Response<TransactionDto>("You must supply an id or object_reference_id or a object_reference_id and a object_sub_reference_id", ResultCode.DataValidationError);
+        }
+        else
+        {
+            return new Response<TransactionDto>("An identifier is required to delete a transaction", ResultCode.DataValidationError);
+        }
+
 
         existingEntity.is_deleted = true;
         existingEntity.deleted_on = DateTime.Now;
@@ -295,7 +347,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, TransactionPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,TransactionPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

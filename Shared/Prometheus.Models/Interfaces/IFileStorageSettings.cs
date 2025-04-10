@@ -13,4 +13,5 @@ public interface IFileStorageSettings
     string? aws_region { get; set; }
     string? gpc_json_file_path { get; set; }
     string? gpc_bucket_name { get; set; }
+    string? local_storage_path { get; set; }
 }

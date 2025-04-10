@@ -5,13 +5,14 @@ namespace Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 
 public class TransactionEditCommand : DataCommand
 {
-    [Required]
-    public int id { get; set; }
+    public int? id { get; set; }
+
+    public int? object_reference_id { get; set; }
+    public int? object_sub_reference_id { get; set; }
+
     public int? product_id { get; set; }
     public int? transaction_type { get; set; }
     public DateTime? transaction_date { get; set; }
-    public int? object_reference_id { get; set; }
-    public int? object_sub_reference_id { get; set; }
     public int? units_sold { get; set; }
     public int? units_shipped { get; set; }
     public int? units_purchased { get; set; }

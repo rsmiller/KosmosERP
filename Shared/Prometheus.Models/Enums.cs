@@ -38,3 +38,19 @@ public enum ResultCode
     AlreadyExists = -7,
     InvalidPermission = -8
 }
+
+public class TransactionType
+{
+    public static int Input { get { return 1; } }
+    public static int Output { get { return 2; } }
+    public static int Move { get { return 3; } }
+    public static int Adjustment { get { return 3; } }
+}
+
+public class StorageType
+{
+    public static string Local { get { return "local"; } }
+    public static string Azure { get { return "azure"; } }
+    public static string AWS { get { return "aws"; } }
+    public static string Google { get { return "google"; } }
+}

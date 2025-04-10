@@ -202,7 +202,7 @@ namespace Prometheus.BusinessLayer.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ProductPermissions.Create, write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ProductPermissions.Create, write: true);
             if (!permission_result)
                 return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -237,7 +237,7 @@ namespace Prometheus.BusinessLayer.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ProductPermissions.Edit, write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ProductPermissions.Edit, write: true);
             if (!permission_result)
                 return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -250,7 +250,7 @@ namespace Prometheus.BusinessLayer.Modules
             if (!validationResult.Success)
                 return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ProductPermissions.Delete, delete: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ProductPermissions.Delete, delete: true);
             if (!permission_result)
                 return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 

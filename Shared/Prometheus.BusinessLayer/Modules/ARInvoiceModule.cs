@@ -28,7 +28,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 	private IBaseERPContext _Context;
 
 	public ARInvoiceModule(IBaseERPContext context) : base(context)
-	{
+    {
 		_Context = context;
 	}
 

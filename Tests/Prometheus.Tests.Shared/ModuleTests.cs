@@ -14,6 +14,7 @@ public class ModuleTests
     private User _User;
 
     private string _ModuleId = Guid.NewGuid().ToString();
+    private string _SessionId = Guid.NewGuid().ToString();
 
     [SetUp]
     public void Setup()
@@ -47,6 +48,16 @@ public class ModuleTests
 
         _User = _Context.Users.First();
 
+        var userSession = new UserSessionState()
+        {
+            user_id = _User.id,
+            session_id = _SessionId,
+            created_on = DateTime.Now,
+            session_expires = DateTime.Now.AddMinutes(30),
+        };
+
+        _Context.UserSessionStates.Add(userSession);
+        _Context.SaveChanges();
 
         var roleModel1 = new Role()
         {
@@ -181,7 +192,7 @@ public class ModuleTests
         var base_module = new BaseERPModule(_Context);
         base_module.ModuleIdentifier = Guid.Parse(_ModuleId);
 
-        var has_permission = await base_module.HasPermission(_User.id, "module_read", true);
+        var has_permission = await base_module.HasPermission(_User.id, _SessionId, "module_read", true);
 
         Assert.NotNull(has_permission);
         Assert.IsTrue(has_permission);
@@ -193,7 +204,7 @@ public class ModuleTests
         var base_module = new BaseERPModule(_Context);
         base_module.ModuleIdentifier = Guid.Parse(_ModuleId);
 
-        var has_permission = await base_module.HasPermission(_User.id, "module_edit", edit: true);
+        var has_permission = await base_module.HasPermission(_User.id, _SessionId, "module_edit", edit: true);
 
         Assert.NotNull(has_permission);
         Assert.IsTrue(has_permission);
@@ -205,7 +216,7 @@ public class ModuleTests
         var base_module = new BaseERPModule(_Context);
         base_module.ModuleIdentifier = Guid.Parse(_ModuleId);
 
-        var has_permission = await base_module.HasPermission(_User.id, "write_user", write: true);
+        var has_permission = await base_module.HasPermission(_User.id, _SessionId, "write_user", write: true);
 
         Assert.NotNull(has_permission);
         Assert.IsFalse(has_permission);
@@ -219,7 +230,7 @@ public class ModuleTests
 
 
 
-        var has_permission = await base_module.HasPermission(_User.id, UserPermissions.Delete, delete: true);
+        var has_permission = await base_module.HasPermission(_User.id, _SessionId, UserPermissions.Delete, delete: true);
 
         Assert.NotNull(has_permission);
         Assert.IsFalse(has_permission);

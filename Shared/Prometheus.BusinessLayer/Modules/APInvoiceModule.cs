@@ -241,7 +241,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,APInvoicePermissions.Create, write: true);
         if (!permission_result)
             return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -285,7 +285,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,APInvoicePermissions.Create, write: true);
         if (!permission_result)
             return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -318,7 +318,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,APInvoicePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -389,7 +389,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,APInvoicePermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -442,7 +442,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,APInvoicePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -467,7 +467,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (!validationResult.Success)
             return new Response<APInvoiceLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, APInvoicePermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,APInvoicePermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -496,7 +496,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var permission_result = await base.HasPermission(associationCommand.calling_user_id, APInvoicePermissions.Edit, edit: true);
+            var permission_result = await base.HasPermission(associationCommand.calling_user_id, associationCommand.token, APInvoicePermissions.Edit, edit: true);
             if (!permission_result)
                 return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -573,7 +573,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var permission_result = await base.HasPermission(associationCommand.calling_user_id, APInvoicePermissions.Edit, edit: true);
+            var permission_result = await base.HasPermission(associationCommand.calling_user_id, associationCommand.token, APInvoicePermissions.Edit, edit: true);
             if (!permission_result)
                 return new Response<APInvoiceLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -649,7 +649,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
-            var permission_result = await base.HasPermission(associationCommand.calling_user_id, APInvoicePermissions.Edit, edit: true);
+            var permission_result = await base.HasPermission(associationCommand.calling_user_id, associationCommand.token, APInvoicePermissions.Edit, edit: true);
             if (!permission_result)
                 return new Response<APInvoiceHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 

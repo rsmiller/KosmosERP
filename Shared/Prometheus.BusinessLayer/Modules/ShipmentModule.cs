@@ -228,7 +228,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (!validationResult.Success)
                 return new Response<ShipmentDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Create, write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Create, write: true);
             if (!permission_result)
                 return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -267,7 +267,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (!validationResult.Success)
                 return new Response<ShipmentLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Create, write: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Create, write: true);
             if (!permission_result)
                 return new Response<ShipmentLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -292,7 +292,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (!validationResult.Success)
             return new Response<ShipmentDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -350,7 +350,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (!validationResult.Success)
             return new Response<ShipmentLineDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ShipmentLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -391,7 +391,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     public async Task<Response<ShipmentDto>> Delete(ShipmentHeaderDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -412,7 +412,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     public async Task<Response<ShipmentLineDto>> DeleteLine(ShipmentLineDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ShipmentLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -436,7 +436,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var response = new PagingResult<ShipmentListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, ShipmentPermissions.Edit, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Edit, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

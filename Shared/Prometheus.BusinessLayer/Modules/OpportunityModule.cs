@@ -10,8 +10,6 @@ using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Customer.Dto;
-using Prometheus.BusinessLayer.Models.Module.Lead.Dto;
 using Prometheus.Models.Permissions;
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -25,7 +23,7 @@ public interface IOpportunityModule : IERPModule<
     OpportunityDeleteCommand,
     OpportunityFindCommand>, IBaseERPModule
 {
-    // Add any opportunity-specific methods here if needed
+
 }
 
 public class OpportunityModule : BaseERPModule, IOpportunityModule
@@ -205,7 +203,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (!validationResult.Success)
             return new Response<OpportunityDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Create, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OpportunityPermissions.Create, write: true);
         if (!permission_result)
             return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -225,7 +223,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (!validationResult.Success)
             return new Response<OpportunityDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OpportunityPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -275,7 +273,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
     public async Task<Response<OpportunityDto>> Delete(OpportunityDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OpportunityPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<OpportunityDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -301,7 +299,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         try
         {
             // Example permission check (could be read_opportunity, etc.)
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, OpportunityPermissions.Read, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,OpportunityPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);

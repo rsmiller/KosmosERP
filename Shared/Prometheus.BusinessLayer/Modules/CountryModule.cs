@@ -81,7 +81,7 @@ public class CountryModule : BaseERPModule, ICountryModule
         if (!validationResult.Success)
             return new Response<CountryDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, CountryPermissions.Edit, edit: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,CountryPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<CountryDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -121,7 +121,7 @@ public class CountryModule : BaseERPModule, ICountryModule
 
     public async Task<Response<CountryDto>> Delete(CountryDeleteCommand commandModel)
     {
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, CountryPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,CountryPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<CountryDto>("Invalid permission", ResultCode.InvalidPermission);
 
