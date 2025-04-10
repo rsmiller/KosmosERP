@@ -24,6 +24,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.7" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
   </ItemGroup>
 
   <ItemGroup>

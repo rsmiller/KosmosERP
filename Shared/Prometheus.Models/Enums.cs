@@ -54,3 +54,16 @@ public class StorageType
     public static string AWS { get { return "aws"; } }
     public static string Google { get { return "google"; } }
 }
+
+public class MessagePublisherType
+{
+    public static string RabbitMq { get { return "rabbit"; } }
+    public static string Azure { get { return "azure"; } }
+    public static string AWS { get { return "aws"; } }
+    public static string Google { get { return "google"; } }
+}
+
+public class RequireMessageTopics
+{
+    public static string TransactionMovementTopic { get { return "transaction_movement_topic"; } }
+}

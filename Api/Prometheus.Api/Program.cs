@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Prometheus.Api.Modules;
@@ -16,7 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 /// For development debug
 Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost;uid=auser;pwd=12345;database=prometheus_erp");
-
+Environment.SetEnvironmentVariable("MessagePublisherAccountProvider", "RabbitMQ");
+Environment.SetEnvironmentVariable("TransactionMovementTopic", "transaction_movement");
 
 // Add services to the container.
 
@@ -79,16 +81,34 @@ var storageAccountSettings = new FileStorageSettings()
 
 builder.Services.AddSingleton<IFileStorageSettings>(storageAccountSettings);
 
-if (!String.IsNullOrEmpty(storageAccountSettings.account_provider))
+
+///////////////////////////////
+// Factories
+var sorage_provider = StorageFactory.Create(storageAccountSettings);
+builder.Services.AddSingleton<IStorageProvider>(sorage_provider);
+
+
+var messagePublisherSettings = new MessagePublisherSettings()
 {
-    var sorage_provider = StorageFactory.Create(storageAccountSettings);
+    account_provider = Environment.GetEnvironmentVariable("MessagePublisherAccountProvider"),
+    rabbitmq_host = Environment.GetEnvironmentVariable("RabbitMQHost"),
+    rabbitmq_username = Environment.GetEnvironmentVariable("RabbitMQUsername"),
+    rabbitmq_password = Environment.GetEnvironmentVariable("RabbitMQPassword"),
+    rabbitmq_port = Environment.GetEnvironmentVariable("RabbitMQPort"),
+    rabbitmq_virtual_host = Environment.GetEnvironmentVariable("RabbitMQVirtualHost"),
+    rabbitmq_exchange = Environment.GetEnvironmentVariable("RabbitMQExchange"),
+    aws_region = Environment.GetEnvironmentVariable("AWSRegion"),
+    azure_connection_string = Environment.GetEnvironmentVariable("AzureConnectionString"),
+    rabbitmq_routing_key = Environment.GetEnvironmentVariable("RabbitMQRoutingKey"),
+    transaction_movement_topic = Environment.GetEnvironmentVariable("TransactionMovementTopic")
+};
 
-    if(sorage_provider != null)
-        builder.Services.AddSingleton<IStorageProvider>(sorage_provider);
-}
 
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+var messaging_provider = MessageFactory.Create(messagePublisherSettings);
+builder.Services.AddSingleton<IMessagePublisher>(messaging_provider);
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 builder.Services.AddScoped<ITokenModule, TokenModule>();
 

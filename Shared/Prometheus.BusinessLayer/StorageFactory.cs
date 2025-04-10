@@ -7,10 +7,11 @@ namespace Prometheus.BusinessLayer;
 
 public static class StorageFactory
 {
-    public static IStorageProvider? Create(IFileStorageSettings storageAccountSettings)
+    public static IStorageProvider Create(IFileStorageSettings storageAccountSettings)
     {
         if (string.IsNullOrEmpty(storageAccountSettings.account_provider))
-            return null;
+            throw new ArgumentException("Storage account provider is null or empty");
+
 
         if (storageAccountSettings.account_provider.Equals(StorageType.Azure, StringComparison.OrdinalIgnoreCase))
         {
@@ -30,7 +31,7 @@ public static class StorageFactory
         }
         else
         {
-            return null;
+            throw new ArgumentNullException("Storage account provider not supported.");
         }
     }
 }
