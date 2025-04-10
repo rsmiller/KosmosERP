@@ -820,7 +820,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
         var existingEntity = await GetAttributeAsync(commandModel.id);
         if (existingEntity == null)
-            return new Response<OrderLineAttributeDto>("Order Line not found", ResultCode.NotFound);
+            return new Response<OrderLineAttributeDto>("Attribute not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
         existingEntity.deleted_on = DateTime.Now;
