@@ -41,10 +41,13 @@ public enum ResultCode
 
 public class TransactionType
 {
-    public static int Input { get { return 1; } }
-    public static int Output { get { return 2; } }
-    public static int Move { get { return 3; } }
-    public static int Adjustment { get { return 3; } }
+    public static int Inbound { get { return 1; } }
+    public static int Outbound { get { return 2; } }
+    public static int Planned { get { return 3; } }
+    public static int Commited { get { return 5; } }
+    public static int Reserved { get { return 6; } }
+    public static int Move { get { return 7; } }
+    public static int Adjustment { get { return 8; } }
 }
 
 public class StorageType
@@ -63,7 +66,7 @@ public class MessagePublisherType
     public static string Google { get { return "google"; } }
 }
 
-public class RequireMessageTopics
+public class RequiredMessageTopics
 {
     public static string TransactionMovementTopic { get { return "transaction_movement_topic"; } }
 }

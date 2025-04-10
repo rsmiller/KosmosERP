@@ -1,9 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Interfaces;
+using Prometheus.BusinessLayer.Models.Module.PurchaseOrder.Dto;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Dto;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 using Prometheus.Models;
@@ -11,6 +16,7 @@ using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models.Permissions;
 using Prometheus.Module;
+using System.Text.Json;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -31,10 +37,12 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
     public override string ModuleName => "PurchaseOrderReceive";
 
     private IBaseERPContext _Context;
+    private IMessagePublisher _MessagePublisher;
 
-    public PurchaseOrderReceiveModule(IBaseERPContext context) : base(context)
+    public PurchaseOrderReceiveModule(IBaseERPContext context, IMessagePublisher messagePublisher) : base(context)
     {
         _Context = context;
+        _MessagePublisher = messagePublisher;
     }
 
     public override void SeedPermissions()
@@ -276,6 +284,24 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
                 await _Context.PurchaseOrderReceiveLines.AddAsync(db_line);
                 await _Context.SaveChangesAsync();
+
+
+                var purchase_line_product = await _Context.PurchaseOrderLines.Where(m => m.id == db_line.purchase_order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+                await _MessagePublisher.PublishAsync(new Models.MessageObject()
+                {
+                    created_on = DateTime.Now,
+                    object_type = "TransactionCreateCommand",
+                    body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                    {
+                        transaction_type = TransactionType.Inbound,
+                        transaction_date = DateTime.Now,
+                        object_reference_id = db_line.purchase_order_receive_header_id,
+                        object_sub_reference_id = db_line.id,
+                        units_received = db_line.units_received,
+                        product_id = purchase_line_product,
+                        calling_user_id = commandModel.calling_user_id,
+                    })
+                }, RequiredMessageTopics.TransactionMovementTopic);
             }
 
 
@@ -314,15 +340,34 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (existingEntity == null)
             return new Response<PurchaseOrderReceiveHeaderDto>("Purchase Order Receive Header not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        try
+        {
+            existingEntity.is_deleted = true;
+            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_by = commandModel.calling_user_id;
 
-        _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+            _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        var dto = await MapToDto(existingEntity);
-        return new Response<PurchaseOrderReceiveHeaderDto>(dto);
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionDeleteCommand",
+                body = JsonSerializer.Serialize(new TransactionDeleteCommand()
+                {
+                    object_reference_id = existingEntity.id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
+            var dto = await MapToDto(existingEntity);
+            return new Response<PurchaseOrderReceiveHeaderDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(Delete), ex);
+            return new Response<PurchaseOrderReceiveHeaderDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<PurchaseOrderReceiveHeaderDto>> Edit(PurchaseOrderReceiveHeaderEditCommand commandModel)
@@ -363,45 +408,71 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
         }
 
-
-        if (commandModel.purchase_order_id.HasValue && existingEntity.purchase_order_id != commandModel.purchase_order_id)
-            existingEntity.purchase_order_id = commandModel.purchase_order_id.Value;
-        if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
-            existingEntity.is_complete = commandModel.is_complete.Value;
-        if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
-            existingEntity.is_canceled = commandModel.is_canceled.Value;
-        if (existingEntity.canceled_reason != commandModel.canceled_reason)
-            existingEntity.canceled_reason = commandModel.canceled_reason;
-
-
-        existingEntity.updated_on = DateTime.Now;
-        existingEntity.updated_by = commandModel.calling_user_id;
-
-        _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
-        await _Context.SaveChangesAsync();
-
-        // Create or update lines
-        foreach (var line in commandModel.received_lines)
+        try
         {
-            // Edit lines
-            if (!line.id.HasValue)
-            {
-                var add_line = this.MapToLineDatabaseModel(line, existingEntity.id, commandModel.calling_user_id);
-                await _Context.PurchaseOrderReceiveLines.AddAsync(add_line);
-                await _Context.SaveChangesAsync();
-            }
-            else
-            {
-                var edit_response = await this.EditLine(line);
 
-                if (!edit_response.Success)
-                    return new Response<PurchaseOrderReceiveHeaderDto>(edit_response.Exception, ResultCode.Error);
+            if (commandModel.purchase_order_id.HasValue && existingEntity.purchase_order_id != commandModel.purchase_order_id)
+                existingEntity.purchase_order_id = commandModel.purchase_order_id.Value;
+            if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
+                existingEntity.is_complete = commandModel.is_complete.Value;
+            if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
+                existingEntity.is_canceled = commandModel.is_canceled.Value;
+            if (existingEntity.canceled_reason != commandModel.canceled_reason)
+                existingEntity.canceled_reason = commandModel.canceled_reason;
+
+
+            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_by = commandModel.calling_user_id;
+
+            _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+            // Create or update lines
+            foreach (var line in commandModel.received_lines)
+            {
+                // Edit lines
+                if (!line.id.HasValue)
+                {
+                    var add_line = this.MapToLineDatabaseModel(line, existingEntity.id, commandModel.calling_user_id);
+                    await _Context.PurchaseOrderReceiveLines.AddAsync(add_line);
+                    await _Context.SaveChangesAsync();
+
+                    // Publish this data to a message queue to be processed for transactions
+                    var purchase_line_product = await _Context.PurchaseOrderLines.Where(m => m.id == add_line.purchase_order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+                    await _MessagePublisher.PublishAsync(new Models.MessageObject()
+                    {
+                        created_on = DateTime.Now,
+                        object_type = "TransactionCreateCommand",
+                        body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                        {
+                            transaction_type = TransactionType.Inbound,
+                            transaction_date = DateTime.Now,
+                            object_reference_id = add_line.purchase_order_receive_header_id,
+                            object_sub_reference_id = add_line.id,
+                            units_received = add_line.units_received,
+                            product_id = purchase_line_product,
+                            calling_user_id = commandModel.calling_user_id,
+                        })
+                    }, RequiredMessageTopics.TransactionMovementTopic);
+                }
+                else
+                {
+                    var edit_response = await this.EditLine(line);
+
+                    if (!edit_response.Success)
+                        return new Response<PurchaseOrderReceiveHeaderDto>(edit_response.Exception, ResultCode.Error);
+                }
             }
+
+            var dto = await MapToDto(existingEntity);
+
+            return new Response<PurchaseOrderReceiveHeaderDto>(dto);
         }
-
-        var dto = await MapToDto(existingEntity);
-
-        return new Response<PurchaseOrderReceiveHeaderDto>(dto);
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(Edit), ex);
+            return new Response<PurchaseOrderReceiveHeaderDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<PagingResult<PurchaseOrderReceiveHeaderListDto>> Find(PagingSortingParameters parameters, PurchaseOrderReceiveHeaderFindCommand commandModel)
@@ -467,12 +538,31 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             await _Context.PurchaseOrderReceiveLines.AddAsync(item);
             await _Context.SaveChangesAsync();
 
+            var purchase_line_product = await _Context.PurchaseOrderLines.Where(m => m.id == item.purchase_order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionCreateCommand",
+                body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                {
+                    transaction_type = TransactionType.Inbound,
+                    transaction_date = DateTime.Now,
+                    object_reference_id = item.purchase_order_receive_header_id,
+                    object_sub_reference_id = item.id,
+                    units_received = item.units_received,
+                    product_id = purchase_line_product,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
+
             var dto = await GetLineDto(item.id);
 
             return new Response<PurchaseOrderReceiveLineDto>(dto.Data);
         }
         catch (Exception ex)
         {
+            await LogError(80, this.GetType().Name, nameof(CreateLine), ex);
             return new Response<PurchaseOrderReceiveLineDto>(ex.Message, ResultCode.Error);
         }
     }
@@ -494,27 +584,53 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (existingEntity == null)
             return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Line not found", ResultCode.NotFound);
 
-        if (commandModel.purchase_order_line_id.HasValue && existingEntity.purchase_order_line_id != commandModel.purchase_order_line_id)
-            existingEntity.purchase_order_line_id = commandModel.purchase_order_line_id.Value;
-        if (commandModel.units_received.HasValue && existingEntity.units_received != commandModel.units_received)
-            existingEntity.units_received = commandModel.units_received.Value;
-        if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
-            existingEntity.is_complete = commandModel.is_complete.Value;
-        if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
-            existingEntity.is_canceled = commandModel.is_canceled.Value;
-        if (existingEntity.canceled_reason != commandModel.canceled_reason)
-            existingEntity.canceled_reason = commandModel.canceled_reason;
+        try
+        {
+
+            if (commandModel.purchase_order_line_id.HasValue && existingEntity.purchase_order_line_id != commandModel.purchase_order_line_id)
+                existingEntity.purchase_order_line_id = commandModel.purchase_order_line_id.Value;
+            if (commandModel.units_received.HasValue && existingEntity.units_received != commandModel.units_received)
+                existingEntity.units_received = commandModel.units_received.Value;
+            if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
+                existingEntity.is_complete = commandModel.is_complete.Value;
+            if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
+                existingEntity.is_canceled = commandModel.is_canceled.Value;
+            if (existingEntity.canceled_reason != commandModel.canceled_reason)
+                existingEntity.canceled_reason = commandModel.canceled_reason;
 
 
-        existingEntity.updated_on = DateTime.Now;
-        existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_by = commandModel.calling_user_id;
 
-        _Context.PurchaseOrderReceiveLines.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+            _Context.PurchaseOrderReceiveLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        var dto = await MapToLineDto(existingEntity);
 
-        return new Response<PurchaseOrderReceiveLineDto>(dto);
+            // Publish this data to a message queue to be processed for transactions
+            var purchase_line_product = await _Context.PurchaseOrderLines.Where(m => m.id == existingEntity.purchase_order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionEditCommand",
+                body = JsonSerializer.Serialize(new TransactionEditCommand()
+                {
+                    object_reference_id = existingEntity.purchase_order_receive_header_id,
+                    object_sub_reference_id = existingEntity.id,
+                    units_received = existingEntity.units_received,
+                    product_id = purchase_line_product,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
+            var dto = await MapToLineDto(existingEntity);
+
+            return new Response<PurchaseOrderReceiveLineDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(EditLine), ex);
+            return new Response<PurchaseOrderReceiveLineDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<PurchaseOrderReceiveLineDto>> DeleteLine(PurchaseOrderReceiveLineDeleteCommand commandModel)
@@ -530,16 +646,35 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         var existingEntity = await GetLineAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Line not found", ResultCode.NotFound);
+        try
+        {
+            existingEntity.is_deleted = true;
+            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_by = commandModel.calling_user_id;
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+            _Context.PurchaseOrderReceiveLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        _Context.PurchaseOrderReceiveLines.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionDeleteCommand",
+                body = JsonSerializer.Serialize(new TransactionDeleteCommand()
+                {
+                    object_reference_id = existingEntity.purchase_order_receive_header_id,
+                    object_sub_reference_id = existingEntity.id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
 
-        var dto = await MapToLineDto(existingEntity);
-        return new Response<PurchaseOrderReceiveLineDto>(dto);
+            var dto = await MapToLineDto(existingEntity);
+            return new Response<PurchaseOrderReceiveLineDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(DeleteLine), ex);
+            return new Response<PurchaseOrderReceiveLineDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<PurchaseOrderReceiveUploadDto>> CreateUpload(PurchaseOrderReceiveUploadCreateCommand commandModel)

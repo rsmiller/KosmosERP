@@ -6,8 +6,7 @@ namespace Prometheus.BusinessLayer.Models.Module.PurchaseOrder.Command.Edit;
 
 public class PurchaseOrderLineEditCommand : DataCommand
 {
-    [Required]
-    public int id { get; set; }
+    public int? id { get; set; }
 
     public int? product_id { get; set; }
     public int line_number { get; set; }

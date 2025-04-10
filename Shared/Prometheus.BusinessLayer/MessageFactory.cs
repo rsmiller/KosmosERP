@@ -40,6 +40,6 @@ public class MessageFactory
             throw new ArgumentNullException("Messaging account provider cannot be null or empty.");
 
         if(string.IsNullOrEmpty(settings.transaction_movement_topic))
-            throw new ArgumentNullException($"Messaging topic or queue {RequireMessageTopics.TransactionMovementTopic} must exist and cannot be null or empty.");
+            throw new ArgumentNullException($"Messaging topic or queue {RequiredMessageTopics.TransactionMovementTopic} must exist and cannot be null or empty.");
     }
 }

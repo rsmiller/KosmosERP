@@ -14,6 +14,8 @@ using Prometheus.Models.Permissions;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using Prometheus.BusinessLayer.Interfaces;
+using System.Text.Json;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -34,17 +36,12 @@ public class OrderModule : BaseERPModule, IOrderModule
 	public override string ModuleName => "SalesOrder";
 
 	private IBaseERPContext _Context;
-    private ITransactionModule? _TransactionModule;
+    private IMessagePublisher _MessagePublisher;
 
-    public OrderModule(IBaseERPContext context) : base(context)
-    {
-		_Context = context;
-    }
-
-    public OrderModule(IBaseERPContext context, ITransactionModule transactionModule) : base(context)
+    public OrderModule(IBaseERPContext context, IMessagePublisher messagePublisher) : base(context)
     {
         _Context = context;
-        _TransactionModule = transactionModule;
+        _MessagePublisher = messagePublisher;
     }
 
     
@@ -264,9 +261,6 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
-        if (_TransactionModule == null)
-            throw new Exception("Transaction module not available");
-
         try
         {
             var alreadyExists = await this.OrderHeaderExists(commandModel);
@@ -288,22 +282,23 @@ public class OrderModule : BaseERPModule, IOrderModule
                 await _Context.SaveChangesAsync();
 
 
-                // Transaction per line
-                var transaction_response = await _TransactionModule.Create(new TransactionCreateCommand()
+                // Publish this data to a message queue to be processed for transactions
+                await _MessagePublisher.PublishAsync(new Models.MessageObject()
                 {
-                    transaction_type = TransactionType.Input,
-                    transaction_date = DateTime.Now,
-                    object_reference_id = item.id,
-                    object_sub_reference_id = item.id,
-                    sold_unit_price = item.price,
-                    units_sold = order_line.quantity,
-                    product_id = order_line.product_id,
-                    calling_user_id = commandModel.calling_user_id,
-                    
-                });
-
-                if(transaction_response != null && !transaction_response.Success)
-                    throw new Exception(transaction_response.Exception);
+                    created_on = DateTime.Now,
+                    object_type = "TransactionCreateCommand",
+                    body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                    {
+                        transaction_type = TransactionType.Reserved,
+                        transaction_date = DateTime.Now,
+                        object_reference_id = item.id,
+                        object_sub_reference_id = item.id,
+                        sold_unit_price = item.price,
+                        units_sold = order_line.quantity,
+                        product_id = order_line.product_id,
+                        calling_user_id = commandModel.calling_user_id,
+                    })
+                }, RequiredMessageTopics.TransactionMovementTopic);
             }
 
 
@@ -339,6 +334,18 @@ public class OrderModule : BaseERPModule, IOrderModule
         _Context.OrderHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
 
+
+        await _MessagePublisher.PublishAsync(new Models.MessageObject()
+        {
+            created_on = DateTime.Now,
+            object_type = "TransactionDeleteCommand",
+            body = JsonSerializer.Serialize(new TransactionDeleteCommand()
+            {
+                object_reference_id = existingEntity.id,
+                calling_user_id = commandModel.calling_user_id,
+            })
+        }, RequiredMessageTopics.TransactionMovementTopic);
+
         var dto = await MapToDto(existingEntity);
         return new Response<OrderHeaderDto>(dto);
     }
@@ -360,9 +367,6 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderHeaderDto>("Order Header not found", ResultCode.NotFound);
 
-        if (_TransactionModule == null)
-            throw new Exception("Transaction module not available");
-
         // Check for validation issues with the lines
         foreach (var line in commandModel.order_lines)
         {
@@ -382,7 +386,6 @@ public class OrderModule : BaseERPModule, IOrderModule
                     return new Response<OrderHeaderDto>("Required field not set on new line", ResultCode.DataValidationError);
                 }
             }
-
         }
 
 
@@ -440,22 +443,23 @@ public class OrderModule : BaseERPModule, IOrderModule
                         }   
                     }
 
-
-                    // Transaction per line
-                    var transaction_response = await _TransactionModule.Create(new TransactionCreateCommand()
+                    // Publish this data to a message queue to be processed for transactions
+                    await _MessagePublisher.PublishAsync(new Models.MessageObject()
                     {
-                        transaction_type = TransactionType.Input,
-                        transaction_date = DateTime.Now,
-                        object_reference_id = add_line.order_id,
-                        object_sub_reference_id = add_line.id,
-                        sold_unit_price = add_line.unit_price,
-                        units_sold = add_line.quantity,
-                        product_id = add_line.product_id,
-                        calling_user_id = commandModel.calling_user_id,
-                    });
-
-                    if (transaction_response != null && !transaction_response.Success)
-                        throw new Exception(transaction_response.Exception);
+                        created_on = DateTime.Now,
+                        object_type = "TransactionCreateCommand",
+                        body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                        {
+                            transaction_type = TransactionType.Reserved,
+                            transaction_date = DateTime.Now,
+                            object_reference_id = add_line.order_id,
+                            object_sub_reference_id = add_line.id,
+                            sold_unit_price = add_line.unit_price,
+                            units_sold = add_line.quantity,
+                            product_id = add_line.product_id,
+                            calling_user_id = commandModel.calling_user_id,
+                        })
+                    }, RequiredMessageTopics.TransactionMovementTopic);
                 }
                 else
                 {
@@ -473,21 +477,6 @@ public class OrderModule : BaseERPModule, IOrderModule
                         if (!attibute_response.Success)
                             return new Response<OrderHeaderDto>(attibute_response.Exception, ResultCode.Error);
                     }
-
-
-                    // Transaction per line
-                    var transaction_response = await _TransactionModule.Edit(new TransactionEditCommand()
-                    {
-                        object_reference_id = edit_response.Data.order_id,
-                        object_sub_reference_id = edit_response.Data.id,
-                        sold_unit_price = edit_response.Data.unit_price,
-                        units_sold = edit_response.Data.quantity,
-                        product_id = edit_response.Data.product_id,
-                        calling_user_id = commandModel.calling_user_id,
-                    });
-
-                    if (transaction_response != null && !transaction_response.Success)
-                        throw new Exception(transaction_response.Exception);
                 }
             }
 
@@ -592,10 +581,6 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!commandModel.order_id.HasValue)
             return new Response<OrderLineDto>("Order Header os a required field", ResultCode.DataValidationError);
 
-        if (_TransactionModule == null)
-            throw new Exception("Transaction module not available");
-
-
         try
         {
             var item = this.MapToLineDatabaseModel(commandModel, commandModel.order_id.Value, commandModel.calling_user_id);
@@ -604,21 +589,22 @@ public class OrderModule : BaseERPModule, IOrderModule
             await _Context.SaveChangesAsync();
 
 
-            // Transaction per line
-            var transaction_response = await _TransactionModule.Create(new TransactionCreateCommand()
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                transaction_type = TransactionType.Input,
-                transaction_date = DateTime.Now,
-                object_reference_id = item.order_id,
-                object_sub_reference_id = item.id,
-                sold_unit_price = item.unit_price,
-                units_sold = item.quantity,
-                product_id = item.product_id,
-                calling_user_id = commandModel.calling_user_id,
-            });
-
-            if (transaction_response != null && !transaction_response.Success)
-                throw new Exception(transaction_response.Exception);
+                created_on = DateTime.Now,
+                object_type = "TransactionCreateCommand",
+                body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                {
+                    transaction_type = TransactionType.Reserved,
+                    transaction_date = DateTime.Now,
+                    object_reference_id = item.order_id,
+                    object_sub_reference_id = item.id,
+                    sold_unit_price = item.unit_price,
+                    units_sold = item.quantity,
+                    product_id = item.product_id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
 
 
             var dto = await GetLineDto(item.id);
@@ -649,9 +635,6 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineDto>("Order Line not found", ResultCode.NotFound);
 
-        if (_TransactionModule == null)
-            throw new Exception("Transaction module not available");
-
         try
         {
 
@@ -675,19 +658,20 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.OrderLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
 
-            // Transaction per line
-            var transaction_response = await _TransactionModule.Edit(new TransactionEditCommand()
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                object_reference_id = existingEntity.order_id,
-                object_sub_reference_id = existingEntity.id,
-                sold_unit_price = existingEntity.unit_price,
-                units_sold = existingEntity.quantity,
-                product_id = existingEntity.product_id,
-                calling_user_id = commandModel.calling_user_id,
-            });
-
-            if (transaction_response != null && !transaction_response.Success)
-                throw new Exception(transaction_response.Exception);
+                created_on = DateTime.Now,
+                object_type = "TransactionEditCommand",
+                body = JsonSerializer.Serialize(new TransactionEditCommand()
+                {
+                    object_reference_id = existingEntity.order_id,
+                    object_sub_reference_id = existingEntity.id,
+                    sold_unit_price = existingEntity.unit_price,
+                    units_sold = existingEntity.quantity,
+                    product_id = existingEntity.product_id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
 
 
             var dto = await MapToLineDto(existingEntity);
@@ -716,9 +700,6 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineDto>("Order Line not found", ResultCode.NotFound);
 
-        if (_TransactionModule == null)
-            throw new Exception("Transaction module not available");
-
         try
         {
             existingEntity.is_deleted = true;
@@ -730,16 +711,18 @@ public class OrderModule : BaseERPModule, IOrderModule
 
 
             // Corrolate the transacation data
-            var system_user = await _Context.Users.FirstAsync(m => m.username == "system");
-            var transaction_response = await _TransactionModule.Delete(new TransactionDeleteCommand()
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                object_reference_id = existingEntity.order_id,
-                object_sub_reference_id = existingEntity.id,
-                calling_user_id = system_user.id,
-            });
+                created_on = DateTime.Now,
+                object_type = "TransactionDeleteCommand",
+                body = JsonSerializer.Serialize(new TransactionDeleteCommand()
+                {
+                    object_reference_id = existingEntity.order_id,
+                    object_sub_reference_id = existingEntity.id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
 
-            if (transaction_response != null && !transaction_response.Success)
-                throw new Exception(transaction_response.Exception);
 
             var dto = await MapToLineDto(existingEntity);
             return new Response<OrderLineDto>(dto);

@@ -5,11 +5,17 @@ using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
+using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Interfaces;
 using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Shipment.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Shipment.Dto;
-using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
+using System.Text.Json;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -36,10 +42,12 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
     public override string ModuleName => "Shipments";
 
     private readonly IBaseERPContext _Context;
+    private IMessagePublisher _MessagePublisher;
 
-    public ShipmentModule(IBaseERPContext context) : base(context)
+    public ShipmentModule(IBaseERPContext context, IMessagePublisher messagePublisher) : base(context)
     {
         _Context = context;
+        _MessagePublisher = messagePublisher;
     }
 
     public override void SeedPermissions()
@@ -235,8 +243,6 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             var newShipmentHeader = this.MapForCreate(commandModel);
 
-            var db_transaction = await _Context.Database.BeginTransactionAsync();
-
             _Context.ShipmentHeaders.Add(newShipmentHeader);
             await _Context.SaveChangesAsync();
 
@@ -246,15 +252,32 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
                 _Context.ShipmentLines.Add(line);
                 await _Context.SaveChangesAsync();
+
+                var order_line_product = await _Context.OrderLines.Where(m => m.id == line.order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+                await _MessagePublisher.PublishAsync(new Models.MessageObject()
+                {
+                    created_on = DateTime.Now,
+                    object_type = "TransactionCreateCommand",
+                    body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                    {
+                        transaction_type = TransactionType.Outbound,
+                        transaction_date = DateTime.Now,
+                        object_reference_id = line.shipment_header_id,
+                        object_sub_reference_id = line.id,
+                        units_shipped = line.units_to_ship,
+                        product_id = order_line_product,
+                        calling_user_id = commandModel.calling_user_id,
+                    })
+                }, RequiredMessageTopics.TransactionMovementTopic);
             }
 
-            await db_transaction.CommitAsync();
 
             var dto = await MapToDto(newShipmentHeader);
             return new Response<ShipmentDto>(dto);
         }
         catch (Exception ex)
         {
+            await LogError(80, this.GetType().Name, nameof(Create), ex);
             return new Response<ShipmentDto>(ex.Message, ResultCode.Error);
         }
     }
@@ -277,11 +300,29 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.ShipmentLines.Add(line);
             await _Context.SaveChangesAsync();
 
+            var order_line_product = await _Context.OrderLines.Where(m => m.id == line.order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionCreateCommand",
+                body = JsonSerializer.Serialize(new TransactionCreateCommand()
+                {
+                    transaction_type = TransactionType.Outbound,
+                    transaction_date = DateTime.Now,
+                    object_reference_id = line.shipment_header_id,
+                    object_sub_reference_id = line.id,
+                    units_shipped = line.units_shipped,
+                    product_id = order_line_product,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
             var dto = await MapToLineDto(line);
             return new Response<ShipmentLineDto>(dto);
         }
         catch (Exception ex)
         {
+            await LogError(80, this.GetType().Name, nameof(CreateLine), ex);
             return new Response<ShipmentLineDto>(ex.Message, ResultCode.Error);
         }
     }
@@ -301,47 +342,54 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (existingEntity == null)
             return new Response<ShipmentDto>("Shipment Header not found", ResultCode.NotFound);
 
+        try
+        {
+            if (commandModel.order_id.HasValue && existingEntity.order_id != commandModel.order_id)
+                existingEntity.order_id = commandModel.order_id.Value;
 
-        if (commandModel.order_id.HasValue && existingEntity.order_id != commandModel.order_id)
-            existingEntity.order_id = commandModel.order_id.Value;
+            if (commandModel.address_id.HasValue && existingEntity.address_id != commandModel.address_id)
+                existingEntity.address_id = commandModel.address_id.Value;
 
-        if (commandModel.address_id.HasValue && existingEntity.address_id != commandModel.address_id)
-            existingEntity.address_id = commandModel.address_id.Value;
+            if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
+                existingEntity.is_complete = commandModel.is_complete.Value;
 
-        if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
-            existingEntity.is_complete = commandModel.is_complete.Value;
+            if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
+                existingEntity.is_canceled = commandModel.is_canceled.Value;
 
-        if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
-            existingEntity.is_canceled = commandModel.is_canceled.Value;
+            if (existingEntity.ship_via != commandModel.ship_via)
+                existingEntity.ship_via = commandModel.ship_via;
 
-        if (existingEntity.ship_via != commandModel.ship_via)
-            existingEntity.ship_via = commandModel.ship_via;
+            if (existingEntity.ship_attn != commandModel.ship_attn)
+                existingEntity.ship_attn = commandModel.ship_attn;
 
-        if (existingEntity.ship_attn != commandModel.ship_attn)
-            existingEntity.ship_attn = commandModel.ship_attn;
+            if (existingEntity.freight_carrier != commandModel.freight_carrier)
+                existingEntity.freight_carrier = commandModel.freight_carrier;
 
-        if (existingEntity.freight_carrier != commandModel.freight_carrier)
-            existingEntity.freight_carrier = commandModel.freight_carrier;
+            if (commandModel.freight_charge_amount.HasValue && existingEntity.freight_charge_amount != commandModel.freight_charge_amount)
+                existingEntity.freight_charge_amount = commandModel.freight_charge_amount.Value;
 
-        if (commandModel.freight_charge_amount.HasValue && existingEntity.freight_charge_amount != commandModel.freight_charge_amount)
-            existingEntity.freight_charge_amount = commandModel.freight_charge_amount.Value;
+            if (commandModel.tax.HasValue && existingEntity.tax != commandModel.tax)
+                existingEntity.tax = commandModel.tax.Value;
 
-        if (commandModel.tax.HasValue && existingEntity.tax != commandModel.tax)
-            existingEntity.tax = commandModel.tax.Value;
+            if (existingEntity.canceled_reason != commandModel.canceled_reason)
+                existingEntity.canceled_reason = commandModel.canceled_reason;
 
-        if (existingEntity.canceled_reason != commandModel.canceled_reason)
-            existingEntity.canceled_reason = commandModel.canceled_reason;
+            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_by = commandModel.calling_user_id;
 
-        existingEntity.updated_on = DateTime.Now;
-        existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity.revision_number = existingEntity.revision_number + 1;
 
-        existingEntity.revision_number = existingEntity.revision_number + 1;
+            _Context.ShipmentHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        _Context.ShipmentHeaders.Update(existingEntity);
-        await _Context.SaveChangesAsync();
-
-        var dto = await MapToDto(existingEntity);
-        return new Response<ShipmentDto>(dto);
+            var dto = await MapToDto(existingEntity);
+            return new Response<ShipmentDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(CreateLine), ex);
+            return new Response<ShipmentDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<ShipmentLineDto>> EditLine(ShipmentLineEditCommand commandModel)
@@ -358,35 +406,59 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (existingEntity == null)
             return new Response<ShipmentLineDto>("Shipment Line not found", ResultCode.NotFound);
 
+        try
+        {
+            if (commandModel.order_line_id.HasValue && existingEntity.order_line_id != commandModel.order_line_id)
+                existingEntity.order_line_id = commandModel.order_line_id.Value;
 
-        if (commandModel.order_line_id.HasValue && existingEntity.order_line_id != commandModel.order_line_id)
-            existingEntity.order_line_id = commandModel.order_line_id.Value;
+            if (commandModel.units_to_ship.HasValue && existingEntity.units_to_ship != commandModel.units_to_ship)
+                existingEntity.units_to_ship = commandModel.units_to_ship.Value;
 
-        if (commandModel.units_to_ship.HasValue && existingEntity.units_to_ship != commandModel.units_to_ship)
-            existingEntity.units_to_ship = commandModel.units_to_ship.Value;
+            if (commandModel.units_shipped.HasValue && existingEntity.units_shipped != commandModel.units_shipped)
+                existingEntity.units_shipped = commandModel.units_shipped.Value;
 
-        if (commandModel.units_shipped.HasValue && existingEntity.units_shipped != commandModel.units_shipped)
-            existingEntity.units_shipped = commandModel.units_shipped.Value;
+            if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
+                existingEntity.is_complete = commandModel.is_complete.Value;
 
-        if (commandModel.is_complete.HasValue && existingEntity.is_complete != commandModel.is_complete)
-            existingEntity.is_complete = commandModel.is_complete.Value;
+            if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
+                existingEntity.is_canceled = commandModel.is_canceled.Value;
 
-        if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
-            existingEntity.is_canceled = commandModel.is_canceled.Value;
+            if (existingEntity.canceled_reason != commandModel.canceled_reason)
+                existingEntity.canceled_reason = commandModel.canceled_reason;
 
-        if (existingEntity.canceled_reason != commandModel.canceled_reason)
-            existingEntity.canceled_reason = commandModel.canceled_reason;
+            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_by = commandModel.calling_user_id;
 
-        existingEntity.updated_on = DateTime.Now;
-        existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity.revision_number = existingEntity.revision_number + 1;
 
-        existingEntity.revision_number = existingEntity.revision_number + 1;
+            _Context.ShipmentLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        _Context.ShipmentLines.Update(existingEntity);
-        await _Context.SaveChangesAsync();
 
-        var dto = await MapToLineDto(existingEntity);
-        return new Response<ShipmentLineDto>(dto);
+            // Publish this data to a message queue to be processed for transactions
+            var purchase_line_product = await _Context.OrderLines.Where(m => m.id == existingEntity.order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionEditCommand",
+                body = JsonSerializer.Serialize(new TransactionEditCommand()
+                {
+                    object_reference_id = existingEntity.shipment_header_id,
+                    object_sub_reference_id = existingEntity.id,
+                    units_shipped = existingEntity.units_shipped,
+                    product_id = purchase_line_product,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
+            var dto = await MapToLineDto(existingEntity);
+            return new Response<ShipmentLineDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(EditLine), ex);
+            return new Response<ShipmentLineDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<ShipmentDto>> Delete(ShipmentHeaderDeleteCommand commandModel)
@@ -399,15 +471,35 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (existingEntity == null)
             return new Response<ShipmentDto>("Shipment Header not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        try
+        {
+            existingEntity.is_deleted = true;
+            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_by = commandModel.calling_user_id;
 
-        _Context.ShipmentHeaders.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+            _Context.ShipmentHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        var dto = await MapToDto(existingEntity);
-        return new Response<ShipmentDto>(dto);
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionDeleteCommand",
+                body = JsonSerializer.Serialize(new TransactionDeleteCommand()
+                {
+                    object_reference_id = existingEntity.id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
+            var dto = await MapToDto(existingEntity);
+            return new Response<ShipmentDto>(dto);
+
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(Delete), ex);
+            return new Response<ShipmentDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<ShipmentLineDto>> DeleteLine(ShipmentLineDeleteCommand commandModel)
@@ -420,15 +512,35 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (existingEntity == null)
             return new Response<ShipmentLineDto>("Shipment Line not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        try
+        {
+            existingEntity.is_deleted = true;
+            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_by = commandModel.calling_user_id;
 
-        _Context.ShipmentLines.Update(existingEntity);
-        await _Context.SaveChangesAsync();
+            _Context.ShipmentLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
 
-        var dto = await MapToLineDto(existingEntity);
-        return new Response<ShipmentLineDto>(dto);
+            await _MessagePublisher.PublishAsync(new Models.MessageObject()
+            {
+                created_on = DateTime.Now,
+                object_type = "TransactionDeleteCommand",
+                body = JsonSerializer.Serialize(new TransactionDeleteCommand()
+                {
+                    object_reference_id = existingEntity.shipment_header_id,
+                    object_sub_reference_id = existingEntity.id,
+                    calling_user_id = commandModel.calling_user_id,
+                })
+            }, RequiredMessageTopics.TransactionMovementTopic);
+
+            var dto = await MapToLineDto(existingEntity);
+            return new Response<ShipmentLineDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(DeleteLine), ex);
+            return new Response<ShipmentLineDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<PagingResult<ShipmentListDto>> Find(PagingSortingParameters parameters, ShipmentHeaderFindCommand commandModel)
