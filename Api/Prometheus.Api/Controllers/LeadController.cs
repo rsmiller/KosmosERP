@@ -40,10 +40,7 @@ public class LeadController : ERPApiController
 
     [HttpPost("FindLead", Name = "FindLead")]
     [ProducesResponseType(typeof(PagingResult<LeadListDto>), 200)]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(401)]
-    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
     public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] LeadFindCommand command)
     {
         try

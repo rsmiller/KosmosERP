@@ -53,6 +53,8 @@ builder.Services.AddSwaggerGen(setup =>
 
 });
 
+builder.Services.AddSignalR();
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 var authenticationSettings = new AuthenticationSettings()
@@ -136,6 +138,10 @@ builder.Services.AddScoped<IProductModule, ProductModule>();
 builder.Services.AddScoped<IVendorModule, VendorModule>();
 builder.Services.AddScoped<ITransactionModule, TransactionModule>();
 
+builder.Services.AddScoped<INotificationModule, NotificationModule>();
+
+
+
 builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("DatabaseConnectionString")));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,5 +206,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Hubs
+app.MapHub<NotificationModule>("/notification_hub");
+
 
 app.Run();

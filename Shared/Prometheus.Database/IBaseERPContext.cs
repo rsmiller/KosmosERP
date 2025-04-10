@@ -48,6 +48,7 @@ namespace Prometheus.Database
         DbSet<DocumentUploadRevisionTag> DocumentUploadRevisionsTags { get; set; }
         DbSet<DocumentUploadObjectTagTemplate> DocumentUploadObjectTags { get; set; }
         DbSet<Transaction> Transactions { get; set; }
+        DbSet<Notification> Notifications { get; set; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

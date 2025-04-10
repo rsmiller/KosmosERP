@@ -60,6 +60,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new StateConfiguration());
         modelBuilder.ApplyConfiguration(new CountryConfiguration());
         modelBuilder.ApplyConfiguration(new TransactionConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
     }
     
 
@@ -104,4 +105,5 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<DocumentUploadRevisionTag> DocumentUploadRevisionsTags { get; set; }
     public DbSet<DocumentUploadObjectTagTemplate> DocumentUploadObjectTags { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 }
