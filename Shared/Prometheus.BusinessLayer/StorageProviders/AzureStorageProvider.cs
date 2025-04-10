@@ -1,5 +1,4 @@
 ﻿using Azure.Storage.Blobs;
-using Microsoft.Extensions.Azure;
 using Prometheus.BusinessLayer.Interfaces;
 using Prometheus.Models.Interfaces;
 
@@ -21,20 +20,34 @@ public class AzureStorageProvider : IStorageProvider
         _ConnectionString = storageAccountSettings.azure_container_name;
     }
 
-    public Task<byte[]?> GetFileAsync(string identifier)
+    public async Task<byte[]?> GetFileAsync(string identifier)
     {
         var serviceClient = new BlobServiceClient(_ConnectionString);
         var containerClient = serviceClient.GetBlobContainerClient(_ContainerName);
-        
-        throw new NotImplementedException();
+        var blobClient = containerClient.GetBlobClient(identifier);
+
+        var download = await blobClient.DownloadAsync();
+        var download_info = download.Value;
+
+        using (var buffer_stream = new MemoryStream())
+        {
+            await download_info.Content.CopyToAsync(buffer_stream);
+
+            buffer_stream.Position = 0;
+
+            return buffer_stream.ToArray();
+        }  
     }
 
-    public Task<bool> UploadFileAsync(byte[] data, string identifier)
+    public async Task<bool> UploadFileAsync(byte[] data, string identifier)
     {
         var serviceClient = new BlobServiceClient(_ConnectionString);
         var containerClient = serviceClient.GetBlobContainerClient(_ContainerName);
-        //serviceClient.AddBlobServiceClient()
+        await containerClient.CreateIfNotExistsAsync();
 
-        throw new NotImplementedException();
+        var blobClient = containerClient.GetBlobClient(identifier);
+        await blobClient.UploadAsync(new BinaryData(data));
+
+        return true;
     }
 }
