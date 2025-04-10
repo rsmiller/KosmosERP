@@ -28,6 +28,10 @@ public class MessageFactory
         {
             return new RabbitMqMessagePublisher(settings);
         }
+        else if (settings.account_provider.Equals(MessagePublisherType.MOCK, StringComparison.OrdinalIgnoreCase))
+        {
+            return new MockMessagePublisher(settings);
+        }
         else
         {
             throw new ArgumentNullException("Messaging account provider not supported.");

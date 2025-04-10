@@ -29,6 +29,10 @@ public static class StorageFactory
         {
             return new LocalStorageProvider(storageAccountSettings);
         }
+        else if (storageAccountSettings.account_provider.Equals(StorageType.MOCK, StringComparison.OrdinalIgnoreCase))
+        {
+            return new MockStorageProvider(storageAccountSettings);
+        }
         else
         {
             throw new ArgumentNullException("Storage account provider not supported.");

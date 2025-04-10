@@ -56,6 +56,7 @@ public class StorageType
     public static string Azure { get { return "azure"; } }
     public static string AWS { get { return "aws"; } }
     public static string Google { get { return "google"; } }
+    public static string MOCK { get { return "mock"; } }
 }
 
 public class MessagePublisherType
@@ -64,6 +65,7 @@ public class MessagePublisherType
     public static string Azure { get { return "azure"; } }
     public static string AWS { get { return "aws"; } }
     public static string Google { get { return "google"; } }
+    public static string MOCK { get { return "mock"; } }
 }
 
 public class RequiredMessageTopics

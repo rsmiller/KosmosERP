@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Prometheus.Api.Modules;
@@ -17,8 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 /// For development debug
 Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost;uid=auser;pwd=12345;database=prometheus_erp");
-Environment.SetEnvironmentVariable("MessagePublisherAccountProvider", "RabbitMQ");
+Environment.SetEnvironmentVariable("MessagePublisherAccountProvider", "Mock");
 Environment.SetEnvironmentVariable("TransactionMovementTopic", "transaction_movement");
+Environment.SetEnvironmentVariable("FileStorageAccountProvider", "Mock");
 
 // Add services to the container.
 
