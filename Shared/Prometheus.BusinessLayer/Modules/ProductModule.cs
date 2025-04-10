@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Product.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Product.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Product.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Models.Module.Order.Dto;
 
 namespace Prometheus.BusinessLayer.Modules
 {
@@ -272,7 +273,41 @@ namespace Prometheus.BusinessLayer.Modules
 
         public async Task<PagingResult<ProductListDto>> Find(PagingSortingParameters parameters, ProductFindCommand commandModel)
         {
-            throw new NotImplementedException();
+            var response = new PagingResult<ProductListDto>();
+
+            try
+            {
+                var query = _Context.Products.Where(m => !m.is_deleted);
+
+                if (!string.IsNullOrEmpty(commandModel.wildcard))
+                {
+                    var wild = commandModel.wildcard.ToLower();
+                    query = query.Where(m => m.product_name.ToLower().Contains(wild)
+                                            || m.identifier1.ToLower().Contains(wild)
+                                            || m.identifier2.ToLower().Contains(wild)
+                                            || m.identifier3.ToLower().Contains(wild));
+                }
+
+                var totalCount = await query.CountAsync();
+                var pagedItems = await query.SortAndPageBy(parameters).ToListAsync();
+
+                var dtos = new List<ProductListDto>();
+                foreach (var item in pagedItems)
+                {
+                    dtos.Add(await MapToListDto(item));
+                }
+
+                response.Data = dtos;
+                response.TotalResultCount = totalCount;
+            }
+            catch (Exception ex)
+            {
+                await LogError(50, this.GetType().Name, nameof(Find), ex);
+                response.SetException(ex.Message, ResultCode.Error);
+                response.TotalResultCount = 0;
+            }
+
+            return response;
         }
 
         public async Task<Response<List<ProductListDto>>> GlobalSearch(PagingSortingParameters parameters, string wildcard)
