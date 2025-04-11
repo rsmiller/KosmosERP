@@ -53,9 +53,9 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             {
                 name = "CRM Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -83,9 +83,9 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -111,9 +111,9 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -139,9 +139,9 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -167,9 +167,9 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -262,7 +262,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (commandModel.owner_id.HasValue && existingEntity.owner_id != commandModel.owner_id)
             existingEntity.owner_id = commandModel.owner_id.Value;
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.Opportunities.Update(existingEntity);
@@ -283,7 +283,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             return new Response<OpportunityDto>("Opportunity not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Opportunities.Update(existingEntity);

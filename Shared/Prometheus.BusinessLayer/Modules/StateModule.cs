@@ -105,7 +105,7 @@ public class StateModule : BaseERPModule, IStateModule
             existingEntity.iso2 = commandModel.iso2;
 
         // Update auditing fields
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.States.Update(existingEntity);
@@ -127,7 +127,7 @@ public class StateModule : BaseERPModule, IStateModule
 
         // Soft-delete
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.States.Update(existingEntity);

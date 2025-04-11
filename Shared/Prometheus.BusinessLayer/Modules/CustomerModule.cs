@@ -53,9 +53,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             {
                 name = "Customer Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -83,9 +83,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -111,9 +111,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -139,9 +139,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -167,9 +167,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -253,7 +253,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             existingEntity.category = commandModel.category;
 
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.Customers.Update(existingEntity);
@@ -278,7 +278,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             return new Response<CustomerDto>("Customer not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Customers.Update(existingEntity);
@@ -465,7 +465,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
     private Customer MapForCreate(CustomerCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var customer = CommonDataHelper<Customer>.FillCommonFields(new Customer
         {

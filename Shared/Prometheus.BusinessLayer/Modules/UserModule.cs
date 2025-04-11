@@ -289,7 +289,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         {
             var result = await _IContext.UserSessionStates.FirstOrDefaultAsync(m => m.session_id == session_id);
 
-            if (result == null || result.session_expires <= DateTime.Now)
+            if (result == null || result.session_expires <= DateTime.UtcNow)
             {
                 response.SetException("User session expired or does not exist", ResultCode.NotFound);
             }
@@ -423,8 +423,8 @@ public partial class UserModule : BaseERPModule, IUserModule
             role_id = commandModel.role_id,
             created_by = commandModel.user_id,
             updated_by = commandModel.user_id,
-            created_on = DateTime.Now,
-            updated_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
+            updated_on = DateTime.UtcNow,
         });
 
         await _IContext.SaveChangesAsync();
@@ -524,7 +524,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             if(commandModel.is_deleted == true && existingEntity.is_deleted == false)
             {
                 existingEntity.deleted_by = commandModel.calling_user_id;
-                existingEntity.deleted_on = DateTime.Now;
+                existingEntity.deleted_on = DateTime.UtcNow;
             }
 
             if (commandModel.is_deleted == false && existingEntity.is_deleted == true)
@@ -548,7 +548,7 @@ public partial class UserModule : BaseERPModule, IUserModule
 
         try
         {
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             _IContext.Users.Update(existingEntity);
@@ -578,7 +578,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             return new Response<UserDto>("User not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _IContext.Users.Update(existingEntity);
@@ -724,7 +724,7 @@ public partial class UserModule : BaseERPModule, IUserModule
 
     private Prometheus.Database.Models.User MapForCreate(UserCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var user = CommonDataHelper<Prometheus.Database.Models.User>.FillCommonFields(new Prometheus.Database.Models.User()
         {
@@ -770,9 +770,9 @@ public partial class UserModule : BaseERPModule, IUserModule
             session = new UserSessionState()
             {
                 user_id = user_id,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 session_id = Guid.NewGuid().ToString(),
-                session_expires = DateTime.Now.AddHours(6),
+                session_expires = DateTime.UtcNow.AddHours(6),
             };
 
             await _IContext.UserSessionStates.AddAsync(session);

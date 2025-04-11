@@ -174,9 +174,9 @@ public class DatabaseTests
         {
             name = "WriteDeleteModuleRole",
             created_by = 1,
-            created_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
             updated_by = 1,
-            updated_on = DateTime.Now
+            updated_on = DateTime.UtcNow
         }, 1);
 
         var moduleWriteModel = new ModulePermission()
@@ -335,9 +335,9 @@ public class DatabaseTests
             postal_code = "77777",
             country = "USA",
             created_by = 1,
-            created_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
             updated_by = 1,
-            updated_on = DateTime.Now
+            updated_on = DateTime.UtcNow
         }, 1);
 
         var address_model2 = CommonDataHelper<Address>.FillCommonFields(new Address()
@@ -364,9 +364,9 @@ public class DatabaseTests
             customer_id = customer_model.id,
             address_id = address_model2.id,
             created_by = 1,
-            created_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
             updated_by = 1,
-            updated_on = DateTime.Now
+            updated_on = DateTime.UtcNow
         }, 1);
 
         await _Context.CustomerAddresses.AddAsync(customer_address_model1);
@@ -400,8 +400,8 @@ public class DatabaseTests
             ship_to_address_id = address_model.id,
             shipping_method_id = 1,
             pay_method_id = 1,
-            order_date = DateOnly.FromDateTime(DateTime.Now),
-            required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+            order_date = DateOnly.FromDateTime(DateTime.UtcNow),
+            required_date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
             price = 1,
             tax = 1,
         }, 1);
@@ -435,9 +435,9 @@ public class DatabaseTests
             attribute_name = "Height",
             attribute_value = "1",
             created_by = 1,
-            created_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
             updated_by = 1,
-            updated_on = DateTime.Now
+            updated_on = DateTime.UtcNow
         }, 1);
 
         await _Context.OrderLineAttributes.AddAsync(line_attribute1);
@@ -456,9 +456,9 @@ public class DatabaseTests
         var invoice_header_model = CommonDataHelper<APInvoiceHeader>.FillCommonFields(new APInvoiceHeader()
         {
             invoice_number = "1",
-            inv_due_date = DateTime.Now.AddDays(30),
-            inv_received_date = DateTime.Now.AddDays(-10),
-            inv_date = DateTime.Now,
+            inv_due_date = DateTime.UtcNow.AddDays(30),
+            inv_received_date = DateTime.UtcNow.AddDays(-10),
+            inv_date = DateTime.UtcNow,
             invoice_total = 100,
             vendor_id = 1,
             memo = "ASDASDSD",
@@ -499,8 +499,8 @@ public class DatabaseTests
             shipping_method_id = 1,
             pay_method_id = 1,
             order_type = "R",
-            order_date = DateOnly.FromDateTime(DateTime.Now),
-            required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+            order_date = DateOnly.FromDateTime(DateTime.UtcNow),
+            required_date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
             price = 1,
             tax = 1,
         }, 1);
@@ -538,7 +538,7 @@ public class DatabaseTests
         {
             invoice_number = 10001,
             customer_id = 1,
-            invoice_date = DateOnly.FromDateTime(DateTime.Now),
+            invoice_date = DateOnly.FromDateTime(DateTime.UtcNow),
             invoice_total = 100,
             order_id = order_model.id,
             tax_percentage = 8.25M,
@@ -578,8 +578,8 @@ public class DatabaseTests
             shipping_method_id = 1,
             pay_method_id = 1,
             order_type = "R",
-            order_date = DateOnly.FromDateTime(DateTime.Now),
-            required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+            order_date = DateOnly.FromDateTime(DateTime.UtcNow),
+            required_date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
             price = 1,
             tax = 1,
         }, 1);
@@ -658,9 +658,9 @@ public class DatabaseTests
             postal_code = "77777",
             country = "USA",
             created_by = 1,
-            created_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
             updated_by = 1,
-            updated_on = DateTime.Now
+            updated_on = DateTime.UtcNow
         }, 1);
 
         await _Context.Addresses.AddAsync(address_model);
@@ -819,7 +819,7 @@ public class DatabaseTests
             amount = 100,
             win_chance = 50,
             stage = "Prospect",
-            expected_close = DateOnly.FromDateTime(DateTime.Now),
+            expected_close = DateOnly.FromDateTime(DateTime.UtcNow),
         }, 1);
 
         await _Context.Opportunities.AddAsync(opportunity_model);

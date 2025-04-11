@@ -61,9 +61,9 @@ public class OrderModule : BaseERPModule, IOrderModule
             {
                 name = "Sales Order Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -91,9 +91,9 @@ public class OrderModule : BaseERPModule, IOrderModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -119,9 +119,9 @@ public class OrderModule : BaseERPModule, IOrderModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -147,9 +147,9 @@ public class OrderModule : BaseERPModule, IOrderModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -175,9 +175,9 @@ public class OrderModule : BaseERPModule, IOrderModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -287,12 +287,12 @@ public class OrderModule : BaseERPModule, IOrderModule
                 // Publish this data to a message queue to be processed for transactions
                 await _MessagePublisher.PublishAsync(new Models.MessageObject()
                 {
-                    created_on = DateTime.Now,
+                    created_on = DateTime.UtcNow,
                     object_type = "TransactionCreateCommand",
                     body = JsonSerializer.Serialize(new TransactionCreateCommand()
                     {
                         transaction_type = TransactionType.Reserved,
-                        transaction_date = DateTime.Now,
+                        transaction_date = DateTime.UtcNow,
                         object_reference_id = item.id,
                         object_sub_reference_id = item.id,
                         sold_unit_price = item.price,
@@ -330,7 +330,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             return new Response<OrderHeaderDto>("Order Header not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.OrderHeaders.Update(existingEntity);
@@ -339,7 +339,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
         await _MessagePublisher.PublishAsync(new Models.MessageObject()
         {
-            created_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
             object_type = "TransactionDeleteCommand",
             body = JsonSerializer.Serialize(new TransactionDeleteCommand()
             {
@@ -417,7 +417,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 existingEntity.shipping_cost = commandModel.shipping_cost.Value;
 
 
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             _Context.OrderHeaders.Update(existingEntity);
@@ -448,12 +448,12 @@ public class OrderModule : BaseERPModule, IOrderModule
                     // Publish this data to a message queue to be processed for transactions
                     await _MessagePublisher.PublishAsync(new Models.MessageObject()
                     {
-                        created_on = DateTime.Now,
+                        created_on = DateTime.UtcNow,
                         object_type = "TransactionCreateCommand",
                         body = JsonSerializer.Serialize(new TransactionCreateCommand()
                         {
                             transaction_type = TransactionType.Reserved,
-                            transaction_date = DateTime.Now,
+                            transaction_date = DateTime.UtcNow,
                             object_reference_id = add_line.order_id,
                             object_sub_reference_id = add_line.id,
                             sold_unit_price = add_line.unit_price,
@@ -593,12 +593,12 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionCreateCommand",
                 body = JsonSerializer.Serialize(new TransactionCreateCommand()
                 {
                     transaction_type = TransactionType.Reserved,
-                    transaction_date = DateTime.Now,
+                    transaction_date = DateTime.UtcNow,
                     object_reference_id = item.order_id,
                     object_sub_reference_id = item.id,
                     sold_unit_price = item.unit_price,
@@ -654,7 +654,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 existingEntity.unit_price = commandModel.unit_price.Value;
 
 
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             _Context.OrderLines.Update(existingEntity);
@@ -662,7 +662,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionEditCommand",
                 body = JsonSerializer.Serialize(new TransactionEditCommand()
                 {
@@ -705,7 +705,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         try
         {
             existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_on = DateTime.UtcNow;
             existingEntity.deleted_by = commandModel.calling_user_id;
 
             _Context.OrderLines.Update(existingEntity);
@@ -715,7 +715,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             // Corrolate the transacation data
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionDeleteCommand",
                 body = JsonSerializer.Serialize(new TransactionDeleteCommand()
                 {
@@ -798,7 +798,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity.attribute_value3 != commandModel.attribute_value3)
             existingEntity.attribute_value3 = commandModel.attribute_value3;
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.OrderLineAttributes.Update(existingEntity);
@@ -824,7 +824,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             return new Response<OrderLineAttributeDto>("Attribute not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.OrderLineAttributes.Update(existingEntity);

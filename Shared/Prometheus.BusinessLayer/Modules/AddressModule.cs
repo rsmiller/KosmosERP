@@ -178,7 +178,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             existingEntity.country = commandModel.country;
 
         // Update auditing fields
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.Addresses.Update(existingEntity);
@@ -205,7 +205,7 @@ public class AddressModule : BaseERPModule, IAddressModule
 
         // Soft-delete
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Addresses.Update(existingEntity);

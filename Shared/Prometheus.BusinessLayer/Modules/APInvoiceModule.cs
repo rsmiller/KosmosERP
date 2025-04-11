@@ -60,9 +60,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             {
                 name = "AP Invoice Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -90,9 +90,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -118,9 +118,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -146,9 +146,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -174,9 +174,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -371,7 +371,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             existingEntity.is_paid = commandModel.is_paid.Value;
 
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.APInvoiceHeaders.Update(existingEntity);
@@ -427,7 +427,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             existingEntity.association_is_ar_invoice = commandModel.association_is_ar_invoice.Value;
 
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.APInvoiceLines.Update(existingEntity);
@@ -452,7 +452,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             return new Response<APInvoiceHeaderDto>("AP Invoice Header not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.APInvoiceHeaders.Update(existingEntity);
@@ -477,7 +477,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             return new Response<APInvoiceLineDto>("AP Invoice Line not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.APInvoiceLines.Update(existingEntity);
@@ -545,7 +545,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 existingEntity.association_is_ar_invoice = true;
 
             existingEntity.updated_by = associationCommand.calling_user_id;
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
 
             _Context.APInvoiceHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -622,7 +622,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 existingEntity.association_is_ar_invoice = true;
 
             existingEntity.updated_by = associationCommand.calling_user_id;
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
 
             _Context.APInvoiceLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -664,7 +664,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             existingEntity.purchase_order_receive_id = associationCommand.ap_invoice_object_id;
             existingEntity.updated_by = associationCommand.calling_user_id;
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
 
             _Context.APInvoiceHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -933,8 +933,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             association_is_ar_invoice = createCommand.association_is_ar_invoice,
             is_paid = createCommand.is_paid,
             guid = Guid.NewGuid().ToString(),
-            created_on = DateTime.Now,
-            updated_on = DateTime.Now,
+            created_on = DateTime.UtcNow,
+            updated_on = DateTime.UtcNow,
             is_deleted = false
         }, createCommand.calling_user_id);
     }

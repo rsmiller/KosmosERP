@@ -11,7 +11,7 @@ public class Transaction : BaseDatabaseModel
     public int transaction_type { get; set; }
 
     [Required]
-    public DateTime transaction_date { get; set; } = DateTime.Now;
+    public DateTime transaction_date { get; set; } = DateTime.UtcNow;
 
     [Required]
     public int object_reference_id { get; set; }

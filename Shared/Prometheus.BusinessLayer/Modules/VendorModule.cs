@@ -55,9 +55,9 @@ public class VendorModule : BaseERPModule, IVendorModule
             {
                 name = "Vendor Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -85,9 +85,9 @@ public class VendorModule : BaseERPModule, IVendorModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -113,9 +113,9 @@ public class VendorModule : BaseERPModule, IVendorModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -141,9 +141,9 @@ public class VendorModule : BaseERPModule, IVendorModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -169,9 +169,9 @@ public class VendorModule : BaseERPModule, IVendorModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -292,7 +292,7 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (existingEntity.retired_by != commandModel.retired_by)
             existingEntity.retired_by = commandModel.retired_by;
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.Vendors.Update(existingEntity);
@@ -317,7 +317,7 @@ public class VendorModule : BaseERPModule, IVendorModule
             return new Response<VendorDto>("Vendor not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Vendors.Update(existingEntity);
@@ -534,7 +534,7 @@ public class VendorModule : BaseERPModule, IVendorModule
 
     private Vendor MapForCreate(VendorCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var vendor = CommonDataHelper<Vendor>.FillCommonFields(new Vendor
         {

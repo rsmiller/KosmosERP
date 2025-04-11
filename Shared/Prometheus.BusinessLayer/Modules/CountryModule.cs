@@ -111,7 +111,7 @@ public class CountryModule : BaseERPModule, ICountryModule
             existingEntity.region = commandModel.region;
 
         // Update auditing fields
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.Countries.Update(existingEntity);
@@ -133,7 +133,7 @@ public class CountryModule : BaseERPModule, ICountryModule
 
         // Soft-delete
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Countries.Update(existingEntity);
@@ -292,7 +292,7 @@ public class CountryModule : BaseERPModule, ICountryModule
 
     private Country MapForCreate(CountryCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var country = CommonDataHelper<Country>.FillCommonFields(new Country
         {

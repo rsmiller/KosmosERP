@@ -54,9 +54,9 @@ public class ContactModule : BaseERPModule, IContactModule
             {
                 name = "Contact Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -84,9 +84,9 @@ public class ContactModule : BaseERPModule, IContactModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -112,9 +112,9 @@ public class ContactModule : BaseERPModule, IContactModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -140,9 +140,9 @@ public class ContactModule : BaseERPModule, IContactModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -168,9 +168,9 @@ public class ContactModule : BaseERPModule, IContactModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -250,7 +250,7 @@ public class ContactModule : BaseERPModule, IContactModule
         if (existingEntity.cell_phone != commandModel.cell_phone)
             existingEntity.cell_phone = commandModel.cell_phone;
 
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         _Context.Contacts.Update(existingEntity);
@@ -275,7 +275,7 @@ public class ContactModule : BaseERPModule, IContactModule
             return new Response<ContactDto>("Contact not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Contacts.Update(existingEntity);
@@ -457,7 +457,7 @@ public class ContactModule : BaseERPModule, IContactModule
 
     private Contact MapForCreate(ContactCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var contact = CommonDataHelper<Contact>.FillCommonFields(new Contact
         {

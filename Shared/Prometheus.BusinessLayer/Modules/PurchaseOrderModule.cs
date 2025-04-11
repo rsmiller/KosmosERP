@@ -66,9 +66,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             {
                 name = "PO Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -96,9 +96,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -124,9 +124,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -152,9 +152,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -180,9 +180,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -256,12 +256,12 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 // Publish this data to a message queue to be processed for transactions
                 await _MessagePublisher.PublishAsync(new Models.MessageObject()
                 {
-                    created_on = DateTime.Now,
+                    created_on = DateTime.UtcNow,
                     object_type = "TransactionCreateCommand",
                     body = JsonSerializer.Serialize(new TransactionCreateCommand()
                     {
                         transaction_type = TransactionType.Planned,
-                        transaction_date = DateTime.Now,
+                        transaction_date = DateTime.UtcNow,
                         object_reference_id = newPoHeader.id,
                         object_sub_reference_id = line.id,
                         purchased_unit_cost = line.unit_price,
@@ -303,12 +303,12 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             // Publish this data to a message queue to be processed for transactions
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionCreateCommand",
                 body = JsonSerializer.Serialize(new TransactionCreateCommand()
                 {
                     transaction_type = TransactionType.Planned,
-                    transaction_date = DateTime.Now,
+                    transaction_date = DateTime.UtcNow,
                     object_reference_id = line.purchase_order_header_id,
                     object_sub_reference_id = line.id,
                     purchased_unit_cost = line.unit_price,
@@ -386,7 +386,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
                 existingEntity.is_canceled = commandModel.is_canceled.Value;
 
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
@@ -408,12 +408,12 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                     // Publish this data to a message queue to be processed for transactions
                     await _MessagePublisher.PublishAsync(new Models.MessageObject()
                     {
-                        created_on = DateTime.Now,
+                        created_on = DateTime.UtcNow,
                         object_type = "TransactionCreateCommand",
                         body = JsonSerializer.Serialize(new TransactionCreateCommand()
                         {
                             transaction_type = TransactionType.Planned,
-                            transaction_date = DateTime.Now,
+                            transaction_date = DateTime.UtcNow,
                             object_reference_id = add_line.purchase_order_header_id,
                             object_sub_reference_id = add_line.id,
                             purchased_unit_cost = add_line.unit_price,
@@ -483,7 +483,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
                 existingEntity.is_taxable = commandModel.is_taxable.Value;
 
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
@@ -494,7 +494,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             // Publish this data to a message queue to be processed for transactions
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionEditCommand",
                 body = JsonSerializer.Serialize(new TransactionEditCommand()
                 {
@@ -526,7 +526,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         try
         {
             existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_on = DateTime.UtcNow;
             existingEntity.deleted_by = commandModel.calling_user_id;
 
             _Context.PurchaseOrderHeaders.Update(existingEntity);
@@ -534,7 +534,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionDeleteCommand",
                 body = JsonSerializer.Serialize(new TransactionDeleteCommand()
                 {
@@ -562,7 +562,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         try
         {
             existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_on = DateTime.UtcNow;
             existingEntity.deleted_by = commandModel.calling_user_id;
 
             _Context.PurchaseOrderLines.Update(existingEntity);
@@ -570,7 +570,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionDeleteCommand",
                 body = JsonSerializer.Serialize(new TransactionDeleteCommand()
                 {

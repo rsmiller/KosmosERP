@@ -40,7 +40,7 @@ public class TokenModule : ITokenModule
                 new Claim(ClaimTypes.Name, username)
             }),
             Issuer = TokenModule.Issuer,
-            Expires = DateTime.Now.AddMinutes(TokenModule.Expires),
+            Expires = DateTime.UtcNow.AddMinutes(TokenModule.Expires),
             SigningCredentials = new SigningCredentials(TokenModule.CreateSecurityKey(privateKey), SecurityAlgorithms.HmacSha256Signature)
         };
 

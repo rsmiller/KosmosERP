@@ -16,5 +16,5 @@ public class GeneralLog
     public string message { get; set; } = "";
 
     [Required]
-    public DateTime created_on { get; set; } = DateTime.Now;
+    public DateTime created_on { get; set; } = DateTime.UtcNow;
 }

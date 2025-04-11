@@ -62,8 +62,8 @@ public class ModuleUserTests
         {
             user_id = baseUser.id,
             session_id = _SessionId,
-            created_on = DateTime.Now,
-            session_expires = DateTime.Now.AddMinutes(30),
+            created_on = DateTime.UtcNow,
+            session_expires = DateTime.UtcNow.AddMinutes(30),
         };
 
         _Context.UserSessionStates.Add(userSession);

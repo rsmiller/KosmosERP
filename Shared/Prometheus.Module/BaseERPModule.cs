@@ -45,7 +45,7 @@ public class BaseERPModule : IBaseERPModule
                 error_severity = severity,
                 error_message = e.Message,
                 inner_message = e.InnerException != null ? e.InnerException.Message : "",
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
             });
 
             await _ERPDbContext.SaveChangesAsync();

@@ -64,9 +64,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             {
                 name = "Shipping Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -94,9 +94,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -122,9 +122,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -150,9 +150,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -178,9 +178,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -256,12 +256,12 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 var order_line_product = await _Context.OrderLines.Where(m => m.id == line.order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
                 await _MessagePublisher.PublishAsync(new Models.MessageObject()
                 {
-                    created_on = DateTime.Now,
+                    created_on = DateTime.UtcNow,
                     object_type = "TransactionCreateCommand",
                     body = JsonSerializer.Serialize(new TransactionCreateCommand()
                     {
                         transaction_type = TransactionType.Outbound,
-                        transaction_date = DateTime.Now,
+                        transaction_date = DateTime.UtcNow,
                         object_reference_id = line.shipment_header_id,
                         object_sub_reference_id = line.id,
                         units_shipped = line.units_to_ship,
@@ -303,12 +303,12 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             var order_line_product = await _Context.OrderLines.Where(m => m.id == line.order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionCreateCommand",
                 body = JsonSerializer.Serialize(new TransactionCreateCommand()
                 {
                     transaction_type = TransactionType.Outbound,
-                    transaction_date = DateTime.Now,
+                    transaction_date = DateTime.UtcNow,
                     object_reference_id = line.shipment_header_id,
                     object_sub_reference_id = line.id,
                     units_shipped = line.units_shipped,
@@ -374,7 +374,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (existingEntity.canceled_reason != commandModel.canceled_reason)
                 existingEntity.canceled_reason = commandModel.canceled_reason;
 
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
@@ -426,7 +426,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (existingEntity.canceled_reason != commandModel.canceled_reason)
                 existingEntity.canceled_reason = commandModel.canceled_reason;
 
-            existingEntity.updated_on = DateTime.Now;
+            existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
@@ -439,7 +439,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             var purchase_line_product = await _Context.OrderLines.Where(m => m.id == existingEntity.order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionEditCommand",
                 body = JsonSerializer.Serialize(new TransactionEditCommand()
                 {
@@ -474,7 +474,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         try
         {
             existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_on = DateTime.UtcNow;
             existingEntity.deleted_by = commandModel.calling_user_id;
 
             _Context.ShipmentHeaders.Update(existingEntity);
@@ -482,7 +482,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionDeleteCommand",
                 body = JsonSerializer.Serialize(new TransactionDeleteCommand()
                 {
@@ -515,7 +515,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         try
         {
             existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.Now;
+            existingEntity.deleted_on = DateTime.UtcNow;
             existingEntity.deleted_by = commandModel.calling_user_id;
 
             _Context.ShipmentLines.Update(existingEntity);
@@ -523,7 +523,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 object_type = "TransactionDeleteCommand",
                 body = JsonSerializer.Serialize(new TransactionDeleteCommand()
                 {
@@ -771,7 +771,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     private ShipmentHeader MapForCreate(ShipmentHeaderCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var shipment_header = new ShipmentHeader
         {
@@ -794,7 +794,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     private ShipmentLine MapForCreate(ShipmentLineCreateCommand createCommandModel, int shipment_header_id)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var shipment_line = new ShipmentLine
         {

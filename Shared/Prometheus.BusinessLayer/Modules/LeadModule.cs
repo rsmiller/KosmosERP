@@ -47,9 +47,9 @@ public class LeadModule : BaseERPModule, ILeadModule
             {
                 name = "CRM Users",
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -77,9 +77,9 @@ public class LeadModule : BaseERPModule, ILeadModule
                 role_id = role_id,
                 module_permission_id = read_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -105,9 +105,9 @@ public class LeadModule : BaseERPModule, ILeadModule
                 role_id = role_id,
                 module_permission_id = create_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -133,9 +133,9 @@ public class LeadModule : BaseERPModule, ILeadModule
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -161,9 +161,9 @@ public class LeadModule : BaseERPModule, ILeadModule
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
                 created_by = 1,
-                created_on = DateTime.Now,
+                created_on = DateTime.UtcNow,
                 updated_by = 1,
-                updated_on = DateTime.Now,
+                updated_on = DateTime.UtcNow,
             });
 
             _Context.SaveChanges();
@@ -290,7 +290,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             existingEntity.owner_id = commandModel.owner_id.Value;
 
         // Update auditing fields
-        existingEntity.updated_on = DateTime.Now;
+        existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
 
         // Persist
@@ -317,7 +317,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             return new Response<LeadDto>("Lead not found", ResultCode.NotFound);
 
         existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.Now;
+        existingEntity.deleted_on = DateTime.UtcNow;
         existingEntity.deleted_by = commandModel.calling_user_id;
 
         _Context.Leads.Update(existingEntity);
@@ -483,7 +483,7 @@ public class LeadModule : BaseERPModule, ILeadModule
 
     private Lead MapForCreate(LeadCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var lead = CommonDataHelper<Lead>.FillCommonFields(new Lead
         {
