@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Prometheus.BusinessLayer.Modules;
+using Prometheus.BusinessLayer.Helpers;
 using Prometheus.Database;
 using Prometheus.Database.Models;
-using Prometheus.Models;
 using Prometheus.Models.Permissions;
 using Prometheus.Module;
 
@@ -25,7 +24,7 @@ public class ModuleTests
 
         _Context = new ERPDbContext(options);
 
-        var baseUser = new User()
+        var baseUser = CommonDataHelper<Prometheus.Database.Models.User>.FillCommonFields(new User()
         {
             first_name = "test",
             last_name = "user",
@@ -37,11 +36,7 @@ public class ModuleTests
             department = 1,
             guid = Guid.NewGuid().ToString(),
             is_admin = false,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now,
-        };
+        }, 1);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
@@ -59,47 +54,33 @@ public class ModuleTests
         _Context.UserSessionStates.Add(userSession);
         _Context.SaveChanges();
 
-        var roleModel1 = new Role()
+        var roleModel1 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ExampleRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
 
-        var roleModel2 = new Role()
+        }, 1);
+
+        var roleModel2 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "AnotherRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+
+        }, 1);
 
         _Context.Roles.Add(roleModel1);
         _Context.Roles.Add(roleModel2);
         _Context.SaveChanges();
 
-        var userRole1 = new UserRole()
+        var userRole1 = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             role_id = roleModel1.id,
             user_id = _User.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var userRole2 = new UserRole()
+        var userRole2 = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             role_id = roleModel2.id,
             user_id = _User.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         _Context.UserRoles.Add(userRole1);
         _Context.UserRoles.Add(userRole2);
@@ -141,25 +122,17 @@ public class ModuleTests
         var readModulePermission = _Context.ModulePermissions.Single(m => m.module_id == _ModuleId && m.permission_name == moduleReadModel.permission_name);
         var editModulePermission = _Context.ModulePermissions.Single(m => m.module_id == _ModuleId && m.permission_name == moduleEditModel.permission_name);
 
-        var rolePermissionReadModel = new RolePermission()
+        var rolePermissionReadModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_permission_id = readModulePermission.id,
             role_id = role.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var rolePermissionEditModel = new RolePermission()
+        var rolePermissionEditModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_permission_id = editModulePermission.id,
             role_id = role.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
 
         _Context.RolePermissions.Add(rolePermissionReadModel);

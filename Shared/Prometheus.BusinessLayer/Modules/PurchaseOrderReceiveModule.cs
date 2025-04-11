@@ -1,6 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using Prometheus.Database;
+using Prometheus.Database.Models;
+using Prometheus.Models;
+using Prometheus.Models.Helpers;
+using Prometheus.Module;
+using Prometheus.Models.Interfaces;
+using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 using Prometheus.BusinessLayer.Interfaces;
-using Prometheus.BusinessLayer.Models.Module.PurchaseOrder.Dto;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Edit;
@@ -9,14 +17,6 @@ using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Dto;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
-using Prometheus.Database;
-using Prometheus.Database.Models;
-using Prometheus.Models;
-using Prometheus.Models.Helpers;
-using Prometheus.Models.Interfaces;
-using Prometheus.Models.Permissions;
-using Prometheus.Module;
-using System.Text.Json;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -755,65 +755,43 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
     {
         var now = DateTime.Now;
 
-        return new PurchaseOrderReceiveHeader()
+        return CommonDataHelper<PurchaseOrderReceiveHeader>.FillCommonFields(new PurchaseOrderReceiveHeader()
         {
             purchase_order_id = commandModel.purchase_order_id,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public PurchaseOrderReceiveLine MapToLineDatabaseModel(PurchaseOrderReceiveLineCreateCommand commandModel, int purchase_order_receive_header_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        return new PurchaseOrderReceiveLine()
+        return CommonDataHelper<PurchaseOrderReceiveLine>.FillCommonFields(new PurchaseOrderReceiveLine()
         {
             purchase_order_receive_header_id = purchase_order_receive_header_id,
             purchase_order_line_id = commandModel.purchase_order_line_id,
             units_received = commandModel.units_received,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public PurchaseOrderReceiveLine MapToLineDatabaseModel(PurchaseOrderReceiveLineEditCommand commandModel, int purchase_order_receive_header_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        return new PurchaseOrderReceiveLine()
+        return CommonDataHelper<PurchaseOrderReceiveLine>.FillCommonFields(new PurchaseOrderReceiveLine()
         {
             purchase_order_receive_header_id = purchase_order_receive_header_id,
             purchase_order_line_id = commandModel.purchase_order_line_id.Value,
             units_received = commandModel.units_received.Value,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public PurchaseOrderReceiveUpload MapToUploadDatabaseModel(PurchaseOrderReceiveUploadCreateCommand commandModel, int purchase_order_receive_header_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        return new PurchaseOrderReceiveUpload()
+        return CommonDataHelper<PurchaseOrderReceiveUpload>.FillCommonFields(new PurchaseOrderReceiveUpload()
         {
             purchase_order_receive_header_id = purchase_order_receive_header_id,
             document_upload_id = commandModel.document_upload_id,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public async Task<PurchaseOrderReceiveHeaderDto> MapToDto(PurchaseOrderReceiveHeader databaseModel)

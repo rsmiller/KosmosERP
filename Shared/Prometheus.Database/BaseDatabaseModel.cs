@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Prometheus.Database;
-public class BaseDatabaseModel
+public partial class BaseDatabaseModel
 {
     [Required]
     [Key]
@@ -15,13 +15,25 @@ public class BaseDatabaseModel
     public DateTime created_on { get; set; }
 
     [Required]
+    public string created_on_timezone { get; set; }
+
+    [Required]
+    public string created_on_string { get; set; }
+
+    [Required]
     public int created_by { get; set; }
 
     public DateTime? updated_on { get; set; }
     public int? updated_by { get; set; }
 
+    public string updated_on_timezone { get; set; }
+    public string updated_on_string { get; set; }
+
     public DateTime? deleted_on { get; set; }
 
     public int? deleted_by { get; set; }
+
+    public string deleted_on_timezone { get; set; }
+    public string deleted_on_string { get; set; }
 }
 

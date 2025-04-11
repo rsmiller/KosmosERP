@@ -13,6 +13,7 @@ using Prometheus.BusinessLayer.Models.Module.User.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Find;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -52,14 +53,10 @@ public partial class UserModule : BaseERPModule, IUserModule
 
         if(admin_role == false)
         {
-            _IContext.Roles.Add(new Role()
+            _IContext.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Administrators",
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
         }
@@ -80,15 +77,11 @@ public partial class UserModule : BaseERPModule, IUserModule
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
             var read_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Read).Select(m => m.id).Single();
 
-            _IContext.RolePermissions.Add(new RolePermission()
+            _IContext.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_user_perm_id,
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
         }
@@ -109,15 +102,11 @@ public partial class UserModule : BaseERPModule, IUserModule
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
             var create_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Create).Select(m => m.id).Single();
 
-            _IContext.RolePermissions.Add(new RolePermission()
+            _IContext.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_user_perm_id,
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
         }
@@ -138,15 +127,11 @@ public partial class UserModule : BaseERPModule, IUserModule
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
             var edit_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Edit).Select(m => m.id).Single();
 
-            _IContext.RolePermissions.Add(new RolePermission()
+            _IContext.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_user_perm_id,
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
         }
@@ -167,15 +152,11 @@ public partial class UserModule : BaseERPModule, IUserModule
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
             var delete_user_perm_id = _IContext.ModulePermissions.Where(m => m.internal_permission_name == UserPermissions.Delete).Select(m => m.id).Single();
 
-            _IContext.RolePermissions.Add(new RolePermission()
+            _IContext.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_user_perm_id,
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
         }
@@ -188,7 +169,7 @@ public partial class UserModule : BaseERPModule, IUserModule
 
             Console.WriteLine("Administrator user generated with password: " + new_password);
 
-            _IContext.Users.Add(new User()
+            _IContext.Users.Add(CommonDataHelper<User>.FillCommonFields(new User()
             {
                 username = "system",
                 employee_number = "1",
@@ -198,26 +179,18 @@ public partial class UserModule : BaseERPModule, IUserModule
                 password = password.HashedPassword,
                 password_salt = password.Salt,
                 is_admin = true,
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
 
             var role_id = _IContext.Roles.Where(m => m.name == "Administrators").Select(m => m.id).Single();
             var user_id = _IContext.Users.Where(m => m.username == "system").Select(m => m.id).Single();
 
-            _IContext.UserRoles.Add(new UserRole()
+            _IContext.UserRoles.Add(CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
             {
                 role_id = role_id,
                 user_id = user_id,
-                created_by = 1,
-                created_on = DateTime.Now,
-                updated_by = 1,
-                updated_on = DateTime.Now,
-            });
+            }, 1));
 
             _IContext.SaveChanges();
         }
@@ -702,16 +675,19 @@ public partial class UserModule : BaseERPModule, IUserModule
             username = databaseModel.username,
             employee_number = databaseModel.employee_number,
             is_deleted = databaseModel.is_deleted,
-            created_on = databaseModel.created_on,
-            created_by = databaseModel.created_by,
-            updated_on = databaseModel.updated_on,
-            updated_by = databaseModel.updated_by,
             department = databaseModel.department,
             is_admin = databaseModel.is_admin,
             is_management = databaseModel.is_management,
             is_external_user = databaseModel.is_external_user,
             is_guest = databaseModel.is_guest,
-
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -726,14 +702,18 @@ public partial class UserModule : BaseERPModule, IUserModule
             username = databaseModel.username,
             employee_number = databaseModel.employee_number,
             is_deleted = databaseModel.is_deleted,
-            created_on = databaseModel.created_on,
-            updated_on = databaseModel.updated_on,
             department = databaseModel.department,
             is_admin = databaseModel.is_admin,
             is_management = databaseModel.is_management,
             is_external_user = databaseModel.is_external_user,
             is_guest = databaseModel.is_guest,
-
+            created_on = databaseModel.created_on,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -746,7 +726,7 @@ public partial class UserModule : BaseERPModule, IUserModule
     {
         var now = DateTime.Now;
 
-        var user = new Prometheus.Database.Models.User()
+        var user = CommonDataHelper<Prometheus.Database.Models.User>.FillCommonFields(new Prometheus.Database.Models.User()
         {
             email = createCommandModel.email,
             first_name = createCommandModel.first_name,
@@ -754,17 +734,13 @@ public partial class UserModule : BaseERPModule, IUserModule
             username = createCommandModel.username,
             employee_number = createCommandModel.employee_number,
             is_deleted = createCommandModel.is_deleted,
-            created_by = createCommandModel.calling_user_id,
-            updated_by = createCommandModel.calling_user_id,
             department = createCommandModel.department,
             is_admin = createCommandModel.is_admin,
             is_management = createCommandModel.is_management,
             is_external_user = createCommandModel.is_external_user,
             is_guest = createCommandModel.is_guest,
-            created_on = now,
-            updated_on = now
 
-        };
+        }, createCommandModel.calling_user_id);
 
         var passwordInfo = GeneratePasword(createCommandModel.password);
 

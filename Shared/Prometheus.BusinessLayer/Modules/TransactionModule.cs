@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -508,9 +509,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
     private Transaction MapForCreate(TransactionCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
-
-        var transaction = new Transaction
+        var transaction = CommonDataHelper<Transaction>.FillCommonFields(new Transaction
         {
             product_id = createCommandModel.product_id,
             transaction_type = createCommandModel.transaction_type,
@@ -523,11 +522,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             units_received = createCommandModel.units_received,
             purchased_unit_cost = createCommandModel.purchased_unit_cost,
             sold_unit_price = createCommandModel.sold_unit_price,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return transaction;
     }

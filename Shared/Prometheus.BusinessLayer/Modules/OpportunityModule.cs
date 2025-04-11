@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Opportunity.Command.Find;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -448,7 +449,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
     public Opportunity MapToDatabaseModel(OpportunityCreateCommand createCommand)
     {
-        return new Opportunity
+        return CommonDataHelper<Opportunity>.FillCommonFields(new Opportunity
         {
             opportunity_name = createCommand.opportunity_name,
             customer_id = createCommand.customer_id,
@@ -457,6 +458,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             stage = createCommand.stage,
             win_chance = createCommand.win_chance,
             expected_close = createCommand.expected_close,
-        };
+        }, createCommand.calling_user_id);
+        
     }
 }

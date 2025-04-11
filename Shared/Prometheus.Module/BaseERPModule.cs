@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Prometheus.Database;
+using Prometheus.Database.Models;
 using Prometheus.Models;
 
 namespace Prometheus.Module;
@@ -61,11 +62,13 @@ public class BaseERPModule : IBaseERPModule
     {
         try
         {
+            var now = DateTime.UtcNow;
+
             await _ERPDbContext.GeneralLogs.AddAsync(new Database.Models.GeneralLog()
             {
                 category = category,
                 message = message,
-                created_on = DateTime.Now,
+                created_on = now,
             });
 
             await _ERPDbContext.SaveChangesAsync();

@@ -16,6 +16,7 @@ using Prometheus.BusinessLayer.Models.Module.Order.Dto;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using Prometheus.BusinessLayer.Helpers;
 
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -856,9 +857,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
     public OrderHeader MapToDatabaseModel(OrderHeaderCreateCommand commandModel, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        return new OrderHeader()
+        return CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader()
         {
             customer_id = commandModel.customer_id,
             ship_to_address_id = commandModel.ship_to_address_id,
@@ -873,18 +872,12 @@ public class OrderModule : BaseERPModule, IOrderModule
             tax = commandModel.tax,
             shipping_cost = commandModel.shipping_cost,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public OrderLine MapToLineDatabaseModel(OrderLineCreateCommand commandModel, int order_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        return new OrderLine()
+        return CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
             order_id = order_id,
             product_id = commandModel.product_id,
@@ -894,11 +887,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             quantity = commandModel.quantity,
             unit_price = commandModel.unit_price,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
 
@@ -1020,9 +1009,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
     public OrderLine MapToLineDatabaseModel(OrderLineEditCommand commandModel, int order_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        return new OrderLine()
+        return CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
             order_id = order_id,
             product_id = commandModel.product_id.Value,
@@ -1032,17 +1019,12 @@ public class OrderModule : BaseERPModule, IOrderModule
             quantity = commandModel.quantity.Value,
             unit_price = commandModel.unit_price.Value,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public OrderLineAttribute MapToAttributeDatabaseModel(OrderLineAttributeEditCommand commandModel, int order_line_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-        return new OrderLineAttribute()
+        return CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
             order_line_id = order_line_id,
             attribute_name = commandModel.attribute_name,
@@ -1050,17 +1032,12 @@ public class OrderModule : BaseERPModule, IOrderModule
             attribute_value2 = commandModel.attribute_value2,
             attribute_value3 = commandModel.attribute_value3,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public OrderLineAttribute MapToAttributeDatabaseModel(OrderLineAttributeCreateCommand commandModel, int calling_user_id)
     {
-        var now = DateTime.Now;
-        return new OrderLineAttribute()
+        return CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
             order_line_id = commandModel.order_line_id.Value,
             attribute_name = commandModel.attribute_name,
@@ -1068,11 +1045,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             attribute_value2 = commandModel.attribute_value2,
             attribute_value3 = commandModel.attribute_value3,
             guid = Guid.NewGuid().ToString(),
-            created_by = calling_user_id,
-            created_on = now,
-            updated_by = calling_user_id,
-            updated_on = now,
-        };
+        }, calling_user_id);
     }
 
     public async Task<OrderLineAttributeDto> MapToAttributeDto(OrderLineAttribute databaseModel)

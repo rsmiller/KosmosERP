@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mysqlx.Expr;
+using Prometheus.BusinessLayer.Helpers;
 using Prometheus.Database;
 using Prometheus.Database.Models;
 
@@ -21,7 +22,7 @@ public class DatabaseTests
 
         _Context = new ERPDbContext(options);
 
-        var baseUser = new User()
+        var baseUser = CommonDataHelper<Prometheus.Database.Models.User>.FillCommonFields(new User()
         {
             first_name = "test",
             last_name = "user",
@@ -33,11 +34,7 @@ public class DatabaseTests
             department = 1,
             guid = Guid.NewGuid().ToString(),
             is_admin = true,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now,
-        };
+        }, 1);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
@@ -54,47 +51,31 @@ public class DatabaseTests
     [Test]
     public async Task UserRoles()
     {
-        var roleModel1 = new Role()
+        var roleModel1 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ExampleRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var roleModel2 = new Role()
+        var roleModel2 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "AnotherRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Roles.AddAsync(roleModel1);
         await _Context.Roles.AddAsync(roleModel2);
         await _Context.SaveChangesAsync();
 
-        var userRole1 = new UserRole()
+        var userRole1 = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             role_id = roleModel1.id,
             user_id = _User.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var userRole2 = new UserRole()
+        var userRole2 = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             role_id = roleModel2.id,
             user_id = _User.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.UserRoles.AddAsync(userRole1);
         await _Context.UserRoles.AddAsync(userRole2);
@@ -111,14 +92,10 @@ public class DatabaseTests
     [Test]
     public async Task RolesAndPermissions_ReadEdit()
     {
-        var roleModel = new Role()
+        var roleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ReadEditModuleRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         var moduleReadModel = new ModulePermission()
         {
@@ -156,25 +133,17 @@ public class DatabaseTests
         var readModulePermission = await _Context.ModulePermissions.SingleAsync(m => m.module_id == _ModuleId && m.permission_name == moduleReadModel.permission_name);
         var editModulePermission = await _Context.ModulePermissions.SingleAsync(m => m.module_id == _ModuleId && m.permission_name == moduleEditModel.permission_name);
 
-        var rolePermissionReadModel = new RolePermission()
+        var rolePermissionReadModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_permission_id = readModulePermission.id,
             role_id = role.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var rolePermissionEditModel = new RolePermission()
+        var rolePermissionEditModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_permission_id = editModulePermission.id,
             role_id = role.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
 
         await _Context.RolePermissions.AddAsync(rolePermissionReadModel);
@@ -201,14 +170,14 @@ public class DatabaseTests
     [Test]
     public async Task RolesAndPermissions_WriteDelete()
     {
-        var roleModel = new Role()
+        var roleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "WriteDeleteModuleRole",
             created_by = 1,
             created_on = DateTime.Now,
             updated_by = 1,
             updated_on = DateTime.Now
-        };
+        }, 1);
 
         var moduleWriteModel = new ModulePermission()
         {
@@ -246,25 +215,17 @@ public class DatabaseTests
         var writeModulePermission = await _Context.ModulePermissions.SingleAsync(m => m.module_id == _ModuleId && m.permission_name == moduleWriteModel.permission_name);
         var deleteModulePermission = await _Context.ModulePermissions.SingleAsync(m => m.module_id == _ModuleId && m.permission_name == moduleDeleteModel.permission_name);
 
-        var rolePermissionWriteModel = new RolePermission()
+        var rolePermissionWriteModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_permission_id = writeModulePermission.id,
             role_id = role.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var rolePermissionDeleteModel = new RolePermission()
+        var rolePermissionDeleteModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_permission_id = deleteModulePermission.id,
             role_id = role.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
 
         await _Context.RolePermissions.AddAsync(rolePermissionWriteModel);
@@ -291,39 +252,31 @@ public class DatabaseTests
     [Test]
     public async Task VendorProducts()
     {
-        var address_model = new Address()
+        var address_model = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
             street_address1 = "123 St",
             city = "City",
             state = "TX",
             postal_code = "77777",
             country = "USA",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
 
-        var vendor_model = new Vendor()
+        var vendor_model = CommonDataHelper<Vendor>.FillCommonFields(new Vendor()
         {
             vendor_name = "Vendor",
             
             phone = "123-456-7890",
             category = "Cat1",
             address_id = address_model.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Vendors.AddAsync(vendor_model);
         await _Context.SaveChangesAsync();
 
-        var product_model = new Product()
+        var product_model = CommonDataHelper<Product>.FillCommonFields(new Product()
         {
             vendor_id = vendor_model.id,
             product_class = "Class",
@@ -331,36 +284,24 @@ public class DatabaseTests
             identifier1 = "SKU-1",
             internal_description = "A product description",
             product_name = "A product",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Products.AddAsync(product_model);
         await _Context.SaveChangesAsync();
 
-        var product_attribute1 = new ProductAttribute()
+        var product_attribute1 = CommonDataHelper<ProductAttribute>.FillCommonFields(new ProductAttribute()
         {
             product_id = product_model.id,
             attribute_name = "Weight",
             attribute_value = "10",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var product_attribute2 = new ProductAttribute()
+        var product_attribute2 = CommonDataHelper<ProductAttribute>.FillCommonFields(new ProductAttribute()
         {
             product_id = product_model.id,
             attribute_name = "Length",
             attribute_value = "12",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.ProductAttributes.AddAsync(product_attribute1);
         await _Context.ProductAttributes.AddAsync(product_attribute2);
@@ -375,22 +316,18 @@ public class DatabaseTests
     [Test]
     public async Task CustomerAddresses()
     {
-        var customer_model = new Customer()
+        var customer_model = CommonDataHelper<Customer>.FillCommonFields(new Customer()
         { 
             customer_name = "Customer",
             phone = "123-456-7890",
             category = "Cat1",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Customers.AddAsync(customer_model);
         await _Context.SaveChangesAsync();
 
 
-        var address_model1 = new Address()
+        var address_model1 = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
             street_address1 = "123 St",
             city = "City",
@@ -401,36 +338,28 @@ public class DatabaseTests
             created_on = DateTime.Now,
             updated_by = 1,
             updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var address_model2 = new Address()
+        var address_model2 = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
             street_address1 = "9999 St",
             city = "Place",
             state = "OK",
             postal_code = "99999",
             country = "USA",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Addresses.AddAsync(address_model1);
         await _Context.Addresses.AddAsync(address_model2);
         await _Context.SaveChangesAsync();
 
-        var customer_address_model1 = new CustomerAddress()
+        var customer_address_model1 = CommonDataHelper<CustomerAddress>.FillCommonFields(new CustomerAddress()
         {
             customer_id = customer_model.id,
             address_id = address_model1.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var customer_address_model2 = new CustomerAddress()
+        var customer_address_model2 = CommonDataHelper<CustomerAddress>.FillCommonFields(new CustomerAddress()
         {
             customer_id = customer_model.id,
             address_id = address_model2.id,
@@ -438,7 +367,7 @@ public class DatabaseTests
             created_on = DateTime.Now,
             updated_by = 1,
             updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.CustomerAddresses.AddAsync(customer_address_model1);
         await _Context.CustomerAddresses.AddAsync(customer_address_model2);
@@ -452,23 +381,19 @@ public class DatabaseTests
     [Test]
     public async Task Orders()
     {
-        var address_model = new Address()
+        var address_model = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
             street_address1 = "123 St",
             city = "City",
             state = "TX",
             postal_code = "77777",
             country = "USA",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
 
-        var order_model = new OrderHeader()
+        var order_model = CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader()
         {
             customer_id = 1,
             order_type = "Q",
@@ -479,16 +404,12 @@ public class DatabaseTests
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
             price = 1,
             tax = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
 
-        var order_line = new OrderLine()
+        var order_line = CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         { 
             order_id = order_model.id,
             product_id = 1,
@@ -496,27 +417,19 @@ public class DatabaseTests
             line_number = 1,
             unit_price = 10,
             line_description = "ASDASDASDASD",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderLines.AddAsync(order_line);
         await _Context.SaveChangesAsync();
 
-        var line_attribute1 = new OrderLineAttribute()
+        var line_attribute1 = CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
             order_line_id = order_line.id,
             attribute_name = "Weight",
             attribute_value = "10",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var line_attribute2 = new OrderLineAttribute()
+        var line_attribute2 = CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
             order_line_id = order_line.id,
             attribute_name = "Height",
@@ -525,7 +438,7 @@ public class DatabaseTests
             created_on = DateTime.Now,
             updated_by = 1,
             updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderLineAttributes.AddAsync(line_attribute1);
         await _Context.OrderLineAttributes.AddAsync(line_attribute2);
@@ -540,7 +453,7 @@ public class DatabaseTests
     [Test]
     public async Task APInvoices()
     {
-        var invoice_header_model = new APInvoiceHeader()
+        var invoice_header_model = CommonDataHelper<APInvoiceHeader>.FillCommonFields(new APInvoiceHeader()
         {
             invoice_number = "1",
             inv_due_date = DateTime.Now.AddDays(30),
@@ -549,16 +462,12 @@ public class DatabaseTests
             invoice_total = 100,
             vendor_id = 1,
             memo = "ASDASDSD",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.APInvoiceHeaders.AddAsync(invoice_header_model);
         await _Context.SaveChangesAsync();
 
-        var invoice_line_model = new APInvoiceLine()
+        var invoice_line_model = CommonDataHelper<APInvoiceLine>.FillCommonFields(new APInvoiceLine()
         {
             ap_invoice_header_id = invoice_header_model.id,
             association_is_ar_invoice = false,
@@ -570,11 +479,7 @@ public class DatabaseTests
             line_total = 100,
             association_object_line_id = 1,
             qty_invoiced = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.APInvoiceLines.AddAsync(invoice_line_model);
         await _Context.SaveChangesAsync();
@@ -587,7 +492,7 @@ public class DatabaseTests
     [Test]
     public async Task ARInvoices()
     {
-        var order_model = new OrderHeader()
+        var order_model = CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader()
         {
             customer_id = 1,
             ship_to_address_id = 1,
@@ -598,16 +503,12 @@ public class DatabaseTests
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
             price = 1,
             tax = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
 
-        var order_line_model = new OrderLine()
+        var order_line_model = CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
             order_id = order_model.id,
             product_id = 1,
@@ -615,16 +516,12 @@ public class DatabaseTests
             line_number = 1,
             unit_price = 10,
             line_description = "ASDASDASDASD",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderLines.AddAsync(order_line_model);
         await _Context.SaveChangesAsync();
 
-        var product_model = new Product()
+        var product_model = CommonDataHelper<Product>.FillCommonFields(new Product()
         {
             vendor_id = 1,
             product_class = "Class",
@@ -632,16 +529,12 @@ public class DatabaseTests
             identifier1 = "SKU-1",
             internal_description = "A product description",
             product_name = "A product",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Products.AddAsync(product_model);
         await _Context.SaveChangesAsync();
 
-        var invoice_header_model = new ARInvoiceHeader()
+        var invoice_header_model = CommonDataHelper<ARInvoiceHeader>.FillCommonFields(new ARInvoiceHeader()
         {
             invoice_number = 10001,
             customer_id = 1,
@@ -650,16 +543,12 @@ public class DatabaseTests
             order_id = order_model.id,
             tax_percentage = 8.25M,
             is_taxable = true,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.ARInvoiceHeaders.AddAsync(invoice_header_model);
         await _Context.SaveChangesAsync();
 
-        var invoice_line_model = new ARInvoiceLine()
+        var invoice_line_model = CommonDataHelper<ARInvoiceLine>.FillCommonFields(new ARInvoiceLine()
         {
             ar_invoice_header_id = invoice_header_model.id,
             product_id = product_model.id,
@@ -667,11 +556,7 @@ public class DatabaseTests
             order_qty = 10,
             invoice_qty = 10,
             line_total = 100,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.ARInvoiceLines.AddAsync(invoice_line_model);
         await _Context.SaveChangesAsync();
@@ -686,7 +571,7 @@ public class DatabaseTests
     [Test]
     public async Task Shipments()
     {
-        var order_model = new OrderHeader()
+        var order_model = CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader()
         {
             customer_id = 1,
             ship_to_address_id = 1,
@@ -697,16 +582,12 @@ public class DatabaseTests
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
             price = 1,
             tax = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
 
-        var order_line_model = new OrderLine()
+        var order_line_model = CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
             order_id = order_model.id,
             product_id = 1,
@@ -714,32 +595,24 @@ public class DatabaseTests
             line_number = 1,
             unit_price = 10,
             line_description = "ASDASDASDASD",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OrderLines.AddAsync(order_line_model);
         await _Context.SaveChangesAsync();
 
-        var address_model = new Address()
+        var address_model = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
             street_address1 = "123 St",
             city = "City",
             state = "TX",
             postal_code = "77777",
             country = "USA",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
 
-        var shipment_header_model = new ShipmentHeader()
+        var shipment_header_model = CommonDataHelper<ShipmentHeader>.FillCommonFields(new ShipmentHeader()
         {
             order_id = order_model.id,
             shipment_number = 10001,
@@ -750,26 +623,19 @@ public class DatabaseTests
             ship_attn = "Hello",
             address_id = address_model.id,
             freight_charge_amount = 100,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.ShipmentHeaders.AddAsync(shipment_header_model);
         await _Context.SaveChangesAsync();
 
-        var shipment_line_model = new ShipmentLine()
+        var shipment_line_model = CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine()
         {
             shipment_header_id = shipment_header_model.id,
             order_line_id = order_line_model.id,
             units_shipped = 0,
             units_to_ship = 10,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+
+        }, 1);
 
         await _Context.ShipmentLines.AddAsync(shipment_line_model);
         await _Context.SaveChangesAsync();
@@ -784,7 +650,7 @@ public class DatabaseTests
     [Test]
     public async Task PurchaseOrders()
     {
-        var address_model = new Address()
+        var address_model = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
             street_address1 = "123 St",
             city = "City",
@@ -795,27 +661,23 @@ public class DatabaseTests
             created_on = DateTime.Now,
             updated_by = 1,
             updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
 
-        var vendor_model = new Vendor()
+        var vendor_model = CommonDataHelper<Vendor>.FillCommonFields(new Vendor()
         {
             vendor_name = "Vendor",
             address_id = address_model.id,
             phone = "123-456-7890",
             category = "Cat1",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Vendors.AddAsync(vendor_model);
         await _Context.SaveChangesAsync();
 
-        var product_model = new Product()
+        var product_model = CommonDataHelper<Product>.FillCommonFields(new Product()
         {
             vendor_id = vendor_model.id,
             product_class = "Class",
@@ -823,31 +685,24 @@ public class DatabaseTests
             identifier1 = "SKU-1",
             internal_description = "A product description",
             product_name = "A product",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Products.AddAsync(product_model);
         await _Context.SaveChangesAsync();
 
-        var purchase_order_model = new PurchaseOrderHeader()
+        var purchase_order_model = CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader()
         {
             vendor_id = vendor_model.id,
             po_number = 10002,
             po_type = "R",
             revision_number = 2,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+
+        }, 1);
 
         await _Context.PurchaseOrderHeaders.AddAsync(purchase_order_model);
         await _Context.SaveChangesAsync();
 
-        var purchase_order_line = new PurchaseOrderLine()
+        var purchase_order_line = CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine()
         {
             purchase_order_header_id = purchase_order_model.id,
             product_id = product_model.id,
@@ -858,11 +713,7 @@ public class DatabaseTests
             revision_number = 1,
             is_taxable = true,
             tax = 1.9M,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.PurchaseOrderLines.AddAsync(purchase_order_line);
         await _Context.SaveChangesAsync();
@@ -877,22 +728,18 @@ public class DatabaseTests
     [Test]
     public async Task PurchaseOrderReceive()
     {
-        var purchase_order_model = new PurchaseOrderHeader()
+        var purchase_order_model = CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader()
         {
             vendor_id = 1,
             po_number = 10002,
             po_type = "R",
             revision_number = 2,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.PurchaseOrderHeaders.AddAsync(purchase_order_model);
         await _Context.SaveChangesAsync();
 
-        var purchase_order_line = new PurchaseOrderLine()
+        var purchase_order_line = CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine()
         {
             purchase_order_header_id = purchase_order_model.id,
             product_id = 1,
@@ -903,41 +750,29 @@ public class DatabaseTests
             revision_number = 1,
             is_taxable = true,
             tax = 1.9M,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.PurchaseOrderLines.AddAsync(purchase_order_line);
         await _Context.SaveChangesAsync();
 
 
-        var purchase_order_receive_model = new PurchaseOrderReceiveHeader()
+        var purchase_order_receive_model = CommonDataHelper<PurchaseOrderReceiveHeader>.FillCommonFields(new PurchaseOrderReceiveHeader()
         {
             purchase_order_id = purchase_order_line.id,
             units_ordered = 10,
             units_received = 2,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.PurchaseOrderReceiveHeaders.AddAsync(purchase_order_receive_model);
         await _Context.SaveChangesAsync();
 
-        var purchase_order_receive_line = new PurchaseOrderReceiveLine()
+        var purchase_order_receive_line = CommonDataHelper<PurchaseOrderReceiveLine>.FillCommonFields(new PurchaseOrderReceiveLine()
         {
             purchase_order_receive_header_id = purchase_order_receive_model.id,
             purchase_order_line_id = purchase_order_line.id,
             units_ordered = 10,
             units_received = 2,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.PurchaseOrderReceiveLines.AddAsync(purchase_order_receive_line);
         await _Context.SaveChangesAsync();
@@ -953,21 +788,17 @@ public class DatabaseTests
     [Test]
     public async Task Opportunities()
     {
-        var customer_model = new Customer()
+        var customer_model = CommonDataHelper<Customer>.FillCommonFields(new Customer()
         {
             customer_name = "Customer",
             phone = "123-456-7890",
             category = "Cat1",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Customers.AddAsync(customer_model);
         await _Context.SaveChangesAsync();
 
-        var contact_model = new Contact()
+        var contact_model = CommonDataHelper<Contact>.FillCommonFields(new Contact()
         {
             customer_id = customer_model.id,
             first_name = "Bob",
@@ -975,16 +806,12 @@ public class DatabaseTests
             title = "CEO",
             email = "test@test.com",
             cell_phone = "555-555-5555",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Contacts.AddAsync(contact_model);
         await _Context.SaveChangesAsync();
 
-        var opportunity_model = new Opportunity()
+        var opportunity_model = CommonDataHelper<Opportunity>.FillCommonFields(new Opportunity()
         {
             contact_id = contact_model.id,
             customer_id = customer_model.id,
@@ -993,27 +820,19 @@ public class DatabaseTests
             win_chance = 50,
             stage = "Prospect",
             expected_close = DateOnly.FromDateTime(DateTime.Now),
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.Opportunities.AddAsync(opportunity_model);
         await _Context.SaveChangesAsync();
 
-        var oppotunity_line = new OpportunityLine()
+        var oppotunity_line = CommonDataHelper<OpportunityLine>.FillCommonFields(new OpportunityLine()
         {
             opportunity_id = opportunity_model.id,
             description = "A description line",
             unit_price = 100.20M,
             line_number = 1,
             quantity = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.OpportunityLines.AddAsync(oppotunity_line);
         await _Context.SaveChangesAsync();
@@ -1032,7 +851,8 @@ public class DatabaseTests
         {
             friendly_name = "AP Invoice",
             internal_name = "ap_invoice",
-            requires_approval = false
+            requires_approval = false,
+            
         };
 
         await _Context.DocumentUploadObjects.AddAsync(document_upload_object);
@@ -1041,7 +861,7 @@ public class DatabaseTests
         var document_upload_tag = new DocumentUploadObjectTagTemplate()
         {
             document_object_id = document_upload_object.id,
-            name = "PO Number"
+            name = "PO Number",
         };
 
         await _Context.DocumentUploadObjectTags.AddAsync(document_upload_tag);
@@ -1051,45 +871,33 @@ public class DatabaseTests
 
         Assert.That(document_upload_object.object_tags.Count() == 1);
 
-        var document_upload = new DocumentUpload()
+        var document_upload = CommonDataHelper<DocumentUpload>.FillCommonFields(new DocumentUpload()
         {
             document_object_id = document_upload_object.id,
             rev_num = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.DocumentUploads.AddAsync(document_upload);
         await _Context.SaveChangesAsync();
 
-        var document_revision = new DocumentUploadRevision()
+        var document_revision = CommonDataHelper<DocumentUploadRevision>.FillCommonFields(new DocumentUploadRevision()
         {
             document_upload_id = document_upload_object.id,
             document_name = "Document.jpg",
             document_path = "https://asdkasdjasdk.com/Document.jpg",
             rev_num = 1,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.DocumentUploadRevisions.AddAsync(document_revision);
         await _Context.SaveChangesAsync();
 
-        var document_revision_tag = new DocumentUploadRevisionTag()
+        var document_revision_tag = CommonDataHelper<DocumentUploadRevisionTag>.FillCommonFields(new DocumentUploadRevisionTag()
         {
             document_upload_revision_id = document_revision.id,
             document_upload_object_tag_id = document_upload_tag.id,
             tag_name = "PO Number",
             tag_value = "123442",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.DocumentUploadRevisionsTags.AddAsync(document_revision_tag);
         await _Context.SaveChangesAsync();

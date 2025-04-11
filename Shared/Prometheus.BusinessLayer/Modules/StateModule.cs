@@ -10,6 +10,8 @@ using Prometheus.BusinessLayer.Models.Module.State.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.State.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.State.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
+using Prometheus.Database.Models;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -277,19 +279,13 @@ public class StateModule : BaseERPModule, IStateModule
 
     private Database.Models.State MapForCreate(StateCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
-
-        var state = new Database.Models.State
+        var state = CommonDataHelper<Database.Models.State>.FillCommonFields(new Database.Models.State
         {
             country_id = createCommandModel.country_id,
             state_name = createCommandModel.state_name,
             iso2 = createCommandModel.iso2,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return state;
     }

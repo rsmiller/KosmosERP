@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Helpers;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.User.Command.Find;
@@ -20,7 +21,7 @@ public class ModuleUserTests
 
     public int _UserId { get; set; }
     private string _SessionId = Guid.NewGuid().ToString();
-    private string _PrivateKey = "Key123";
+    private string _PrivateKey = "Key1231231243456efghfghfghf!!@!@!@";
 
     [SetUp]
     public void Setup()
@@ -40,7 +41,7 @@ public class ModuleUserTests
 
         _Module.SeedPermissions();
 
-        var baseUser = new User()
+        var baseUser = CommonDataHelper<User>.FillCommonFields(new User()
         {
             first_name = "test",
             last_name = "user",
@@ -52,11 +53,7 @@ public class ModuleUserTests
             department = 1,
             guid = Guid.NewGuid().ToString(),
             is_admin = true,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now,
-        };
+        }, 1);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
@@ -72,23 +69,15 @@ public class ModuleUserTests
         _Context.UserSessionStates.Add(userSession);
         _Context.SaveChanges();
 
-        var editRoleModel = new Role()
+        var editRoleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "EditRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var createRoleModel = new Role()
+        var createRoleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "CreateRole",
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         _Context.Roles.Add(editRoleModel);
         _Context.Roles.Add(createRoleModel);
@@ -126,25 +115,17 @@ public class ModuleUserTests
         var create_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Read);
 
         // Have to give the user edit permissions in order to assign them in the module
-        var rolePermission = new RolePermission()
+        var rolePermission = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             role_id = _EditRoleId,
             module_permission_id = edit_permission.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var userRole = new UserRole()
+        var userRole = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             user_id = _UserId,
             role_id = _EditRoleId,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.RolePermissions.AddAsync(rolePermission);
         await _Context.UserRoles.AddAsync(userRole);
@@ -366,25 +347,17 @@ public class ModuleUserTests
         var seeded_permissions = await _Context.ModulePermissions.ToListAsync();
         var read_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Read);
 
-        var rolePermission = new RolePermission()
+        var rolePermission = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             role_id = _CreateRoleId,
             module_permission_id = read_permission.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var userRole = new UserRole()
+        var userRole = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             user_id = _UserId,
             role_id = _CreateRoleId,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.UserRoles.AddAsync(userRole);
         await _Context.RolePermissions.AddAsync(rolePermission);
@@ -396,25 +369,17 @@ public class ModuleUserTests
         var seeded_permissions = await _Context.ModulePermissions.ToListAsync();
         var create_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Create);
 
-        var rolePermission = new RolePermission()
+        var rolePermission = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             role_id = _CreateRoleId,
             module_permission_id = create_permission.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var userRole = new UserRole()
+        var userRole = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             user_id = _UserId,
             role_id = _CreateRoleId,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.UserRoles.AddAsync(userRole);
         await _Context.RolePermissions.AddAsync(rolePermission);
@@ -426,25 +391,17 @@ public class ModuleUserTests
         var seeded_permissions = await _Context.ModulePermissions.ToListAsync();
         var edit_permission = seeded_permissions.Single(m => m.internal_permission_name == UserPermissions.Edit);
 
-        var rolePermission = new RolePermission()
+        var rolePermission = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             role_id = _EditRoleId,
             module_permission_id = edit_permission.id,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
-        var userRole = new UserRole()
+        var userRole = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             user_id = _UserId,
             role_id = _EditRoleId,
-            created_by = 1,
-            created_on = DateTime.Now,
-            updated_by = 1,
-            updated_on = DateTime.Now
-        };
+        }, 1);
 
         await _Context.UserRoles.AddAsync(userRole);
         await _Context.RolePermissions.AddAsync(rolePermission);

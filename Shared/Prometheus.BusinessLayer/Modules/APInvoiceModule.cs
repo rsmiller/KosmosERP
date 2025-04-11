@@ -18,6 +18,7 @@ using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.Api.Modules;
 
@@ -899,7 +900,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
     public APInvoiceHeader MapToDatabaseModel(APInvoiceHeaderCreateCommand createCommand)
     {
-        return new APInvoiceHeader()
+        return CommonDataHelper<APInvoiceHeader>.FillCommonFields(new APInvoiceHeader()
         {
             vendor_id = createCommand.vendor_id,
             invoice_number = createCommand.invoice_number,
@@ -919,12 +920,12 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             created_on = DateTime.Now,
             updated_on = DateTime.Now,
             is_deleted = false
-        };
+        }, createCommand.calling_user_id);
     }
 
     public APInvoiceLine MapToLineDatabaseModel(APInvoiceLineCreateCommand createCommand, int ap_invoice_header_id, int calling_user_id)
     {
-        return new APInvoiceLine()
+        return CommonDataHelper<APInvoiceLine>.FillCommonFields(new APInvoiceLine()
         {
             ap_invoice_header_id = ap_invoice_header_id,
             line_number = createCommand.line_number,
@@ -938,12 +939,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             association_is_sales_order = createCommand.association_is_sales_order,
             association_is_ar_invoice = createCommand.association_is_ar_invoice,
             guid = Guid.NewGuid().ToString(),
-            created_on = DateTime.Now,
-            updated_on = DateTime.Now,
-            created_by = calling_user_id,
-            updated_by = calling_user_id,
             is_deleted = false
-        };
+        }, calling_user_id);
     }
 
     private bool APInvoiceHeaderExists(APInvoiceHeaderCreateCommand createCommand)

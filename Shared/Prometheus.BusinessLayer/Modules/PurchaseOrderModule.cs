@@ -17,6 +17,7 @@ using Prometheus.BusinessLayer.Interfaces;
 using Prometheus.BusinessLayer.Models.Module.Order.Dto;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -789,28 +790,20 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
     private PurchaseOrderHeader MapForCreate(PurchaseOrderHeaderCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
-
-        var header = new PurchaseOrderHeader
+        var header = CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader
         {
             vendor_id = createCommandModel.vendor_id,
             po_type = createCommandModel.po_type,
             revision_number = 1,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return header;
     }
 
     public PurchaseOrderLine MapForEditLine(PurchaseOrderLineEditCommand commandModel, int purchase_order_header_id, int calling_user_id)
     {
-        var now = DateTime.Now;
-
-        var line = new PurchaseOrderLine()
+        var line = CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine()
         {
             purchase_order_header_id = purchase_order_header_id,
             product_id = commandModel.product_id.Value,
@@ -822,20 +815,14 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             is_taxable = commandModel.is_taxable.Value,
             revision_number = 1,
             is_deleted = false,
-            created_on = now,
-            created_by = commandModel.calling_user_id,
-            updated_on = now,
-            updated_by = commandModel.calling_user_id
-        };
+        }, commandModel.calling_user_id);
 
         return line;
     }
 
     private PurchaseOrderLine MapForCreateLine(PurchaseOrderLineCreateCommand createCommandModel, int purchase_order_header_id)
     {
-        var now = DateTime.Now;
-
-        var line = new PurchaseOrderLine()
+        var line = CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine()
         {
             purchase_order_header_id = purchase_order_header_id,
             product_id = createCommandModel.product_id,
@@ -847,11 +834,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             is_taxable = createCommandModel.is_taxable,
             revision_number = 1,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return line;
     }

@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Vendor.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Vendor.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -527,7 +528,7 @@ public class VendorModule : BaseERPModule, IVendorModule
     {
         var now = DateTime.Now;
 
-        var vendor = new Vendor
+        var vendor = CommonDataHelper<Vendor>.FillCommonFields(new Vendor
         {
             vendor_name = createCommandModel.vendor_name,
             vendor_description = createCommandModel.vendor_description,
@@ -544,11 +545,7 @@ public class VendorModule : BaseERPModule, IVendorModule
             retired_on = createCommandModel.retired_on,
             retired_by = createCommandModel.retired_by,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return vendor;
     }

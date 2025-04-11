@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Helpers;
 using Prometheus.BusinessLayer.Models.Module.Lead.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.Lead.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Lead.Command.Edit;
@@ -480,7 +481,7 @@ public class LeadModule : BaseERPModule, ILeadModule
     {
         var now = DateTime.Now;
 
-        var lead = new Lead
+        var lead = CommonDataHelper<Lead>.FillCommonFields(new Lead
         {
             first_name = createCommandModel.first_name,
             last_name = createCommandModel.last_name,
@@ -497,11 +498,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             state = createCommandModel.state,
             zip = createCommandModel.zip,
             country = createCommandModel.country,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return lead;
     }

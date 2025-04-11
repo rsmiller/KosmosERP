@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Contact.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Contact.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Contact.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
+using Prometheus.BusinessLayer.Helpers;
 
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -452,7 +453,7 @@ public class ContactModule : BaseERPModule, IContactModule
     {
         var now = DateTime.Now;
 
-        var contact = new Contact
+        var contact = CommonDataHelper<Contact>.FillCommonFields(new Contact
         {
             customer_id = createCommandModel.customer_id,
             first_name = createCommandModel.first_name,
@@ -462,11 +463,7 @@ public class ContactModule : BaseERPModule, IContactModule
             phone = createCommandModel.phone,
             cell_phone = createCommandModel.cell_phone,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return contact;
     }

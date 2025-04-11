@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Customer.Dto;
 using Prometheus.BusinessLayer.Models.Module.Customer.Command.Find;
 using Microsoft.EntityFrameworkCore;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -463,7 +464,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
     {
         var now = DateTime.Now;
 
-        var customer = new Customer
+        var customer = CommonDataHelper<Customer>.FillCommonFields(new Customer
         {
             customer_name = createCommandModel.customer_name,
             customer_description = createCommandModel.customer_description,
@@ -473,11 +474,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             website = createCommandModel.website,
             category = createCommandModel.category,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return customer;
     }

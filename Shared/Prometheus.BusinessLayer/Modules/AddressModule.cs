@@ -11,6 +11,7 @@ using Prometheus.Models;
 using Prometheus.Module;
 using Microsoft.EntityFrameworkCore;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -376,9 +377,7 @@ public class AddressModule : BaseERPModule, IAddressModule
 
     private Address MapForCreate(AddressCreateCommand createCommandModel)
     {
-        var now = DateTime.Now;
-
-        var address = new Address
+        var address = CommonDataHelper<Address>.FillCommonFields(new Address
         {
             street_address1 = createCommandModel.street_address1,
             street_address2 = createCommandModel.street_address2,
@@ -387,11 +386,7 @@ public class AddressModule : BaseERPModule, IAddressModule
             postal_code = createCommandModel.postal_code,
             country = createCommandModel.country,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return address;
     }

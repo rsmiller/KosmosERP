@@ -11,6 +11,7 @@ using Prometheus.BusinessLayer.Models.Module.Product.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.Product.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Product.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Product.Dto;
+using Prometheus.BusinessLayer.Helpers;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -519,7 +520,7 @@ public class ProductModule : BaseERPModule, IProductModule
 
     public Database.Models.Product MapToDatabaseModel(ProductCreateCommand createCommand)
     {
-        return new Database.Models.Product()
+        return CommonDataHelper<Database.Models.Product>.FillCommonFields(new Database.Models.Product()
         {
             sales_price = createCommand.sales_price,
             unit_cost = createCommand.unit_cost,
@@ -546,27 +547,19 @@ public class ProductModule : BaseERPModule, IProductModule
             required_stock_level = createCommand.required_stock_level,
             our_cost = createCommand.our_cost,
             external_description = createCommand.external_description,
-            created_on = DateTime.Now,
-            updated_on = DateTime.Now,
-            created_by = createCommand.calling_user_id,
-            updated_by = createCommand.calling_user_id
-        };
+        }, createCommand.calling_user_id);
     }
 
     public ProductAttribute MapToAttributeDatabaseModel(ProductAttributeCreateCommand createCommand, int calling_user_id)
     {
-        return new ProductAttribute()
+        return CommonDataHelper<ProductAttribute>.FillCommonFields(new ProductAttribute()
         {
             product_id = createCommand.product_id.Value,
             attribute_name = createCommand.attribute_name,
             attribute_value = createCommand.attribute_value,
             attribute_value2 = createCommand.attribute_value2,
             attribute_value3 = createCommand.attribute_value3,
-            created_on = DateTime.Now,
-            updated_on = DateTime.Now,
-            created_by = calling_user_id,
-            updated_by = calling_user_id
-        };
+        }, calling_user_id);
     }
 
     public ProductAttributeDto MapToProductAttributeDto(ProductAttribute databaseModel)

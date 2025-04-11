@@ -10,6 +10,8 @@ using Prometheus.BusinessLayer.Models.Module.Country.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Country.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Country.Dto;
 using Prometheus.Models.Permissions;
+using Prometheus.BusinessLayer.Helpers;
+using Prometheus.Database.Models;
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -280,11 +282,11 @@ public class CountryModule : BaseERPModule, ICountryModule
         };
     }
 
-    private Database.Models.Country MapForCreate(CountryCreateCommand createCommandModel)
+    private Country MapForCreate(CountryCreateCommand createCommandModel)
     {
         var now = DateTime.Now;
 
-        var Country = new Database.Models.Country
+        var country = CommonDataHelper<Country>.FillCommonFields(new Country
         {
             country_name = createCommandModel.country_name,
             iso3 = createCommandModel.iso3,
@@ -293,12 +295,8 @@ public class CountryModule : BaseERPModule, ICountryModule
             currency_symbol = createCommandModel.currency_symbol,
             region = createCommandModel.region,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
-        return Country;
+        return country;
     }
 }
