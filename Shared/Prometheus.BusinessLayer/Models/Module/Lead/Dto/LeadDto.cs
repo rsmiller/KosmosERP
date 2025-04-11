@@ -1,23 +1,9 @@
-﻿namespace Prometheus.BusinessLayer.Models.Module.Lead.Dto;
+﻿using Prometheus.Models;
 
-public class LeadDto
+namespace Prometheus.BusinessLayer.Models.Module.Lead.Dto;
+
+public class LeadDto : BaseDto
 {
-    public int id { get; set; }
-
-    public bool is_deleted { get; set; } = false;
-
-    public DateTime created_on { get; set; }
-
-    public int created_by { get; set; }
-
-    public DateTime? updated_on { get; set; }
-
-    public int? updated_by { get; set; }
-
-    public DateTime? deleted_on { get; set; }
-
-    public int? deleted_by { get; set; }
-
     public string first_name { get; set; }
 
     public string last_name { get; set; }
@@ -48,6 +34,4 @@ public class LeadDto
     public int? converted_contact_id { get; set; }
 
     public int owner_id { get; set; }
-
-    public string guid { get; set; }
 }

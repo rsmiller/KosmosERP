@@ -394,6 +394,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             customer_number = databaseModel.customer_number,
             customer_name = databaseModel.customer_name,
             customer_description = databaseModel.customer_description,
@@ -419,8 +423,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
-            // Customer fields
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             customer_number = databaseModel.customer_number,
             customer_name = databaseModel.customer_name,
             customer_description = databaseModel.customer_description,
@@ -437,7 +443,6 @@ public class CustomerModule : BaseERPModule, ICustomerModule
     {
         return new Customer
         {
-            // Base fields
             id = dtoModel.id,
             is_deleted = dtoModel.is_deleted,
             created_on = dtoModel.created_on,
@@ -446,8 +451,6 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             updated_by = dtoModel.updated_by,
             deleted_on = dtoModel.deleted_on,
             deleted_by = dtoModel.deleted_by,
-
-            // Customer fields
             customer_number = dtoModel.customer_number,
             customer_name = dtoModel.customer_name,
             customer_description = dtoModel.customer_description,

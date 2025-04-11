@@ -1,8 +1,9 @@
-﻿namespace Prometheus.BusinessLayer.Models.Module.Product.Dto;
+﻿using Prometheus.Models;
 
-public class ProductListDto
+namespace Prometheus.BusinessLayer.Models.Module.Product.Dto;
+
+public class ProductListDto : BaseDto
 {
-    public required int id { get; set; }
     public required int vendor_id { get; set; }
     public required string vendor_name { get; set; }
     public required string product_class { get; set; }
@@ -17,6 +18,4 @@ public class ProductListDto
     public decimal list_price { get; set; }
     public decimal unit_cost { get; set; }
     public bool is_sales_item { get; set; }
-    public required string guid { get; set; }
-    public DateTime created_on { get; set; }
 }

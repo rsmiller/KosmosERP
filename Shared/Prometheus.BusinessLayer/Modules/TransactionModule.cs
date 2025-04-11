@@ -435,7 +435,10 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             product_id = databaseModel.product_id,
             transaction_type = databaseModel.transaction_type,
             transaction_date = databaseModel.transaction_date,
@@ -463,7 +466,10 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             product_id = databaseModel.product_id,
             transaction_type = databaseModel.transaction_type,
             transaction_date = databaseModel.transaction_date,

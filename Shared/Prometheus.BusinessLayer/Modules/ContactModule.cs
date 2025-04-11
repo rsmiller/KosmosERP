@@ -389,7 +389,10 @@ public class ContactModule : BaseERPModule, IContactModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             customer_id = databaseModel.customer_id,
             first_name = databaseModel.first_name,
             last_name = databaseModel.last_name,
@@ -413,7 +416,10 @@ public class ContactModule : BaseERPModule, IContactModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             customer_id = databaseModel.customer_id,
             first_name = databaseModel.first_name,
             last_name = databaseModel.last_name,

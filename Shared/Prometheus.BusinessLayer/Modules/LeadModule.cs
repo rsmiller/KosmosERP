@@ -398,8 +398,10 @@ public class LeadModule : BaseERPModule, ILeadModule
             converted_contact_id = databaseModel.converted_contact_id,
             owner_id = databaseModel.owner_id,
             guid = databaseModel.guid,
-
-            // BaseDatabaseModel fields
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
             is_deleted = databaseModel.is_deleted,
             created_on = databaseModel.created_on,
             created_by = databaseModel.created_by,
@@ -437,7 +439,11 @@ public class LeadModule : BaseERPModule, ILeadModule
             created_on = databaseModel.created_on,
             created_by = databaseModel.created_by,
             updated_on = databaseModel.updated_on,
-            updated_by = databaseModel.updated_by
+            updated_by = databaseModel.updated_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -466,8 +472,6 @@ public class LeadModule : BaseERPModule, ILeadModule
             converted_contact_id = dtoModel.converted_contact_id,
             owner_id = dtoModel.owner_id,
             guid = dtoModel.guid,
-
-            // BaseDatabaseModel fields
             is_deleted = dtoModel.is_deleted,
             created_on = dtoModel.created_on,
             created_by = dtoModel.created_by,

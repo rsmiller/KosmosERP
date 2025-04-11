@@ -815,7 +815,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             updated_on = databaseModel.updated_on,
             deleted_by = databaseModel.deleted_by,
             deleted_on = databaseModel.deleted_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         var uploads = await _Context.PurchaseOrderReceiveUploads
@@ -857,7 +861,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             updated_on = databaseModel.updated_on,
             deleted_by = databaseModel.deleted_by,
             deleted_on = databaseModel.deleted_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         return dto;
@@ -881,7 +889,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             guid = databaseModel.guid,
             deleted_by = databaseModel.deleted_by,
             deleted_on = databaseModel.deleted_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         return dto;
@@ -900,7 +912,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             updated_on = databaseModel.updated_on,
             deleted_by = databaseModel.deleted_by,
             deleted_on = databaseModel.deleted_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         return dto;

@@ -923,7 +923,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             is_complete = databaseModel.is_complete,
             is_canceled = databaseModel.is_canceled,
             canceled_on = databaseModel.canceled_on,
-            canceled_by = databaseModel.canceled_by
+            canceled_by = databaseModel.canceled_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -959,7 +963,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             is_complete = databaseModel.is_complete,
             is_canceled = databaseModel.is_canceled,
             canceled_on = databaseModel.canceled_on,
-            canceled_by = databaseModel.canceled_by
+            canceled_by = databaseModel.canceled_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -973,7 +981,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             opportunity_line_id = databaseModel.opportunity_line_id,
             quantity = databaseModel.quantity,
             unit_price = databaseModel.unit_price,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         var attributes = await _Context.OrderLineAttributes.Where(m => m.order_line_id == databaseModel.id).ToListAsync();
@@ -1003,7 +1015,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             deleted_on = databaseModel.deleted_on,
             updated_by = databaseModel.updated_by,
             updated_on = databaseModel.updated_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -1062,7 +1078,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             created_by = databaseModel.created_by,
             created_on = databaseModel.created_on,
             updated_by = databaseModel.updated_by,
-            updated_on = databaseModel.updated_on
+            updated_on = databaseModel.updated_on,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 }

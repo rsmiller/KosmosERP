@@ -145,6 +145,12 @@ public class NotificationModule : Hub, INotificationModule
             created_on = databaseModel.created_on,
             guid = databaseModel.guid,
             is_deleted = databaseModel.is_deleted,
+            updated_by = databaseModel.updated_by,
+            updated_on = databaseModel.updated_on,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 }

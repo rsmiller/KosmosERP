@@ -772,7 +772,11 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
@@ -802,7 +806,11 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
@@ -837,7 +845,11 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         if(databaseModel.association_object_id.HasValue && databaseModel.association_is_purchase_order)
@@ -892,7 +904,11 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
-            is_deleted = databaseModel.is_deleted
+            is_deleted = databaseModel.is_deleted,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         return dto;

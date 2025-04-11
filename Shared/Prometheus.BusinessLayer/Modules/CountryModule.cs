@@ -237,6 +237,10 @@ public class CountryModule : BaseERPModule, ICountryModule
             currency = databaseModel.currency,
             currency_symbol = databaseModel.currency_symbol,
             region = databaseModel.region,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -258,6 +262,10 @@ public class CountryModule : BaseERPModule, ICountryModule
             currency = databaseModel.currency,
             currency_symbol = databaseModel.currency_symbol,
             region = databaseModel.region,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 

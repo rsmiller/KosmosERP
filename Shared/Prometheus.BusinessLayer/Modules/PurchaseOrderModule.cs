@@ -701,7 +701,11 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             completed_by = databaseModel.completed_by,
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -729,7 +733,11 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             completed_by = databaseModel.completed_by,
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -756,7 +764,11 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             is_taxable = databaseModel.is_taxable,
             is_complete = databaseModel.is_complete,
             is_canceled = databaseModel.is_canceled,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 

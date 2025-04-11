@@ -660,7 +660,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
             canceled_reason = databaseModel.canceled_reason,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -693,7 +697,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
             canceled_reason = databaseModel.canceled_reason,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -720,7 +728,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
             canceled_reason = databaseModel.canceled_reason,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 

@@ -232,10 +232,13 @@ public class StateModule : BaseERPModule, IStateModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
             country_id = databaseModel.country_id,
             state_name = databaseModel.state_name,
-            iso2 = databaseModel.iso2
+            iso2 = databaseModel.iso2,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -251,10 +254,13 @@ public class StateModule : BaseERPModule, IStateModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-
             country_id = databaseModel.country_id,
             state_name = databaseModel.state_name,
-            iso2 = databaseModel.iso2
+            iso2 = databaseModel.iso2,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 

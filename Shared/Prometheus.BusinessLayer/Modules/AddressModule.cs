@@ -327,7 +327,11 @@ public class AddressModule : BaseERPModule, IAddressModule
             state = databaseModel.state,
             postal_code = databaseModel.postal_code,
             country = databaseModel.country,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
@@ -337,19 +341,23 @@ public class AddressModule : BaseERPModule, IAddressModule
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
-            created_on = databaseModel.created_on,
-            created_by = databaseModel.created_by,
-            updated_on = databaseModel.updated_on,
-            updated_by = databaseModel.updated_by,
-            deleted_on = databaseModel.deleted_on,
-            deleted_by = databaseModel.deleted_by,
             street_address1 = databaseModel.street_address1,
             street_address2 = databaseModel.street_address2,
             city = databaseModel.city,
             state = databaseModel.state,
             postal_code = databaseModel.postal_code,
             country = databaseModel.country,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 

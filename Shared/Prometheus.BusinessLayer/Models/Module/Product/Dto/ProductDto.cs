@@ -1,8 +1,9 @@
-﻿namespace Prometheus.BusinessLayer.Models.Module.Product.Dto;
+﻿using Prometheus.Models;
 
-public class ProductDto
+namespace Prometheus.BusinessLayer.Models.Module.Product.Dto;
+
+public class ProductDto : BaseDto
 {
-    public int id { get; set; }
     public required int vendor_id { get; set; }
     public required string product_class { get; set; }
     public required string category { get; set; }
@@ -19,7 +20,6 @@ public class ProductDto
     public decimal unit_cost { get; set; }
     public decimal sales_price { get; set; }
     public decimal list_price { get; set; }
-    public required string guid { get; set; }
     public string? rfid_id { get; set; }
     public bool is_taxable { get; set; } = true;
     public bool is_stock { get; set; } = false;
@@ -29,10 +29,8 @@ public class ProductDto
     public bool is_labor { get; set; } = false;
     public bool is_shippable { get; set; } = true;
     public bool is_retired { get; set; } = true;
-    public DateTime created_on { get; set; }
     public string? created_by_name { get; set; }
     public string? updated_by_name { get; set; }
-    public DateTime? updated_on { get; set; }
     public DateTime? retired_on { get; set; }
     public string? retired_by_name { get; set; }
 

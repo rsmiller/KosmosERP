@@ -433,7 +433,14 @@ public class ProductModule : BaseERPModule, IProductModule
             vendor_id = databaseModel.vendor_id,
             vendor_name = vendor_name,
             created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
+            updated_on = databaseModel.updated_on,
             external_description = databaseModel.external_description,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         return dto;
@@ -472,7 +479,13 @@ public class ProductModule : BaseERPModule, IProductModule
             retired_on = databaseModel.retired_on,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             external_description = databaseModel.external_description,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
         var attributes = await _Context.ProductAttributes.Where(m => m.product_id == databaseModel.id).ToListAsync();
@@ -571,7 +584,11 @@ public class ProductModule : BaseERPModule, IProductModule
             attribute_value = databaseModel.attribute_value,
             attribute_value2 = databaseModel.attribute_value2,
             attribute_value3 = databaseModel.attribute_value3,
-            product_id = databaseModel.product_id
+            product_id = databaseModel.product_id,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
         };
     }
 
