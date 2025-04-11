@@ -5,11 +5,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "APIUsername": "abcd",
-        "APIPassword": "123456",
-        "APIPrivateKey": "1fe8309e-8cca-4564-86b3-fd5358cca414",
-        "database_string": "sdsd"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5213"
@@ -19,11 +15,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "APIUsername": "abcd",
-        "APIPassword": "123456",
-        "APIPrivateKey": "1fe8309e-8cca-4564-86b3-fd5358cca414",
-        "database_string": "server=localhost;user=root;password=Gnosis!2020;database=prometheus_erp;convert zero datetime=True;TreatTinyAsBoolean=True"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7054;http://localhost:5213"
