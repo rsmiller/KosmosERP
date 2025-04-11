@@ -132,9 +132,7 @@ public class CountryModule : BaseERPModule, ICountryModule
             return new Response<CountryDto>("Country not found", ResultCode.NotFound);
 
         // Soft-delete
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Country>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Countries.Update(existingEntity);
         await _Context.SaveChangesAsync();

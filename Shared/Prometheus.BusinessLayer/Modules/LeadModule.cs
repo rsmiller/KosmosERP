@@ -316,9 +316,9 @@ public class LeadModule : BaseERPModule, ILeadModule
         if (existingEntity == null)
             return new Response<LeadDto>("Lead not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        // Delete
+        existingEntity = CommonDataHelper<Lead>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Leads.Update(existingEntity);
         await _Context.SaveChangesAsync();

@@ -316,9 +316,8 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (existingEntity == null)
             return new Response<VendorDto>("Vendor not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // Delete
+        existingEntity = CommonDataHelper<Vendor>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Vendors.Update(existingEntity);
         await _Context.SaveChangesAsync();

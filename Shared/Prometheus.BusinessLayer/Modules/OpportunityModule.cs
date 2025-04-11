@@ -282,9 +282,10 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (existingEntity == null)
             return new Response<OpportunityDto>("Opportunity not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        // Do delete
+        existingEntity = CommonDataHelper<Opportunity>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Opportunities.Update(existingEntity);
         await _Context.SaveChangesAsync();

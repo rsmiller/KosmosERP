@@ -277,9 +277,8 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (existingEntity == null)
             return new Response<CustomerDto>("Customer not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // DO Delete
+        existingEntity = CommonDataHelper<Customer>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Customers.Update(existingEntity);
         await _Context.SaveChangesAsync();

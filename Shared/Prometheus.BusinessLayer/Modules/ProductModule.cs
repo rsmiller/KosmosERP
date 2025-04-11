@@ -267,9 +267,8 @@ public class ProductModule : BaseERPModule, IProductModule
         if (existingEntity == null)
             return new Response<ProductDto>("Product not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // Do delete
+        existingEntity = CommonDataHelper<Product>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Products.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -354,9 +353,9 @@ public class ProductModule : BaseERPModule, IProductModule
         if (existingEntity == null)
             return new Response<ProductAttributeDto>("Attribute not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        // Destroy
+        existingEntity = CommonDataHelper<ProductAttribute>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.ProductAttributes.Update(existingEntity);
         await _Context.SaveChangesAsync();

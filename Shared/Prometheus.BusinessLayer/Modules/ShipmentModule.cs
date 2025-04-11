@@ -15,6 +15,7 @@ using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Create;
 using System.Text.Json;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using Prometheus.BusinessLayer.Helpers;
 
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -473,9 +474,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            // DO delete
+            existingEntity = CommonDataHelper<ShipmentHeader>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
             _Context.ShipmentHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -514,9 +514,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            // Delete line
+            existingEntity = CommonDataHelper<ShipmentLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
             _Context.ShipmentLines.Update(existingEntity);
             await _Context.SaveChangesAsync();

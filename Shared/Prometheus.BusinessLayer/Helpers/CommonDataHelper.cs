@@ -32,6 +32,7 @@ namespace Prometheus.BusinessLayer.Helpers
         {
             var now = DateTime.UtcNow;
 
+            model.is_deleted = true;
             model.deleted_by = calling_user_id;
             model.deleted_by = calling_user_id;
             model.deleted_on_string = now.ToString("u");

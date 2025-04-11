@@ -203,10 +203,8 @@ public class AddressModule : BaseERPModule, IAddressModule
         if (existingEntity == null)
             return new Response<AddressDto>("Address not found", ResultCode.NotFound);
 
-        // Soft-delete
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // Soft-deletes
+        existingEntity = CommonDataHelper<Address>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Addresses.Update(existingEntity);
         await _Context.SaveChangesAsync();

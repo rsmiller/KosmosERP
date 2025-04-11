@@ -331,9 +331,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
         }
 
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Transaction>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Transactions.Update(existingEntity);
         await _Context.SaveChangesAsync();

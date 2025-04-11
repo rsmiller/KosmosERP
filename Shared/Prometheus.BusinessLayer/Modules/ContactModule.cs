@@ -274,9 +274,8 @@ public class ContactModule : BaseERPModule, IContactModule
         if (existingEntity == null)
             return new Response<ContactDto>("Contact not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        //  Soft delete
+        existingEntity = CommonDataHelper<Contact>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.Contacts.Update(existingEntity);
         await _Context.SaveChangesAsync();

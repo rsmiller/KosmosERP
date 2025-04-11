@@ -451,9 +451,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (existingEntity == null)
             return new Response<APInvoiceHeaderDto>("AP Invoice Header not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // Soft Delete
+        existingEntity = CommonDataHelper<APInvoiceHeader>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.APInvoiceHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -476,9 +475,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (existingEntity == null)
             return new Response<APInvoiceLineDto>("AP Invoice Line not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // Soft Delete
+        existingEntity = CommonDataHelper<APInvoiceLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _Context.APInvoiceLines.Update(existingEntity);
         await _Context.SaveChangesAsync();

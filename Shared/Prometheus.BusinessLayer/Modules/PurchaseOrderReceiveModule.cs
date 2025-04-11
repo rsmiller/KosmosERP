@@ -342,9 +342,9 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            // Delete
+            existingEntity = CommonDataHelper<PurchaseOrderReceiveHeader>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
 
             _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -648,9 +648,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Line not found", ResultCode.NotFound);
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            existingEntity = CommonDataHelper<PurchaseOrderReceiveLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
             _Context.PurchaseOrderReceiveLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -730,9 +728,10 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (existingEntity == null)
             return new Response<PurchaseOrderReceiveUploadDto>("Purchase Order Receive Upload not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        // Soft delete
+        existingEntity = CommonDataHelper<PurchaseOrderReceiveUpload>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.PurchaseOrderReceiveUploads.Update(existingEntity);
         await _Context.SaveChangesAsync();

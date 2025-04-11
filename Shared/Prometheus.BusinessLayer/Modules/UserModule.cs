@@ -577,9 +577,8 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (existingEntity == null)
             return new Response<UserDto>("User not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+        // Soft delete user
+        existingEntity = CommonDataHelper<User>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
         _IContext.Users.Update(existingEntity);
         await _IContext.SaveChangesAsync();

@@ -329,9 +329,10 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderHeaderDto>("Order Header not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        // Delete Record
+        existingEntity = CommonDataHelper<OrderHeader>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.OrderHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -405,8 +406,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 existingEntity.opportunity_id = commandModel.opportunity_id.Value;
             if(existingEntity.order_type != commandModel.order_type)
                 existingEntity.order_type = commandModel.order_type;
-            if(commandModel.order_date.HasValue && existingEntity.order_date != commandModel.order_date)
-                existingEntity.order_date = commandModel.order_date.Value;
+            
             if (commandModel.required_date.HasValue && existingEntity.required_date != commandModel.required_date)
                 existingEntity.required_date = commandModel.required_date.Value;
             if (existingEntity.po_number != commandModel.po_number)
@@ -416,6 +416,8 @@ public class OrderModule : BaseERPModule, IOrderModule
             if (commandModel.shipping_cost.HasValue && existingEntity.shipping_cost != commandModel.shipping_cost)
                 existingEntity.shipping_cost = commandModel.shipping_cost.Value;
 
+            if (commandModel.order_date.HasValue && existingEntity.order_date != commandModel.order_date)
+                existingEntity.order_date = commandModel.order_date.Value;
 
             existingEntity.updated_on = DateTime.UtcNow;
             existingEntity.updated_by = commandModel.calling_user_id;
@@ -704,9 +706,8 @@ public class OrderModule : BaseERPModule, IOrderModule
 
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            // Delete
+            existingEntity = CommonDataHelper<OrderLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
             _Context.OrderLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -823,9 +824,10 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineAttributeDto>("Attribute not found", ResultCode.NotFound);
 
-        existingEntity.is_deleted = true;
-        existingEntity.deleted_on = DateTime.UtcNow;
-        existingEntity.deleted_by = commandModel.calling_user_id;
+
+        // Nuke
+        existingEntity = CommonDataHelper<OrderLineAttribute>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.OrderLineAttributes.Update(existingEntity);
         await _Context.SaveChangesAsync();

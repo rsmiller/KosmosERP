@@ -525,9 +525,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            // Soft delete
+            existingEntity = CommonDataHelper<PurchaseOrderHeader>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
 
             _Context.PurchaseOrderHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -561,9 +561,8 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
         try
         {
-            existingEntity.is_deleted = true;
-            existingEntity.deleted_on = DateTime.UtcNow;
-            existingEntity.deleted_by = commandModel.calling_user_id;
+            // Do Delete
+            existingEntity = CommonDataHelper<PurchaseOrderLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
             _Context.PurchaseOrderLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
