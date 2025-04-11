@@ -4,11 +4,11 @@ using Prometheus.BusinessLayer.Models.Module.Notification.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.Notification.Dto;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
 using Prometheus.BusinessLayer.Modules;
-using Prometheus.Models;
+using Prometheus.Models; 
 
 namespace Prometheus.Api.Controllers;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 [Route("api/v1/[controller]")]
 public class NotificationController : Controller

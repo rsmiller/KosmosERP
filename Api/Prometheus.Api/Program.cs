@@ -19,6 +19,9 @@ Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost
 Environment.SetEnvironmentVariable("MessagePublisherAccountProvider", "Mock");
 Environment.SetEnvironmentVariable("TransactionMovementTopic", "transaction_movement");
 Environment.SetEnvironmentVariable("FileStorageAccountProvider", "Mock");
+Environment.SetEnvironmentVariable("APIUsername", "test");
+Environment.SetEnvironmentVariable("APIPassword", "password");
+Environment.SetEnvironmentVariable("APIPrivateKey", "444333");
 
 // Add services to the container.
 
@@ -59,8 +62,6 @@ builder.Services.AddSignalR();
 //
 var authenticationSettings = new AuthenticationSettings()
 {
-    APIUsername = Environment.GetEnvironmentVariable("APIUsername"),
-    APIPassword = Environment.GetEnvironmentVariable("APIPassword"),
     APIPrivateKey = Environment.GetEnvironmentVariable("APIPrivateKey")
 };
 
@@ -192,11 +193,11 @@ foreach (var module in modules)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 //app.UseHttpsRedirection();
 

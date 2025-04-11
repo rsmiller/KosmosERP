@@ -20,6 +20,7 @@ public class ModuleUserTests
 
     public int _UserId { get; set; }
     private string _SessionId = Guid.NewGuid().ToString();
+    private string _PrivateKey = "Key123";
 
     [SetUp]
     public void Setup()
@@ -30,7 +31,13 @@ public class ModuleUserTests
 
         _Context = new ERPDbContext(options);
 
-        _Module = new UserModule(_Context);
+        var auth_settings = new AuthenticationSettings()
+        {
+            APIPrivateKey = _PrivateKey
+        };
+
+        _Module = new UserModule(_Context, auth_settings);
+
         _Module.SeedPermissions();
 
         var baseUser = new User()
@@ -198,6 +205,7 @@ public class ModuleUserTests
         Assert.NotNull(authenticate_response.Data);
         Assert.IsTrue(authenticate_response.Data.authenticated);
         Assert.NotNull(authenticate_response.Data.session);
+        Assert.NotNull(authenticate_response.Data.token);
     }
 
     [Test]

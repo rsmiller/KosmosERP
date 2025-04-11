@@ -4,18 +4,18 @@ using Prometheus.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
+using System.Security.Claims;
 
 namespace Prometheus.BusinessLayer.Modules;
 
 public interface ITokenModule
 {
-    Response<JwtToken> Request(string username, string password);
 }
 
 public class TokenModule : ITokenModule
 {
     public static string Issuer { get { return "Prometheus"; } }
-    public static int Expires { get { return 10000; } }
+    public static int Expires { get { return 60000; } }
 
     private IAuthenticationSettings _AuthenticationSettings;
 
@@ -24,36 +24,31 @@ public class TokenModule : ITokenModule
         _AuthenticationSettings = settings;
     }
 
-    public Response<JwtToken> Request(string username, string password)
-    {
-        Response<JwtToken> response = new Response<JwtToken>();
-
-        try
-        {
-            if (username == _AuthenticationSettings.APIUsername && password == _AuthenticationSettings.APIPassword)
-                response.Data = CreateSecurityToken(_AuthenticationSettings.APIPrivateKey);
-            else
-                response.Success = false;
-        }
-        catch (Exception e)
-        {
-            response.SetException(e);
-        }
-
-        return response;
-    }
-
     public static SymmetricSecurityKey CreateSecurityKey(string privateKey)
     {
         return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(privateKey));
     }
 
-    public static JwtToken CreateSecurityToken(string privateKey)
+    public static JwtToken CreateSecurityToken(string username, string privateKey)
     {
-        return new JwtToken(new JwtSecurityToken(
-            issuer: TokenModule.Issuer,
-            expires: DateTime.Now.AddMinutes(TokenModule.Expires),
-            signingCredentials: new SigningCredentials(TokenModule.CreateSecurityKey(privateKey), SecurityAlgorithms.HmacSha256Signature)));
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var claim = new SecurityTokenDescriptor()
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, username)
+            }),
+            Issuer = TokenModule.Issuer,
+            Expires = DateTime.Now.AddMinutes(TokenModule.Expires),
+            SigningCredentials = new SigningCredentials(TokenModule.CreateSecurityKey(privateKey), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateJwtSecurityToken(claim);
+
+        return new JwtToken(token);
+
+
     }
 
     public static string CreateAPIKey(string username, string password)

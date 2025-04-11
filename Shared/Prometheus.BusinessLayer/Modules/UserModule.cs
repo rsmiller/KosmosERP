@@ -33,9 +33,12 @@ public partial class UserModule : BaseERPModule, IUserModule
 
     private IBaseERPContext _IContext;
 
-    public UserModule(IBaseERPContext context) : base (context)
+    private IAuthenticationSettings _AuthenticationSettings;
+
+    public UserModule(IBaseERPContext context, IAuthenticationSettings authenticationSettings) : base (context)
     {
         _IContext = context;
+        _AuthenticationSettings = authenticationSettings;
     }
 
     public override void SeedPermissions()
@@ -377,12 +380,15 @@ public partial class UserModule : BaseERPModule, IUserModule
                     var userDto = await this.MapToDto(result);
                     var sessionState = await this.FindCreateOrUpdateUserSession(userDto.id);
 
+                    var token = TokenModule.CreateSecurityToken(username, _AuthenticationSettings.APIPrivateKey);
+
                     var dto = new AuthenticatedUserDto()
                     {
                         id = result.id,
                         authenticated = true,
                         user = userDto,
-                        session = sessionState
+                        session = sessionState,
+                        token = token
                     };
 
                     return new Response<AuthenticatedUserDto>(dto);
@@ -393,7 +399,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         }
         catch (Exception ex)
         {
-            await LogError(50, this.GetType().Name, "Authenticate", ex);
+            await LogError(20, this.GetType().Name, "Authenticate", ex);
 
             return new Response<AuthenticatedUserDto>(ex.Message, ResultCode.Error);
         }

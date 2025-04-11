@@ -267,40 +267,4 @@ public class ModuleTests
         Assert.That(log_result.category == "Admin");
         Assert.That(log_result.message == "Someone did something");
     }
-
-    [Test]
-    public void GetToken_TokenService()
-    {
-        var auth_settings = new AuthenticationSettings()
-        {
-            APIUsername = "Test",
-            APIPassword = "Password",
-            APIPrivateKey = "Key123"
-        };
-
-        var service = new TokenModule(auth_settings);
-
-        var token_response = service.Request(auth_settings.APIUsername, auth_settings.APIPassword);
-
-        Assert.NotNull(token_response);
-        Assert.NotNull(token_response.Data);
-    }
-
-    [Test]
-    public void GetToken_BadResponse_TokenService()
-    {
-        var auth_settings = new AuthenticationSettings()
-        {
-            APIUsername = "Test",
-            APIPassword = "Password",
-            APIPrivateKey = "Key123"
-        };
-
-        var service = new TokenModule(auth_settings);
-
-        var token_response = service.Request("ASDASDASD", auth_settings.APIPassword);
-
-        Assert.NotNull(token_response);
-        Assert.IsNull(token_response.Data);
-    }
 }
