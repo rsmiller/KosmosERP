@@ -1,5 +1,4 @@
 ﻿using Prometheus.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace Prometheus.BusinessLayer.Models.Module.Lead.Command.Find;
 

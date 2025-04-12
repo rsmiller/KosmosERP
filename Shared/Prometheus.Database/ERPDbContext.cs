@@ -61,6 +61,9 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new CountryConfiguration());
         modelBuilder.ApplyConfiguration(new TransactionConfiguration());
         modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductionOrderHeaderConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductionOrderLineConfiguration());
+        modelBuilder.ApplyConfiguration(new BOMConfiguration());
     }
     
 
@@ -106,4 +109,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<DocumentUploadObjectTagTemplate> DocumentUploadObjectTags { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ProductionOrderHeader> ProductionOrderHeaders { get; set; }
+    public DbSet<ProductionOrderLine> ProductionOrderLines { get; set; }
+    public DbSet<BOM> BOMs { get; set; }
 }
