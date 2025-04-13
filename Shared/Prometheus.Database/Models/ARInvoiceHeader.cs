@@ -10,13 +10,19 @@ public class ARInvoiceHeader : BaseDatabaseModel
     public int customer_id { get; set; }
 
     [Required]
-    public int order_id { get; set; }
+    public int order_header_id { get; set; }
 
     [Required]
     public int invoice_number { get; set; }
 
     [Required]
+    public int payment_terms { get; set; }
+
+    [Required]
     public DateOnly invoice_date { get; set; }
+
+    [Required]
+    public DateOnly invoice_due_date { get; set; }
 
     [Required]
     [Precision(14, 3)]
@@ -32,7 +38,7 @@ public class ARInvoiceHeader : BaseDatabaseModel
     public bool is_taxable { get; set; } = false;
 
     [Required]
-    public DateOnly paid_on { get; set; }
+    public DateOnly? paid_on { get; set; }
 
     [Required]
     public string guid { get; set; } = Guid.NewGuid().ToString();

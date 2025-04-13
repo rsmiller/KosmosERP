@@ -456,9 +456,9 @@ public class DatabaseTests
         var invoice_header_model = CommonDataHelper<APInvoiceHeader>.FillCommonFields(new APInvoiceHeader()
         {
             invoice_number = "1",
-            inv_due_date = DateTime.UtcNow.AddDays(30),
-            inv_received_date = DateTime.UtcNow.AddDays(-10),
-            inv_date = DateTime.UtcNow,
+            invoice_due_date = DateTime.UtcNow.AddDays(30),
+            invoice_received_date = DateTime.UtcNow.AddDays(-10),
+            invoice_date = DateTime.UtcNow,
             invoice_total = 100,
             vendor_id = 1,
             memo = "ASDASDSD",
@@ -540,7 +540,7 @@ public class DatabaseTests
             customer_id = 1,
             invoice_date = DateOnly.FromDateTime(DateTime.UtcNow),
             invoice_total = 100,
-            order_id = order_model.id,
+            order_header_id = order_model.id,
             tax_percentage = 8.25M,
             is_taxable = true,
         }, 1);

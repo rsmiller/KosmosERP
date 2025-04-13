@@ -8,12 +8,17 @@ public class ARInvoiceLine : BaseDatabaseModel
 {
     [Required]
     public int ar_invoice_header_id { get; set; }
+    [Required]
+    public int line_number { get; set; }
 
     [Required]
     public int order_line_id { get; set; }
 
     [Required]
     public int product_id { get; set; }
+
+    [Required]
+    public string line_description { get; set; }
 
     [Required]
     public int order_qty { get; set; } = 0;

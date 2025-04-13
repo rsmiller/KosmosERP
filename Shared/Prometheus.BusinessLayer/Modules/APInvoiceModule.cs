@@ -334,14 +334,14 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         if (existingEntity.invoice_number != commandModel.invoice_number)
             existingEntity.invoice_number = commandModel.invoice_number;
 
-        if (existingEntity.inv_date != commandModel.inv_date && commandModel.inv_date.HasValue)
-            existingEntity.inv_date = commandModel.inv_date.Value;
+        if (existingEntity.invoice_date != commandModel.invoice_date && commandModel.invoice_date.HasValue)
+            existingEntity.invoice_date = commandModel.invoice_date.Value;
 
-        if (existingEntity.inv_due_date != commandModel.inv_due_date && commandModel.inv_due_date.HasValue)
-            existingEntity.inv_due_date = commandModel.inv_due_date.Value;
+        if (existingEntity.invoice_due_date != commandModel.invoice_due_date && commandModel.invoice_due_date.HasValue)
+            existingEntity.invoice_due_date = commandModel.invoice_due_date.Value;
 
-        if (existingEntity.inv_received_date != commandModel.inv_received_date && commandModel.inv_received_date.HasValue)
-            existingEntity.inv_received_date = commandModel.inv_received_date.Value;
+        if (existingEntity.invoice_received_date != commandModel.invoice_received_date && commandModel.invoice_received_date.HasValue)
+            existingEntity.invoice_received_date = commandModel.invoice_received_date.Value;
 
         if (existingEntity.invoice_total != commandModel.invoice_total && commandModel.invoice_total.HasValue)
             existingEntity.invoice_total = commandModel.invoice_total.Value;
@@ -759,9 +759,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             vendor_id = databaseModel.vendor_id,
             invoice_number = databaseModel.invoice_number,
-            inv_date = databaseModel.inv_date,
-            inv_due_date = databaseModel.inv_due_date,
-            inv_received_date = databaseModel.inv_received_date,
+            invoice_date = databaseModel.invoice_date,
+            invoice_due_date = databaseModel.invoice_due_date,
+            invoice_received_date = databaseModel.invoice_received_date,
             invoice_total = databaseModel.invoice_total,
             memo = databaseModel.memo,
             packing_list_is_required = databaseModel.packing_list_is_required,
@@ -788,9 +788,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             vendor_id = databaseModel.vendor_id,
             invoice_number = databaseModel.invoice_number,
-            inv_date = databaseModel.inv_date,
-            inv_due_date = databaseModel.inv_due_date,
-            inv_received_date = databaseModel.inv_received_date,
+            invoice_date = databaseModel.invoice_date,
+            invoice_due_date = databaseModel.invoice_due_date,
+            invoice_received_date = databaseModel.invoice_received_date,
             invoice_total = databaseModel.invoice_total,
             memo = databaseModel.memo,
             purchase_order_receive_id = databaseModel.purchase_order_receive_id,
@@ -918,9 +918,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
         {
             vendor_id = createCommand.vendor_id,
             invoice_number = createCommand.invoice_number,
-            inv_date = createCommand.inv_date,
-            inv_due_date = createCommand.inv_due_date,
-            inv_received_date = createCommand.inv_received_date,
+            invoice_date = createCommand.invoice_date,
+            invoice_due_date = createCommand.invoice_due_date,
+            invoice_received_date = createCommand.invoice_received_date,
             invoice_total = createCommand.invoice_total,
             memo = createCommand.memo,
             purchase_order_receive_id = createCommand.purchase_order_receive_id,

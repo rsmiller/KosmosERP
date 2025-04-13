@@ -2,7 +2,7 @@
 
 namespace Prometheus.BusinessLayer.Models.Module.ARInvoice.Dto;
 
-public class ARInvoiceLineDto : BaseDto
+public class ARInvoiceLineListDto : BaseDto
 {
     public int ar_invoice_header_id { get; set; }
     public int line_number { get; set; }

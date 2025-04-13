@@ -9,10 +9,10 @@ public class APInvoiceHeaderDto : BaseDto
 
     public string invoice_number { get; set; }
 
-    public DateTime inv_date { get; set; }
-    public DateTime inv_due_date { get; set; }
+    public DateTime invoice_date { get; set; }
+    public DateTime invoice_due_date { get; set; }
 
-    public DateTime inv_received_date { get; set; }
+    public DateTime invoice_received_date { get; set; }
 
     public decimal invoice_total { get; set; }
 

@@ -14,11 +14,11 @@ public class APInvoiceHeaderEditCommand : DataCommand
 
     public int? vendor_id { get; set; }
 
-    public DateTime? inv_date { get; set; }
+    public DateTime? invoice_date { get; set; }
 
-    public DateTime? inv_due_date { get; set; }
+    public DateTime? invoice_due_date { get; set; }
 
-    public DateTime? inv_received_date { get; set; }
+    public DateTime? invoice_received_date { get; set; }
 
     [Precision(14, 3)]
     public decimal? invoice_total { get; set; }
