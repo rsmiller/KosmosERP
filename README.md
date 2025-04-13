@@ -20,7 +20,7 @@ As of 4/13/2025
 - I started storage account factories that will support local and cloud systems. Details needed and testing.
 - Created a messaging factory for providers like service bus, rabbitmq, pub/sub, ect.
 - The following modules need to be created for a Minimal Viable Product: MRP, BOM, Production/Release Orders, Inventory, Return.
-- SignalR hib for notifications has been made but it may need some slight rework.
+- SignalR hub for notifications has been made but it may need some slight rework.
 
 As of 3/9/2025
 - Database models are 90% of what an average company will need
