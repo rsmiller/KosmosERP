@@ -20,7 +20,7 @@ As of 4/13/2025
 - I started storage account factories that will support local and cloud systems. Details needed and testing.
 - Created a messaging factory for providers like service bus, rabbitmq, pub/sub, ect.
 - The following modules need to be created for a Minimal Viable Product: MRP, BOM, Production/Release Orders, Inventory, Return.
-- Started development on the Api monolith.
+- SignalR hib for notifications has been made but it may need some slight rework.
 
 As of 3/9/2025
 - Database models are 90% of what an average company will need
@@ -44,4 +44,4 @@ As of 3/9/2025
 - Certificates Module
 - Quality/RMA Module
 - Camera Module - use case: taking a picture of products on scales/pallets when receiving or when completed.
-- 
+- Comment Module - user case: for a running tally of internal communication of objects like orders, invoices, production orders, ect.
