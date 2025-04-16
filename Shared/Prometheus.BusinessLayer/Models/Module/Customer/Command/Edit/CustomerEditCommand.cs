@@ -15,4 +15,6 @@ public class CustomerEditCommand : DataCommand
     public string? general_email { get; set; }
     public string? website { get; set; }
     public string? category { get; set; }
+    public bool? is_taxable { get; set; }
+    public decimal? tax_rate { get; set; }
 }

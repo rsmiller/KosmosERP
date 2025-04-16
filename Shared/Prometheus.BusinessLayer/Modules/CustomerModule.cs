@@ -4,25 +4,25 @@ using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models;
 using Prometheus.Module;
-using Prometheus.BusinessLayer.Models.Module.Customer.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Customer.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Customer.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Customer.Dto;
-using Prometheus.BusinessLayer.Models.Module.Customer.Command.Find;
 using Microsoft.EntityFrameworkCore;
 using Prometheus.Models.Permissions;
 using Prometheus.BusinessLayer.Helpers;
+using Prometheus.BusinessLayer.Models.Module.Customer.Dto;
+using Prometheus.BusinessLayer.Models.Module.Customer.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.Customer.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.Customer.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.Customer.Command.Find;
 
 namespace Prometheus.BusinessLayer.Modules;
 
 public interface ICustomerModule : IERPModule<
-Customer,
-CustomerDto,
-CustomerListDto,
-CustomerCreateCommand,
-CustomerEditCommand,
-CustomerDeleteCommand,
-CustomerFindCommand>, IBaseERPModule
+        Customer,
+        CustomerDto,
+        CustomerListDto,
+        CustomerCreateCommand,
+        CustomerEditCommand,
+        CustomerDeleteCommand,
+        CustomerFindCommand>, IBaseERPModule
 {
 
 }
@@ -252,6 +252,11 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (existingEntity.category != commandModel.category)
             existingEntity.category = commandModel.category;
 
+        if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
+            existingEntity.is_taxable = commandModel.is_taxable.Value;
+
+        if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
+            existingEntity.is_taxable = commandModel.is_taxable.Value;
 
         existingEntity.updated_on = DateTime.UtcNow;
         existingEntity.updated_by = commandModel.calling_user_id;
@@ -405,7 +410,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             general_email = databaseModel.general_email,
             website = databaseModel.website,
             category = databaseModel.category,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            is_taxable = databaseModel.is_taxable,
+            tax_rate = databaseModel.tax_rate,
         };
     }
 
@@ -434,7 +441,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             general_email = databaseModel.general_email,
             website = databaseModel.website,
             category = databaseModel.category,
-            guid = databaseModel.guid
+            guid = databaseModel.guid,
+            is_taxable = databaseModel.is_taxable,
+            tax_rate = databaseModel.tax_rate,
         };
     }
 
@@ -458,7 +467,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             general_email = dtoModel.general_email,
             website = dtoModel.website,
             category = dtoModel.category,
-            guid = dtoModel.guid
+            guid = dtoModel.guid,
+            is_taxable = dtoModel.is_taxable,
+            tax_rate = dtoModel.tax_rate,
         };
     }
 
@@ -476,6 +487,8 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             website = createCommandModel.website,
             category = createCommandModel.category,
             is_deleted = false,
+            is_taxable = createCommandModel.is_taxable,
+            tax_rate = createCommandModel.tax_rate,
         }, createCommandModel.calling_user_id);
 
         return customer;

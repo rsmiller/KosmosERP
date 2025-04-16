@@ -33,6 +33,12 @@ public class Customer : BaseDatabaseModel
     public string category { get; set; }
 
     [Required]
+    public bool is_taxable { get; set; } = true;
+
+    [Required]
+    public decimal tax_rate { get; set; } = 0;
+
+    [Required]
     [MaxLength(50)]
     public string guid { get; set; } = Guid.NewGuid().ToString();
 

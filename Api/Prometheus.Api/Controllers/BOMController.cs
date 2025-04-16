@@ -1,32 +1,32 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Prometheus.BusinessLayer.Models.Module.BOM.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.BOM.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.BOM.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.BOM.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.BOM.Dto;
+using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
+using Prometheus.BusinessLayer.Modules;
 using Prometheus.Models;
 using Prometheus.Module;
-using Prometheus.BusinessLayer.Modules;
-using Prometheus.BusinessLayer.Models.Module.Contact.Dto;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.Contact.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
 
 namespace Prometheus.Api.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/v1/[controller]")]
-public class ContactController : ERPApiController
+public class BOMController : ERPApiController
 {
-    private IContactModule _Module;
+    private IBOMModule _Module;
 
-    public ContactController(IContactModule module) : base(module)
+    public BOMController(IBOMModule module) : base(module)
     {
         _Module = module;
     }
 
-    
-    [HttpGet("GetContact", Name = "GetContact")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+
+    [HttpGet("GetBOM", Name = "GetBOM")]
+    [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Get([FromQuery] int id)
     {
@@ -38,10 +38,10 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [HttpPost("FindContact", Name = "FindContact")]
-    [ProducesResponseType(typeof(PagingResult<ContactListDto>), 200)]
+    [HttpPost("FindBOM", Name = "FindBOM")]
+    [ProducesResponseType(typeof(PagingResult<BOMListDto>), 200)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] ContactFindCommand command)
+    public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] BOMFindCommand command)
     {
         try
         {
@@ -64,10 +64,10 @@ public class ContactController : ERPApiController
         }
     }
 
-    [HttpPost("CreateContact", Name = "CreateContact")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [HttpPost("CreateBOM", Name = "CreateBOM")]
+    [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult> Create([FromBody] ContactCreateCommand createCommand)
+    public async Task<ActionResult> Create([FromBody] BOMCreateCommand createCommand)
     {
         var result = await _Module.Create(createCommand);
 
@@ -77,10 +77,10 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [HttpPut("UpdateContact", Name = "UpdateContact")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [HttpPut("UpdateBOM", Name = "UpdateBOM")]
+    [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult> Edit([FromBody] ContactEditCommand editCommand)
+    public async Task<ActionResult> Edit([FromBody] BOMEditCommand editCommand)
     {
         var result = await _Module.Edit(editCommand);
 
@@ -90,10 +90,10 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [HttpDelete("DeleteContact", Name = "DeleteContact")]
-    [ProducesResponseType(typeof(Response<ContactDto>), 200)]
+    [HttpDelete("DeleteBOM", Name = "DeleteBOM")]
+    [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
-    public async Task<ActionResult> Delete([FromBody] ContactDeleteCommand deleteCommand)
+    public async Task<ActionResult> Delete([FromBody] BOMDeleteCommand deleteCommand)
     {
         var result = await _Module.Delete(deleteCommand);
 

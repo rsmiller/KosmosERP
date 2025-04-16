@@ -13,4 +13,6 @@ public class CustomerListDto : BaseDto
     public string? website { get; set; }
     public string category { get; set; }
     public string guid { get; set; }
+    public bool is_taxable { get; set; }
+    public decimal tax_rate { get; set; }
 }

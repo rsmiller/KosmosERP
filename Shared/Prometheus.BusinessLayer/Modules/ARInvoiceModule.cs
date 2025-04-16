@@ -1,17 +1,18 @@
-﻿using Prometheus.Database;
+﻿using Prometheus.Models;
+using Prometheus.Module;
+using Prometheus.Database;
+using Prometheus.Models.Helpers;
 using Prometheus.Database.Models;
-using Prometheus.Models;
 using Prometheus.Models.Interfaces;
 using Prometheus.Models.Permissions;
-using Prometheus.Module;
+using Microsoft.EntityFrameworkCore;
+using Prometheus.BusinessLayer.Helpers;
+using Prometheus.BusinessLayer.Models.Module.ARInvoice.Dto;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.ARInvoice.Dto;
-using Microsoft.EntityFrameworkCore;
-using Prometheus.BusinessLayer.Helpers;
-using Prometheus.Models.Helpers;
+
 
 namespace Prometheus.BusinessLayer.Modules;
 
@@ -245,7 +246,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             // Now do lines
             foreach (var ap_line in commandModel.ar_invoice_lines)
             {
-                var db_line = MapToLineDatabaseModel(ap_line, item.id, commandModel.calling_user_id);
+                var db_line = await MapToLineDatabaseModel(ap_line, item.id, commandModel.calling_user_id);
 
                 await _Context.ARInvoiceLines.AddAsync(db_line);
                 await _Context.SaveChangesAsync();
@@ -280,7 +281,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         try
         {
-            var item = MapToLineDatabaseModel(commandModel, commandModel.ar_invoice_header_id.Value, commandModel.calling_user_id);
+            var item = await MapToLineDatabaseModel(commandModel, commandModel.ar_invoice_header_id.Value, commandModel.calling_user_id);
 
             await _Context.ARInvoiceLines.AddAsync(item);
             await _Context.SaveChangesAsync();
@@ -647,9 +648,9 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         }, createCommand.calling_user_id);
     }
 
-    public ARInvoiceLine MapToLineDatabaseModel(ARInvoiceLineCreateCommand createCommand, int ar_invoice_header_id, int calling_user_id)
+    public async Task<ARInvoiceLine> MapToLineDatabaseModel(ARInvoiceLineCreateCommand createCommand, int ar_invoice_header_id, int calling_user_id)
     {
-        return CommonDataHelper<ARInvoiceLine>.FillCommonFields(new ARInvoiceLine()
+        var line = CommonDataHelper<ARInvoiceLine>.FillCommonFields(new ARInvoiceLine()
         {
             ar_invoice_header_id = ar_invoice_header_id,
             line_number = createCommand.line_number,
@@ -658,12 +659,35 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             line_description = createCommand.line_description,
             invoice_qty = createCommand.invoice_qty,
             guid = Guid.NewGuid().ToString(),
-            is_deleted = false
+            is_deleted = false,
         }, calling_user_id);
 
-        // TODO: line_total
-        // TODO: Order qty
-        // TODO: line_tax
+
+        var order_line = await _Context.OrderLines.Where(m => m.id == createCommand.order_line_id).SingleOrDefaultAsync();
+
+        if (order_line == null)
+            throw new Exception("Order line not found");
+
+        var customer_tax = await (from c in _Context.Customers
+                                  join o in _Context.OrderHeaders on c.id equals o.customer_id
+                                  where c.id == order_line.order_id
+                                  select new { c.is_taxable, c.tax_rate }).SingleOrDefaultAsync();
+
+        if (customer_tax == null)
+            throw new Exception("Customer tax information not found");
+
+
+        // line_total
+        line.line_total = order_line.unit_price * line.invoice_qty;
+
+        // Order qty
+        line.order_qty = order_line.quantity;
+
+        // Tax
+        line.is_taxable = customer_tax.is_taxable;
+        line.line_tax = line.line_total * (customer_tax.tax_rate / 100);
+
+        return line;
     }
 
     private bool ARInvoiceLineExists(ARInvoiceLineCreateCommand createCommand)
