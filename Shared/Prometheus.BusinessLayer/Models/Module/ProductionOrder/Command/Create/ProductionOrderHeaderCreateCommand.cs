@@ -15,5 +15,7 @@ public class ProductionOrderHeaderCreateCommand : DataCommand
     public DateOnly planned_start_date { get; set; }
     [Required]
     public DateOnly planned_complete_date { get; set; }
-    public string guid { get; set; }
+
+    [Required]
+    public List<ProductionOrderLineCreateCommand> production_order_lines { get; set; } = new List<ProductionOrderLineCreateCommand>();
 }

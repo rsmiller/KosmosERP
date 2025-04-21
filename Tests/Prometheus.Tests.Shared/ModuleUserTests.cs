@@ -93,6 +93,7 @@ public class ModuleUserTests
     [TearDown]
     public void Destroy()
     {
+        _Module.Dispose();
         _Context.Dispose();
     }
 

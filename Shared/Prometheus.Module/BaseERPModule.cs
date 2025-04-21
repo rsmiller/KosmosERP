@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Prometheus.Database;
-using Prometheus.Database.Models;
 using Prometheus.Models;
 
 namespace Prometheus.Module;
@@ -14,7 +13,7 @@ public interface IBaseERPModule
     void SeedPermissions();
 }
 
-public class BaseERPModule : IBaseERPModule
+public class BaseERPModule : IBaseERPModule, IDisposable
 {
     private IBaseERPContext _ERPDbContext;
 
@@ -152,5 +151,10 @@ public class BaseERPModule : IBaseERPModule
         }
 
         return hasPermission;
+    }
+
+    public void Dispose()
+    {
+        //this._ERPDbContext
     }
 }

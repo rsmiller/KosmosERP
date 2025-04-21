@@ -5,17 +5,17 @@ namespace Prometheus.BusinessLayer.Models.Module.ProductionOrder.Command.Create;
 
 public class ProductionOrderLineCreateCommand : DataCommand
 {
-    [Required]
-    public int production_order_header_id { get; set; }
+    public int? production_order_header_id { get; set; }
     [Required]
     public int order_line_id { get; set; }
     [Required]
     public int quantity { get; set; }
     [Required]
-    public DateTime? started_on { get; set; }
+    public DateTime started_on { get; set; }
     [Required]
-    public DateTime? completed_on { get; set; }
+    public DateTime completed_on { get; set; }
     [Required]
     public int status_id { get; set; }
-    public string guid { get; set; }
+    [Required]
+    public int line_number { get; set; }
 }

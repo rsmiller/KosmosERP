@@ -133,6 +133,7 @@ builder.Services.AddScoped<IPurchaseOrderReceiveModule, PurchaseOrderReceiveModu
 builder.Services.AddScoped<IAPInvoiceModule, APInvoiceModule>();
 builder.Services.AddScoped<IARInvoiceModule, ARInvoiceModule>();
 builder.Services.AddScoped<IBOMModule, BOMModule>();
+builder.Services.AddScoped<IProductionOrderModule, ProductionOrderModule>();
 
 builder.Services.AddScoped<IDocumentUploadModule, DocumentUploadModule>();
 

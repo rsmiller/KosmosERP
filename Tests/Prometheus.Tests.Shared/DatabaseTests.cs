@@ -542,6 +542,7 @@ public class DatabaseTests
             invoice_total = 100,
             order_header_id = order_model.id,
             tax_percentage = 8.25M,
+            paid_on = DateOnly.FromDateTime(DateTime.UtcNow),
             is_taxable = true,
         }, 1);
 
@@ -553,6 +554,9 @@ public class DatabaseTests
             ar_invoice_header_id = invoice_header_model.id,
             product_id = product_model.id,
             order_line_id = order_line_model.id,
+            line_description = "ASDASDASDASD",
+            line_number = 1,
+            line_tax = 1,
             order_qty = 10,
             invoice_qty = 10,
             line_total = 100,

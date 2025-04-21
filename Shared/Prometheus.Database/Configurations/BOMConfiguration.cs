@@ -14,6 +14,6 @@ public class BOMConfiguration : BaseConfiguration<BOM>
         builder.HasIndex(m => m.parent_product_id);
         builder.HasIndex(m => m.guid);
 
-        builder.HasOne<Product>(x => x.parent_product).WithMany().HasForeignKey(x => x.parent_product).HasPrincipalKey(c => c.id);
+        builder.HasOne<Product>(x => x.parent_product).WithMany().HasForeignKey(x => x.parent_product_id).HasPrincipalKey(c => c.id);
     }
 }

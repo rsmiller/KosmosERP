@@ -1,7 +1,7 @@
 ﻿using Prometheus.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace Prometheus.BusinessLayer.Models.Module.State.Command.Delete;
+namespace Prometheus.BusinessLayer.Models.Module.ProductionOrder.Command.Delete;
 
 public class ProductionOrderLineDeleteCommand : DataCommand
 {

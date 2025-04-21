@@ -9,6 +9,7 @@ public class ProductionOrderHeader : BaseDatabaseModel
     public int priority_id { get; set; } = 99;
     public DateOnly planned_start_date { get; set; }
     public DateOnly planned_complete_date { get; set; }
+    public DateOnly? actual_completed_on { get; set; }
     public bool is_complete { get; set; } = false;
     public string guid { get; set; } = Guid.NewGuid().ToString();
 
