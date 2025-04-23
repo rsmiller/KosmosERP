@@ -26,7 +26,7 @@ public interface IProductionOrderModule : IERPModule<ProductionOrderHeader, Prod
 
 public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
 {
-	public override Guid ModuleIdentifier => Guid.Parse("fab75a7f-af8c-4416-9e40-9c774aba1811");
+	public override Guid ModuleIdentifier => Guid.Parse("97dd4b13-ff15-47ff-955d-5e957644cffd");
 	public override string ModuleName => "ProductionOrder";
 
 	private IBaseERPContext _Context;

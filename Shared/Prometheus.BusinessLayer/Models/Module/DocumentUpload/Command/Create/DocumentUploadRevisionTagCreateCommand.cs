@@ -5,8 +5,7 @@ namespace Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
 
 public class DocumentUploadRevisionTagCreateCommand : DataCommand
 {
-    [Required]
-    public int document_upload_revision_id { get; set; }
+    public int? document_upload_revision_id { get; set; }
 
     [Required]
     public int document_upload_object_tag_id { get; set; }
