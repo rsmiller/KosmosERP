@@ -17,6 +17,10 @@ public class DocumentUploadRevision : BaseDatabaseModel
     public string document_path { get; set; }
 
     [Required]
+    [MaxLength(200)]
+    public string document_type { get; set; }
+
+    [Required]
     public int rev_num { get; set; } = 1;
 
     [MaxLength(500)]

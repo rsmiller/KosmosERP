@@ -34,11 +34,23 @@ namespace Prometheus.BusinessLayer.Helpers
 
             model.is_deleted = true;
             model.deleted_by = calling_user_id;
-            model.deleted_by = calling_user_id;
+            model.deleted_on = now;
             model.deleted_on_string = now.ToString("u");
             model.deleted_on_timezone = GetTimezoneAsString(now);
 
-            return FillCommonFields(model);
+            return model;
+        }
+
+        public static T FillUpdateFields(T model, int calling_user_id)
+        {
+            var now = DateTime.UtcNow;
+
+            model.updated_by = calling_user_id;
+            model.updated_on = now;
+            model.updated_on_string = now.ToString("u");
+            model.updated_on_timezone = GetTimezoneAsString(now);
+
+            return model;
         }
 
         public static DateTime EnsureUtc(DateTime the_date)

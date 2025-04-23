@@ -15,7 +15,7 @@ public class GoogleStorageProvider : IStorageProvider
         throw new NotImplementedException();
     }
 
-    public Task<bool> UploadFileAsync(byte[] data, string identifier)
+    public Task<string> UploadFileAsync(byte[] data, string identifier)
     {
         throw new NotImplementedException();
     }

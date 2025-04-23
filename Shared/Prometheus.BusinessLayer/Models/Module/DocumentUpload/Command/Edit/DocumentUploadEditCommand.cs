@@ -1,9 +1,10 @@
-﻿using Prometheus.Models;
+﻿using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
+using Prometheus.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
 
-public class DocumentUploadEditCommand : BaseDto
+public class DocumentUploadEditCommand : DataCommand
 {
     [Required]
     public int id { get; set; }
@@ -14,4 +15,6 @@ public class DocumentUploadEditCommand : BaseDto
     public string? rejected_reason { get; set; }
     public bool? requires_approval { get; set; }
     public int? approve_by_id { get; set; }
+
+    public List<DocumentUploadRevisionTagCreateCommand> revision_tags { get; set; } = new List<DocumentUploadRevisionTagCreateCommand>();
 }

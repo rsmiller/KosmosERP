@@ -25,15 +25,15 @@ public class LocalStorageProvider : IStorageProvider
         return await File.ReadAllBytesAsync(filePath);
     }
 
-    public async Task<bool> UploadFileAsync(byte[] data, string identifier)
+    public async Task<string> UploadFileAsync(byte[] data, string identifier)
     {
         var filePath = Path.Combine(_LocalStoragePath, identifier);
 
         if (File.Exists(filePath))
-            return false;
+            return "";
 
         await File.WriteAllBytesAsync(filePath, data);
 
-        return true;
+        return filePath;
     }
 }

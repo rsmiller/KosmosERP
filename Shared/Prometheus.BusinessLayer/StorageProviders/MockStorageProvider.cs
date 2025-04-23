@@ -20,8 +20,8 @@ public class MockStorageProvider : IStorageProvider
         return Encoding.UTF8.GetBytes(test);
     }
 
-    public async Task<bool> UploadFileAsync(byte[] data, string identifier)
+    public async Task<string> UploadFileAsync(byte[] data, string identifier)
     {
-        return true;
+        return "";
     }
 }

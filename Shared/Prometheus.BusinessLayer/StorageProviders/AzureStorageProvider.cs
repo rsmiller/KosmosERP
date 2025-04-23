@@ -39,15 +39,15 @@ public class AzureStorageProvider : IStorageProvider
         }  
     }
 
-    public async Task<bool> UploadFileAsync(byte[] data, string identifier)
+    public async Task<string> UploadFileAsync(byte[] data, string identifier)
     {
         var serviceClient = new BlobServiceClient(_ConnectionString);
         var containerClient = serviceClient.GetBlobContainerClient(_ContainerName);
         await containerClient.CreateIfNotExistsAsync();
 
         var blobClient = containerClient.GetBlobClient(identifier);
-        await blobClient.UploadAsync(new BinaryData(data));
-
-        return true;
+        var response = await blobClient.UploadAsync(new BinaryData(data));
+        
+        return blobClient.Uri.AbsoluteUri;
     }
 }

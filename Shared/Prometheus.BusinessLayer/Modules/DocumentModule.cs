@@ -14,14 +14,13 @@ using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
-
 
 namespace Prometheus.BusinessLayer.Modules;
 
 public interface IDocumentUploadModule : IERPModule<DocumentUpload, DocumentUploadDto, DocumentUploadListDto, DocumentUploadCreateCommand, DocumentUploadEditCommand, DocumentUploadDeleteCommand, DocumentUploadFindCommand>, IBaseERPModule
 {
 	Task<Response<DocumentUploadDto>> CreateOverride(IFormFile file, DocumentUploadCreateCommand commandModel);
+    Task<Response<DocumentUploadDto>> CreateNewFileRevision(IFormFile file, DocumentUploadEditCommand commandModel);
     Task<byte[]?> GetFile(int document_revision_id);
     
 }
@@ -185,7 +184,53 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
     public async Task<Response<DocumentUploadDto>> CreateOverride(IFormFile file, DocumentUploadCreateCommand commandModel)
     {
-        throw new NotImplementedException();
+        
+        try
+        {
+            var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+            if (!validationResult.Success)
+                return new Response<DocumentUploadDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+
+            var new_document = this.MapForCreate(commandModel, commandModel.calling_user_id);
+
+            _Context.DocumentUploads.Add(new_document);
+            await _Context.SaveChangesAsync();
+
+
+            // Upload the document to get the 'path'
+            string filePath = "";
+            string internalId = Guid.NewGuid().ToString().ToLower();
+
+            using (var memoryStream = new MemoryStream()) {
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                filePath = await _StorageProvider.UploadFileAsync(memoryStream.ToArray(), internalId);
+            }
+            
+            var revision = this.MapForRevisionCreate(file, new_document, filePath, new_document.rev_num, commandModel.calling_user_id);
+
+            _Context.DocumentUploadRevisions.Add(revision);
+            await _Context.SaveChangesAsync();
+
+            foreach (var tag in commandModel.revision_tags)
+            {
+                var newTag = this.MapForRevisionTagCreate(tag, revision, commandModel.calling_user_id);
+
+                _Context.DocumentUploadRevisionsTags.Add(newTag);
+                await _Context.SaveChangesAsync();
+            }
+
+
+            var dto = await MapToDto(new_document);
+            return new Response<DocumentUploadDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(50, this.GetType().Name, "Create", ex);
+            return new Response<DocumentUploadDto>(ex.Message, ResultCode.Error);
+        }
     }
 
 
@@ -215,6 +260,16 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
         _Context.DocumentUploads.Update(existingEntity);
         await _Context.SaveChangesAsync();
 
+        // Delete revisions
+        var revisions = await _Context.DocumentUploadRevisions.Where(m => m.document_upload_id == existingEntity.id).ToListAsync();
+        foreach(var revision in revisions)
+        {
+            var rev = CommonDataHelper<DocumentUploadRevision>.FillDeleteFields(revision, commandModel.calling_user_id);
+
+            _Context.DocumentUploadRevisions.Update(rev);
+            await _Context.SaveChangesAsync();
+        }
+
         var dto = await MapToDto(existingEntity);
         return new Response<DocumentUploadDto>(dto);
     }
@@ -222,6 +277,82 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
     public async Task<Response<DocumentUploadDto>> Edit(DocumentUploadEditCommand commandModel)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<Response<DocumentUploadDto>> CreateNewFileRevision(IFormFile file, DocumentUploadEditCommand commandModel)
+    {
+        Response<DocumentUploadDto> response = new Response<DocumentUploadDto>();
+
+        try
+        {
+            var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+            if (!validationResult.Success)
+                return new Response<DocumentUploadDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, DocumentPermissions.Edit, edit: true);
+            if (!permission_result)
+                return new Response<DocumentUploadDto>("Invalid permission", ResultCode.InvalidPermission);
+
+            var existingEntity = await GetAsync(commandModel.id);
+            if (existingEntity == null)
+                return new Response<DocumentUploadDto>("Document not found", ResultCode.NotFound);
+
+            int old_rev_num = existingEntity.rev_num;
+
+            existingEntity.rev_num += 1;
+
+            existingEntity = CommonDataHelper<DocumentUpload>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
+            _Context.DocumentUploads.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+
+            // Upload the document to get the 'path'
+            string filePath = "";
+            string internalId = Guid.NewGuid().ToString().ToLower();
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                filePath = await _StorageProvider.UploadFileAsync(memoryStream.ToArray(), internalId);
+            }
+
+            var old_revision = await _Context.DocumentUploadRevisions.Where(m => m.document_upload_id == existingEntity.id && m.rev_num == old_rev_num).FirstAsync();
+            var new_revision = this.MapForRevisionCreate(file, existingEntity, filePath, existingEntity.rev_num, commandModel.calling_user_id);
+
+            _Context.DocumentUploadRevisions.Add(new_revision);
+            await _Context.SaveChangesAsync();
+
+            //var existing_tags = await _Context.DocumentUploadRevisionsTags.Where(m => m.document_upload_revision_id == old_revision.id).ToListAsync();
+            //foreach(var existing_tag in existing_tags)
+            //{
+            //    var copy_tag = this.CopyRevisionTag(existing_tag);
+            //    copy_tag.document_upload_revision_id = new_revision.id;
+            //
+            //    _Context.DocumentUploadRevisionsTags.Add(copy_tag);
+            //    await _Context.SaveChangesAsync();
+            //}
+
+            foreach (var tag in commandModel.revision_tags)
+            {
+                var newTag = this.MapForRevisionTagCreate(tag, new_revision, commandModel.calling_user_id);
+
+                _Context.DocumentUploadRevisionsTags.Add(newTag);
+                await _Context.SaveChangesAsync();
+            }
+
+            var dto = await MapToDto(existingEntity);
+            return new Response<DocumentUploadDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(50, this.GetType().Name, "Edit", ex);
+            response.SetException(ex);
+        }
+
+        return response;
     }
 
     public async Task<PagingResult<DocumentUploadListDto>> Find(PagingSortingParameters parameters, DocumentUploadFindCommand commandModel)
@@ -244,6 +375,7 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
                                where durt.is_deleted == false
                                && dur.is_deleted == false
                                && du.is_deleted == false
+                               && dur.rev_num == du.rev_num
                                && (durt.tag_value.ToLower().Contains(commandModel.wildcard.ToLower())
                                || dur.document_name.ToLower().Contains(commandModel.wildcard.ToLower()))
                                select du);
@@ -337,9 +469,81 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
         return document;
     }
 
-	public async Task<DocumentUploadDto> MapToDto(DocumentUpload databaseModel)
+    public DocumentUploadRevisionTag MapForTagCreate(DocumentUploadRevisionTagCreateCommand command, int calling_user_id)
+    {
+        var tag = CommonDataHelper<DocumentUploadRevisionTag>.FillCommonFields(new DocumentUploadRevisionTag()
+        {
+            tag_name = command.tag_name,
+            tag_value = command.tag_value,
+        }, calling_user_id);
+
+        return tag;
+    }
+
+    public DocumentUploadRevision MapForRevisionCreate(IFormFile file, DocumentUpload documentUpload, string filePath, int rev_num, int calling_user_id)
+    {
+        var revision = CommonDataHelper<DocumentUploadRevision>.FillCommonFields(new DocumentUploadRevision()
+        {
+            rev_num = rev_num,
+            document_upload_id = documentUpload.id,
+            document_name = file.Name,
+            document_type = file.ContentType,
+            document_path = filePath,
+        }, calling_user_id);
+
+        return revision;
+    }
+
+    public DocumentUploadRevisionTag MapForRevisionTagCreate(DocumentUploadRevisionTagCreateCommand command, DocumentUploadRevision documentRevision, int calling_user_id)
+    {
+        var newTag = CommonDataHelper<DocumentUploadRevisionTag>.FillCommonFields(new DocumentUploadRevisionTag()
+        {
+            tag_name = command.tag_name,
+            tag_value = command.tag_value,
+            document_upload_object_tag_id = command.document_upload_object_tag_id,
+            document_upload_revision_id = documentRevision.id
+        }, calling_user_id);
+
+        return newTag;
+    }
+
+    public async Task<DocumentUploadDto> MapToDto(DocumentUpload databaseModel)
 	{
-        return new DocumentUploadDto()
+        var dto = new DocumentUploadDto()
+        {
+            id = databaseModel.id,
+            document_object_id = databaseModel.document_object_id,
+            rev_num = databaseModel.rev_num,
+            guid = databaseModel.guid,
+            is_deleted = databaseModel.is_deleted,
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+        };
+
+        var revisions = await _Context.DocumentUploadRevisions.Where(m => m.document_upload_id == databaseModel.id).ToListAsync();
+
+        foreach(var revision in revisions)
+        {
+            dto.document_revisions.Add(await this.MapToRevisionDto(revision));
+        }
+
+
+        return dto;
+    }
+
+	public async Task<DocumentUploadListDto> MapToListDto(DocumentUpload databaseModel)
+	{
+        return new DocumentUploadListDto()
         {
             id = databaseModel.id,
             document_object_id = databaseModel.document_object_id,
@@ -361,13 +565,79 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
         };
     }
 
-	public async Task<DocumentUploadListDto> MapToListDto(DocumentUpload databaseModel)
-	{
-        return new DocumentUploadListDto()
+    public async Task<DocumentUploadRevisionDto> MapToRevisionDto(DocumentUploadRevision databaseModel)
+    {
+        var dto = new DocumentUploadRevisionDto()
         {
             id = databaseModel.id,
-            document_object_id = databaseModel.document_object_id,
+            document_name = databaseModel.document_name,
+            document_upload_id = databaseModel.document_upload_id,
+            document_path = databaseModel.document_path,
+            approved_by = databaseModel.approved_by,
+            approved_on = databaseModel.approved_on,
+            rejected_by = databaseModel.rejected_by,
+            rejected_on = databaseModel.rejected_on,
+            rejected_reason = databaseModel.rejected_reason, 
             rev_num = databaseModel.rev_num,
+            guid = databaseModel.guid,
+            is_deleted = databaseModel.is_deleted,
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+        };
+
+        var revision_tags = await _Context.DocumentUploadRevisionsTags.Where(m => m.document_upload_revision_id == databaseModel.id).ToListAsync();
+
+        foreach(var tag in revision_tags)
+        {
+            dto.revision_tags.Add(this.MapToRevisionTagDto(tag));
+        }
+
+
+        return dto;
+    }
+
+    public DocumentUploadRevisionTagDto MapToRevisionTagDto(DocumentUploadRevisionTag databaseModel)
+    {
+        return new DocumentUploadRevisionTagDto()
+        {
+            id = databaseModel.id,
+            document_upload_object_tag_id = databaseModel.document_upload_object_tag_id,
+            document_upload_revision_id = databaseModel.document_upload_revision_id,
+            is_required = databaseModel.is_required,
+            guid = databaseModel.guid,
+            is_deleted = databaseModel.is_deleted,
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+        };
+    }
+
+    private DocumentUploadRevisionTag CopyRevisionTag(DocumentUploadRevisionTag databaseModel)
+    {
+        return new DocumentUploadRevisionTag()
+        {
+            document_upload_object_tag_id = databaseModel.document_upload_object_tag_id,
+            document_upload_revision_id = databaseModel.document_upload_revision_id,
+            is_required = databaseModel.is_required,
             guid = databaseModel.guid,
             is_deleted = databaseModel.is_deleted,
             created_on = databaseModel.created_on,

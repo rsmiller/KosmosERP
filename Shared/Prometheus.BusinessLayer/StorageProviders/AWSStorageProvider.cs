@@ -48,7 +48,7 @@ public class AWSStorageProvider : IStorageProvider
         throw new NotImplementedException();
     }
 
-    public Task<bool> UploadFileAsync(byte[] data, string identifier)
+    public Task<string> UploadFileAsync(byte[] data, string identifier)
     {
         //var client = new AmazonS3Client(_AccessKey, _SecretKey, _Region);
         throw new NotImplementedException();

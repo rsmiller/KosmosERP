@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Prometheus.BusinessLayer.Models.Module.Customer.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Dto;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
@@ -63,6 +65,20 @@ public class DocumentController : ERPApiController
     public async Task<ActionResult> Create(IFormFile file, [FromForm] DocumentUploadCreateCommand createCommand)
     {
         var result = await _Module.CreateOverride(file, createCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    
+    [HttpPost("CreateNewFileRevision", Name = "CreateNewFileRevision")]
+    [ProducesResponseType(typeof(Response<DocumentUploadDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> CreateNewFileRevision(IFormFile file, [FromForm] DocumentUploadEditCommand editCommand)
+    {
+        var result = await _Module.CreateNewFileRevision(file, editCommand);
 
         if (!result.Success)
             return BadRequest(result);
