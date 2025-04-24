@@ -4,8 +4,8 @@
 This is a side project I sometimes work on. Sorry for the sporadic nature of it. This is currently not in a finished state, but feel free to use it to your desires.
 
 ## Use Case
--This design is based on a few designs I used in the past.
--The point of this project is to give anyone in the world who needs an internal ERP system the ability to create one from a generally available template, so they don't have to write one from scratch. I have a gut feeling there are going to be a lot of manufacturing start-ups in the next few years and jumping into SAP/Oracle/Info is cost prohibitive.
+- This design is based on a few designs I used in the past.
+- The point of this project is to give anyone in the world who needs an internal ERP system the ability to create one from a generally available template, so they don't have to write one from scratch. I have a gut feeling there are going to be a lot of manufacturing start-ups in the next few years and jumping into SAP/Oracle/Info is cost prohibitive.
 - This system does not, and should not be utilized, as an accounting system. It does not accept payments, wires, credit cards, ect. The generic accounting data in this ERP should be piped into Quickbooks, Zero, Wave, or FreshBooks because those systems accept payments in a controlled and compliant manner. This ERP enforces process control, allows for tracability of data, inventory counts, and reporting. Not for accounting.
 
 ## Tech and Architecture
