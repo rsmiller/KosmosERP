@@ -15,10 +15,10 @@
   </ItemGroup>
 
     <ItemGroup>
-	    <ProjectReference Include="..\..\Shared\Prometheus.BusinessLayer\Prometheus.BusinessLayer.csproj" />
-	    <ProjectReference Include="..\..\Shared\Prometheus.Database\Prometheus.Database.csproj" />
-	    <ProjectReference Include="..\..\Shared\Prometheus.Models\Prometheus.Models.csproj" />
-	    <ProjectReference Include="..\..\Shared\Prometheus.Module\Prometheus.Module.csproj" />
+	    <ProjectReference Include="..\Shared\Prometheus.BusinessLayer\Prometheus.BusinessLayer.csproj" />
+	    <ProjectReference Include="..\Shared\Prometheus.Database\Prometheus.Database.csproj" />
+	    <ProjectReference Include="..\Shared\Prometheus.Models\Prometheus.Models.csproj" />
+	    <ProjectReference Include="..\Shared\Prometheus.Module\Prometheus.Module.csproj" />
     </ItemGroup>
 
 </Project>

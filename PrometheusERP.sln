@@ -26,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prometheus.Api", "Api\Prometheus.Api\Prometheus.Api.csproj", "{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prometheus.Api", "Api\Prometheus.Api.csproj", "{AD3F8BE3-B7A6-4996-A0FA-97CAA0D9EF5B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prometheus.BusinessLayer", "Shared\Prometheus.BusinessLayer\Prometheus.BusinessLayer.csproj", "{15F69216-C66E-4CE8-9585-F64CE0C5BD9B}"
 EndProject
