@@ -78,33 +78,37 @@ public static class SortExtensions
         Contract.EndContractBlock();
 
         //  handle first entry
-        var orderedquery = (IOrderedQueryable<T>)query;
-        var firstsortdef = args.SortDefinitions.First();
-        switch (firstsortdef.SortOrder)
+        if (args.SortDefinitions.Count() > 0)
         {
-            case SortOrder.Ascending:
-                orderedquery = query.OrderBy(firstsortdef.ColumnName);
-                break;
-            case SortOrder.Descending:
-                orderedquery = query.OrderByDescending(firstsortdef.ColumnName);
-                break;
-        }
-
-        // handle rest of the sort columns
-        foreach (var sortdef in args.SortDefinitions.Skip(1))
-        {
-            switch (sortdef.SortOrder)
+            var orderedquery = (IOrderedQueryable<T>)query;
+            var firstsortdef = args.SortDefinitions.First();
+            switch (firstsortdef.SortOrder)
             {
                 case SortOrder.Ascending:
-                    orderedquery = orderedquery.ThenBy(sortdef.ColumnName);
+                    orderedquery = query.OrderBy(firstsortdef.ColumnName);
                     break;
                 case SortOrder.Descending:
-                    orderedquery = orderedquery.ThenByDescending(sortdef.ColumnName);
+                    orderedquery = query.OrderByDescending(firstsortdef.ColumnName);
                     break;
             }
+
+            // handle rest of the sort columns
+            foreach (var sortdef in args.SortDefinitions.Skip(1))
+            {
+                switch (sortdef.SortOrder)
+                {
+                    case SortOrder.Ascending:
+                        orderedquery = orderedquery.ThenBy(sortdef.ColumnName);
+                        break;
+                    case SortOrder.Descending:
+                        orderedquery = orderedquery.ThenByDescending(sortdef.ColumnName);
+                        break;
+                }
+            }
+
+            query = orderedquery;
         }
 
-        query = orderedquery;
         query = query.Skip(args.Start - 1).Take(args.ResultCount);
 
         return query;

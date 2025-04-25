@@ -57,7 +57,6 @@ public class ModuleTests
         var roleModel1 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ExampleRole",
-
         }, 1);
 
         var roleModel2 = CommonDataHelper<Role>.FillCommonFields(new Role()
