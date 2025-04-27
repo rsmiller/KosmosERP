@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Prometheus.Models;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Create;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Create;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Create;
 
 public class APInvoiceHeaderCreateCommand : DataCommand
 {

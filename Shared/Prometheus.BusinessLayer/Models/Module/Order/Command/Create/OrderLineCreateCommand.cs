@@ -6,7 +6,7 @@ namespace Prometheus.BusinessLayer.Models.Module.Order.Command.Create;
 
 public class OrderLineCreateCommand : DataCommand
 {
-    public int? order_id { get; set; }
+    public int? order_header_id { get; set; }
 
     [Required]
     public int product_id { get; set; }

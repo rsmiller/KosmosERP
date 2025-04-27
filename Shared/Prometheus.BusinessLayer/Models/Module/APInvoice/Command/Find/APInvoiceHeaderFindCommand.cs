@@ -1,6 +1,6 @@
 using Prometheus.Models;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Find;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
 
 public class APInvoiceHeaderFindCommand : DataCommand
 {

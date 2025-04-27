@@ -19,7 +19,7 @@ public class OrderHeaderConfiguration : BaseConfiguration<OrderHeader>
         builder.HasIndex(x => new { x.order_number, x.order_type, x.revision_number });
         builder.HasIndex(x => new { x.order_number, x.revision_number });
 
-        builder.HasMany<OrderLine>(x => x.order_lines).WithOne().HasForeignKey(x => x.order_id).HasPrincipalKey(c => c.id);
+        builder.HasMany<OrderLine>(x => x.order_lines).WithOne().HasForeignKey(x => x.order_header_id).HasPrincipalKey(c => c.id);
         builder.HasOne<Address>(x => x.ship_to_address).WithMany().HasForeignKey(x => x.ship_to_address_id).HasPrincipalKey(c => c.id);
     }
 }

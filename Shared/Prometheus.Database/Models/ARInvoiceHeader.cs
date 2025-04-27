@@ -37,7 +37,6 @@ public class ARInvoiceHeader : BaseDatabaseModel
     [Required]
     public bool is_taxable { get; set; } = false;
 
-    [Required]
     public DateOnly? paid_on { get; set; }
 
     [Required]

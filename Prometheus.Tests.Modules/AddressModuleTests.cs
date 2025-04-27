@@ -206,8 +206,12 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
             id = new_result.Data.id
         });
 
-        Assert.IsTrue(new_result.Success);
-        Assert.IsNotNull(new_result.Data);
+        Assert.IsTrue(delete_result.Success);
+        Assert.IsNotNull(delete_result.Data);
+        Assert.NotNull(delete_result.Data.deleted_by);
+        Assert.NotNull(delete_result.Data.deleted_on);
+        Assert.NotNull(delete_result.Data.deleted_on_string);
+        Assert.NotNull(delete_result.Data.deleted_on_timezone);
     }
 
     [Test]

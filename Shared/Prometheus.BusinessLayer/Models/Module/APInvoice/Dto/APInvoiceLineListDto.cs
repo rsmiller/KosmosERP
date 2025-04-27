@@ -1,6 +1,6 @@
 ﻿using Prometheus.Models;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 
 public class APInvoiceLineListDto : BaseDto
 {

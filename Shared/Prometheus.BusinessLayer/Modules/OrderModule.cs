@@ -456,7 +456,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                         {
                             transaction_type = TransactionType.Reserved,
                             transaction_date = DateTime.UtcNow,
-                            object_reference_id = add_line.order_id,
+                            object_reference_id = add_line.order_header_id,
                             object_sub_reference_id = add_line.id,
                             sold_unit_price = add_line.unit_price,
                             units_sold = add_line.quantity,
@@ -582,12 +582,12 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!permission_result)
             return new Response<OrderLineDto>("Invalid permission", ResultCode.InvalidPermission);
 
-        if (!commandModel.order_id.HasValue)
+        if (!commandModel.order_header_id.HasValue)
             return new Response<OrderLineDto>("Order Header os a required field", ResultCode.DataValidationError);
 
         try
         {
-            var item = this.MapToLineDatabaseModel(commandModel, commandModel.order_id.Value, commandModel.calling_user_id);
+            var item = this.MapToLineDatabaseModel(commandModel, commandModel.order_header_id.Value, commandModel.calling_user_id);
 
             await _Context.OrderLines.AddAsync(item);
             await _Context.SaveChangesAsync();
@@ -601,7 +601,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 {
                     transaction_type = TransactionType.Reserved,
                     transaction_date = DateTime.UtcNow,
-                    object_reference_id = item.order_id,
+                    object_reference_id = item.order_header_id,
                     object_sub_reference_id = item.id,
                     sold_unit_price = item.unit_price,
                     units_sold = item.quantity,
@@ -668,7 +668,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 object_type = "TransactionEditCommand",
                 body = JsonSerializer.Serialize(new TransactionEditCommand()
                 {
-                    object_reference_id = existingEntity.order_id,
+                    object_reference_id = existingEntity.order_header_id,
                     object_sub_reference_id = existingEntity.id,
                     sold_unit_price = existingEntity.unit_price,
                     units_sold = existingEntity.quantity,
@@ -720,7 +720,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 object_type = "TransactionDeleteCommand",
                 body = JsonSerializer.Serialize(new TransactionDeleteCommand()
                 {
-                    object_reference_id = existingEntity.order_id,
+                    object_reference_id = existingEntity.order_header_id,
                     object_sub_reference_id = existingEntity.id,
                     calling_user_id = commandModel.calling_user_id,
                 })
@@ -881,7 +881,7 @@ public class OrderModule : BaseERPModule, IOrderModule
     {
         return CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
-            order_id = order_id,
+            order_header_id = order_id,
             product_id = commandModel.product_id,
             line_number = commandModel.line_number,
             opportunity_line_id = commandModel.opportunity_line_id,
@@ -977,7 +977,7 @@ public class OrderModule : BaseERPModule, IOrderModule
     {
         var dto = new OrderLineDto()
         {
-            order_id = databaseModel.order_id,
+            order_header_id = databaseModel.order_header_id,
             product_id = databaseModel.product_id,
             line_number = databaseModel.line_number,
             opportunity_line_id = databaseModel.opportunity_line_id,
@@ -1029,7 +1029,7 @@ public class OrderModule : BaseERPModule, IOrderModule
     {
         return CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
-            order_id = order_id,
+            order_header_id = order_id,
             product_id = commandModel.product_id.Value,
             line_number = commandModel.line_number.Value,
             opportunity_line_id = commandModel.opportunity_line_id,

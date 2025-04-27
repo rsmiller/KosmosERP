@@ -5,22 +5,16 @@ using Prometheus.Module;
 using Prometheus.Models;
 using Prometheus.Models.Helpers;
 using Prometheus.Models.Interfaces;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Dto;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
 using Prometheus.Models.Permissions;
 using Prometheus.BusinessLayer.Helpers;
 
-namespace Prometheus.Api.Modules;
+namespace Prometheus.BusinessLayer.Modules;
 
 public interface IAPInvoiceModule : IERPModule<APInvoiceHeader, APInvoiceHeaderDto, APInvoiceHeaderListDto, APInvoiceHeaderCreateCommand, APInvoiceHeaderEditCommand, APInvoiceHeaderDeleteCommand, APInvoiceHeaderFindCommand>, IBaseERPModule
 {
@@ -56,14 +50,14 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "AP Invoice Users",
                 created_by = 1,
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -85,7 +79,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
@@ -93,7 +87,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -113,7 +107,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
@@ -121,7 +115,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -141,7 +135,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
@@ -149,7 +143,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -169,7 +163,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == APInvoicePermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
@@ -177,7 +171,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -371,8 +365,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             existingEntity.is_paid = commandModel.is_paid.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<APInvoiceHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.APInvoiceHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -427,8 +421,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             existingEntity.association_is_ar_invoice = commandModel.association_is_ar_invoice.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<APInvoiceLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.APInvoiceLines.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -456,6 +450,19 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         _Context.APInvoiceHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
+
+        // Delete lines
+        var lines = await _Context.APInvoiceLines.Where(m => m.ap_invoice_header_id == existingEntity.id).ToListAsync();
+        foreach(var line in lines)
+        {
+            await this.DeleteLine(new APInvoiceLineDeleteCommand()
+            {
+                calling_user_id = commandModel.calling_user_id,
+                token = commandModel.token,
+                id = line.id,
+            });
+        }
+
 
         var dto = await MapToDto(existingEntity);
         return new Response<APInvoiceHeaderDto>(dto);
@@ -542,8 +549,9 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             else if (associationCommand.association_is_ar_invoice == true)
                 existingEntity.association_is_ar_invoice = true;
 
-            existingEntity.updated_by = associationCommand.calling_user_id;
-            existingEntity.updated_on = DateTime.UtcNow;
+
+            existingEntity = CommonDataHelper<APInvoiceHeader>.FillUpdateFields(existingEntity, associationCommand.calling_user_id);
+
 
             _Context.APInvoiceHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -619,8 +627,8 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             else if (associationCommand.association_is_ar_invoice == true)
                 existingEntity.association_is_ar_invoice = true;
 
-            existingEntity.updated_by = associationCommand.calling_user_id;
-            existingEntity.updated_on = DateTime.UtcNow;
+            existingEntity = CommonDataHelper<APInvoiceLine>.FillUpdateFields(existingEntity, associationCommand.calling_user_id);
+
 
             _Context.APInvoiceLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -660,9 +668,12 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             if (associatedPO == null)
                 return new Response<APInvoiceHeaderDto>("PO Invoice not found", ResultCode.NotFound);
 
+
             existingEntity.purchase_order_receive_id = associationCommand.ap_invoice_object_id;
-            existingEntity.updated_by = associationCommand.calling_user_id;
-            existingEntity.updated_on = DateTime.UtcNow;
+            existingEntity.invoice_received_date = associatedPO.created_on;
+
+            existingEntity = CommonDataHelper<APInvoiceHeader>.FillUpdateFields(existingEntity, associationCommand.calling_user_id);
+
 
             _Context.APInvoiceHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -742,7 +753,108 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
 
         try
         {
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, APInvoicePermissions.Edit, edit: true);
+            if (!permission_result)
+                return new Response<List<APInvoiceAssociationDto>>("Invalid permission", ResultCode.InvalidPermission);
 
+            var existingEntity = await GetAsync(commandModel.ap_invoice_object_id);
+            if (existingEntity == null)
+                return new Response<List<APInvoiceAssociationDto>>("AP Invoice Header not found", ResultCode.NotFound);
+
+            var ap_invoice_lines = await _Context.APInvoiceLines.Where(m => m.ap_invoice_header_id == existingEntity.id).ToListAsync();
+
+            if (existingEntity.association_is_purchase_order == true)
+            {
+                var purchase_order_header = await _Context.PurchaseOrderHeaders.Where(m => m.id == existingEntity.association_object_id).SingleOrDefaultAsync();
+                if (purchase_order_header == null)
+                    return new Response<List<APInvoiceAssociationDto>>("Purchase Order Header not found", ResultCode.NotFound);
+
+                var purchase_order_lines = await _Context.PurchaseOrderLines.Where(m => m.purchase_order_header_id == existingEntity.association_object_id).ToListAsync();
+
+                foreach (var ap_invoice_line in ap_invoice_lines)
+                {
+                    if(ap_invoice_line.association_object_line_id.HasValue)
+                    {
+                        var found_line = purchase_order_lines.FirstOrDefault(m => m.id == ap_invoice_line.association_object_line_id);
+                        if (found_line != null)
+                        {
+                            response.Data.Add(new APInvoiceAssociationDto()
+                            {
+                                id = ap_invoice_line.id,
+                                is_purchase_order = true,
+                                additional_data = new Dictionary<string, string>()
+                                {
+                                    {"quantity", found_line.quantity.ToString() },
+                                    {"product_id", found_line.product_id.ToString() },
+                                    {"unit_price", found_line.unit_price.ToString() }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            else if (existingEntity.association_is_sales_order == true)
+            {
+                var sales_order_header = await _Context.OrderHeaders.Where(m => m.id == existingEntity.association_object_id).SingleOrDefaultAsync();
+                if (sales_order_header == null)
+                    return new Response<List<APInvoiceAssociationDto>>("Sales Order Header not found", ResultCode.NotFound);
+
+                var sales_order_lines = await _Context.OrderLines.Where(m => m.order_header_id == existingEntity.association_object_id).ToListAsync();
+
+                foreach (var ap_invoice_line in ap_invoice_lines)
+                {
+                    if (ap_invoice_line.association_object_line_id.HasValue)
+                    {
+                        var found_line = sales_order_lines.FirstOrDefault(m => m.id == ap_invoice_line.association_object_line_id);
+                        if (found_line != null)
+                        {
+                            response.Data.Add(new APInvoiceAssociationDto()
+                            {
+                                id = ap_invoice_line.id,
+                                is_sales_order = true,
+                                additional_data = new Dictionary<string, string>()
+                                {
+                                    {"quantity", found_line.quantity.ToString() },
+                                    {"product_id", found_line.product_id.ToString() },
+                                    {"unit_price", found_line.unit_price.ToString() }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            else if (existingEntity.association_is_ar_invoice == true)
+            {
+                var ar_invoice_header = await _Context.ARInvoiceHeaders.Where(m => m.id == existingEntity.association_object_id).SingleOrDefaultAsync();
+                if (ar_invoice_header == null)
+                    return new Response<List<APInvoiceAssociationDto>>("AR Invoice Header not found", ResultCode.NotFound);
+
+                var ar_invoice_lines = await _Context.ARInvoiceLines.Where(m => m.ar_invoice_header_id == existingEntity.association_object_id).ToListAsync();
+
+                foreach (var ap_invoice_line in ap_invoice_lines)
+                {
+                    if (ap_invoice_line.association_object_line_id.HasValue)
+                    {
+                        var found_line = ar_invoice_lines.FirstOrDefault(m => m.id == ap_invoice_line.association_object_line_id);
+                        if (found_line != null)
+                        {
+                            response.Data.Add(new APInvoiceAssociationDto()
+                            {
+                                id = ap_invoice_line.id,
+                                is_ar_invoice = true,
+                                additional_data = new Dictionary<string, string>()
+                                {
+                                    {"quantity", found_line.invoice_qty.ToString() },
+                                    {"order_quantity", found_line.order_qty.ToString() },
+                                    {"product_id", found_line.product_id.ToString() },
+                                    {"unit_price", found_line.order_line.unit_price.ToString() }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            
         }
         catch (Exception ex)
         {
@@ -769,12 +881,18 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             guid = databaseModel.guid,
             id = databaseModel.id,
             created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
             updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
@@ -802,13 +920,19 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             is_paid = databaseModel.is_paid,
             guid = databaseModel.guid,
             id = databaseModel.id,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
@@ -841,13 +965,19 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             association_is_ar_invoice = databaseModel.association_is_ar_invoice,
             guid = databaseModel.guid,
             id = databaseModel.id,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         if(databaseModel.association_object_id.HasValue && databaseModel.association_is_purchase_order)
@@ -900,13 +1030,19 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             association_object_line_id = databaseModel.association_object_line_id,
             guid = databaseModel.guid,
             id = databaseModel.id,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         return dto;

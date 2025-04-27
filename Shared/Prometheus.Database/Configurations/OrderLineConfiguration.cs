@@ -11,7 +11,7 @@ public class OrderLineConfiguration : BaseConfiguration<OrderLine>
         base.Configure(builder);
 
         builder.ToTable("order_lines");
-        builder.HasIndex(m => m.order_id);
+        builder.HasIndex(m => m.order_header_id);
         builder.HasIndex(m => m.product_id);
         builder.HasIndex(m => m.guid);
 

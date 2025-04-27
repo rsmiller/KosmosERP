@@ -1,7 +1,7 @@
 ﻿using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Dto;
 using Prometheus.Models;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 
 public class APInvoiceLineDto : BaseDto
 {

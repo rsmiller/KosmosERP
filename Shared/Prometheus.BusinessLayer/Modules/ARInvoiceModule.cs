@@ -670,7 +670,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         var customer_tax = await (from c in _Context.Customers
                                   join o in _Context.OrderHeaders on c.id equals o.customer_id
-                                  where c.id == order_line.order_id
+                                  where c.id == order_line.order_header_id
                                   select new { c.is_taxable, c.tax_rate }).SingleOrDefaultAsync();
 
         if (customer_tax == null)

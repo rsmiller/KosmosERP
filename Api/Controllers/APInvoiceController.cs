@@ -1,19 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Prometheus.Api.Modules;
 using Prometheus.Models;
 using Prometheus.Module;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Dto;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Dto;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Create;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Delete;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Edit;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
+using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
+using Prometheus.BusinessLayer.Modules;
 
 namespace Prometheus.Api.Controllers;
 

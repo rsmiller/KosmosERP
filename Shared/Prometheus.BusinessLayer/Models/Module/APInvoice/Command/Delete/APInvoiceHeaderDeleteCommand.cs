@@ -1,7 +1,7 @@
 using Prometheus.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceHeader.Command.Delete;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Delete;
 
 public class APInvoiceHeaderDeleteCommand : DataCommand
 {

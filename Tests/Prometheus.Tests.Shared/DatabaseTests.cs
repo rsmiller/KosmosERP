@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Mysqlx.Expr;
 using Prometheus.BusinessLayer.Helpers;
 using Prometheus.Database;
 using Prometheus.Database.Models;
@@ -411,7 +410,7 @@ public class DatabaseTests
 
         var order_line = CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         { 
-            order_id = order_model.id,
+            order_header_id = order_model.id,
             product_id = 1,
             quantity = 1,
             line_number = 1,
@@ -510,7 +509,7 @@ public class DatabaseTests
 
         var order_line_model = CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
-            order_id = order_model.id,
+            order_header_id = order_model.id,
             product_id = 1,
             quantity = 10,
             line_number = 1,
@@ -593,7 +592,7 @@ public class DatabaseTests
 
         var order_line_model = CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine()
         {
-            order_id = order_model.id,
+            order_header_id = order_model.id,
             product_id = 1,
             quantity = 10,
             line_number = 1,

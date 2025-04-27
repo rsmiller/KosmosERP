@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Prometheus.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Create;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Create;
 
 public class APInvoiceLineCreateCommand : DataCommand
 {

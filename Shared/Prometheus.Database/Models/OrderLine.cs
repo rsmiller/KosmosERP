@@ -6,7 +6,7 @@ namespace Prometheus.Database.Models;
 public class OrderLine : BaseDatabaseModel
 {
     [Required]
-    public int order_id { get; set; }
+    public int order_header_id { get; set; }
 
     [Required]
     public int product_id { get; set; }

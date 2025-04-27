@@ -2,7 +2,7 @@
 using Prometheus.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace Prometheus.BusinessLayer.Models.Module.APInvoiceLine.Command.Edit;
+namespace Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Edit;
 
 public class APInvoiceLineEditCommand : DataCommand
 {

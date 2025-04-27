@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Prometheus.Api.Modules;
 using Prometheus.BusinessLayer;
 using Prometheus.BusinessLayer.Interfaces;
 using Prometheus.BusinessLayer.Modules;

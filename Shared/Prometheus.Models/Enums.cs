@@ -39,6 +39,13 @@ public enum ResultCode
     InvalidPermission = -8
 }
 
+public class CustomerAddressType
+{
+    public static int Physical { get { return 1; } }
+    public static int ShipTo { get { return 2; } }
+}
+
+
 public class TransactionType
 {
     public static int Inbound { get { return 1; } }

@@ -178,8 +178,8 @@ public class AddressModule : BaseERPModule, IAddressModule
             existingEntity.country = commandModel.country;
 
         // Update auditing fields
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Address>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Addresses.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -330,6 +330,8 @@ public class AddressModule : BaseERPModule, IAddressModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone
         };
     }
 
@@ -356,6 +358,8 @@ public class AddressModule : BaseERPModule, IAddressModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone
         };
     }
 
