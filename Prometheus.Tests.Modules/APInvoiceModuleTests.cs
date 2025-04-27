@@ -12,6 +12,7 @@ using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
+using MySqlX.XDevAPI.Common;
 
 namespace Prometheus.Tests.Modules;
 
@@ -832,6 +833,164 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
         Assert.That(associate_response.Data.association_is_purchase_order == true);
         Assert.That(associate_response.Data.association_object_id == _PurchaseOrderHeader.id);
     }
+
+    [Test]
+    public async Task CreateLine()
+    {
+        var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            vendor_id = _Vendor.id,
+            invoice_number = "D6283",
+            invoice_date = DateTime.Now,
+            invoice_due_date = DateTime.Now.AddDays(20),
+            invoice_received_date = DateTime.Now.AddDays(-10),
+            invoice_total = 100,
+            memo = "Test memo",
+            ap_invoice_lines = new List<APInvoiceLineCreateCommand>() {
+                new APInvoiceLineCreateCommand()
+                {
+                    gl_account_id = 1,
+                    description = "A line",
+                    line_number = 1,
+                    line_total = 100,
+                    qty_invoiced = 1
+                }
+            }
+        });
+
+        Assert.IsTrue(create_result.Success);
+        Assert.IsNotNull(create_result.Data);
+        Assert.NotZero(create_result.Data.ap_invoice_lines.Count());
+
+
+        var create_command = new APInvoiceLineCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            ap_invoice_header_id = create_result.Data.id,
+            gl_account_id = 1,
+            description = "A line",
+            line_number = 2,
+            line_total = 100,
+            qty_invoiced = 1
+        };
+
+        var create_line_response = await _Module.CreateLine(create_command);
+
+
+        Assert.IsTrue(create_line_response.Success);
+        Assert.IsNotNull(create_line_response.Data);
+        Assert.That(create_line_response.Data.line_number == create_command.line_number);
+        Assert.That(create_line_response.Data.gl_account_id == create_command.gl_account_id);
+        Assert.That(create_line_response.Data.description == create_command.description);
+        Assert.That(create_line_response.Data.line_total == create_command.line_total);
+        Assert.That(create_line_response.Data.qty_invoiced == create_command.qty_invoiced);
+    }
+
+    [Test]
+    public async Task EditLine()
+    {
+        var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            vendor_id = _Vendor.id,
+            invoice_number = "D6283",
+            invoice_date = DateTime.Now,
+            invoice_due_date = DateTime.Now.AddDays(20),
+            invoice_received_date = DateTime.Now.AddDays(-10),
+            invoice_total = 100,
+            memo = "Test memo",
+            ap_invoice_lines = new List<APInvoiceLineCreateCommand>() {
+                new APInvoiceLineCreateCommand()
+                {
+                    gl_account_id = 1,
+                    description = "A line",
+                    line_number = 1,
+                    line_total = 100,
+                    qty_invoiced = 1
+                }
+            }
+        });
+
+        Assert.IsTrue(create_result.Success);
+        Assert.IsNotNull(create_result.Data);
+        Assert.NotZero(create_result.Data.ap_invoice_lines.Count());
+
+
+        var edit_command = new APInvoiceLineEditCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            id = create_result.Data.ap_invoice_lines[0].id,
+            gl_account_id = 2,
+            description = "asdasd",
+            line_number = 4,
+            line_total = 1010,
+            qty_invoiced = 2,
+        };
+
+        var edit_line_response = await _Module.EditLine(edit_command);
+
+
+        Assert.IsTrue(edit_line_response.Success);
+        Assert.IsNotNull(edit_line_response.Data);
+        Assert.That(edit_line_response.Data.line_number == edit_command.line_number);
+        Assert.That(edit_line_response.Data.gl_account_id == edit_command.gl_account_id);
+        Assert.That(edit_line_response.Data.description == edit_command.description);
+        Assert.That(edit_line_response.Data.line_total == edit_command.line_total);
+        Assert.That(edit_line_response.Data.qty_invoiced == edit_command.qty_invoiced);
+    }
+
+
+    [Test]
+    public async Task DeleteLine()
+    {
+        var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            vendor_id = _Vendor.id,
+            invoice_number = "D6283",
+            invoice_date = DateTime.Now,
+            invoice_due_date = DateTime.Now.AddDays(20),
+            invoice_received_date = DateTime.Now.AddDays(-10),
+            invoice_total = 100,
+            memo = "Test memo",
+            ap_invoice_lines = new List<APInvoiceLineCreateCommand>() {
+                new APInvoiceLineCreateCommand()
+                {
+                    gl_account_id = 1,
+                    description = "A line",
+                    line_number = 1,
+                    line_total = 100,
+                    qty_invoiced = 1
+                }
+            }
+        });
+
+        Assert.IsTrue(create_result.Success);
+        Assert.IsNotNull(create_result.Data);
+        Assert.NotZero(create_result.Data.ap_invoice_lines.Count());
+
+        var response = await _Module.DeleteLine(new APInvoiceLineDeleteCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            id = create_result.Data.ap_invoice_lines[0].id,
+        });
+
+
+        Assert.IsTrue(response.Success);
+        Assert.IsNotNull(response.Data);
+        Assert.NotNull(response.Data.deleted_by);
+        Assert.NotNull(response.Data.deleted_on);
+        Assert.NotNull(response.Data.deleted_on_string);
+        Assert.NotNull(response.Data.deleted_on_timezone);
+    }
+
 
     private void ValidateMostDtoFields(Response<APInvoiceHeaderDto> result)
     {
