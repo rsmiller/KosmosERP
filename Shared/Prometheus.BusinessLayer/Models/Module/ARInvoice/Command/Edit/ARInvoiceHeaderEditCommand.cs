@@ -7,7 +7,6 @@ public class ARInvoiceHeaderEditCommand : DataCommand
 {
     [Required]
     public int id { get; set; }
-    public int? line_number { get; set; }
     public DateOnly? invoice_date { get; set; }
     public decimal? tax_percentage { get; set; }
     public int? payment_terms { get; set; }

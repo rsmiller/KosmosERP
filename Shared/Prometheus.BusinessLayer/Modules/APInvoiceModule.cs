@@ -1067,9 +1067,6 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             association_is_ar_invoice = createCommand.association_is_ar_invoice,
             is_paid = createCommand.is_paid,
             guid = Guid.NewGuid().ToString(),
-            created_on = DateTime.UtcNow,
-            updated_on = DateTime.UtcNow,
-            is_deleted = false
         }, createCommand.calling_user_id);
     }
 
@@ -1107,4 +1104,6 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
     {
         throw new NotImplementedException();
     }
+
+
 }

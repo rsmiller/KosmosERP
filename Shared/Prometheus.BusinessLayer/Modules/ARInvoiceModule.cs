@@ -12,6 +12,7 @@ using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Create;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Edit;
 using Prometheus.BusinessLayer.Models.Module.ARInvoice.Command.Find;
+using System.Threading.Tasks;
 
 
 namespace Prometheus.BusinessLayer.Modules;
@@ -46,14 +47,14 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "AR Invoice Users",
                 created_by = 1,
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -75,7 +76,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ARInvoicePermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
@@ -83,7 +84,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -103,7 +104,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ARInvoicePermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
@@ -111,7 +112,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -131,7 +132,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ARInvoicePermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
@@ -139,7 +140,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -159,7 +160,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ARInvoicePermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
@@ -167,7 +168,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 created_on = DateTime.UtcNow,
                 updated_by = 1,
                 updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -238,10 +239,19 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         try
         {
-            var item = MapToDatabaseModel(commandModel);
+            var item = await MapToDatabaseModel(commandModel);
 
             await _Context.ARInvoiceHeaders.AddAsync(item);
             await _Context.SaveChangesAsync();
+
+            // Check invoice number
+            if(item.invoice_number == 0)
+            {
+                item.invoice_number = await this.ManuallyGenerateAnInvoiceNumber();
+
+                _Context.ARInvoiceHeaders.Update(item);
+                await _Context.SaveChangesAsync();
+            }
 
             // Now do lines
             foreach (var ap_line in commandModel.ar_invoice_lines)
@@ -366,6 +376,9 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         if (existingEntity.order_line_id != commandModel.order_line_id && commandModel.order_line_id.HasValue)
             existingEntity.order_line_id = commandModel.order_line_id.Value;
 
+        if (existingEntity.ar_invoice_header_id != commandModel.ar_invoice_header_id && commandModel.ar_invoice_header_id.HasValue)
+            existingEntity.ar_invoice_header_id = commandModel.ar_invoice_header_id.Value;
+
         if (existingEntity.product_id != commandModel.product_id && commandModel.product_id.HasValue)
             existingEntity.product_id = commandModel.product_id.Value;
 
@@ -408,6 +421,17 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         _Context.ARInvoiceHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
+
+        var lines = await _Context.ARInvoiceLines.Where(m => m.ar_invoice_header_id == existingEntity.id).ToListAsync();
+        foreach(var line in lines)
+        {
+            await this.DeleteLine(new ARInvoiceLineDeleteCommand()
+            {
+                calling_user_id = commandModel.calling_user_id,
+                token = commandModel.token,
+                id = line.id
+            });
+        }
 
         var dto = await MapToDto(existingEntity);
         return new Response<ARInvoiceHeaderDto>(dto);
@@ -501,12 +525,18 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             is_taxable = databaseModel.is_taxable,
             id = databaseModel.id,
             created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             updated_on = databaseModel.updated_on,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone
         };
 
         dto.customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
@@ -534,11 +564,17 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone
         };
 
         dto.customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
@@ -573,11 +609,17 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone
         };
 
         return dto;
@@ -619,18 +661,37 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
             is_deleted = databaseModel.is_deleted,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone
         };
 
         return dto;
     }
 
-    public ARInvoiceHeader MapToDatabaseModel(ARInvoiceHeaderCreateCommand createCommand)
+    public async Task<ARInvoiceHeader> MapToDatabaseModel(ARInvoiceHeaderCreateCommand createCommand)
     {
-        // TODO: Calcualte total
+        decimal invoice_total = 0;
+        foreach(var invoice_line in createCommand.ar_invoice_lines)
+        {
+            var product_price = await _Context.OrderLines.Where(m => m.id == invoice_line.order_line_id).Select(m => m.unit_price).SingleAsync();
+            decimal line_total = (invoice_line.invoice_qty * product_price);
+
+            if(invoice_line.is_taxable)
+            {
+                decimal tax = ((invoice_line.invoice_qty * product_price) * createCommand.tax_percentage);
+                line_total = ((invoice_line.invoice_qty * product_price) + tax);
+            }
+
+            invoice_total = invoice_total + line_total;
+        }
 
         return CommonDataHelper<ARInvoiceHeader>.FillCommonFields(new ARInvoiceHeader()
         {
@@ -641,6 +702,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             payment_terms = createCommand.payment_terms,
             is_taxable = createCommand.is_taxable,
             tax_percentage = createCommand.tax_percentage,
+            invoice_total = invoice_total,
             guid = Guid.NewGuid().ToString(),
             created_on = DateTime.UtcNow,
             updated_on = DateTime.UtcNow,
@@ -658,6 +720,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             product_id = createCommand.product_id,
             line_description = createCommand.line_description,
             invoice_qty = createCommand.invoice_qty,
+            is_taxable = createCommand.is_taxable,
             guid = Guid.NewGuid().ToString(),
             is_deleted = false,
         }, calling_user_id);
@@ -684,8 +747,10 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         line.order_qty = order_line.quantity;
 
         // Tax
-        line.is_taxable = customer_tax.is_taxable;
-        line.line_tax = line.line_total * (customer_tax.tax_rate / 100);
+        if (line.is_taxable)
+            line.line_tax = line.line_total * (customer_tax.tax_rate / 100);
+        else
+            line.line_tax = 0;
 
         return line;
     }
@@ -698,5 +763,15 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
     public ARInvoiceHeader MapToDatabaseModel(ARInvoiceHeaderDto dtoModel)
     {
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// This method is used when the auto-gen field on Invoice Number fails. Some databases like memory databases don't auto-incremenet fields.
+    /// </summary>
+    /// <returns>Invoice Number</returns>
+    private async Task<int> ManuallyGenerateAnInvoiceNumber()
+    {
+        var total_records = await _Context.ARInvoiceHeaders.CountAsync();
+        return (total_records + 1);
     }
 }
