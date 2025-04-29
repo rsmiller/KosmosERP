@@ -15,4 +15,9 @@ public class GoogleMessagePublisher : IMessagePublisher
     {
         throw new NotImplementedException();
     }
+
+    public async Task CloseConnection()
+    {
+        throw new NotImplementedException();
+    }
 }

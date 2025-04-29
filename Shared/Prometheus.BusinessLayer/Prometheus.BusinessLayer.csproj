@@ -24,7 +24,9 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.7" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+	<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.19.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -49,6 +49,14 @@ public class RabbitMqMessagePublisher : IMessagePublisher, IAsyncDisposable
         return true;
     }
 
+    public async Task CloseConnection()
+    {
+        if (_Connection != null && _Connection.IsOpen)
+        {
+            await _Connection.CloseAsync();
+        }
+    }
+
     public async Task Dispose()
     {
         if (_Connection != null && _Connection.IsOpen)

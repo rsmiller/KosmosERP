@@ -15,4 +15,9 @@ public class MockMessagePublisher : IMessagePublisher
     {
         return true;
     }
+
+    public async Task CloseConnection()
+    {
+        
+    }
 }
