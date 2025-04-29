@@ -64,6 +64,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new ProductionOrderHeaderConfiguration());
         modelBuilder.ApplyConfiguration(new ProductionOrderLineConfiguration());
         modelBuilder.ApplyConfiguration(new BOMConfiguration());
+        modelBuilder.ApplyConfiguration(new InventoryConfiguration());
     }
     
 
@@ -112,4 +113,5 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<ProductionOrderHeader> ProductionOrderHeaders { get; set; }
     public DbSet<ProductionOrderLine> ProductionOrderLines { get; set; }
     public DbSet<BOM> BOMs { get; set; }
+    public DbSet<Inventory> InventoryCounts { get; set; }
 }

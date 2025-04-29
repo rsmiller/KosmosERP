@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Api\Prometheus.Api\Prometheus.Api.csproj" />
+    <ProjectReference Include="..\..\Api\Prometheus.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Prometheus.Database\Prometheus.Database.csproj" />
     <ProjectReference Include="..\..\Shared\Prometheus.Module\Prometheus.Module.csproj" />
   </ItemGroup>

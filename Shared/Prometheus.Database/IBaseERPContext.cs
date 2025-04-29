@@ -52,6 +52,7 @@ namespace Prometheus.Database
         DbSet<ProductionOrderHeader> ProductionOrderHeaders { get; set; }
         DbSet<ProductionOrderLine> ProductionOrderLines { get; set; }
         DbSet<BOM> BOMs { get; set; }
+        DbSet<Inventory> InventoryCounts { get; set; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
