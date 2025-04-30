@@ -139,9 +139,10 @@ builder.Services.AddScoped<IDocumentUploadModule, DocumentUploadModule>();
 builder.Services.AddScoped<IProductModule, ProductModule>();
 builder.Services.AddScoped<IVendorModule, VendorModule>();
 builder.Services.AddScoped<ITransactionModule, TransactionModule>();
+//builder.Services.AddScoped<IInventoryModule, InventoryModule>();
 
 builder.Services.AddScoped<INotificationModule, NotificationModule>();
-
+//builder.Services.AddScoped<IValuesModule, ValuesModule>();
 
 
 builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("DatabaseConnectionString")));

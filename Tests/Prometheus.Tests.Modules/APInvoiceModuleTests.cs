@@ -12,7 +12,6 @@ using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Delete;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
 using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
-using MySqlX.XDevAPI.Common;
 
 namespace Prometheus.Tests.Modules;
 
