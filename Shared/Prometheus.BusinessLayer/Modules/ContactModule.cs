@@ -50,14 +50,10 @@ public class ContactModule : BaseERPModule, IContactModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Contact Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -79,15 +75,11 @@ public class ContactModule : BaseERPModule, IContactModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -107,15 +99,11 @@ public class ContactModule : BaseERPModule, IContactModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -135,15 +123,11 @@ public class ContactModule : BaseERPModule, IContactModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -163,15 +147,11 @@ public class ContactModule : BaseERPModule, IContactModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ContactPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -250,8 +230,9 @@ public class ContactModule : BaseERPModule, IContactModule
         if (existingEntity.cell_phone != commandModel.cell_phone)
             existingEntity.cell_phone = commandModel.cell_phone;
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        // Update auditing fields
+        existingEntity = CommonDataHelper<Contact>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Contacts.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -392,6 +373,8 @@ public class ContactModule : BaseERPModule, IContactModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             customer_id = databaseModel.customer_id,
             first_name = databaseModel.first_name,
             last_name = databaseModel.last_name,
@@ -419,6 +402,8 @@ public class ContactModule : BaseERPModule, IContactModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             customer_id = databaseModel.customer_id,
             first_name = databaseModel.first_name,
             last_name = databaseModel.last_name,
@@ -442,7 +427,6 @@ public class ContactModule : BaseERPModule, IContactModule
             updated_by = dtoModel.updated_by,
             deleted_on = dtoModel.deleted_on,
             deleted_by = dtoModel.deleted_by,
-
             customer_id = dtoModel.customer_id,
             first_name = dtoModel.first_name,
             last_name = dtoModel.last_name,
