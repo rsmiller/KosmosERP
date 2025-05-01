@@ -39,6 +39,98 @@ public class StateModule : BaseERPModule, IStateModule
         _Context = context;
     }
 
+    public override void SeedPermissions()
+    {
+        var role = _Context.Roles.Any(m => m.name == "State Users");
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == StatePermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == StatePermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == StatePermissions.Delete);
+
+        if (role == false)
+        {
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
+            {
+                name = "State Users",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        var role_id = _Context.Roles.Where(m => m.name == "State Users").Select(m => m.id).Single();
+
+        
+        if (create_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Create State",
+                internal_permission_name = StatePermissions.Create,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                write = true
+            });
+
+            _Context.SaveChanges();
+
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == StatePermissions.Create).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = create_perm_id,
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (edit_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Edit State",
+                internal_permission_name = StatePermissions.Edit,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                edit = true
+            });
+
+            _Context.SaveChanges();
+
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == StatePermissions.Edit).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = edit_perm_id,
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete State",
+                internal_permission_name = StatePermissions.Delete,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == StatePermissions.Delete).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+    }
 
     public Database.Models.State? Get(int object_id)
     {
@@ -141,13 +233,6 @@ public class StateModule : BaseERPModule, IStateModule
 
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,StatePermissions.Read, read: true);
-            if (!permission_result)
-            {
-                response.SetException("Invalid permission", ResultCode.InvalidPermission);
-                return response;
-            }
-
             var query = _Context.States
                 .Where(m => !m.is_deleted);
 
@@ -259,6 +344,8 @@ public class StateModule : BaseERPModule, IStateModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
         };
     }
 
@@ -274,7 +361,12 @@ public class StateModule : BaseERPModule, IStateModule
             updated_by = dtoModel.updated_by,
             deleted_on = dtoModel.deleted_on,
             deleted_by = dtoModel.deleted_by,
-
+            deleted_on_string = dtoModel.deleted_on_string,
+            deleted_on_timezone = dtoModel.deleted_on_timezone,
+            created_on_string = dtoModel.created_on_string,
+            created_on_timezone = dtoModel.created_on_timezone,
+            updated_on_string = dtoModel.updated_on_string,
+            updated_on_timezone = dtoModel.updated_on_timezone,
             country_id = dtoModel.country_id,
             state_name = dtoModel.state_name,
             iso2 = dtoModel.iso2

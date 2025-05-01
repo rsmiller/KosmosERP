@@ -39,6 +39,98 @@ public class CountryModule : BaseERPModule, ICountryModule
         _Context = context;
     }
 
+    public override void SeedPermissions()
+    {
+        var role = _Context.Roles.Any(m => m.name == "Country Users");
+        var create_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == CountryPermissions.Create);
+        var edit_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == CountryPermissions.Edit);
+        var delete_permission = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString() && m.internal_permission_name == CountryPermissions.Delete);
+
+        if (role == false)
+        {
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
+            {
+                name = "Country Users",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        var role_id = _Context.Roles.Where(m => m.name == "Country Users").Select(m => m.id).Single();
+
+        
+        if (create_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Create Country",
+                internal_permission_name = CountryPermissions.Create,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                write = true
+            });
+
+            _Context.SaveChanges();
+
+            var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CountryPermissions.Create).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = create_perm_id,
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (edit_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Edit Country",
+                internal_permission_name = CountryPermissions.Edit,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                edit = true
+            });
+
+            _Context.SaveChanges();
+
+            var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CountryPermissions.Edit).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = edit_perm_id,
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (delete_permission == false)
+        {
+            _Context.ModulePermissions.Add(new ModulePermission()
+            {
+                permission_name = "Delete Country",
+                internal_permission_name = CountryPermissions.Delete,
+                module_id = this.ModuleIdentifier.ToString(),
+                module_name = this.ModuleName,
+                delete = true
+            });
+
+            _Context.SaveChanges();
+
+            var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CountryPermissions.Delete).Select(m => m.id).Single();
+
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
+            {
+                role_id = role_id,
+                module_permission_id = delete_perm_id,
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+    }
 
     public Database.Models.Country? Get(int object_id)
     {
@@ -264,6 +356,8 @@ public class CountryModule : BaseERPModule, ICountryModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
         };
     }
 
@@ -279,6 +373,12 @@ public class CountryModule : BaseERPModule, ICountryModule
             updated_by = dtoModel.updated_by,
             deleted_on = dtoModel.deleted_on,
             deleted_by = dtoModel.deleted_by,
+            deleted_on_string = dtoModel.deleted_on_string,
+            deleted_on_timezone= dtoModel.deleted_on_timezone,
+            created_on_string= dtoModel.created_on_string,
+            created_on_timezone = dtoModel.created_on_timezone,
+            updated_on_string = dtoModel.updated_on_string,
+            updated_on_timezone = dtoModel.updated_on_timezone,
             country_name = dtoModel.country_name,
             iso3 = dtoModel.iso3,
             phonecode = dtoModel.phonecode,
