@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Prometheus.Database;
-using Prometheus.Database.Models;
+using KosmosERP.Database;
+using KosmosERP.Database.Models;
 
 
 Console.WriteLine("Hello, I am a bot!");

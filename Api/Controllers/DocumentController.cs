@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Prometheus.BusinessLayer.Models.Module.Customer.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.DocumentUpload.Dto;
-using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
-using Prometheus.BusinessLayer.Modules;
-using Prometheus.Models;
-using Prometheus.Module;
+using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Edit;
+using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
+using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
+using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Dto;
+using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.BusinessLayer.Modules;
+using KosmosERP.Models;
+using KosmosERP.Module;
 
-namespace Prometheus.Api.Controllers;
+namespace KosmosERP.Api.Controllers;
 
 //[Authorize]
 [ApiController]

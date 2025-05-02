@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Prometheus.Models;
-using Prometheus.Module;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Edit;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.APInvoice.Dto;
-using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
-using Prometheus.BusinessLayer.Modules;
+using KosmosERP.Models;
+using KosmosERP.Module;
+using KosmosERP.BusinessLayer.Models.Module.APInvoice.Command;
+using KosmosERP.BusinessLayer.Models.Module.APInvoice.Command.Create;
+using KosmosERP.BusinessLayer.Models.Module.APInvoice.Command.Delete;
+using KosmosERP.BusinessLayer.Models.Module.APInvoice.Command.Edit;
+using KosmosERP.BusinessLayer.Models.Module.APInvoice.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.APInvoice.Dto;
+using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.BusinessLayer.Modules;
 
-namespace Prometheus.Api.Controllers;
+namespace KosmosERP.Api.Controllers;
 
 [Authorize]
 [ApiController]

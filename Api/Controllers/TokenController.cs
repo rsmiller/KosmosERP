@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Prometheus.BusinessLayer.Modules;
+using KosmosERP.BusinessLayer.Modules;
 
-namespace Prometheus.Api.Controllers;
+namespace KosmosERP.Api.Controllers;
 
 public class TokenController : Controller
 {

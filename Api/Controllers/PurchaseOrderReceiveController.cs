@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Prometheus.Models;
-using Prometheus.Module;
-using Prometheus.BusinessLayer.Modules;
-using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Dto;
-using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Create;
-using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Delete;
-using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
-using Prometheus.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Edit;
+using KosmosERP.Models;
+using KosmosERP.Module;
+using KosmosERP.BusinessLayer.Modules;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrderReceive.Dto;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Create;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Delete;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrderReceive.Command.Edit;
 
-namespace Prometheus.Api.Controllers;
+namespace KosmosERP.Api.Controllers;
 
 [Authorize]
 [ApiController]

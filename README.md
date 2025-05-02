@@ -1,4 +1,4 @@
-# Prometheus ERP
+# Kosmos ERP - The Enveryone-ERP
 
 ## Warning 
 This is a side project I sometimes work on. Sorry for the sporadic nature of it. This is currently not in a finished state, but feel free to use it to your desires.
@@ -17,6 +17,12 @@ This is a side project I sometimes work on. Sorry for the sporadic nature of it.
 - Run in Azure Web App, AKS, a VM, IIS, whatever
 
 ## Current State
+As of 5/2/2025
+- I did a rebrand because there was another well established company called Prometheus Ggroup that was in teh ERP space.
+- Need to create unit tests for all the services, which will undoubtedly require fixes and opportunities for improvement.
+- I am looking to leverage Apache Superset for the BI dashboards and reports (https://superset.apache.org/) to be cost effective as possible while giving the end user a lot of control.
+- Researched documentation websites and probably going with Read The Docs
+
 As of 4/24/2025
 - Inventory/MRP tables, DTOs, services, and worker needs to be created.
 - Need to create unit tests for all the services, which will undoubtedly require fixes and opportunities for improvement.

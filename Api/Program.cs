@@ -2,19 +2,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Prometheus.BusinessLayer;
-using Prometheus.BusinessLayer.Interfaces;
-using Prometheus.BusinessLayer.Modules;
-using Prometheus.Database;
-using Prometheus.Models;
-using Prometheus.Models.Interfaces;
-using Prometheus.Module;
+using KosmosERP.BusinessLayer;
+using KosmosERP.BusinessLayer.Interfaces;
+using KosmosERP.BusinessLayer.Modules;
+using KosmosERP.Database;
+using KosmosERP.Models;
+using KosmosERP.Models.Interfaces;
+using KosmosERP.Module;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 /// For development debug
-Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost;uid=auser;pwd=12345;database=prometheus_erp");
+Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost;uid=auser;pwd=12345;database=KosmosERP_erp");
 Environment.SetEnvironmentVariable("MessagePublisherAccountProvider", "Mock");
 Environment.SetEnvironmentVariable("TransactionMovementTopic", "transaction_movement");
 Environment.SetEnvironmentVariable("FileStorageAccountProvider", "Mock");

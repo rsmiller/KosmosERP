@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Prometheus.BusinessLayer.Models.Module.Notification.Command.Find;
-using Prometheus.BusinessLayer.Models.Module.Notification.Dto;
-using Prometheus.BusinessLayer.Models.Module.User.ListProfiles;
-using Prometheus.BusinessLayer.Modules;
-using Prometheus.Models; 
+using KosmosERP.BusinessLayer.Models.Module.Notification.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.Notification.Dto;
+using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.BusinessLayer.Modules;
+using KosmosERP.Models; 
 
-namespace Prometheus.Api.Controllers;
+namespace KosmosERP.Api.Controllers;
 
 [Authorize]
 [ApiController]
