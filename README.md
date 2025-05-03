@@ -18,7 +18,7 @@ This is a side project I sometimes work on. Sorry for the sporadic nature of it.
 
 ## Current State
 As of 5/2/2025
-- I did a rebrand because there was another well established company called Prometheus Ggroup that was in teh ERP space.
+- I did a rebrand because there was another well established company called Prometheus Group that was in teh ERP space.
 - Need to create unit tests for all the services, which will undoubtedly require fixes and opportunities for improvement.
 - I am looking to leverage Apache Superset for the BI dashboards and reports (https://superset.apache.org/) to be cost effective as possible while giving the end user a lot of control.
 - Researched documentation websites and probably going with Read The Docs
