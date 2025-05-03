@@ -1,4 +1,4 @@
-# Kosmos ERP - The Enveryone-ERP
+![](https://www.kosmoserp.com/kosmos_erp_brand.png)
 
 ## Warning 
 This is a side project I sometimes work on. Sorry for the sporadic nature of it. This is currently not in a finished state, but feel free to use it to your desires.
