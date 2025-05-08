@@ -12,6 +12,7 @@ using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Find;
+using Mysqlx.Crud;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -49,14 +50,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Customer Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -78,15 +75,11 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CustomerPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -106,15 +99,11 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CustomerPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -134,15 +123,11 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CustomerPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -162,15 +147,11 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == CustomerPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -213,6 +194,15 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         _Context.Customers.Add(newCustomer);
         await _Context.SaveChangesAsync();
 
+        // Check invoice number
+        if (newCustomer.customer_number == 0)
+        {
+            newCustomer.customer_number = await this.ManuallyGenerateACustomerNumber();
+
+            _Context.Customers.Update(newCustomer);
+            await _Context.SaveChangesAsync();
+        }
+
         var dto = await MapToDto(newCustomer);
         return new Response<CustomerDto>(dto);
     }
@@ -251,6 +241,9 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
         if (existingEntity.category != commandModel.category)
             existingEntity.category = commandModel.category;
+
+        if (commandModel.tax_rate.HasValue && existingEntity.tax_rate != commandModel.tax_rate)
+            existingEntity.tax_rate = commandModel.tax_rate.Value;
 
         if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
             existingEntity.is_taxable = commandModel.is_taxable.Value;
@@ -402,6 +395,8 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             customer_number = databaseModel.customer_number,
             customer_name = databaseModel.customer_name,
             customer_description = databaseModel.customer_description,
@@ -420,7 +415,6 @@ public class CustomerModule : BaseERPModule, ICustomerModule
     {
         return new CustomerDto
         {
-            // Base fields
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
             created_on = databaseModel.created_on,
@@ -433,6 +427,8 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             customer_number = databaseModel.customer_number,
             customer_name = databaseModel.customer_name,
             customer_description = databaseModel.customer_description,
@@ -459,6 +455,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             updated_by = dtoModel.updated_by,
             deleted_on = dtoModel.deleted_on,
             deleted_by = dtoModel.deleted_by,
+            deleted_on_string = dtoModel.deleted_on_string,
+            deleted_on_timezone = dtoModel.deleted_on_timezone,
+            updated_on_string = dtoModel.updated_on_string,
+            updated_on_timezone = dtoModel.updated_on_timezone,
             customer_number = dtoModel.customer_number,
             customer_name = dtoModel.customer_name,
             customer_description = dtoModel.customer_description,
@@ -492,5 +492,15 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         }, createCommandModel.calling_user_id);
 
         return customer;
+    }
+
+    /// <summary>
+    /// This method is used when the auto-gen field on Invoice Number fails. Some databases like memory databases don't auto-incremenet fields.
+    /// </summary>
+    /// <returns>Customer Number</returns>
+    private async Task<int> ManuallyGenerateACustomerNumber()
+    {
+        var total_records = await _Context.Customers.CountAsync();
+        return (total_records + 1);
     }
 }
