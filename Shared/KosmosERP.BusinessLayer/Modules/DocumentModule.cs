@@ -14,6 +14,7 @@ using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Find;
+using KosmosERP.BusinessLayer.StorageProviders;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -55,19 +56,15 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Document Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
 
-        var role_id = _Context.Roles.Where(m => m.name == "Customer Users").Select(m => m.id).Single();
+        var role_id = _Context.Roles.Where(m => m.name == "Document Users").Select(m => m.id).Single();
 
         if (read_permission == false)
         {
@@ -84,15 +81,11 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -112,15 +105,11 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -130,7 +119,7 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
             _Context.ModulePermissions.Add(new ModulePermission()
             {
                 permission_name = "Edit Document",
-                internal_permission_name = DocumentPermissions.Delete,
+                internal_permission_name = DocumentPermissions.Edit,
                 module_id = this.ModuleIdentifier.ToString(),
                 module_name = this.ModuleName,
                 edit = true
@@ -140,15 +129,11 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -168,15 +153,11 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == DocumentPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -197,18 +178,22 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
             _Context.DocumentUploads.Add(new_document);
             await _Context.SaveChangesAsync();
 
-
+            
             // Upload the document to get the 'path'
             string filePath = "";
             string internalId = Guid.NewGuid().ToString().ToLower();
 
-            using (var memoryStream = new MemoryStream()) {
-                await file.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
+            if(_StorageProvider != null && _StorageProvider.GetType() != typeof(MockStorageProvider))
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
 
-                filePath = await _StorageProvider.UploadFileAsync(memoryStream.ToArray(), internalId);
+                    filePath = await _StorageProvider.UploadFileAsync(memoryStream.ToArray(), internalId);
+                }
             }
-            
+
             var revision = this.MapForRevisionCreate(file, new_document, filePath, new_document.rev_num, commandModel.calling_user_id);
 
             _Context.DocumentUploadRevisions.Add(revision);
@@ -311,13 +296,17 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
             string filePath = "";
             string internalId = Guid.NewGuid().ToString().ToLower();
 
-            using (var memoryStream = new MemoryStream())
+            if (_StorageProvider != null && _StorageProvider.GetType() != typeof(MockStorageProvider))
             {
-                await file.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
 
-                filePath = await _StorageProvider.UploadFileAsync(memoryStream.ToArray(), internalId);
+                    filePath = await _StorageProvider.UploadFileAsync(memoryStream.ToArray(), internalId);
+                }
             }
+            
 
             var old_revision = await _Context.DocumentUploadRevisions.Where(m => m.document_upload_id == existingEntity.id && m.rev_num == old_rev_num).FirstAsync();
             var new_revision = this.MapForRevisionCreate(file, existingEntity, filePath, existingEntity.rev_num, commandModel.calling_user_id);
@@ -369,7 +358,15 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
 
             if (!String.IsNullOrEmpty(commandModel.wildcard))
             {
-                var results = (from du in _Context.DocumentUploads
+                var documents = (from du in _Context.DocumentUploads
+                               join dur in _Context.DocumentUploadRevisions on du.id equals dur.document_upload_id
+                               where dur.is_deleted == false
+                               && du.is_deleted == false
+                               && dur.rev_num == du.rev_num
+                               && (dur.document_name.ToLower().Contains(commandModel.wildcard.ToLower()))
+                               select du);
+
+                var document_tags = (from du in _Context.DocumentUploads
                                join dur in _Context.DocumentUploadRevisions on du.id equals dur.document_upload_id
                                join durt in _Context.DocumentUploadRevisionsTags on dur.id equals durt.document_upload_revision_id
                                where durt.is_deleted == false
@@ -380,6 +377,8 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
                                || dur.document_name.ToLower().Contains(commandModel.wildcard.ToLower()))
                                select du);
 
+
+                var results = documents.Concat(document_tags);
 
                 var sortedResults = await results.SortAndPageBy(parameters).ToListAsync();
 
