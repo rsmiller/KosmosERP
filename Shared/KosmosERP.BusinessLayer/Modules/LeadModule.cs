@@ -12,6 +12,8 @@ using KosmosERP.Models.Helpers;
 using KosmosERP.Models.Interfaces;
 using KosmosERP.Models.Permissions;
 using KosmosERP.Module;
+using System.Threading.Tasks;
+using Mysqlx.Crud;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -43,14 +45,10 @@ public class LeadModule : BaseERPModule, ILeadModule
         
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "CRM Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -72,15 +70,11 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -100,15 +94,11 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -128,15 +118,11 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -156,15 +142,96 @@ public class LeadModule : BaseERPModule, ILeadModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == LeadPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        var new_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_new").SingleOrDefault();
+        var contacted_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_contacted").SingleOrDefault();
+        var qualified_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_qualified").SingleOrDefault();
+        var unqualified_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_unqualified").SingleOrDefault();
+        var working_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_working").SingleOrDefault();
+        var reopen_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_reopen").SingleOrDefault();
+        var lost_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "lead_stage_lost").SingleOrDefault();
+
+        if(new_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_new",
+                value = "New",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (contacted_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_contacted",
+                value = "Contacted",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (qualified_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_qualified",
+                value = "Qualified",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (unqualified_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_unqualified",
+                value = "Unqualified",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (working_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_working",
+                value = "Working",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (reopen_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_reopen",
+                value = "Reopen",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (lost_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "lead_stage_lost",
+                value = "Lost",
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -406,7 +473,9 @@ public class LeadModule : BaseERPModule, ILeadModule
             created_on = databaseModel.created_on,
             created_by = databaseModel.created_by,
             updated_on = databaseModel.updated_on,
-            updated_by = databaseModel.updated_by
+            updated_by = databaseModel.updated_by,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 
@@ -440,10 +509,14 @@ public class LeadModule : BaseERPModule, ILeadModule
             created_by = databaseModel.created_by,
             updated_on = databaseModel.updated_on,
             updated_by = databaseModel.updated_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 
@@ -476,7 +549,15 @@ public class LeadModule : BaseERPModule, ILeadModule
             created_on = dtoModel.created_on,
             created_by = dtoModel.created_by,
             updated_on = dtoModel.updated_on,
-            updated_by = dtoModel.updated_by
+            updated_by = dtoModel.updated_by,
+            created_on_string = dtoModel.created_on_string,
+            created_on_timezone = dtoModel.created_on_timezone,
+            deleted_by = dtoModel.deleted_by,
+            deleted_on = dtoModel.deleted_on,
+            deleted_on_string = dtoModel.deleted_on_string,
+            deleted_on_timezone = dtoModel.deleted_on_timezone,
+            updated_on_string = dtoModel.updated_on_string,
+            updated_on_timezone = dtoModel.updated_on_timezone
         };
     }
 
