@@ -12,8 +12,6 @@ using KosmosERP.Models.Helpers;
 using KosmosERP.Models.Interfaces;
 using KosmosERP.Models.Permissions;
 using KosmosERP.Module;
-using System.Threading.Tasks;
-using Mysqlx.Crud;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
