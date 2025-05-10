@@ -51,14 +51,10 @@ public class VendorModule : BaseERPModule, IVendorModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Vendor Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -80,15 +76,11 @@ public class VendorModule : BaseERPModule, IVendorModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -108,15 +100,11 @@ public class VendorModule : BaseERPModule, IVendorModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -136,15 +124,11 @@ public class VendorModule : BaseERPModule, IVendorModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -164,15 +148,25 @@ public class VendorModule : BaseERPModule, IVendorModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == VendorPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        var general_vendor = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "vendor_category_general").SingleOrDefault();
+
+        if (general_vendor == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "vendor_category_general",
+                value = "General",
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -212,17 +206,23 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (!address_permission_result)
             return new Response<VendorDto>("Invalid address permission", ResultCode.InvalidPermission);
 
+        int address_id = 0;
 
-        commandModel.address.calling_user_id = commandModel.calling_user_id;
+        if(commandModel.address != null)
+        {
+            commandModel.address.calling_user_id = commandModel.calling_user_id;
+            commandModel.address.token = commandModel.token;
 
-        var address_response = await _AddressModule.Create(commandModel.address);
+            var address_response = await _AddressModule.Create(commandModel.address);
 
-        if(!address_response.Success || address_response.Data == null)
-            return new Response<VendorDto>(address_response.Exception, ResultCode.Error);
+            if (!address_response.Success || address_response.Data == null)
+                return new Response<VendorDto>(address_response.Exception, ResultCode.Error);
 
+            address_id = address_response.Data.id;
+        }
 
         var newVendor = this.MapForCreate(commandModel);
-        newVendor.address_id = address_response.Data.id;
+        newVendor.address_id = address_id;
 
 
         _Context.Vendors.Add(newVendor);
@@ -271,7 +271,7 @@ public class VendorModule : BaseERPModule, IVendorModule
             existingEntity.category = commandModel.category;
 
         if (commandModel.is_critial_vendor.HasValue && existingEntity.is_critial_vendor != commandModel.is_critial_vendor)
-            existingEntity.is_critial_vendor = commandModel.is_critial_vendor.HasValue;
+            existingEntity.is_critial_vendor = commandModel.is_critial_vendor.Value;
 
         // Additional vendor-specific fields
         if (existingEntity.approved_on != commandModel.approved_on)
@@ -439,6 +439,8 @@ public class VendorModule : BaseERPModule, IVendorModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             vendor_number = databaseModel.vendor_number,
             vendor_name = databaseModel.vendor_name,
             vendor_description = databaseModel.vendor_description,
@@ -479,6 +481,8 @@ public class VendorModule : BaseERPModule, IVendorModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             vendor_number = databaseModel.vendor_number,
             vendor_name = databaseModel.vendor_name,
             vendor_description = databaseModel.vendor_description,
