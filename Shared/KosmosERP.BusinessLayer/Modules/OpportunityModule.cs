@@ -49,14 +49,10 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "CRM Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -78,15 +74,11 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -106,15 +98,11 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -134,15 +122,11 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -162,15 +146,106 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OpportunityPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+
+        var prospecting_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() 
+                                    && m.key == "opporunity_stage_prospecting").SingleOrDefault();
+        var qualifying_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() 
+                                    && m.key == "opporunity_stage_qualifying").SingleOrDefault();
+        var analysis_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() 
+                                    && m.key == "opporunity_stage_analysis").SingleOrDefault();
+        var proposition_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() 
+                                    && m.key == "opporunity_stage_proposition").SingleOrDefault();
+        var proposal_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() 
+                                    && m.key == "opporunity_stage_proposal").SingleOrDefault();
+        var negotiation_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() 
+                                    && m.key == "opporunity_stage_negotiation").SingleOrDefault();
+        var closed_won_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "opporunity_stage_closed_won").SingleOrDefault();
+        var closed_lost_stage = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "opporunity_stage_closed_lost").SingleOrDefault();
+
+        if (prospecting_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_prospecting",
+                value = "Prospecting",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (qualifying_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_qualifying",
+                value = "Qualifying",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (analysis_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_analysis",
+                value = "Analysis",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (proposition_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_proposition",
+                value = "Proposition",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (proposal_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_proposal",
+                value = "Proposal",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (closed_won_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_closed_won",
+                value = "Closed Won",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (closed_lost_stage == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "opporunity_stage_closed_lost",
+                value = "Closed Lost",
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -400,6 +475,8 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             opportunity_name = databaseModel.opportunity_name,
             customer_id = databaseModel.customer_id,
             contact_id = databaseModel.contact_id,
@@ -428,6 +505,8 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             opportunity_name = databaseModel.opportunity_name,
             customer_id = databaseModel.customer_id,
             contact_id = databaseModel.contact_id,
