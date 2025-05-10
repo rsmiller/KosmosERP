@@ -417,15 +417,12 @@ public partial class UserModule : BaseERPModule, IUserModule
         if (permission == null)
             return new Response<bool>("User already has role", ResultCode.AlreadyExists);
 
-        await _IContext.UserRoles.AddAsync(new UserRole()
+
+        await _IContext.UserRoles.AddAsync(CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             user_id = commandModel.user_id,
             role_id = commandModel.role_id,
-            created_by = commandModel.user_id,
-            updated_by = commandModel.user_id,
-            created_on = DateTime.UtcNow,
-            updated_on = DateTime.UtcNow,
-        });
+        }, commandModel.user_id));
 
         await _IContext.SaveChangesAsync();
 
@@ -548,8 +545,8 @@ public partial class UserModule : BaseERPModule, IUserModule
 
         try
         {
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity = CommonDataHelper<User>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             _IContext.Users.Update(existingEntity);
             await _IContext.SaveChangesAsync();

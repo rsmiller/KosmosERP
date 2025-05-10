@@ -292,8 +292,9 @@ public class VendorModule : BaseERPModule, IVendorModule
         if (existingEntity.retired_by != commandModel.retired_by)
             existingEntity.retired_by = commandModel.retired_by;
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+
+        existingEntity = CommonDataHelper<Vendor>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Vendors.Update(existingEntity);
         await _Context.SaveChangesAsync();

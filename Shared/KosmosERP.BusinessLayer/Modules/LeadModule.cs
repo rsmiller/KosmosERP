@@ -355,8 +355,8 @@ public class LeadModule : BaseERPModule, ILeadModule
             existingEntity.owner_id = commandModel.owner_id.Value;
 
         // Update auditing fields
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Lead>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         // Persist
         _Context.Leads.Update(existingEntity);

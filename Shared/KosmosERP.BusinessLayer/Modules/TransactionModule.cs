@@ -278,8 +278,8 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             existingEntity.sold_unit_price = commandModel.sold_unit_price.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Transaction>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Transactions.Update(existingEntity);
         await _Context.SaveChangesAsync();

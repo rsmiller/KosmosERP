@@ -375,8 +375,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (existingEntity.canceled_reason != commandModel.canceled_reason)
                 existingEntity.canceled_reason = commandModel.canceled_reason;
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+
+            existingEntity = CommonDataHelper<ShipmentHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
 
@@ -427,8 +428,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             if (existingEntity.canceled_reason != commandModel.canceled_reason)
                 existingEntity.canceled_reason = commandModel.canceled_reason;
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity = CommonDataHelper<ShipmentLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
 

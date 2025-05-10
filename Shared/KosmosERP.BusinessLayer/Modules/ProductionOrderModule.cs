@@ -333,8 +333,8 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             existingEntity.is_complete = commandModel.is_complete.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<ProductionOrderHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.ProductionOrderHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
@@ -380,8 +380,8 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             existingEntity.is_complete = commandModel.is_complete.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<ProductionOrderLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.ProductionOrderLines.Update(existingEntity);
         await _Context.SaveChangesAsync();

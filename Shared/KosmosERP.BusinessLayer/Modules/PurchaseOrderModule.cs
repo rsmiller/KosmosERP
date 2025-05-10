@@ -1,23 +1,23 @@
-﻿using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Create;
-using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Delete;
-using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Edit;
-using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Find;
-using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Dto;
-using KosmosERP.Database.Models;
-using KosmosERP.Database;
+﻿using KosmosERP.Database;
 using KosmosERP.Models.Helpers;
 using KosmosERP.Models.Interfaces;
 using KosmosERP.Models;
 using KosmosERP.Module;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using KosmosERP.Models.Permissions;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Create;
-using System.Text.Json;
 using KosmosERP.BusinessLayer.Interfaces;
-using KosmosERP.BusinessLayer.Models.Module.Order.Dto;
+using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Delete;
-using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Create;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Delete;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Edit;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Dto;
+using KosmosERP.Database.Models;
+
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -386,8 +386,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             if (commandModel.is_canceled.HasValue && existingEntity.is_canceled != commandModel.is_canceled)
                 existingEntity.is_canceled = commandModel.is_canceled.Value;
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+
+            existingEntity = CommonDataHelper<PurchaseOrderHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
 
@@ -483,8 +484,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
                 existingEntity.is_taxable = commandModel.is_taxable.Value;
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+
+            existingEntity = CommonDataHelper<PurchaseOrderLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             existingEntity.revision_number = existingEntity.revision_number + 1;
 

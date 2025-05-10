@@ -251,8 +251,8 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
             existingEntity.is_taxable = commandModel.is_taxable.Value;
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Customer>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Customers.Update(existingEntity);
         await _Context.SaveChangesAsync();

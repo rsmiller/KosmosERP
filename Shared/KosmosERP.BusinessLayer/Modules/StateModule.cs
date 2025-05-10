@@ -196,9 +196,10 @@ public class StateModule : BaseERPModule, IStateModule
         if (existingEntity.iso2 != commandModel.iso2)
             existingEntity.iso2 = commandModel.iso2;
 
-        // Update auditing fields
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+
+        existingEntity = CommonDataHelper<State>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
+
 
         _Context.States.Update(existingEntity);
         await _Context.SaveChangesAsync();

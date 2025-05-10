@@ -421,8 +421,8 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
                 existingEntity.canceled_reason = commandModel.canceled_reason;
 
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity = CommonDataHelper<PurchaseOrderReceiveHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -599,8 +599,8 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
                 existingEntity.canceled_reason = commandModel.canceled_reason;
 
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity = CommonDataHelper<PurchaseOrderReceiveLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             _Context.PurchaseOrderReceiveLines.Update(existingEntity);
             await _Context.SaveChangesAsync();

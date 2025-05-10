@@ -320,8 +320,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             existingEntity.payment_terms = commandModel.payment_terms.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<ARInvoiceHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
         //existingEntity.up
 
 
@@ -372,8 +372,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             existingEntity.is_taxable = commandModel.is_taxable.Value;
 
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<ARInvoiceLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.ARInvoiceLines.Update(existingEntity);
         await _Context.SaveChangesAsync();

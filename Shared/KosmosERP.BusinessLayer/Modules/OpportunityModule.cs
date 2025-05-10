@@ -337,8 +337,8 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         if (commandModel.owner_id.HasValue && existingEntity.owner_id != commandModel.owner_id)
             existingEntity.owner_id = commandModel.owner_id.Value;
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+        existingEntity = CommonDataHelper<Opportunity>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.Opportunities.Update(existingEntity);
         await _Context.SaveChangesAsync();

@@ -419,8 +419,9 @@ public class OrderModule : BaseERPModule, IOrderModule
             if (commandModel.order_date.HasValue && existingEntity.order_date != commandModel.order_date)
                 existingEntity.order_date = commandModel.order_date.Value;
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+
+            existingEntity = CommonDataHelper<OrderHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             _Context.OrderHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -656,8 +657,8 @@ public class OrderModule : BaseERPModule, IOrderModule
                 existingEntity.unit_price = commandModel.unit_price.Value;
 
 
-            existingEntity.updated_on = DateTime.UtcNow;
-            existingEntity.updated_by = commandModel.calling_user_id;
+            existingEntity = CommonDataHelper<OrderLine>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
             _Context.OrderLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -799,8 +800,9 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity.attribute_value3 != commandModel.attribute_value3)
             existingEntity.attribute_value3 = commandModel.attribute_value3;
 
-        existingEntity.updated_on = DateTime.UtcNow;
-        existingEntity.updated_by = commandModel.calling_user_id;
+
+        existingEntity = CommonDataHelper<OrderLineAttribute>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
 
         _Context.OrderLineAttributes.Update(existingEntity);
         await _Context.SaveChangesAsync();
