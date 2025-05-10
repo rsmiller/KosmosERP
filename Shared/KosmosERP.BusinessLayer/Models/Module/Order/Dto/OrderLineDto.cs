@@ -7,6 +7,7 @@ public class OrderLineDto : BaseDto
     public int order_header_id { get; set; }
     public int product_id { get; set; }
     public int line_number { get; set; }
+    public string line_description { get; set; }
     public int? opportunity_line_id { get; set; }
     public int quantity { get; set; }
     public decimal unit_price { get; set; }

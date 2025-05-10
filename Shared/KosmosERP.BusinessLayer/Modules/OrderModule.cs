@@ -57,14 +57,10 @@ public class OrderModule : BaseERPModule, IOrderModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Sales Order Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            },1 ));
 
             _Context.SaveChanges();
         }
@@ -86,15 +82,11 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -114,15 +106,11 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -142,15 +130,11 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -170,15 +154,11 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == OrderPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -263,6 +243,10 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!permission_result)
             return new Response<OrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
+        var existingCustomer = await _Context.Customers.SingleOrDefaultAsync(m => m.id == commandModel.customer_id);
+        if (existingCustomer == null)
+            return new Response<OrderHeaderDto>("Customer not found", ResultCode.NotFound);
+
         try
         {
             var alreadyExists = await this.OrderHeaderExists(commandModel);
@@ -271,8 +255,40 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             var item = this.MapToDatabaseModel(commandModel, commandModel.calling_user_id);
 
+            item.revision_number = 1;
+            item.price = commandModel.order_lines.Sum(m => (m.unit_price * m.quantity));
+
+            // Tax stuff
+            decimal tax = 0;
+
+            if (existingCustomer.is_taxable)
+            {
+                var product_ids = commandModel.order_lines.Select(m => m.product_id).ToList();
+                var all_taxable_products = await _Context.Products.Where(m => m.is_taxable == true && product_ids.Contains(m.id)).ToListAsync();
+
+                foreach (var order_line in commandModel.order_lines)
+                {
+                    var product = all_taxable_products.SingleOrDefault(m => m.id == order_line.product_id);
+                    if (product != null)
+                    {
+                        tax += commandModel.order_lines.Sum(m => ((m.unit_price * m.quantity) * existingCustomer.tax_rate) + (m.unit_price * m.quantity));
+                    }
+                }
+            }
+
+            item.tax = tax;
+
             await _Context.OrderHeaders.AddAsync(item);
             await _Context.SaveChangesAsync();
+
+            // Check invoice number
+            if (item.order_number == 0)
+            {
+                item.order_number = await this.ManuallyGenerateAnOrderNumber();
+
+                _Context.OrderHeaders.Update(item);
+                await _Context.SaveChangesAsync();
+            }
 
 
             // Now do lines
@@ -283,6 +299,16 @@ public class OrderModule : BaseERPModule, IOrderModule
                 await _Context.OrderLines.AddAsync(db_line);
                 await _Context.SaveChangesAsync();
 
+                // Attributes
+                if (order_line.attributes.Count > 0)
+                {
+                    var attibute_response = await BuildLineAttributes(order_line, db_line.id, commandModel.calling_user_id, commandModel.token);
+
+                    if (!attibute_response.Success)
+                    {
+                        return new Response<OrderHeaderDto>(attibute_response.Exception, ResultCode.Error);
+                    }
+                }
 
                 // Publish this data to a message queue to be processed for transactions
                 await _MessagePublisher.PublishAsync(new Models.MessageObject()
@@ -336,6 +362,18 @@ public class OrderModule : BaseERPModule, IOrderModule
 
         _Context.OrderHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
+
+        var lines = await _Context.OrderLines.Where(m => m.order_header_id == existingEntity.id && m.is_deleted == false).ToListAsync();
+
+        foreach (var line in lines)
+        {
+            await this.DeleteLine(new OrderLineDeleteCommand()
+            {
+                calling_user_id = commandModel.calling_user_id,
+                token = commandModel.token,
+                id = line.id,
+            });
+        }
 
 
         await _MessagePublisher.PublishAsync(new Models.MessageObject()
@@ -411,14 +449,14 @@ public class OrderModule : BaseERPModule, IOrderModule
                 existingEntity.required_date = commandModel.required_date.Value;
             if (existingEntity.po_number != commandModel.po_number)
                 existingEntity.po_number = commandModel.po_number;
-            if (commandModel.tax.HasValue && existingEntity.tax != commandModel.tax)
-                existingEntity.tax = commandModel.tax.Value;
+
             if (commandModel.shipping_cost.HasValue && existingEntity.shipping_cost != commandModel.shipping_cost)
                 existingEntity.shipping_cost = commandModel.shipping_cost.Value;
 
             if (commandModel.order_date.HasValue && existingEntity.order_date != commandModel.order_date)
                 existingEntity.order_date = commandModel.order_date.Value;
 
+            existingEntity.revision_number += 1;
 
             existingEntity = CommonDataHelper<OrderHeader>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
 
@@ -496,6 +534,30 @@ public class OrderModule : BaseERPModule, IOrderModule
         }
     }
 
+    private async Task<Response<bool>> BuildLineAttributes(OrderLineCreateCommand commandModel, int order_line_id, int calling_user_id, string token)
+    {
+        foreach (var attribute in commandModel.attributes)
+        {
+            if (attribute.calling_user_id != calling_user_id)
+                attribute.calling_user_id = calling_user_id;
+
+            if (!attribute.order_line_id.HasValue)
+                attribute.order_line_id = order_line_id;
+
+            if(String.IsNullOrEmpty(attribute.token))
+                attribute.token = token;
+
+            var edit_response = await this.CreateAttribute(attribute);
+
+            if (!edit_response.Success)
+            {
+                return new Response<bool>(edit_response.Exception, ResultCode.Error);
+            }
+        }
+
+        return new Response<bool>(true);
+    }
+
     private async Task<Response<bool>> BuildAndEditLineAttributes(OrderLineEditCommand commandModel, int order_line_id, int calling_user_id)
     {
         foreach (var attribute in commandModel.attributes)
@@ -527,12 +589,13 @@ public class OrderModule : BaseERPModule, IOrderModule
 
         try
         {
-            var query = _Context.OrderHeaders.Where(m => !m.is_deleted);
+            var filter = PredicateBuilder.True<OrderHeader>();
+            filter = filter.And(m => m.is_deleted == false);
 
             if (!string.IsNullOrEmpty(commandModel.wildcard))
             {
                 var wild = commandModel.wildcard.ToLower();
-                query = query.Where(m => m.po_number.ToLower().Contains(wild));
+                filter = filter.Or(m => m.po_number.ToLower().Contains(wild));
             }
 
             decimal parsed_num = 0;
@@ -540,11 +603,13 @@ public class OrderModule : BaseERPModule, IOrderModule
             if (decimal.TryParse(commandModel.wildcard, out parsed_num))
             {
                 var wild = commandModel.wildcard.ToLower();
-                query = query.Where(m => m.order_number == parsed_num);
+                filter = filter.Or(m => m.order_number == parsed_num);
             }
 
-            var totalCount = await query.CountAsync();
-            var pagedItems = await query.SortAndPageBy(parameters).ToListAsync();
+
+            var totalCount = await _Context.OrderHeaders.CountAsync(filter);
+            var results = _Context.OrderHeaders.Where(filter);
+            var pagedItems = await results.SortAndPageBy(parameters).ToListAsync();
 
             var dtos = new List<OrderHeaderListDto>();
             foreach (var item in pagedItems)
@@ -593,6 +658,16 @@ public class OrderModule : BaseERPModule, IOrderModule
             await _Context.OrderLines.AddAsync(item);
             await _Context.SaveChangesAsync();
 
+            // Attributes
+            if (commandModel.attributes.Count > 0)
+            {
+                var attibute_response = await BuildLineAttributes(commandModel, item.id, commandModel.calling_user_id, commandModel.token);
+
+                if (!attibute_response.Success)
+                {
+                    return new Response<OrderLineDto>(attibute_response.Exception, ResultCode.Error);
+                }
+            }
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
@@ -869,11 +944,9 @@ public class OrderModule : BaseERPModule, IOrderModule
             pay_method_id = commandModel.pay_method_id,
             opportunity_id = commandModel.opportunity_id,
             order_type = commandModel.order_type,
-            revision_number = commandModel.revision_number,
             order_date = commandModel.order_date,
             required_date = commandModel.required_date,
             po_number = commandModel.po_number,
-            tax = commandModel.tax,
             shipping_cost = commandModel.shipping_cost,
             guid = Guid.NewGuid().ToString(),
         }, calling_user_id);
@@ -897,7 +970,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 
     public async Task<OrderHeaderDto> MapToDto(OrderHeader databaseModel)
 	{
-        return new OrderHeaderDto
+        var dto = new OrderHeaderDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -932,7 +1005,16 @@ public class OrderModule : BaseERPModule, IOrderModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        var lines = await _Context.OrderLines.Where(m => m.order_header_id == databaseModel.id && m.is_deleted == false).ToListAsync();
+
+        foreach (var line in lines)
+            dto.order_lines.Add(await this.MapToLineDto(line));
+
+        return dto;
     }
 
 	public async Task<OrderHeaderListDto> MapToListDto(OrderHeader databaseModel)
@@ -972,6 +1054,8 @@ public class OrderModule : BaseERPModule, IOrderModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 
@@ -979,17 +1063,25 @@ public class OrderModule : BaseERPModule, IOrderModule
     {
         var dto = new OrderLineDto()
         {
+            id = databaseModel.id,
             order_header_id = databaseModel.order_header_id,
             product_id = databaseModel.product_id,
             line_number = databaseModel.line_number,
             opportunity_line_id = databaseModel.opportunity_line_id,
             quantity = databaseModel.quantity,
             unit_price = databaseModel.unit_price,
+            line_description = databaseModel.line_description,
             guid = databaseModel.guid,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            updated_by = databaseModel.updated_by,
+            updated_on = databaseModel.updated_on,
         };
 
         var attributes = await _Context.OrderLineAttributes.Where(m => m.order_line_id == databaseModel.id).ToListAsync();
@@ -1024,6 +1116,8 @@ public class OrderModule : BaseERPModule, IOrderModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 
@@ -1087,6 +1181,18 @@ public class OrderModule : BaseERPModule, IOrderModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+    }
+
+    /// <summary>
+    /// This method is used when the auto-gen field on Order Number fails. Some databases like memory databases don't auto-incremenet fields.
+    /// </summary>
+    /// <returns>Order Number</returns>
+    private async Task<int> ManuallyGenerateAnOrderNumber()
+    {
+        var total_records = await _Context.OrderHeaders.CountAsync();
+        return (total_records + 1);
     }
 }

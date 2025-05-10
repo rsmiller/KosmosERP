@@ -23,16 +23,12 @@ public class OrderHeaderCreateCommand : DataCommand
     public string order_type { get; set; }
 
     [Required]
-    public int revision_number { get; set; } = 1;
-
-    [Required]
     public DateOnly order_date { get; set; }
 
     [Required]
     public DateOnly required_date { get; set; }
 
     public string? po_number { get; set; }
-    public decimal tax { get; set; } = 0;
     public decimal shipping_cost { get; set; } = 0;
 
     public List<OrderLineCreateCommand> order_lines { get; set; } = new List<OrderLineCreateCommand>();

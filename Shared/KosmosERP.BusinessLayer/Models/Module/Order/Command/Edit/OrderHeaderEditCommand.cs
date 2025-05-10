@@ -18,7 +18,6 @@ public class OrderHeaderEditCommand : DataCommand
     public DateOnly? order_date { get; set; }
     public DateOnly? required_date { get; set; }
     public string? po_number { get; set; }
-    public decimal? tax { get; set; }
     public decimal? shipping_cost { get; set; }
 
     public List<OrderLineEditCommand> order_lines { get; set; } = new List<OrderLineEditCommand>();
