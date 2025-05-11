@@ -55,14 +55,10 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Purchase Order Receive Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -84,15 +80,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderReceivePermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -112,15 +104,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderReceivePermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -140,15 +128,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderReceivePermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -168,15 +152,11 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderReceivePermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -269,13 +249,26 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (existingUploadEntity == null)
             return new Response<PurchaseOrderReceiveHeaderDto>("Document Upload not found", ResultCode.NotFound);
 
+        var existingPurchaseOrderEntity = await _Context.PurchaseOrderHeaders.Where(m => m.id == commandModel.purchase_order_id).AsNoTracking().FirstOrDefaultAsync();
+        if (existingPurchaseOrderEntity == null)
+            return new Response<PurchaseOrderReceiveHeaderDto>("Purchase Order not found", ResultCode.NotFound);
 
         try
         {
+            var purchase_order_line_sum = await _Context.PurchaseOrderLines
+                                                .Where(m => m.purchase_order_header_id == existingPurchaseOrderEntity.id)
+                                                .SumAsync(m => m.quantity);
+            var total_receieved = commandModel.received_lines.Sum(m => m.units_received);
+
+
             var item = this.MapToDatabaseModel(commandModel, commandModel.calling_user_id);
+
+            item.units_ordered = purchase_order_line_sum;
+            item.units_received = total_receieved;
 
             await _Context.PurchaseOrderReceiveHeaders.AddAsync(item);
             await _Context.SaveChangesAsync();
+
 
             // Now do lines
             foreach (var ap_line in commandModel.received_lines)
@@ -348,6 +341,17 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
             _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
+
+            var lines = await _Context.PurchaseOrderReceiveLines.Where(m => m.purchase_order_line_id == existingEntity.id).ToListAsync();
+            foreach(var line in lines)
+            {
+                await this.DeleteLine(new PurchaseOrderReceiveLineDeleteCommand()
+                {
+                    calling_user_id = commandModel.calling_user_id,
+                    token = commandModel.token,
+                    id = line.id,
+                });
+            }
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
@@ -464,6 +468,21 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
                 }
             }
 
+
+            // After everything lets update totals
+            var purchase_order_line_sum = await _Context.PurchaseOrderLines
+                        .Where(m => m.purchase_order_header_id == existingEntity.purchase_order_id)
+                        .SumAsync(m => m.quantity);
+            var total_receieved = await _Context.PurchaseOrderReceiveLines
+                                    .Where(m => m.purchase_order_receive_header_id == existingEntity.id && m.is_deleted == false)
+                                    .SumAsync(m => m.units_received);
+
+            existingEntity.units_ordered = purchase_order_line_sum;
+            existingEntity.units_received = total_receieved;
+
+            _Context.PurchaseOrderReceiveHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
             var dto = await MapToDto(existingEntity);
 
             return new Response<PurchaseOrderReceiveHeaderDto>(dto);
@@ -531,11 +550,36 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (!commandModel.purchase_order_receive_header_id.HasValue)
             return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Header id is a required field", ResultCode.DataValidationError);
 
+        var existingHeaderEntity = await GetAsync(commandModel.purchase_order_receive_header_id.Value);
+        if (existingHeaderEntity == null)
+            return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Header not found", ResultCode.NotFound);
+
+        var existingLineEntity = await _Context.PurchaseOrderLines.Where(m => m.id == commandModel.purchase_order_line_id).SingleOrDefaultAsync();
+        if (existingLineEntity == null)
+            return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Line not found", ResultCode.NotFound);
+
+
         try
         {
             var item = this.MapToLineDatabaseModel(commandModel, commandModel.purchase_order_receive_header_id.Value, commandModel.calling_user_id);
 
             await _Context.PurchaseOrderReceiveLines.AddAsync(item);
+            await _Context.SaveChangesAsync();
+
+            // After everything lets update totals
+            var purchase_order_line_sum = await _Context.PurchaseOrderLines
+                        .Where(m => m.purchase_order_header_id == existingLineEntity.purchase_order_header_id)
+                        .SumAsync(m => m.quantity);
+            var total_receieved = await _Context.PurchaseOrderReceiveLines
+                                    .Where(m => m.purchase_order_receive_header_id == existingHeaderEntity.id && m.is_deleted == false)
+                                    .SumAsync(m => m.units_received);
+
+            existingHeaderEntity = CommonDataHelper<PurchaseOrderReceiveHeader>.FillUpdateFields(existingHeaderEntity, commandModel.calling_user_id);
+
+            existingHeaderEntity.units_ordered = purchase_order_line_sum;
+            existingHeaderEntity.units_received = total_receieved;
+
+            _Context.PurchaseOrderReceiveHeaders.Update(existingHeaderEntity);
             await _Context.SaveChangesAsync();
 
             var purchase_line_product = await _Context.PurchaseOrderLines.Where(m => m.id == item.purchase_order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
@@ -584,6 +628,10 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         if (existingEntity == null)
             return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Line not found", ResultCode.NotFound);
 
+        var existingHeaderEntity = await GetAsync(existingEntity.purchase_order_receive_header_id);
+        if (existingHeaderEntity == null)
+            return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Header not found", ResultCode.NotFound);
+
         try
         {
 
@@ -605,6 +653,21 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             _Context.PurchaseOrderReceiveLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
 
+            // After everything lets update totals
+            var purchase_order_line_sum = await _Context.PurchaseOrderLines
+                        .Where(m => m.purchase_order_header_id == existingHeaderEntity.purchase_order_id)
+                        .SumAsync(m => m.quantity);
+            var total_receieved = await _Context.PurchaseOrderReceiveLines
+                                    .Where(m => m.purchase_order_receive_header_id == existingHeaderEntity.id && m.is_deleted == false)
+                                    .SumAsync(m => m.units_received);
+
+            existingHeaderEntity = CommonDataHelper<PurchaseOrderReceiveHeader>.FillUpdateFields(existingHeaderEntity, commandModel.calling_user_id);
+
+            existingHeaderEntity.units_ordered = purchase_order_line_sum;
+            existingHeaderEntity.units_received = total_receieved;
+
+            _Context.PurchaseOrderReceiveHeaders.Update(existingHeaderEntity);
+            await _Context.SaveChangesAsync();
 
             // Publish this data to a message queue to be processed for transactions
             var purchase_line_product = await _Context.PurchaseOrderLines.Where(m => m.id == existingEntity.purchase_order_line_id).Select(m => m.product_id).SingleOrDefaultAsync();
@@ -646,11 +709,33 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         var existingEntity = await GetLineAsync(commandModel.id);
         if (existingEntity == null)
             return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Line not found", ResultCode.NotFound);
+
+        var existingHeaderEntity = await GetAsync(existingEntity.purchase_order_receive_header_id);
+        if (existingHeaderEntity == null)
+            return new Response<PurchaseOrderReceiveLineDto>("Purchase Order Receive Header not found", ResultCode.NotFound);
+
+
         try
         {
             existingEntity = CommonDataHelper<PurchaseOrderReceiveLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
 
             _Context.PurchaseOrderReceiveLines.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+            // After everything lets update totals
+            var purchase_order_line_sum = await _Context.PurchaseOrderLines
+                        .Where(m => m.purchase_order_header_id == existingHeaderEntity.purchase_order_id)
+                        .SumAsync(m => m.quantity);
+            var total_receieved = await _Context.PurchaseOrderReceiveLines
+                                    .Where(m => m.purchase_order_receive_header_id == existingHeaderEntity.id && m.is_deleted == false)
+                                    .SumAsync(m => m.units_received);
+
+            existingHeaderEntity = CommonDataHelper<PurchaseOrderReceiveHeader>.FillUpdateFields(existingHeaderEntity, commandModel.calling_user_id);
+
+            existingHeaderEntity.units_ordered = purchase_order_line_sum;
+            existingHeaderEntity.units_received = total_receieved;
+
+            _Context.PurchaseOrderReceiveHeaders.Update(existingHeaderEntity);
             await _Context.SaveChangesAsync();
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
@@ -819,6 +904,8 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         var uploads = await _Context.PurchaseOrderReceiveUploads
@@ -865,6 +952,8 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         return dto;
@@ -893,6 +982,8 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         return dto;
@@ -916,6 +1007,9 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            document_upload_id = databaseModel.document_upload_id,
         };
 
         return dto;
