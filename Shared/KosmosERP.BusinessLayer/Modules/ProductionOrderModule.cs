@@ -12,6 +12,7 @@ using KosmosERP.BusinessLayer.Models.Module.ProductionOrder.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.ProductionOrder.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.ProductionOrder.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.ProductionOrder.Command.Find;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 
 
 namespace KosmosERP.BusinessLayer.Modules;
@@ -46,14 +47,10 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Production Order Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -75,15 +72,11 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductionOrderPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -103,15 +96,11 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductionOrderPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -131,15 +120,11 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductionOrderPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -159,15 +144,78 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductionOrderPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+
+        var submitted_status = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "production_order_status_submitted").SingleOrDefault();
+        var pulled_status = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "production_order_status_pulled").SingleOrDefault();
+        var pulled_wip = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "production_order_status_wip").SingleOrDefault();
+        var pulled_qc = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "production_order_status_qc").SingleOrDefault();
+        var pulled_complete = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "production_order_status_complete").SingleOrDefault();
+
+        if (submitted_status == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "production_order_status_submitted",
+                value = "Submitted",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (pulled_status == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "production_order_status_pulled",
+                value = "Parts Pulled",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (pulled_wip == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "production_order_status_wip",
+                value = "Work In Progress",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (pulled_qc == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "production_order_status_qc",
+                value = "Quality Check",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (pulled_complete == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "production_order_status_complete",
+                value = "Complete",
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -410,6 +458,20 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
         _Context.ProductionOrderHeaders.Update(existingEntity);
         await _Context.SaveChangesAsync();
 
+        var production_order_lines = await _Context.ProductionOrderLines
+            .Where(m => m.production_order_header_id == existingEntity.id && !m.is_deleted)
+            .ToListAsync();
+
+        foreach(var line in  production_order_lines)
+        {
+            await this.DeleteLine(new ProductionOrderLineDeleteCommand()
+            {
+                calling_user_id = commandModel.calling_user_id,
+                token = commandModel.token,
+                id = line.id,
+            });
+        }
+
         var dto = await MapToDto(existingEntity);
         return new Response<ProductionOrderHeaderDto>(dto);
     }
@@ -498,11 +560,17 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         return dto;
@@ -523,11 +591,17 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         var production_order_lines = await _Context.ProductionOrderLines
@@ -556,11 +630,17 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
+            updated_by = databaseModel.updated_by,
+            created_by = databaseModel.created_by,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         using(var order_module = new OrderModule(_Context, null))
@@ -606,11 +686,17 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             id = databaseModel.id,
             created_on = databaseModel.created_on,
             updated_on = databaseModel.updated_on,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            created_by = databaseModel.created_by,
+            updated_by = databaseModel.updated_by,
             is_deleted = databaseModel.is_deleted,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         return dto;
