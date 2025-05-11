@@ -162,6 +162,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
         var result = await _Module.GetDto(new_result.Data.id);
 
         ValidateMostDtoFields(result);
+        Assert.That(result.Data.product_attributes.Count() > 0);
     }
 
     [Test]
@@ -348,6 +349,156 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
         var first_result = results.Data.First();
 
         ValidateMostListFields(first_result);
+    }
+
+    [Test]
+    public async Task CreateAttribute()
+    {
+        var result = await _Module.Create(new ProductCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            product_name = "Some wire",
+            product_class = "Copper",
+            category = "Spool",
+            identifier1 = "SPO-CU-100",
+            is_sales_item = true,
+            is_material = true,
+            internal_description = "A big spool of copper wire used to make stuff",
+            our_cost = 1,
+            list_price = 5,
+            sales_price = 3,
+            unit_cost = 1,
+            vendor_id = _Vendor.id,
+            is_taxable = false,
+            product_attributes = new List<ProductAttributeCreateCommand>()
+            {
+                new ProductAttributeCreateCommand()
+                {
+                    attribute_name = "Diameter",
+                    attribute_value = "1in"
+                }
+            }
+        });
+
+        Assert.IsTrue(result.Success);
+        Assert.IsNotNull(result.Data);
+
+        var attribute_result = await _Module.CreateAttribute(new ProductAttributeCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            attribute_name = "Length",
+            attribute_value = "100000",
+            product_id = result.Data.id
+        });
+
+
+        Assert.IsTrue(attribute_result.Success);
+        Assert.IsNotNull(attribute_result.Data);
+    }
+
+    [Test]
+    public async Task EditAttribute()
+    {
+        var result = await _Module.Create(new ProductCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            product_name = "Some wire",
+            product_class = "Copper",
+            category = "Spool",
+            identifier1 = "SPO-CU-100",
+            is_sales_item = true,
+            is_material = true,
+            internal_description = "A big spool of copper wire used to make stuff",
+            our_cost = 1,
+            list_price = 5,
+            sales_price = 3,
+            unit_cost = 1,
+            vendor_id = _Vendor.id,
+            is_taxable = false,
+            product_attributes = new List<ProductAttributeCreateCommand>()
+            {
+                new ProductAttributeCreateCommand()
+                {
+                    attribute_name = "Diameter",
+                    attribute_value = "1in"
+                }
+            }
+        });
+
+        Assert.IsTrue(result.Success);
+        Assert.IsNotNull(result.Data);
+        Assert.NotZero(result.Data.product_attributes.Count());
+
+        var attribute_to_edit = result.Data.product_attributes[0];
+
+
+        var edit_command = new ProductAttributeEditCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            id = attribute_to_edit.id,
+            attribute_name = "Length",
+            attribute_value = "100000",
+        };
+
+        var attribute_result = await _Module.EditAttribute(edit_command);
+
+
+        Assert.IsTrue(attribute_result.Success);
+        Assert.IsNotNull(attribute_result.Data);
+        Assert.That(attribute_result.Data.attribute_name == edit_command.attribute_name);
+        Assert.That(attribute_result.Data.attribute_value == edit_command.attribute_value);
+    }
+
+    [Test]
+    public async Task DeleteAttribute()
+    {
+        var result = await _Module.Create(new ProductCreateCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            product_name = "Some wire",
+            product_class = "Copper",
+            category = "Spool",
+            identifier1 = "SPO-CU-100",
+            is_sales_item = true,
+            is_material = true,
+            internal_description = "A big spool of copper wire used to make stuff",
+            our_cost = 1,
+            list_price = 5,
+            sales_price = 3,
+            unit_cost = 1,
+            vendor_id = _Vendor.id,
+            is_taxable = false,
+            product_attributes = new List<ProductAttributeCreateCommand>()
+            {
+                new ProductAttributeCreateCommand()
+                {
+                    attribute_name = "Diameter",
+                    attribute_value = "1in"
+                }
+            }
+        });
+
+        Assert.IsTrue(result.Success);
+        Assert.IsNotNull(result.Data);
+        Assert.NotZero(result.Data.product_attributes.Count());
+
+        var attribute_to_edit = result.Data.product_attributes[0];
+
+        var attribute_result = await _Module.DeleteAttribute(new ProductAttributeDeleteCommand()
+        {
+            calling_user_id = 1,
+            token = _SessionId,
+            id = attribute_to_edit.id,
+        });
+
+
+        Assert.IsTrue(attribute_result.Success);
+        Assert.IsNotNull(attribute_result.Data);
     }
 
     private void ValidateMostDtoFields(Response<ProductDto> result)

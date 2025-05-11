@@ -209,6 +209,21 @@ public class ProductModule : BaseERPModule, IProductModule
             await _Context.Products.AddAsync(item);
             await _Context.SaveChangesAsync();
 
+
+            // Do attributes if available
+            foreach(var attribute in commandModel.product_attributes)
+            {
+                attribute.product_id = item.id;
+                attribute.calling_user_id = commandModel.calling_user_id;
+                attribute.token = commandModel.token;
+
+                var attibute_response = await this.CreateAttribute(attribute);
+
+                if (!attibute_response.Success)
+                    return new Response<ProductDto>(attibute_response.Exception, ResultCode.Error);
+            }
+
+
             var dto = await GetDto(item.id);
 
             return new Response<ProductDto>(dto.Data);
@@ -332,7 +347,7 @@ public class ProductModule : BaseERPModule, IProductModule
         if (!validationResult.Success)
             return new Response<ProductAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, ProductPermissions.Create, write: true);
         if (!permission_result)
             return new Response<ProductAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -359,7 +374,7 @@ public class ProductModule : BaseERPModule, IProductModule
         if (!validationResult.Success)
             return new Response<ProductAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, ProductPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ProductAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
@@ -394,7 +409,7 @@ public class ProductModule : BaseERPModule, IProductModule
         if (!validationResult.Success)
             return new Response<ProductAttributeDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, OrderPermissions.Delete, delete: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, ProductPermissions.Delete, delete: true);
         if (!permission_result)
             return new Response<ProductAttributeDto>("Invalid permission", ResultCode.InvalidPermission);
 
