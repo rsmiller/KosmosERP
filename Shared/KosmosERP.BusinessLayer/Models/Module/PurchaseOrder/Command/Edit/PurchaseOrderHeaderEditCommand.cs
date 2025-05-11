@@ -15,5 +15,5 @@ public class PurchaseOrderHeaderEditCommand : DataCommand
     public bool? is_complete { get; set; }
     public bool? is_canceled { get; set; }
 
-    public List<PurchaseOrderLineEditCommand> purchase_order_line {  get; set; } = new List<PurchaseOrderLineEditCommand>();
+    public List<PurchaseOrderLineEditCommand> purchase_order_lines {  get; set; } = new List<PurchaseOrderLineEditCommand>();
 }

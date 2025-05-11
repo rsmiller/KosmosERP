@@ -472,6 +472,8 @@ public class LeadModule : BaseERPModule, ILeadModule
             created_by = databaseModel.created_by,
             updated_on = databaseModel.updated_on,
             updated_by = databaseModel.updated_by,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
             deleted_on_string = databaseModel.deleted_on_string,
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
@@ -555,7 +557,8 @@ public class LeadModule : BaseERPModule, ILeadModule
             deleted_on_string = dtoModel.deleted_on_string,
             deleted_on_timezone = dtoModel.deleted_on_timezone,
             updated_on_string = dtoModel.updated_on_string,
-            updated_on_timezone = dtoModel.updated_on_timezone
+            updated_on_timezone = dtoModel.updated_on_timezone,
+            
         };
     }
 

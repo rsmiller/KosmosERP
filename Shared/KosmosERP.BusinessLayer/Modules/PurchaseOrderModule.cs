@@ -17,6 +17,8 @@ using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Find;
 using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Dto;
 using KosmosERP.Database.Models;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+using Mysqlx.Crud;
 
 
 namespace KosmosERP.BusinessLayer.Modules;
@@ -62,14 +64,10 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "PO Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -91,15 +89,11 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -119,15 +113,11 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -147,15 +137,11 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -175,15 +161,37 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == PurchaseOrderPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+
+        var material_po_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "po_type_materials").SingleOrDefault();
+        var office_po_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString() && m.key == "po_type_office_suplies").SingleOrDefault();
+
+        if (material_po_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "po_type_materials",
+                value = "Build Material",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (office_po_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "po_type_office_suplies",
+                value = "Office Use",
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -340,13 +348,13 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             return new Response<PurchaseOrderHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
         // Check for validation issues with the lines
-        foreach (var line in commandModel.purchase_order_line)
+        foreach (var line in commandModel.purchase_order_lines)
         {
             var line_validation = ModelValidationHelper.ValidateModel(line);
             if (!line_validation.Success)
                 return new Response<PurchaseOrderHeaderDto>(line_validation.Exception, ResultCode.DataValidationError);
 
-            var new_edited_lines = commandModel.purchase_order_line.Where(m => !m.id.HasValue).ToList();
+            var new_edited_lines = commandModel.purchase_order_lines.Where(m => !m.id.HasValue).ToList();
             foreach (var new_edit in new_edited_lines)
             {
                 // These fields must be set to be considered a new line
@@ -396,7 +404,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             await _Context.SaveChangesAsync();
 
             // Create or update lines
-            foreach (var line in commandModel.purchase_order_line)
+            foreach (var line in commandModel.purchase_order_lines)
             {
                 // Edit lines
                 if (!line.id.HasValue)
@@ -533,6 +541,19 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
             _Context.PurchaseOrderHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
+
+            var lines = await _Context.PurchaseOrderLines.Where(m => m.purchase_order_header_id == existingEntity.id && m.is_deleted == false).ToListAsync();
+
+            foreach (var line in lines)
+            {
+                await this.DeleteLine(new PurchaseOrderLineDeleteCommand()
+                {
+                    calling_user_id = commandModel.calling_user_id,
+                    token = commandModel.token,
+                    id = line.id,
+                });
+            }
+
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
@@ -703,16 +724,18 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
             guid = databaseModel.guid,
-            created_on_string = databaseModel.created_on_string,
-            created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 
     public async Task<PurchaseOrderHeaderDto> MapToDto(PurchaseOrderHeader databaseModel)
     {
-        return new PurchaseOrderHeaderDto
+        var dto = new PurchaseOrderHeaderDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -735,11 +758,20 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             canceled_on = databaseModel.canceled_on,
             canceled_by = databaseModel.canceled_by,
             guid = databaseModel.guid,
-            created_on_string = databaseModel.created_on_string,
-            created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        var lines = await _Context.PurchaseOrderLines.Where(m => m.purchase_order_header_id == databaseModel.id && m.is_deleted == false).ToListAsync();
+
+        foreach(var line in lines)
+            dto.purchase_order_lines.Add(await this.MapToLineDto(line));
+
+        return dto;
     }
 
     public async Task<PurchaseOrderLineDto> MapToLineDto(PurchaseOrderLine databaseModel)
@@ -766,10 +798,12 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             is_complete = databaseModel.is_complete,
             is_canceled = databaseModel.is_canceled,
             guid = databaseModel.guid,
-            created_on_string = databaseModel.created_on_string,
-            created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 
@@ -797,7 +831,13 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             completed_by = dtoModel.completed_by,
             canceled_on = dtoModel.canceled_on,
             canceled_by = dtoModel.canceled_by,
-            guid = dtoModel.guid
+            guid = dtoModel.guid,
+            updated_on_string = dtoModel.updated_on_string,
+            updated_on_timezone = dtoModel.updated_on_timezone,
+            created_on_string = dtoModel.created_on_string,
+            created_on_timezone = dtoModel.created_on_timezone,
+            deleted_on_string = dtoModel.deleted_on_string,
+            deleted_on_timezone = dtoModel.deleted_on_timezone,
         };
     }
 
