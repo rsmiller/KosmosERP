@@ -9,6 +9,7 @@ public class KeyValueStore : BaseDatabaseModel
 
     [Required]
     public string value { get; set; } = "";
+    public int? int_value { get; set; }
 
     public string? module_id { get; set; }
 }

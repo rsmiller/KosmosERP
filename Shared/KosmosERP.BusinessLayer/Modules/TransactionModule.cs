@@ -51,14 +51,10 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Transaction Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -95,15 +91,11 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == TransactionPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -123,15 +115,11 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == TransactionPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -151,15 +139,111 @@ public class TransactionModule : BaseERPModule, ITransactionModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == TransactionPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        var inbound_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_inbound").SingleOrDefault();
+        var outbound_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_outbound").SingleOrDefault();
+        var planned_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_planned").SingleOrDefault();
+        var commited_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_commited").SingleOrDefault();
+        var reserved_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_reserved").SingleOrDefault();
+        var move_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_move").SingleOrDefault();
+        var adjustment_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_adjustment").SingleOrDefault();
+
+
+        if (inbound_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_inbound",
+                value = "Inbound",
+                int_value = 1
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (outbound_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_outbound",
+                value = "Outbound",
+                int_value = 2
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (planned_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_planned",
+                value = "Planned",
+                int_value = 3
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (commited_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_commited",
+                value = "Commited",
+                int_value = 5
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (reserved_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_reserved",
+                value = "Reserved",
+                int_value = 6
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (move_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_move",
+                value = "Move",
+                int_value = 7
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (move_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_adjustment",
+                value = "Adjustment",
+                int_value = 8
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -437,6 +521,8 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             product_id = databaseModel.product_id,
             transaction_type = databaseModel.transaction_type,
             transaction_date = databaseModel.transaction_date,
@@ -468,6 +554,8 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             product_id = databaseModel.product_id,
             transaction_type = databaseModel.transaction_type,
             transaction_date = databaseModel.transaction_date,
