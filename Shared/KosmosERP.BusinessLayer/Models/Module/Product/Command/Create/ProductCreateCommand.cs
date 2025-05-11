@@ -8,16 +8,18 @@ public class ProductCreateCommand : DataCommand
     [Required]
     public int vendor_id { get; set; }
     [Required]
+    [MaxLength(250)]
+    public string product_name { get; set; }
+    [Required]
     [MaxLength(50)]
-    public required string product_class { get; set; }
+    public string product_class { get; set; }
+    [Required]
+    [MaxLength(50)]
+    public string category { get; set; }
 
     [Required]
     [MaxLength(50)]
-    public required string category { get; set; }
-
-    [Required]
-    [MaxLength(50)]
-    public required string identifier1 { get; set; }
+    public string identifier1 { get; set; }
 
     [MaxLength(50)]
     public string? identifier2 { get; set; }
@@ -26,7 +28,7 @@ public class ProductCreateCommand : DataCommand
 
     [Required]
     [MaxLength(1000)]
-    public required string internal_description { get; set; }
+    public string internal_description { get; set; }
 
     [MaxLength(1000)]
     public string? external_description { get; set; }

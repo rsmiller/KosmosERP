@@ -12,6 +12,9 @@ using KosmosERP.BusinessLayer.Models.Module.Product.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Product.Command.Find;
 using KosmosERP.BusinessLayer.Models.Module.Product.Dto;
 using KosmosERP.BusinessLayer.Helpers;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+using Mysqlx.Crud;
+using KosmosERP.BusinessLayer.Models.Module.Order.Dto;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -44,14 +47,10 @@ public class ProductModule : BaseERPModule, IProductModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Product Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -73,15 +72,11 @@ public class ProductModule : BaseERPModule, IProductModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -101,15 +96,11 @@ public class ProductModule : BaseERPModule, IProductModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -129,15 +120,11 @@ public class ProductModule : BaseERPModule, IProductModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -157,15 +144,11 @@ public class ProductModule : BaseERPModule, IProductModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ProductPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -245,11 +228,77 @@ public class ProductModule : BaseERPModule, IProductModule
         if (!validationResult.Success)
             return new Response<ProductDto>(validationResult.Exception, ResultCode.DataValidationError);
 
-        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ProductPermissions.Edit, write: true);
+        var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token, ProductPermissions.Edit, edit: true);
         if (!permission_result)
             return new Response<ProductDto>("Invalid permission", ResultCode.InvalidPermission);
 
-        throw new NotImplementedException();
+
+        var existingEntity = await GetAsync(commandModel.id);
+        if (existingEntity == null)
+            return new Response<ProductDto>("Product not found", ResultCode.NotFound);
+
+        try
+        {
+            if (!String.IsNullOrEmpty(commandModel.identifier1) && existingEntity.identifier1 != commandModel.identifier1)
+                existingEntity.identifier1 = commandModel.identifier1;
+            if (existingEntity.identifier2 != commandModel.identifier2)
+                existingEntity.identifier2 = commandModel.identifier2;
+            if (existingEntity.identifier3 != commandModel.identifier3)
+                existingEntity.identifier3 = commandModel.identifier3;
+
+            if (!String.IsNullOrEmpty(commandModel.product_name) && existingEntity.product_name != commandModel.product_name)
+                existingEntity.product_name = commandModel.product_name;
+            if (!String.IsNullOrEmpty(commandModel.product_class) && existingEntity.product_class != commandModel.product_class)
+                existingEntity.product_class = commandModel.product_class;
+            if (!String.IsNullOrEmpty(commandModel.category) && existingEntity.category != commandModel.category)
+                existingEntity.category = commandModel.category;
+
+            if (!String.IsNullOrEmpty(commandModel.internal_description) && existingEntity.internal_description != commandModel.internal_description)
+                existingEntity.internal_description = commandModel.internal_description;
+            if (existingEntity.external_description != commandModel.external_description)
+                existingEntity.external_description = commandModel.external_description;
+            if (existingEntity.rfid_id != commandModel.rfid_id)
+                existingEntity.rfid_id = commandModel.rfid_id;
+
+            if (commandModel.list_price.HasValue && existingEntity.list_price != commandModel.list_price)
+                existingEntity.list_price = commandModel.list_price.Value;
+            if (commandModel.sales_price.HasValue && existingEntity.sales_price != commandModel.sales_price)
+                existingEntity.sales_price = commandModel.sales_price.Value;
+            if (commandModel.unit_cost.HasValue && existingEntity.unit_cost != commandModel.unit_cost)
+                existingEntity.unit_cost = commandModel.unit_cost.Value;
+            if (commandModel.our_cost.HasValue && existingEntity.our_cost != commandModel.our_cost)
+                existingEntity.our_cost = commandModel.our_cost.Value;
+
+            if (commandModel.is_labor.HasValue && existingEntity.is_labor != commandModel.is_labor)
+                existingEntity.is_labor = commandModel.is_labor.Value;
+            if (commandModel.is_material.HasValue && existingEntity.is_material != commandModel.is_material)
+                existingEntity.is_material = commandModel.is_material.Value;
+            if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
+                existingEntity.is_taxable = commandModel.is_taxable.Value;
+            if (commandModel.is_rental_item.HasValue && existingEntity.is_rental_item != commandModel.is_rental_item)
+                existingEntity.is_rental_item = commandModel.is_rental_item.Value;
+            if (commandModel.is_retired.HasValue && existingEntity.is_retired != commandModel.is_retired)
+                existingEntity.is_retired = commandModel.is_retired.Value;
+            if (commandModel.is_shippable.HasValue && existingEntity.is_shippable != commandModel.is_shippable)
+                existingEntity.is_shippable = commandModel.is_shippable.Value;
+            if (commandModel.is_stock.HasValue && existingEntity.is_stock != commandModel.is_stock)
+                existingEntity.is_stock = commandModel.is_stock.Value;
+
+
+            existingEntity = CommonDataHelper<Product>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
+            _Context.Products.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+            var dto = await MapToDto(existingEntity);
+
+            return new Response<ProductDto>(dto);
+        }
+        catch (Exception ex)
+        {
+            await LogError(80, this.GetType().Name, nameof(Edit), ex);
+            return new Response<ProductDto>(ex.Message, ResultCode.Error);
+        }
     }
 
     public async Task<Response<ProductDto>> Delete(ProductDeleteCommand commandModel)
@@ -435,11 +484,15 @@ public class ProductModule : BaseERPModule, IProductModule
             created_by = databaseModel.created_by,
             updated_by = databaseModel.updated_by,
             updated_on = databaseModel.updated_on,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
             external_description = databaseModel.external_description,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         return dto;
@@ -480,11 +533,15 @@ public class ProductModule : BaseERPModule, IProductModule
             updated_on = databaseModel.updated_on,
             created_by = databaseModel.created_by,
             updated_by = databaseModel.updated_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
             external_description = databaseModel.external_description,
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
         var attributes = await _Context.ProductAttributes.Where(m => m.product_id == databaseModel.id).ToListAsync();
@@ -498,6 +555,7 @@ public class ProductModule : BaseERPModule, IProductModule
     {
         return new Database.Models.Product()
         {
+            product_name = dtoModel.product_name,
             sales_price = dtoModel.sales_price,
             unit_cost = dtoModel.unit_cost,
             list_price = dtoModel.list_price,
@@ -534,6 +592,7 @@ public class ProductModule : BaseERPModule, IProductModule
     {
         return CommonDataHelper<Database.Models.Product>.FillCommonFields(new Database.Models.Product()
         {
+            product_name = createCommand.product_name,
             sales_price = createCommand.sales_price,
             unit_cost = createCommand.unit_cost,
             list_price = createCommand.list_price,
@@ -588,6 +647,14 @@ public class ProductModule : BaseERPModule, IProductModule
             created_on_timezone = databaseModel.created_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_by = databaseModel.deleted_by,
+            deleted_on = databaseModel.deleted_on,
+            updated_by = databaseModel.updated_by,
+            updated_on = databaseModel.updated_on,
+            created_by = databaseModel.created_by,
+            created_on = databaseModel.created_on,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
     }
 

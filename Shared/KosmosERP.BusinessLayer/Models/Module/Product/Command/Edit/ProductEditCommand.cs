@@ -11,6 +11,8 @@ public class ProductEditCommand : DataCommand
     public int? vendor_id { get; set; }
     [MaxLength(50)]
     public string? product_class { get; set; }
+    [MaxLength(250)]
+    public string? product_name { get; set; }
     [MaxLength(50)]
     public string? category { get; set; }
     [MaxLength(50)]
