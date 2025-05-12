@@ -25,7 +25,7 @@ public class ShipmentController : ERPApiController
 
     
     [HttpGet("GetShipmentHeader", Name = "GetShipmentHeader")]
-    [ProducesResponseType(typeof(Response<ShipmentDto>), 200)]
+    [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Get([FromQuery] int id)
     {
@@ -51,7 +51,7 @@ public class ShipmentController : ERPApiController
     }
 
     [HttpPost("FindShipmentHeader", Name = "FindShipmentHeader")]
-    [ProducesResponseType(typeof(PagingResult<ShipmentListDto>), 200)]
+    [ProducesResponseType(typeof(PagingResult<ShipmentHeaderListDto>), 200)]
     [ProducesResponseType(500)]
     public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] ShipmentHeaderFindCommand command)
     {
@@ -77,7 +77,7 @@ public class ShipmentController : ERPApiController
     }
 
     [HttpPost("CreateShipmentHeader", Name = "CreateShipmentHeader")]
-    [ProducesResponseType(typeof(Response<ShipmentDto>), 200)]
+    [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] ShipmentHeaderCreateCommand createCommand)
     {
@@ -103,7 +103,7 @@ public class ShipmentController : ERPApiController
     }
 
     [HttpPut("UpdateShipmentHeader", Name = "UpdateShipmentHeader")]
-    [ProducesResponseType(typeof(Response<ShipmentDto>), 200)]
+    [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] ShipmentHeaderEditCommand editCommand)
     {
@@ -129,7 +129,7 @@ public class ShipmentController : ERPApiController
     }
 
     [HttpDelete("DeleteShipmentHeader", Name = "DeleteShipmentHeader")]
-    [ProducesResponseType(typeof(Response<ShipmentDto>), 200)]
+    [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] ShipmentHeaderDeleteCommand deleteCommand)
     {
@@ -142,7 +142,7 @@ public class ShipmentController : ERPApiController
     }
 
     [HttpDelete("DeleteShipmentLine", Name = "DeleteShipmentLine")]
-    [ProducesResponseType(typeof(Response<ShipmentDto>), 200)]
+    [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
     public async Task<ActionResult> DeleteLine([FromBody] ShipmentLineDeleteCommand deleteCommand)
     {

@@ -1,7 +1,7 @@
 ﻿using KosmosERP.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Create;
+namespace KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Edit;
 
 public class ShipmentHeaderEditCommand : DataCommand
 {

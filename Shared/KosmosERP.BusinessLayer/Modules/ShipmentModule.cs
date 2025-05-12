@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using KosmosERP.Database.Models;
 using KosmosERP.Database;
 using KosmosERP.Models.Helpers;
@@ -10,20 +11,23 @@ using KosmosERP.BusinessLayer.Interfaces;
 using KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Shipment.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Create;
-using System.Text.Json;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Delete;
 using KosmosERP.BusinessLayer.Helpers;
+using Mysqlx.Crud;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+
 
 
 namespace KosmosERP.BusinessLayer.Modules;
 
 public interface IShipmentModule : IERPModule<
     ShipmentHeader,
-    ShipmentDto,
-    ShipmentListDto,
+    ShipmentHeaderDto,
+    ShipmentHeaderListDto,
     ShipmentHeaderCreateCommand,
     ShipmentHeaderEditCommand,
     ShipmentHeaderDeleteCommand,
@@ -61,14 +65,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
         if (role == false)
         {
-            _Context.Roles.Add(new Role()
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Shipping Users",
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -90,15 +90,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             var read_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Read).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = read_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -118,15 +114,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             var create_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Create).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = create_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -146,15 +138,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             var edit_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Edit).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = edit_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -174,15 +162,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             var delete_perm_id = _Context.ModulePermissions.Where(m => m.internal_permission_name == ShipmentPermissions.Delete).Select(m => m.id).Single();
 
-            _Context.RolePermissions.Add(new RolePermission()
+            _Context.RolePermissions.Add(CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
             {
                 role_id = role_id,
                 module_permission_id = delete_perm_id,
-                created_by = 1,
-                created_on = DateTime.UtcNow,
-                updated_by = 1,
-                updated_on = DateTime.UtcNow,
-            });
+            }, 1));
 
             _Context.SaveChanges();
         }
@@ -209,14 +193,14 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         return await _Context.ShipmentLines.SingleOrDefaultAsync(m => m.id == object_id);
     }
 
-    public async Task<Response<ShipmentDto>> GetDto(int object_id)
+    public async Task<Response<ShipmentHeaderDto>> GetDto(int object_id)
     {
         var entity = await GetAsync(object_id);
         if (entity == null)
-            return new Response<ShipmentDto>("Shipment Header not found", ResultCode.NotFound);
+            return new Response<ShipmentHeaderDto>("Shipment Header not found", ResultCode.NotFound);
 
         var dto = await MapToDto(entity);
-        return new Response<ShipmentDto>(dto);
+        return new Response<ShipmentHeaderDto>(dto);
     }
 
     public async Task<Response<ShipmentLineDto>> GetLineDto(int object_id)
@@ -229,24 +213,41 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         return new Response<ShipmentLineDto>(dto);
     }
 
-    public async Task<Response<ShipmentDto>> Create(ShipmentHeaderCreateCommand commandModel)
+    public async Task<Response<ShipmentHeaderDto>> Create(ShipmentHeaderCreateCommand commandModel)
     {
         try
         {
             var validationResult = ModelValidationHelper.ValidateModel(commandModel);
             if (!validationResult.Success)
-                return new Response<ShipmentDto>(validationResult.Exception, ResultCode.DataValidationError);
+                return new Response<ShipmentHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
             var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Create, write: true);
             if (!permission_result)
-                return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
+                return new Response<ShipmentHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
+            var existingOrderEntity = await _Context.OrderHeaders.Where(m => m.id == commandModel.order_header_id).SingleOrDefaultAsync();
+            if (existingOrderEntity == null)
+                return new Response<ShipmentHeaderDto>("Order Header not found", ResultCode.NotFound);
+
+            var units_sold = await _Context.OrderLines.Where(m => m.order_header_id == existingOrderEntity.id).SumAsync(m => m.quantity);
 
             var newShipmentHeader = this.MapForCreate(commandModel);
+
+            newShipmentHeader.units_to_ship = units_sold;
 
             _Context.ShipmentHeaders.Add(newShipmentHeader);
             await _Context.SaveChangesAsync();
 
+            // Check shipment number
+            if (newShipmentHeader.shipment_number == 0)
+            {
+                newShipmentHeader.shipment_number = await this.ManuallyGenerateAShipmentNumber();
+
+                _Context.ShipmentHeaders.Update(newShipmentHeader);
+                await _Context.SaveChangesAsync();
+            }
+
+            // Lines
             foreach (var shipment_line in commandModel.shipment_lines)
             {
                 var line = this.MapForCreate(shipment_line, newShipmentHeader.id);
@@ -274,12 +275,12 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
 
             var dto = await MapToDto(newShipmentHeader);
-            return new Response<ShipmentDto>(dto);
+            return new Response<ShipmentHeaderDto>(dto);
         }
         catch (Exception ex)
         {
             await LogError(80, this.GetType().Name, nameof(Create), ex);
-            return new Response<ShipmentDto>(ex.Message, ResultCode.Error);
+            return new Response<ShipmentHeaderDto>(ex.Message, ResultCode.Error);
         }
     }
 
@@ -328,25 +329,25 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         }
     }
 
-    public async Task<Response<ShipmentDto>> Edit(ShipmentHeaderEditCommand commandModel)
+    public async Task<Response<ShipmentHeaderDto>> Edit(ShipmentHeaderEditCommand commandModel)
     {
         var validationResult = ModelValidationHelper.ValidateModel(commandModel);
         if (!validationResult.Success)
-            return new Response<ShipmentDto>(validationResult.Exception, ResultCode.DataValidationError);
+            return new Response<ShipmentHeaderDto>(validationResult.Exception, ResultCode.DataValidationError);
 
         var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Edit, edit: true);
         if (!permission_result)
-            return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
+            return new Response<ShipmentHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
-            return new Response<ShipmentDto>("Shipment Header not found", ResultCode.NotFound);
+            return new Response<ShipmentHeaderDto>("Shipment Header not found", ResultCode.NotFound);
 
         try
         {
-            if (commandModel.order_id.HasValue && existingEntity.order_id != commandModel.order_id)
-                existingEntity.order_id = commandModel.order_id.Value;
+            if (commandModel.order_id.HasValue && existingEntity.order_header_id != commandModel.order_id)
+                existingEntity.order_header_id = commandModel.order_id.Value;
 
             if (commandModel.address_id.HasValue && existingEntity.address_id != commandModel.address_id)
                 existingEntity.address_id = commandModel.address_id.Value;
@@ -385,12 +386,12 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             await _Context.SaveChangesAsync();
 
             var dto = await MapToDto(existingEntity);
-            return new Response<ShipmentDto>(dto);
+            return new Response<ShipmentHeaderDto>(dto);
         }
         catch (Exception ex)
         {
             await LogError(80, this.GetType().Name, nameof(CreateLine), ex);
-            return new Response<ShipmentDto>(ex.Message, ResultCode.Error);
+            return new Response<ShipmentHeaderDto>(ex.Message, ResultCode.Error);
         }
     }
 
@@ -463,15 +464,15 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         }
     }
 
-    public async Task<Response<ShipmentDto>> Delete(ShipmentHeaderDeleteCommand commandModel)
+    public async Task<Response<ShipmentHeaderDto>> Delete(ShipmentHeaderDeleteCommand commandModel)
     {
         var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Delete, delete: true);
         if (!permission_result)
-            return new Response<ShipmentDto>("Invalid permission", ResultCode.InvalidPermission);
+            return new Response<ShipmentHeaderDto>("Invalid permission", ResultCode.InvalidPermission);
 
         var existingEntity = await GetAsync(commandModel.id);
         if (existingEntity == null)
-            return new Response<ShipmentDto>("Shipment Header not found", ResultCode.NotFound);
+            return new Response<ShipmentHeaderDto>("Shipment Header not found", ResultCode.NotFound);
 
         try
         {
@@ -480,6 +481,19 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             _Context.ShipmentHeaders.Update(existingEntity);
             await _Context.SaveChangesAsync();
+
+
+            var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == existingEntity.order_header_id).ToListAsync();
+            foreach (var line in lines)
+            {
+                await this.DeleteLine(new ShipmentLineDeleteCommand()
+                {
+                    calling_user_id = commandModel.calling_user_id,
+                    token = commandModel.token,
+                    id = line.id,
+                });
+            }
+
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
@@ -493,13 +507,13 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             }, RequiredMessageTopics.TransactionMovementTopic);
 
             var dto = await MapToDto(existingEntity);
-            return new Response<ShipmentDto>(dto);
+            return new Response<ShipmentHeaderDto>(dto);
 
         }
         catch (Exception ex)
         {
             await LogError(80, this.GetType().Name, nameof(Delete), ex);
-            return new Response<ShipmentDto>(ex.Message, ResultCode.Error);
+            return new Response<ShipmentHeaderDto>(ex.Message, ResultCode.Error);
         }
     }
 
@@ -543,12 +557,12 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         }
     }
 
-    public async Task<PagingResult<ShipmentListDto>> Find(PagingSortingParameters parameters, ShipmentHeaderFindCommand commandModel)
+    public async Task<PagingResult<ShipmentHeaderListDto>> Find(PagingSortingParameters parameters, ShipmentHeaderFindCommand commandModel)
     {
-        var response = new PagingResult<ShipmentListDto>();
+        var response = new PagingResult<ShipmentHeaderListDto>();
         try
         {
-            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Edit, read: true);
+            var permission_result = await base.HasPermission(commandModel.calling_user_id, commandModel.token,ShipmentPermissions.Read, read: true);
             if (!permission_result)
             {
                 response.SetException("Invalid permission", ResultCode.InvalidPermission);
@@ -569,11 +583,18 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                     || m.guid.ToLower().Contains(wild)
                 );
             }
+            else
+            {
+                int the_num = 0;
+                int.TryParse(commandModel.wildcard, out the_num);
+
+                query = query.Where(m => m.shipment_number == the_num);
+            }
 
             var totalCount = await query.CountAsync();
             var pagedItems = await query.SortAndPageBy(parameters).ToListAsync();
 
-            var dtos = new List<ShipmentListDto>();
+            var dtos = new List<ShipmentHeaderListDto>();
             foreach (var item in pagedItems)
             {
                 dtos.Add(await MapToListDto(item));
@@ -592,9 +613,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         return response;
     }
 
-    public async Task<Response<List<ShipmentListDto>>> GlobalSearch(PagingSortingParameters parameters, string wildcard)
+    public async Task<Response<List<ShipmentHeaderListDto>>> GlobalSearch(PagingSortingParameters parameters, string wildcard)
     {
-        var response = new Response<List<ShipmentListDto>>();
+        var response = new Response<List<ShipmentHeaderListDto>>();
         try
         {
             var query = _Context.ShipmentHeaders
@@ -614,7 +635,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
             var pagedItems = await query.SortAndPageBy(parameters).ToListAsync();
 
-            var dtos = new List<ShipmentListDto>();
+            var dtos = new List<ShipmentHeaderListDto>();
             foreach (var item in pagedItems)
             {
                 dtos.Add(await MapToListDto(item));
@@ -631,9 +652,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         return response;
     }
 
-    public async Task<ShipmentListDto> MapToListDto(ShipmentHeader databaseModel)
+    public async Task<ShipmentHeaderListDto> MapToListDto(ShipmentHeader databaseModel)
     {
-        return new ShipmentListDto
+        return new ShipmentHeaderListDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -643,7 +664,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-            order_id = databaseModel.order_id,
+            order_header_id = databaseModel.order_header_id,
             shipment_number = databaseModel.shipment_number,
             address_id = databaseModel.address_id,
             units_to_ship = databaseModel.units_to_ship,
@@ -661,16 +682,18 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_by = databaseModel.canceled_by,
             canceled_reason = databaseModel.canceled_reason,
             guid = databaseModel.guid,
-            created_on_string = databaseModel.created_on_string,
-            created_on_timezone = databaseModel.created_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
         };
     }
 
-    public async Task<ShipmentDto> MapToDto(ShipmentHeader databaseModel)
+    public async Task<ShipmentHeaderDto> MapToDto(ShipmentHeader databaseModel)
     {
-        return new ShipmentDto
+        var dto = new ShipmentHeaderDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -680,7 +703,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             updated_by = databaseModel.updated_by,
             deleted_on = databaseModel.deleted_on,
             deleted_by = databaseModel.deleted_by,
-            order_id = databaseModel.order_id,
+            order_header_id = databaseModel.order_header_id,
             shipment_number = databaseModel.shipment_number,
             address_id = databaseModel.address_id,
             units_to_ship = databaseModel.units_to_ship,
@@ -698,11 +721,20 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_by = databaseModel.canceled_by,
             canceled_reason = databaseModel.canceled_reason,
             guid = databaseModel.guid,
-            created_on_string = databaseModel.created_on_string,
-            created_on_timezone = databaseModel.created_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
         };
+
+        var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == databaseModel.order_header_id && m.is_deleted == false).ToListAsync();
+        foreach(var line in lines)
+            dto.shipment_lines.Add(await this.MapToLineDto(line));
+
+
+        return dto;
     }
 
     public async Task<ShipmentLineDto> MapToLineDto(ShipmentLine databaseModel)
@@ -729,14 +761,16 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_by = databaseModel.canceled_by,
             canceled_reason = databaseModel.canceled_reason,
             guid = databaseModel.guid,
-            created_on_string = databaseModel.created_on_string,
-            created_on_timezone = databaseModel.created_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
             updated_on_string = databaseModel.updated_on_string,
             updated_on_timezone = databaseModel.updated_on_timezone,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
         };
     }
 
-    public ShipmentHeader MapToDatabaseModel(ShipmentDto dtoModel)
+    public ShipmentHeader MapToDatabaseModel(ShipmentHeaderDto dtoModel)
     {
         return new ShipmentHeader
         {
@@ -748,7 +782,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             updated_by = dtoModel.updated_by,
             deleted_on = dtoModel.deleted_on,
             deleted_by = dtoModel.deleted_by,
-            order_id = dtoModel.order_id,
+            order_header_id = dtoModel.order_header_id,
             shipment_number = dtoModel.shipment_number,
             address_id = dtoModel.address_id,
             units_to_ship = dtoModel.units_to_ship,
@@ -765,17 +799,21 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             canceled_on = dtoModel.canceled_on,
             canceled_by = dtoModel.canceled_by,
             canceled_reason = dtoModel.canceled_reason,
-            guid = dtoModel.guid
+            guid = dtoModel.guid,
+            deleted_on_string = dtoModel.deleted_on_string,
+            deleted_on_timezone = dtoModel.deleted_on_timezone,
+            updated_on_string = dtoModel.updated_on_string,
+            updated_on_timezone = dtoModel.updated_on_timezone,
+            created_on_string = dtoModel.created_on_string,
+            created_on_timezone = dtoModel.created_on_timezone,
         };
     }
 
     private ShipmentHeader MapForCreate(ShipmentHeaderCreateCommand createCommandModel)
     {
-        var now = DateTime.UtcNow;
-
-        var shipment_header = new ShipmentHeader
+        var shipment_header = CommonDataHelper<ShipmentHeader>.FillCommonFields(new ShipmentHeader
         {
-            order_id = createCommandModel.order_id,
+            order_header_id = createCommandModel.order_header_id,
             address_id = createCommandModel.address_id,
             ship_via = createCommandModel.ship_via,
             ship_attn = createCommandModel.ship_attn,
@@ -783,33 +821,33 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             freight_charge_amount = createCommandModel.freight_charge_amount,
             tax = createCommandModel.tax,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, 1);
 
         return shipment_header;
     }
 
     private ShipmentLine MapForCreate(ShipmentLineCreateCommand createCommandModel, int shipment_header_id)
     {
-        var now = DateTime.UtcNow;
-
-        var shipment_line = new ShipmentLine
+        var shipment_line = CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine
         {
             shipment_header_id = shipment_header_id,
             order_line_id = createCommandModel.order_line_id,
             units_to_ship = createCommandModel.units_to_ship,
             units_shipped = createCommandModel.units_shipped,
             is_deleted = false,
-            created_on = now,
-            created_by = createCommandModel.calling_user_id,
-            updated_on = now,
-            updated_by = createCommandModel.calling_user_id
-        };
+        }, createCommandModel.calling_user_id);
 
         return shipment_line;
+    }
+
+    /// <summary>
+    /// This method is used when the auto-gen field on Shipment Number fails. Some databases like memory databases don't auto-incremenet fields.
+    /// </summary>
+    /// <returns>Shipment Number</returns>
+    private async Task<int> ManuallyGenerateAShipmentNumber()
+    {
+        var total_records = await _Context.ShipmentHeaders.CountAsync();
+        return (total_records + 1);
     }
 }
 

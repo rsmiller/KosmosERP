@@ -6,7 +6,7 @@ namespace KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Create;
 public class ShipmentHeaderCreateCommand : DataCommand
 {
     [Required]
-    public int order_id { get; set; }
+    public int order_header_id { get; set; }
 
     [Required]
     public int address_id { get; set; }

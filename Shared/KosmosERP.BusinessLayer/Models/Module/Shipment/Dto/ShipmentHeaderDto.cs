@@ -2,9 +2,9 @@
 
 namespace KosmosERP.BusinessLayer.Models.Module.Shipment.Dto;
 
-public class ShipmentDto : BaseDto
+public class ShipmentHeaderDto : BaseDto
 {
-    public int order_id { get; set; }
+    public int order_header_id { get; set; }
     public int shipment_number { get; set; }
     public int address_id { get; set; }
     public int units_to_ship { get; set; }

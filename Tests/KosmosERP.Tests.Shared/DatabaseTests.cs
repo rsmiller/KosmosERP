@@ -617,7 +617,7 @@ public class DatabaseTests
 
         var shipment_header_model = CommonDataHelper<ShipmentHeader>.FillCommonFields(new ShipmentHeader()
         {
-            order_id = order_model.id,
+            order_header_id = order_model.id,
             shipment_number = 10001,
             tax = 10,
             ship_via = "UPS",
