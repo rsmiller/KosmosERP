@@ -16,6 +16,11 @@ public class MockMessagePublisher : IMessagePublisher
         return true;
     }
 
+    public async Task<string?> GetNextMessage()
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task CloseConnection()
     {
         

@@ -48,6 +48,11 @@ public class AzureMessagePublisher : IMessagePublisher
         return true;
     }
 
+    public async Task<string?> GetNextMessage()
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task CloseConnection()
     {
         if (!_Sender.IsClosed)

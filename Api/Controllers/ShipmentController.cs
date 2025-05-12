@@ -8,6 +8,7 @@ using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Module;
 using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Edit;
 
 namespace KosmosERP.Api.Controllers;
 

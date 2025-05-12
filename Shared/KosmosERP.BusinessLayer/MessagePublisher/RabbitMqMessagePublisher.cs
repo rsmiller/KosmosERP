@@ -3,7 +3,6 @@ using KosmosERP.BusinessLayer.Models;
 using KosmosERP.Models.Interfaces;
 using RabbitMQ.Client;
 using System.Text;
-using System.Text.Json;
 
 namespace KosmosERP.BusinessLayer.MessagePublisher;
 
@@ -41,12 +40,38 @@ public class RabbitMqMessagePublisher : IMessagePublisher, IAsyncDisposable
             await SetQueue(topic_or_queue);
 
 
-        var json = JsonSerializer.Serialize(message);
+        var json = System.Text.Json.JsonSerializer.Serialize(message);
         var bytes = Encoding.UTF8.GetBytes(json);
 
         await _Channel.BasicPublishAsync(_RabbitMqConnectionSettings.rabbitmq_exchange, _RabbitMqConnectionSettings.rabbitmq_routing_key, bytes);
 
         return true;
+    }
+
+    public async Task<string?> GetNextMessage()
+    {
+        if (_Connection == null || _Connection.IsOpen == false)
+            await Setup();
+        
+        var result = await _Channel.BasicGetAsync(_Channel.CurrentQueue, false);
+
+        if (result != null && result != null)
+        {
+            try
+            {
+                var body = result.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                await _Channel.BasicAckAsync(result.DeliveryTag, false);
+
+                return message;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     public async Task CloseConnection()

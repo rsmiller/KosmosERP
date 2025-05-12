@@ -34,6 +34,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryCalculation", "Inv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KosmosERP.Workers.InventoryCalculation", "Workers\InventoryCalculation\KosmosERP.Workers.InventoryCalculation.csproj", "{5CB210F0-6790-44EE-918E-603970671782}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "InventoryProcessing", "InventoryProcessing", "{6BAEA2F6-5B46-4436-BD56-2FFC6573963C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KosmosERP.Workers.InventoryProcessing", "Workers\InventoryProcessing\KosmosERP.Workers.InventoryProcessing.csproj", "{ECA841A9-EAE4-933D-9D6E-C8A2EBF896DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +76,10 @@ Global
 		{5CB210F0-6790-44EE-918E-603970671782}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CB210F0-6790-44EE-918E-603970671782}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CB210F0-6790-44EE-918E-603970671782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECA841A9-EAE4-933D-9D6E-C8A2EBF896DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECA841A9-EAE4-933D-9D6E-C8A2EBF896DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECA841A9-EAE4-933D-9D6E-C8A2EBF896DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECA841A9-EAE4-933D-9D6E-C8A2EBF896DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +94,8 @@ Global
 		{F2527DBD-0E3E-4BE9-8995-B36B2C7C8BDB} = {F17A1C3E-DF6E-459E-A1F8-0C3AAE81E07D}
 		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {EA84E151-E6F3-477F-A533-9BAC9BE5B547}
 		{5CB210F0-6790-44EE-918E-603970671782} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{6BAEA2F6-5B46-4436-BD56-2FFC6573963C} = {EA84E151-E6F3-477F-A533-9BAC9BE5B547}
+		{ECA841A9-EAE4-933D-9D6E-C8A2EBF896DB} = {6BAEA2F6-5B46-4436-BD56-2FFC6573963C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1C19E3D2-C3E7-4269-9E2B-E70B3CC18D90}
