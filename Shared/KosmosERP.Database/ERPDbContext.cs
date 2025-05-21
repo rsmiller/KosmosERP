@@ -67,6 +67,11 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new InventoryConfiguration());
     }
     
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseMySQL("server=localhost;user=erp;password=nosis!2020;database=kosmos-erp;");
+        base.OnConfiguring(optionsBuilder);
+    }
 
     public DbSet<ErrorLog> ErrorLogs { get; set; }
     public DbSet<GeneralLog> GeneralLogs { get; set; }
