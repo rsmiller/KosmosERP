@@ -2,7 +2,7 @@ import { FaHome, FaCogs, FaMoneyBill, FaChartBar, FaCubes, FaFileAlt, FaTruckMov
           FaUserFriends, FaCity, FaBoxOpen, FaDollarSign, FaListAlt, FaReceipt, FaTh } from "react-icons/fa";
 import "../globals.css";
 import "../styles/sidebar.component.css";
-
+import "react-datepicker/dist/react-datepicker.css";
 import { Provider } from "@/components/ui/provider"
 import { Box, Flex, VStack, Link, Text } from '@chakra-ui/react';
 

@@ -18,11 +18,12 @@ public class OrderHeaderListDto : BaseDto
     public decimal price { get; set; }
     public decimal tax { get; set; }
     public decimal shipping_cost { get; set; }
-    public string guid { get; set; }
     public string? deleted_reason { get; set; }
     public string? canceled_reason { get; set; }
     public bool is_complete { get; set; } = false;
     public bool is_canceled { get; set; } = false;
     public DateTime? canceled_on { get; set; }
     public int? canceled_by { get; set; }
+
+    public string? customer_name { get; set; }
 }

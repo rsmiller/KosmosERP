@@ -40,6 +40,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 	private IBaseERPContext _Context;
     private IMessagePublisher _MessagePublisher;
 
+
     public OrderModule(IBaseERPContext context, IMessagePublisher messagePublisher) : base(context)
     {
         _Context = context;
@@ -1009,6 +1010,14 @@ public class OrderModule : BaseERPModule, IOrderModule
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
+        var customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
+        var payment_method_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PayMethods && m.int_value == databaseModel.pay_method_id).Select(m => m.key).SingleOrDefaultAsync();
+        var shipping_method_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.int_value == databaseModel.shipping_method_id).Select(m => m.key).SingleOrDefaultAsync();
+
+        dto.customer_name = customer_name;
+        dto.pay_method_name = payment_method_name;
+        dto.shipping_method_name = shipping_method_name;
+
         var lines = await _Context.OrderLines.Where(m => m.order_header_id == databaseModel.id && m.is_deleted == false).ToListAsync();
 
         foreach (var line in lines)
@@ -1017,9 +1026,9 @@ public class OrderModule : BaseERPModule, IOrderModule
         return dto;
     }
 
-	public async Task<OrderHeaderListDto> MapToListDto(OrderHeader databaseModel)
-	{
-        return new OrderHeaderListDto
+    public async Task<OrderHeaderListDto> MapToListDto(OrderHeader databaseModel)
+    {
+        var dto = new OrderHeaderListDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -1057,6 +1066,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             deleted_on_string = databaseModel.deleted_on_string,
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        var customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
+        dto.customer_name = customer_name;
+
+        return dto;
     }
 
     private async Task<OrderLineDto> MapToLineDto(OrderLine databaseModel)
