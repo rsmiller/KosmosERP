@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KosmosERP.Database.Models;
@@ -17,6 +18,14 @@ public class PurchaseOrderHeader : BaseDatabaseModel
 
     [Required]
     public int po_number { get; set; }
+
+    [Precision(14, 3)]
+    [Required]
+    public decimal price { get; set; }
+
+    [Precision(14, 3)]
+    [Required]
+    public decimal tax { get; set; } = 0;
 
     [MaxLength(500)]
     public string? deleted_reason { get; set; }

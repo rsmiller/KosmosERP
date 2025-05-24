@@ -1115,6 +1115,8 @@ namespace KosmosERP.Database.Migrations
                     po_type = table.Column<string>(type: "varchar(2)", maxLength: 2, nullable: false),
                     revision_number = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     po_number = table.Column<int>(type: "int", nullable: false, defaultValue: 10000),
+                    price = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
+                    tax = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
                     deleted_reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
                     canceled_reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
                     is_complete = table.Column<bool>(type: "tinyint(1)", nullable: false),

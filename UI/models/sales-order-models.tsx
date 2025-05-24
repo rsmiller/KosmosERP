@@ -1,4 +1,6 @@
-export interface OrderHeaderListDto {
+import { BaseDto } from "./base-models";
+
+export interface OrderHeaderListDto extends BaseDto {
   order_number?: number;
   customer_id?: number;
   ship_to_address_id?: number;
@@ -36,7 +38,7 @@ export interface OrderLineAttributeDto
     guid: string;
 }
 
-export interface OrderLineDto
+export interface OrderLineDto extends BaseDto 
 {
   order_header_id?: number;
   product_id: number;

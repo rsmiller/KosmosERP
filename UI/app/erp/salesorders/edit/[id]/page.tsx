@@ -26,6 +26,8 @@ import { OrderLineDto } from '@/models/sales-order-models';
 import { AgGridReact } from 'ag-grid-react';
 import { useEffect, useState } from "react";
 import AddressSelectorCombobox from '@/components/address-selector';
+import PageActionsComponent from '@/components/page-actions';
+import HeaderTypeSelectorCombobox from '@/components/header-type-selector';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -83,11 +85,16 @@ function EditSalesOrderPage() {
 
   };
 
-const getTableData = () =>
+  
+  const handleTypeSelect = (value: any) => {
+
+  };
+
+  const getTableData = () =>
   {
-    setRowData(prev => [...prev, { line_number: 1, product_id: 1, product_name: "Miller Welder", line_description: "Miller Model 203 Welder", quantity: 6, unit_price: 1234, guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" }]);
-    setRowData(prev => [...prev, { line_number: 2, product_id: 2, product_name: "Lincoln Welder", line_description: "Lincoln Model 1200 Welder", quantity: 2, unit_price: 1234, guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" }]);
-    setRowData(prev => [...prev, { line_number: 3, product_id: 3, product_name: "Miller Spot Welder", line_description: "Miller Model 102 Spot Welder", quantity: 4, unit_price: 109, guid: "a2832a33-f023-40dc-961d-67b458f1b00f"  }]);
+    setRowData(prev => [...prev, { id: 1, line_number: 1, product_id: 1, product_name: "Miller Welder", line_description: "Miller Model 203 Welder", quantity: 6, unit_price: 1234, guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" }]);
+    setRowData(prev => [...prev, { id: 2, line_number: 2, product_id: 2, product_name: "Lincoln Welder", line_description: "Lincoln Model 1200 Welder", quantity: 2, unit_price: 1234, guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" }]);
+    setRowData(prev => [...prev, { id: 3, line_number: 3, product_id: 3, product_name: "Miller Spot Welder", line_description: "Miller Model 102 Spot Welder", quantity: 4, unit_price: 109, guid: "a2832a33-f023-40dc-961d-67b458f1b00f"  }]);
 
   };
 
@@ -95,7 +102,6 @@ const getTableData = () =>
 
   const [rowData, setRowData] = useState<OrderLineDto[]>([]);
 
-  // Column Definitions: Defines & controls grid columns.
   const [colDefs, setColDefs] = useState<ColDef<OrderLineDto>[]>([
     { field: "product_name", headerName: "Product Name"},
     { field: "line_description", headerName: "Description" },
@@ -131,10 +137,15 @@ const getTableData = () =>
             p="auto"
             m="auto"
           >
-            <GridItem colSpan={5} >
+            <GridItem colSpan={4} >
               <h1>1203844</h1>
             </GridItem>
-            
+            <GridItem colSpan={1} >
+              <Field.Root invalid={!!errors.customer_id}>
+                <HeaderTypeSelectorCombobox title="PO Type" onChange={handleTypeSelect} />
+              </Field.Root>
+            </GridItem>
+
             <Stack gap="4" align="flex-start" maxW="md">
               <Field.Root invalid={!!errors.customer_id}>
                 <CustomerCombobox onChange={handleCustomerSelect} />
@@ -190,11 +201,7 @@ const getTableData = () =>
             </GridItem>
 
             <GridItem colSpan={5} >
-              <div style={{ width: "100%", marginTop: "25px", textAlign: "center" }}>
-                <hr style={{ width: "100%", marginBottom: "25px"}}/>
-                <Button type="button" colorPalette="blue" onClick={() => handleSaveClick}>Save Record</Button>&nbsp;
-                <Button type="button" colorPalette="red" onClick={() => handleDeleteClick}>Delete Record</Button>
-              </div>
+              <PageActionsComponent onSave={() => handleSaveClick} onDelete={() => handleDeleteClick}/>
             </GridItem>
         </Grid>
       </form>

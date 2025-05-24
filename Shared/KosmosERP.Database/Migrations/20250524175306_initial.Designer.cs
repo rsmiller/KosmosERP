@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KosmosERP.Database.Migrations
 {
     [DbContext(typeof(ERPDbContext))]
-    [Migration("20250520004302_initial")]
+    [Migration("20250524175306_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -2896,10 +2896,18 @@ namespace KosmosERP.Database.Migrations
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)");
 
+                    b.Property<decimal>("price")
+                        .HasPrecision(14, 3)
+                        .HasColumnType("decimal(14,3)");
+
                     b.Property<int>("revision_number")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(1);
+
+                    b.Property<decimal>("tax")
+                        .HasPrecision(14, 3)
+                        .HasColumnType("decimal(14,3)");
 
                     b.Property<int?>("updated_by")
                         .IsRequired()

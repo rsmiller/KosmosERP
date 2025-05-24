@@ -15,5 +15,6 @@ public class PurchaseOrderLineDto : BaseDto
     public bool is_taxable { get; set; }
     public bool is_complete { get; set; }
     public bool is_canceled { get; set; }
-    public string guid { get; set; }
+
+    public string? product_name { get; set; }
 }

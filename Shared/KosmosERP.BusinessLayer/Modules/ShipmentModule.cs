@@ -17,8 +17,6 @@ using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Delete;
 using KosmosERP.BusinessLayer.Helpers;
-using Mysqlx.Crud;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 
 
 

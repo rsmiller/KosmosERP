@@ -17,7 +17,8 @@ public class PurchaseOrderHeaderDto : BaseDto
     public int? completed_by { get; set; }
     public DateTime? canceled_on { get; set; }
     public int? canceled_by { get; set; }
-    public string guid { get; set; }
 
     public List<PurchaseOrderLineDto> purchase_order_lines { get; set; } = new List<PurchaseOrderLineDto>();
+
+    public string? vendor_name { get; set; }
 }
