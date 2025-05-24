@@ -120,6 +120,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
             category = "Category1",
             is_taxable = false,
             tax_rate = 98,
+            payment_terms_id = 1,
         });
 
         Assert.IsTrue(new_result.Success);
@@ -146,6 +147,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
             category = "Category231",
             is_taxable = false,
             tax_rate = 91,
+            payment_terms_id = 1,
         };
 
         var result = await _Module.Create(create_command);
@@ -179,6 +181,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
             category = "Category9",
             is_taxable = false,
             tax_rate = 42,
+            payment_terms_id = 1,
         });
 
         Assert.IsTrue(new_result.Success);
@@ -198,6 +201,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
             category = "Category12",
             is_taxable = true,
             tax_rate = 11,
+            payment_terms_id = 2,
         };
 
         var edit_result = await _Module.Edit(edit_command);
@@ -213,6 +217,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
         Assert.That(edit_result.Data.category == edit_command.category);
         Assert.That(edit_result.Data.is_taxable == edit_command.is_taxable);
         Assert.That(edit_result.Data.tax_rate == edit_command.tax_rate);
+        Assert.That(edit_result.Data.payment_terms_id == edit_command.payment_terms_id);
     }
 
     [Test]
@@ -231,6 +236,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
             category = "Category12",
             is_taxable = true,
             tax_rate = 11,
+            payment_terms_id = 1,
         });
 
         Assert.IsTrue(new_result.Success);
@@ -267,6 +273,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
             category = "Category2",
             is_taxable = true,
             tax_rate = 23,
+            payment_terms_id = 1,
         });
 
         Assert.IsTrue(new_result.Success);
@@ -300,6 +307,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
         Assert.IsNotEmpty(result.Data.website);
         Assert.IsNotEmpty(result.Data.category);
         Assert.NotNull(result.Data.is_taxable);
+        Assert.NotZero(result.Data.payment_terms_id);
         Assert.NotNull(result.Data.tax_rate);
         Assert.NotZero(result.Data.created_by);
         Assert.NotNull(result.Data.created_on);
@@ -321,6 +329,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
         Assert.IsNotEmpty(result.phone);
         Assert.IsNotEmpty(result.fax);
         Assert.IsNotEmpty(result.general_email);
+        Assert.NotZero(result.payment_terms_id);
         Assert.IsNotEmpty(result.website);
         Assert.IsNotEmpty(result.category);
         Assert.NotNull(result.is_taxable);

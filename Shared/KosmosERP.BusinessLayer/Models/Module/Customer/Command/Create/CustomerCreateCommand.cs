@@ -16,6 +16,8 @@ public class CustomerCreateCommand : DataCommand
     public string? website { get; set; }
     public string category { get; set; }
     [Required]
+    public int payment_terms_id { get; set; }
+    [Required]
     public bool is_taxable { get; set; } = true;
     [Required]
     public decimal tax_rate { get; set; } = 0;

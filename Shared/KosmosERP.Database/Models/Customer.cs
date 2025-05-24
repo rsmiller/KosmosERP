@@ -33,6 +33,9 @@ public class Customer : BaseDatabaseModel
     public string category { get; set; }
 
     [Required]
+    public int payment_terms_id { get; set; }
+
+    [Required]
     public bool is_taxable { get; set; } = true;
 
     [Required]

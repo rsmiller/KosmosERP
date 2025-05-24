@@ -9,35 +9,10 @@ import { AgGridReact } from "ag-grid-react";
 import { useState } from "react";
 import { Button } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
+import { OrderHeaderListDto } from '@/models/sales-order-models';
 
 
 ModuleRegistry.registerModules([AllCommunityModule]);
-
-interface OrderHeaderListDto {
-  order_number?: number;
-  customer_id?: number;
-  ship_to_address_id?: number;
-  shipping_method_id?: number;
-  pay_method_id?: number | null;
-  opportunity_id?: number | null;
-  order_type?: string;
-  revision_number?: number;
-  order_date?: string;
-  required_date?: string;
-  po_number?: string | null;
-  price?: number;
-  tax?: number;
-  shipping_cost?: number;
-  guid?: string;
-  deleted_reason?: string | null;
-  canceled_reason?: string | null;
-  is_complete?: boolean;
-  is_canceled?: boolean;
-  canceled_on?: string | null;
-  canceled_by?: number | null;
-
-  customer_name: string;
-}
 
 
 function SalesOrdersPage() {
@@ -58,16 +33,16 @@ function SalesOrdersPage() {
 
   const getTableData = () =>
   {
-    setRowData(prev => [...prev, { order_number: 100001, order_date: "12/13/2025", customer_name: "Some Cool Customer", price: 64950, po_number: "1234B", guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" }]);
+    setRowData(prev => [...prev, { id: 7, order_number: 100001, order_date: "12/13/2025", customer_name: "Some Cool Customer", price: 64950, po_number: "1234B", guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" }]);
   }
 
   const [rowData, setRowData] = useState<OrderHeaderListDto[]>([
-    { order_number: 100001, order_date: "12/13/2025", customer_name: "Some Cool Customer", price: 64950, po_number: "1234B", guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" },
-    { order_number: 100002, order_date: "12/13/2025", customer_name: "Customer 1234", price: 33850, po_number: "10992", guid: "a2832a33-f023-40dc-961d-67b458f1b00f"  },
-    { order_number: 100003, order_date: "12/13/2025", customer_name: "Bob's Home Building Suppplies", price: 29600, po_number: "Timmy", guid: "9d6ee5a7-20dd-4ad1-a16d-6f94775d6864"  },
-    { order_number: 100004, order_date: "12/14/2025", customer_name: "House of Chicken Tenders", price: 48890, po_number: "987722022", guid: "d6a14781-92a7-44e3-becc-661a419963e9"  },
-    { order_number: 100005, order_date: "12/14/2025", customer_name: "Another Cool Customer", price: 15774, po_number: "76255263", guid: "fd87b425-08a8-4f8f-8223-7ef462576df7"  },
-    { order_number: 100006, order_date: "12/15/2025", customer_name: "ABC Achme Inc", price: 20675, po_number: "Bob1", guid: "9856993f-f966-43e2-aca7-2eaedfc565f7" },
+    { id: 1, order_number: 100001, order_date: "12/13/2025", customer_name: "Some Cool Customer", price: 64950, po_number: "1234B", guid: "cf741d9a-e4d4-4e17-ac23-0e26f7d6802c" },
+    { id: 2, order_number: 100002, order_date: "12/13/2025", customer_name: "Customer 1234", price: 33850, po_number: "10992", guid: "a2832a33-f023-40dc-961d-67b458f1b00f"  },
+    { id: 3, order_number: 100003, order_date: "12/13/2025", customer_name: "Bob's Home Building Suppplies", price: 29600, po_number: "Timmy", guid: "9d6ee5a7-20dd-4ad1-a16d-6f94775d6864"  },
+    { id: 4, order_number: 100004, order_date: "12/14/2025", customer_name: "House of Chicken Tenders", price: 48890, po_number: "987722022", guid: "d6a14781-92a7-44e3-becc-661a419963e9"  },
+    { id: 5, order_number: 100005, order_date: "12/14/2025", customer_name: "Another Cool Customer", price: 15774, po_number: "76255263", guid: "fd87b425-08a8-4f8f-8223-7ef462576df7"  },
+    { id: 6, order_number: 100006, order_date: "12/15/2025", customer_name: "ABC Achme Inc", price: 20675, po_number: "Bob1", guid: "9856993f-f966-43e2-aca7-2eaedfc565f7" },
   ]);
 
   // Column Definitions: Defines & controls grid columns.
