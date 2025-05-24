@@ -17,6 +17,14 @@ This is a side project I sometimes work on. Sorry for the sporadic nature of it.
 - Run in Azure Web App, AKS, a VM, IIS, whatever
 
 ## Current State
+As of 5/21/2025
+- Created all unit tests for modules
+- Started React application
+- Published Docker image of the API
+- Started Read The Docs project
+- Started data seed scripts
+- Initial Migrations
+
 As of 5/2/2025
 - I did a rebrand because there was another well established company called Prometheus Group that was in teh ERP space.
 - Need to create unit tests for all the services, which will undoubtedly require fixes and opportunities for improvement.
@@ -44,13 +52,10 @@ As of 3/9/2025
 - Started development on the Api monolith.
 
 ## Current MVP needs
-- Finish API controllers and modules
-- Unit tests for modules
 - Testing all message providers
 - Testing all storage account providers
-- Worker for inventory work
-- Worker to process transactions
 - Create a dozen common reports for Apache Superset
+- Data seed scripts
 
 ## Road Map
 - Kubernetes scripts

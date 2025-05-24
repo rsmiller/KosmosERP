@@ -226,6 +226,11 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
         });
 
         ValidateMostDtoFields(result);
+
+        Assert.IsNotNull(result.Data);
+        Assert.IsNotNull(result.Data.vendor_name);
+        Assert.That(result.Data.purchase_order_lines.Count() == 1);
+        Assert.IsNotNull(result.Data.purchase_order_lines[0].product_name);
     }
 
     [Test]
@@ -280,6 +285,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
 
         Assert.That(result.Data.po_type == edit_command.po_type);
         Assert.That(result.Data.purchase_order_lines.Count() == 2);
+        Assert.IsNotNull(result.Data.vendor_name);
+        Assert.IsNotNull(result.Data.purchase_order_lines[0].product_name);
     }
 
     [Test]
@@ -365,7 +372,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
         ValidateMostListFields(first_result);
     }
 
-    
+
     [Test]
     public async Task CreateLine()
     {
@@ -417,6 +424,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
         Assert.That(create_line_response.Data.is_taxable == create_command.is_taxable);
         Assert.That(create_line_response.Data.product_id == create_command.product_id);
         Assert.That(create_line_response.Data.tax == create_command.tax);
+        Assert.IsNotNull(create_line_response.Data.product_name);
     }
 
     [Test]
@@ -472,6 +480,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
         Assert.That(edit_line_response.Data.quantity == edit_command.quantity);
         Assert.That(edit_line_response.Data.unit_price == edit_command.unit_price);
         Assert.That(edit_line_response.Data.tax == edit_command.tax);
+        Assert.IsNotNull(edit_line_response.Data.product_name);
     }
 
 

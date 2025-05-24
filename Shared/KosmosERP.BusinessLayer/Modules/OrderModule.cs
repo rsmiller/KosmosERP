@@ -40,6 +40,7 @@ public class OrderModule : BaseERPModule, IOrderModule
 	private IBaseERPContext _Context;
     private IMessagePublisher _MessagePublisher;
 
+
     public OrderModule(IBaseERPContext context, IMessagePublisher messagePublisher) : base(context)
     {
         _Context = context;
@@ -523,6 +524,13 @@ public class OrderModule : BaseERPModule, IOrderModule
                 }
             }
 
+            
+
+            existingEntity.price = await _Context.OrderLines.Where(m => m.is_deleted == false).SumAsync(m => (m.unit_price * m.quantity));
+            _Context.OrderHeaders.Update(existingEntity);
+            await _Context.SaveChangesAsync();
+
+
             var dto = await MapToDto(existingEntity);
 
             return new Response<OrderHeaderDto>(dto);
@@ -651,12 +659,24 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (!commandModel.order_header_id.HasValue)
             return new Response<OrderLineDto>("Order Header os a required field", ResultCode.DataValidationError);
 
+        var existingHeader = await GetAsync(commandModel.order_header_id.Value);
+        if (existingHeader == null)
+            return new Response<OrderLineDto>("Order Header not found", ResultCode.NotFound);
+
         try
         {
             var item = this.MapToLineDatabaseModel(commandModel, commandModel.order_header_id.Value, commandModel.calling_user_id);
 
             await _Context.OrderLines.AddAsync(item);
             await _Context.SaveChangesAsync();
+
+
+
+            existingHeader.price = await _Context.OrderLines.Where(m => m.is_deleted == false).SumAsync(m => (m.unit_price * m.quantity));
+            _Context.OrderHeaders.Update(existingHeader);
+            await _Context.SaveChangesAsync();
+
+
 
             // Attributes
             if (commandModel.attributes.Count > 0)
@@ -715,6 +735,10 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineDto>("Order Line not found", ResultCode.NotFound);
 
+        var existingHeader = await GetAsync(existingEntity.order_header_id);
+        if (existingHeader == null)
+            return new Response<OrderLineDto>("Order Header not found", ResultCode.NotFound);
+
         try
         {
 
@@ -737,6 +761,11 @@ public class OrderModule : BaseERPModule, IOrderModule
 
             _Context.OrderLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
+
+            existingHeader.price = await _Context.PurchaseOrderLines.Where(m => m.is_deleted == false).SumAsync(m => (m.unit_price * m.quantity));
+            _Context.OrderHeaders.Update(existingHeader);
+            await _Context.SaveChangesAsync();
+
 
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
             {
@@ -780,6 +809,11 @@ public class OrderModule : BaseERPModule, IOrderModule
         if (existingEntity == null)
             return new Response<OrderLineDto>("Order Line not found", ResultCode.NotFound);
 
+        var existingHeader = await GetAsync(existingEntity.order_header_id);
+        if (existingHeader == null)
+            return new Response<OrderLineDto>("Order Header not found", ResultCode.NotFound);
+
+
         try
         {
             // Delete
@@ -788,6 +822,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.OrderLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
 
+
+            existingHeader.price = await _Context.OrderLines.Where(m => m.is_deleted == false).SumAsync(m => (m.unit_price * m.quantity));
+            _Context.OrderHeaders.Update(existingHeader);
+            await _Context.SaveChangesAsync();
+            
 
             // Corrolate the transacation data
             await _MessagePublisher.PublishAsync(new Models.MessageObject()
@@ -806,7 +845,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             var dto = await MapToLineDto(existingEntity);
             return new Response<OrderLineDto>(dto);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await LogError(80, this.GetType().Name, nameof(Create), ex);
             return new Response<OrderLineDto>(ex.Message, ResultCode.Error);
@@ -1009,6 +1048,14 @@ public class OrderModule : BaseERPModule, IOrderModule
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
+        var customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
+        var payment_method_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PayMethods && m.int_value == databaseModel.pay_method_id).Select(m => m.key).SingleOrDefaultAsync();
+        var shipping_method_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.int_value == databaseModel.shipping_method_id).Select(m => m.key).SingleOrDefaultAsync();
+
+        dto.customer_name = customer_name;
+        dto.pay_method_name = payment_method_name;
+        dto.shipping_method_name = shipping_method_name;
+
         var lines = await _Context.OrderLines.Where(m => m.order_header_id == databaseModel.id && m.is_deleted == false).ToListAsync();
 
         foreach (var line in lines)
@@ -1017,9 +1064,9 @@ public class OrderModule : BaseERPModule, IOrderModule
         return dto;
     }
 
-	public async Task<OrderHeaderListDto> MapToListDto(OrderHeader databaseModel)
-	{
-        return new OrderHeaderListDto
+    public async Task<OrderHeaderListDto> MapToListDto(OrderHeader databaseModel)
+    {
+        var dto = new OrderHeaderListDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -1057,6 +1104,11 @@ public class OrderModule : BaseERPModule, IOrderModule
             deleted_on_string = databaseModel.deleted_on_string,
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        var customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
+        dto.customer_name = customer_name;
+
+        return dto;
     }
 
     private async Task<OrderLineDto> MapToLineDto(OrderLine databaseModel)

@@ -251,6 +251,10 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         if (commandModel.is_taxable.HasValue && existingEntity.is_taxable != commandModel.is_taxable)
             existingEntity.is_taxable = commandModel.is_taxable.Value;
 
+        if (commandModel.payment_terms_id.HasValue && existingEntity.payment_terms_id != commandModel.payment_terms_id)
+            existingEntity.payment_terms_id = commandModel.payment_terms_id.Value;
+            
+
         existingEntity = CommonDataHelper<Customer>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
 
 
@@ -381,7 +385,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
 
     public async Task<CustomerListDto> MapToListDto(Customer databaseModel)
     {
-        return new CustomerListDto
+        var dto = new CustomerListDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -408,12 +412,18 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             guid = databaseModel.guid,
             is_taxable = databaseModel.is_taxable,
             tax_rate = databaseModel.tax_rate,
+            payment_terms_id = databaseModel.payment_terms_id,
         };
+
+        var payment_terms_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PaymentTerms && m.int_value == databaseModel.payment_terms_id).Select(m => m.key).SingleOrDefaultAsync();
+        dto.payment_terms = payment_terms_name;
+
+        return dto;
     }
 
     public async Task<CustomerDto> MapToDto(Customer databaseModel)
     {
-        return new CustomerDto
+        var dto = new CustomerDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -440,7 +450,13 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             guid = databaseModel.guid,
             is_taxable = databaseModel.is_taxable,
             tax_rate = databaseModel.tax_rate,
+            payment_terms_id = databaseModel.payment_terms_id,
         };
+
+        var payment_terms_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PaymentTerms && m.int_value == databaseModel.payment_terms_id).Select(m => m.key).SingleOrDefaultAsync();
+        dto.payment_terms = payment_terms_name;
+
+        return dto;
     }
 
     public Customer MapToDatabaseModel(CustomerDto dtoModel)
@@ -470,13 +486,12 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             guid = dtoModel.guid,
             is_taxable = dtoModel.is_taxable,
             tax_rate = dtoModel.tax_rate,
+            payment_terms_id = dtoModel.payment_terms_id,
         };
     }
 
     private Customer MapForCreate(CustomerCreateCommand createCommandModel)
     {
-        var now = DateTime.UtcNow;
-
         var customer = CommonDataHelper<Customer>.FillCommonFields(new Customer
         {
             customer_name = createCommandModel.customer_name,
@@ -489,6 +504,7 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             is_deleted = false,
             is_taxable = createCommandModel.is_taxable,
             tax_rate = createCommandModel.tax_rate,
+            payment_terms_id = createCommandModel.payment_terms_id,
         }, createCommandModel.calling_user_id);
 
         return customer;

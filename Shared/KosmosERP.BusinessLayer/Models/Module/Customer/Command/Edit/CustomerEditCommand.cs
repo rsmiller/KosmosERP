@@ -17,4 +17,5 @@ public class CustomerEditCommand : DataCommand
     public string? category { get; set; }
     public bool? is_taxable { get; set; }
     public decimal? tax_rate { get; set; }
+    public int? payment_terms_id { get; set; }
 }

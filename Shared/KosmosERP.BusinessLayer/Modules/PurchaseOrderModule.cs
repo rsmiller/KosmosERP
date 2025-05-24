@@ -701,7 +701,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
 
     public async Task<PurchaseOrderHeaderListDto> MapToListDto(PurchaseOrderHeader databaseModel)
     {
-        return new PurchaseOrderHeaderListDto
+        var dto = new PurchaseOrderHeaderListDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -731,6 +731,10 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             deleted_on_string = databaseModel.deleted_on_string,
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        dto.vendor_name = databaseModel.vendor.vendor_name;
+
+        return dto;
     }
 
     public async Task<PurchaseOrderHeaderDto> MapToDto(PurchaseOrderHeader databaseModel)
@@ -771,12 +775,15 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         foreach(var line in lines)
             dto.purchase_order_lines.Add(await this.MapToLineDto(line));
 
+
+        dto.vendor_name = databaseModel.vendor.vendor_name;
+
         return dto;
     }
 
     public async Task<PurchaseOrderLineDto> MapToLineDto(PurchaseOrderLine databaseModel)
     {
-        return new PurchaseOrderLineDto
+        var dto = new PurchaseOrderLineDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -805,6 +812,10 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             deleted_on_string = databaseModel.deleted_on_string,
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        dto.product_name = databaseModel.product.product_name;
+
+        return dto;
     }
 
     public PurchaseOrderHeader MapToDatabaseModel(PurchaseOrderHeaderDto dtoModel)

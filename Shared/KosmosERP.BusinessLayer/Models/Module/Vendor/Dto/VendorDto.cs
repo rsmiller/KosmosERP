@@ -16,7 +16,6 @@ public class VendorDto : BaseDto
     public string? website { get; set; }
     public required string category { get; set; }
     public bool is_critial_vendor { get; set; }
-    public required string guid { get; set; }
     public DateTime? approved_on { get; set; }
     public int? approved_by { get; set; }
     public DateTime? audit_on { get; set; }

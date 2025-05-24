@@ -28,4 +28,8 @@ public class OrderHeaderDto : BaseDto
     public int? canceled_by { get; set; }
     public AddressDto? ship_to_address { get; set; }
     public List<OrderLineDto> order_lines { get; set; } = new List<OrderLineDto>();
+
+    public string? customer_name { get; set; }
+    public string? pay_method_name { get; set; }
+    public string? shipping_method_name { get; set; }
 }
