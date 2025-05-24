@@ -570,7 +570,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             var query = _Context.ShipmentHeaders
                 .Where(m => !m.is_deleted);
 
-            if (!string.IsNullOrEmpty(commandModel.wildcard))
+            int the_num = 0;
+            int.TryParse(commandModel.wildcard, out the_num);
+
+            if (!string.IsNullOrEmpty(commandModel.wildcard) && the_num == 0)
             {
                 var wild = commandModel.wildcard.ToLower();
                 query = query.Where(m =>
@@ -583,9 +586,6 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             }
             else
             {
-                int the_num = 0;
-                int.TryParse(commandModel.wildcard, out the_num);
-
                 query = query.Where(m => m.shipment_number == the_num);
             }
 
