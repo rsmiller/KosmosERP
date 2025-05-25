@@ -628,9 +628,9 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             var query = _Context.PurchaseOrderHeaders
                 .Where(m => !m.is_deleted);
 
-            decimal parsed_num = 0;
+            int parsed_num = 0;
 
-            if (decimal.TryParse(commandModel.wildcard, out parsed_num))
+            if (int.TryParse(commandModel.wildcard, out parsed_num))
             {
                 query = query.Where(m => m.po_number == parsed_num);
             }
