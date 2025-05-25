@@ -25,7 +25,9 @@ public interface ICustomerModule : IERPModule<
         CustomerDeleteCommand,
         CustomerFindCommand>, IBaseERPModule
 {
-
+    Task<List<KeyValueStore>> GetPaymentTerms();
+    Task<List<KeyValueStore>> GetShippingMethods();
+    Task<List<KeyValueStore>> GetPayMethods();
 }
 
 public class CustomerModule : BaseERPModule, ICustomerModule
@@ -381,6 +383,21 @@ public class CustomerModule : BaseERPModule, ICustomerModule
         }
 
         return response;
+    }
+
+    public async Task<List<KeyValueStore>> GetPaymentTerms()
+    {
+        return await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PaymentTerms && m.is_deleted == false).ToListAsync();
+    }
+
+    public async Task<List<KeyValueStore>> GetShippingMethods()
+    {
+        return await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.is_deleted == false).ToListAsync();
+    }
+
+    public async Task<List<KeyValueStore>> GetPayMethods()
+    {
+        return await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PayMethods && m.is_deleted == false).ToListAsync();
     }
 
     public async Task<CustomerListDto> MapToListDto(Customer databaseModel)
