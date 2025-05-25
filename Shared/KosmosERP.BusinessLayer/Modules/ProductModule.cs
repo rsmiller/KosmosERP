@@ -12,9 +12,6 @@ using KosmosERP.BusinessLayer.Models.Module.Product.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Product.Command.Find;
 using KosmosERP.BusinessLayer.Models.Module.Product.Dto;
 using KosmosERP.BusinessLayer.Helpers;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
-using Mysqlx.Crud;
-using KosmosERP.BusinessLayer.Models.Module.Order.Dto;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -23,10 +20,13 @@ public interface IProductModule : IERPModule<Database.Models.Product, ProductDto
     Task<Response<ProductAttributeDto>> CreateAttribute(ProductAttributeCreateCommand commandModel);
     Task<Response<ProductAttributeDto>> EditAttribute(ProductAttributeEditCommand commandModel);
     Task<Response<ProductAttributeDto>> DeleteAttribute(ProductAttributeDeleteCommand commandModel);
+
+    Task<List<KeyValueStore>> GetProductCategories();
 }
 
 public class ProductModule : BaseERPModule, IProductModule
 {
+
     public override Guid ModuleIdentifier => Guid.Parse("b8b0d255-3901-4007-b9c7-b0678f89c955");
     public override string ModuleName => "Products";
 
@@ -474,10 +474,13 @@ public class ProductModule : BaseERPModule, IProductModule
         throw new NotImplementedException();
     }
 
+    public async Task<List<KeyValueStore>> GetProductCategories()
+    {
+        return await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ProductCategories && m.is_deleted == false).ToListAsync();
+    }
+
     public async Task<ProductListDto> MapToListDto(Database.Models.Product databaseModel)
     {
-        var vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleAsync();
-
         var dto = new ProductListDto()
         {
             sales_price = databaseModel.sales_price,
@@ -494,7 +497,6 @@ public class ProductModule : BaseERPModule, IProductModule
             identifier2 = databaseModel.identifier2,
             identifier3 = databaseModel.identifier3,
             vendor_id = databaseModel.vendor_id,
-            vendor_name = vendor_name,
             created_on = databaseModel.created_on,
             created_by = databaseModel.created_by,
             updated_by = databaseModel.updated_by,
@@ -509,6 +511,8 @@ public class ProductModule : BaseERPModule, IProductModule
             deleted_on_string = databaseModel.deleted_on_string,
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
+
+        dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
 
         return dto;
     }
@@ -559,9 +563,11 @@ public class ProductModule : BaseERPModule, IProductModule
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
-        var attributes = await _Context.ProductAttributes.Where(m => m.product_id == databaseModel.id).ToListAsync();
+        var attributes = await _Context.ProductAttributes.Where(m => m.product_id == databaseModel.id && m.is_deleted == false).ToListAsync();
         foreach (var attribute in attributes)
             dto.product_attributes.Add(MapToProductAttributeDto(attribute));
+
+        dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
 
         return dto;
     }
