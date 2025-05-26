@@ -29,6 +29,8 @@ import AddressSelectorCombobox from '@/components/address-selector';
 import PageActionsComponent from '@/components/page-actions';
 import HeaderTypeSelectorCombobox from '@/components/header-type-selector';
 
+import { CurrencyFormatter} from '@/components/ag-grid/currency-formatter';
+
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface FormValues {
@@ -106,7 +108,7 @@ function EditSalesOrderPage() {
     { field: "product_name", headerName: "Product Name"},
     { field: "line_description", headerName: "Description" },
     { field: "quantity", headerName: "Quantity" },
-    { field: "unit_price", headerName: "Price" },
+    { field: "unit_price", headerName: "Price", cellRenderer: CurrencyFormatter },
     {
       field: "guid",
       headerName: "Actions",
