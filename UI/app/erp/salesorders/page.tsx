@@ -11,6 +11,7 @@ import { Button } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
 import { OrderHeaderListDto } from '@/models/sales-order-models';
 
+import { CurrencyFormatter} from '@/components/ag-grid/currency-formatter';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -50,7 +51,7 @@ function SalesOrdersPage() {
     { field: "order_number", headerName: "Order #"},
     { field: "customer_name", headerName: "Customer Name" },
     { field: "order_date", headerName: "Order Date" },
-    { field: "price", headerName: "Price" },
+    { field: "price", headerName: "Price", cellRenderer: CurrencyFormatter },
     { field: "po_number", headerName: "PO #" },
     {
       field: "guid",

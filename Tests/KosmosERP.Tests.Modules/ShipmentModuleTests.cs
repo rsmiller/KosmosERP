@@ -26,7 +26,8 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     [SetUp]
     public async Task SetupModule()
     {
-        var the_module = new ShipmentModule(base._Context, new MockMessagePublisher(new MessagePublisherSettings()));
+        var address_module = new AddressModule(base._Context);
+        var the_module = new ShipmentModule(base._Context, new MockMessagePublisher(new MessagePublisherSettings()), address_module);
 
         await base.SetupModule(the_module);
     }

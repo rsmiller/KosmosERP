@@ -82,7 +82,7 @@ function VendorsPage() {
             <h1>Vendors</h1>
           </div>
           <div style={{ width: "49%", display: "inline-block", textAlign: "right" }}>
-            <Button type="submit" colorPalette="blue" onClick={handleNewClick}>New Customer</Button>
+            <Button type="submit" colorPalette="blue" onClick={handleNewClick}>New Vendor</Button>
           </div>
         </div>
         <AgGridReact

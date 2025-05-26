@@ -38,6 +38,16 @@ public class ProductController : ERPApiController
         return Ok(result);
     }
 
+    [HttpGet("GetProductCategories", Name = "GetProductCategories")]
+    [ProducesResponseType(typeof(List<ActionResult>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> GetProductCategories()
+    {
+        var results = await _Module.GetProductCategories();
+
+        return Ok(results);
+    }
+
     [HttpPost("FindProduct", Name = "FindProduct")]
     [ProducesResponseType(typeof(PagingResult<ProductListDto>), 200)]
     [ProducesResponseType(500)]

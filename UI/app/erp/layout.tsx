@@ -33,8 +33,8 @@ export default function ErpLayout({
           <Link href="/erp/crm"><FaListAlt style={{ marginRight: 6 }} />CRM</Link>
           <Link href="/erp/purchaseorders"><FaBoxOpen style={{ marginRight: 6 }} />Purchase Orders</Link>
           <Link href="/erp/poreceive"><FaCubes style={{ marginRight: 6 }} />PO Receive</Link>
-          <Link href="/erp/Documents"><FaFileAlt style={{ marginRight: 6 }} />Documents</Link>
-          <Link href="/erp/Shipments"><FaTruckMoving style={{ marginRight: 6 }} />Shipments</Link>
+          <Link href="/erp/documents"><FaFileAlt style={{ marginRight: 6 }} />Documents</Link>
+          <Link href="/erp/shipments"><FaTruckMoving style={{ marginRight: 6 }} />Shipments</Link>
           <Link href="/erp/vendors"><FaCity style={{ marginRight: 6 }} />Vendors</Link>
           <Link href="/erp/products"><FaTh style={{ marginRight: 6 }} />Product Catalog</Link>
           <Link href="/erp/admin"><FaChartBar style={{ marginRight: 6 }} />Reports</Link>

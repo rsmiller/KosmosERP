@@ -34,5 +34,7 @@ public class ProductDto : BaseDto
     public DateTime? retired_on { get; set; }
     public string? retired_by_name { get; set; }
 
+    public string? vendor_name { get; set; }
+
     public List<ProductAttributeDto> product_attributes { get; set; } = new List<ProductAttributeDto>();
 }

@@ -628,14 +628,19 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             var query = _Context.PurchaseOrderHeaders
                 .Where(m => !m.is_deleted);
 
-            if (!string.IsNullOrEmpty(commandModel.wildcard))
+            int parsed_num = 0;
+
+            if (int.TryParse(commandModel.wildcard, out parsed_num))
+            {
+                query = query.Where(m => m.po_number == parsed_num);
+            }
+            else
             {
                 var wild = commandModel.wildcard.ToLower();
                 query = query.Where(m =>
                     m.po_type.ToLower().Contains(wild)
                     || (m.deleted_reason != null && m.deleted_reason.ToLower().Contains(wild))
                     || (m.canceled_reason != null && m.canceled_reason.ToLower().Contains(wild))
-                    || m.guid.ToLower().Contains(wild)
                 );
             }
 

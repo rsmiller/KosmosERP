@@ -9,6 +9,7 @@ using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Module;
 using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.Database.Models;
 
 namespace KosmosERP.Api.Controllers
 {
@@ -37,6 +38,34 @@ namespace KosmosERP.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("GetPaymentTerms", Name = "GetPaymentTerms")]
+        [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
+        public async Task<ActionResult> GetPaymentTerms()
+        {
+            var results = await _Module.GetPaymentTerms();
+
+            return Ok(results);
+        }
+
+        [HttpGet("GetShippingMethods", Name = "GetShippingMethods")]
+        [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
+        public async Task<ActionResult> GetShippingMethods()
+        {
+            var results = await _Module.GetShippingMethods();
+
+            return Ok(results);
+        }
+
+        [HttpGet("GetPayMethods", Name = "GetPayMethods")]
+        [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
+        public async Task<ActionResult> GetPayMethods()
+        {
+            var results = await _Module.GetPayMethods();
+
+            return Ok(results);
+        }
+
 
         [HttpPost("FindCustomer", Name = "FindCustomer")]
         [ProducesResponseType(typeof(PagingResult<CustomerListDto>), 200)]
