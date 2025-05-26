@@ -1,4 +1,5 @@
-﻿using KosmosERP.Models;
+﻿using KosmosERP.BusinessLayer.Models.Module.Address.Dto;
+using KosmosERP.Models;
 
 namespace KosmosERP.BusinessLayer.Models.Module.Shipment.Dto;
 
@@ -21,7 +22,7 @@ public class ShipmentHeaderDto : BaseDto
     public DateTime? canceled_on { get; set; }
     public int? canceled_by { get; set; }
     public string? canceled_reason { get; set; }
-    public string guid { get; set; }
 
     public List<ShipmentLineDto> shipment_lines { get; set; } = new List<ShipmentLineDto>();
+    public AddressDto address { get; set; }
 }

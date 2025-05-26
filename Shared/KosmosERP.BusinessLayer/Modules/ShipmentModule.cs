@@ -47,10 +47,14 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
     private readonly IBaseERPContext _Context;
     private IMessagePublisher _MessagePublisher;
 
-    public ShipmentModule(IBaseERPContext context, IMessagePublisher messagePublisher) : base(context)
+    private IAddressModule _AddressModule;
+
+    public ShipmentModule(IBaseERPContext context, IMessagePublisher messagePublisher, IAddressModule addressModule) : base(context)
     {
         _Context = context;
         _MessagePublisher = messagePublisher;
+
+        _AddressModule = addressModule;
     }
 
     public override void SeedPermissions()
@@ -652,7 +656,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
 
     public async Task<ShipmentHeaderListDto> MapToListDto(ShipmentHeader databaseModel)
     {
-        return new ShipmentHeaderListDto
+        var dto = new ShipmentHeaderListDto
         {
             id = databaseModel.id,
             is_deleted = databaseModel.is_deleted,
@@ -687,6 +691,14 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             created_on_string = databaseModel.created_on_string,
             created_on_timezone = databaseModel.created_on_timezone,
         };
+
+
+        var address_result = await _AddressModule.GetDto(databaseModel.address_id);
+        if (address_result.Success && address_result.Data != null)
+            dto.address = address_result.Data;
+
+
+        return dto;
     }
 
     public async Task<ShipmentHeaderDto> MapToDto(ShipmentHeader databaseModel)
@@ -730,6 +742,11 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == databaseModel.order_header_id && m.is_deleted == false).ToListAsync();
         foreach(var line in lines)
             dto.shipment_lines.Add(await this.MapToLineDto(line));
+
+
+        var address_result = await _AddressModule.GetDto(databaseModel.address_id);
+        if (address_result.Success && address_result.Data != null)
+            dto.address = address_result.Data;
 
 
         return dto;
