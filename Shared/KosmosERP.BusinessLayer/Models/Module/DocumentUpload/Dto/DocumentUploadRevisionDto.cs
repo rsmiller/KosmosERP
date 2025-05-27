@@ -13,6 +13,5 @@ public class DocumentUploadRevisionDto : BaseDto
     public int? approved_by { get; set; }
     public DateTime? rejected_on { get; set; }
     public int? rejected_by { get; set; }
-    public string guid { get; set; }
     public List<DocumentUploadRevisionTagDto> revision_tags { get; set; } = new List<DocumentUploadRevisionTagDto>();
 }

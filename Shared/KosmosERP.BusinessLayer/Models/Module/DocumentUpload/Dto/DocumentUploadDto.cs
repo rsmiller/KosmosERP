@@ -6,7 +6,6 @@ public class DocumentUploadDto : BaseDto
 {
     public int rev_num { get; set; } = 1;
     public int document_object_id { get; set; }
-    public string guid { get; set; }
 
     public List<DocumentUploadRevisionDto> document_revisions { get; set; } = new List<DocumentUploadRevisionDto>();
 }

@@ -9,5 +9,4 @@ public class DocumentUploadRevisionTagDto : BaseDto
     public string tag_name { get; set; }
     public string tag_value { get; set; }
     public bool is_required { get; set; } = false;
-    public string guid { get; set; }
 }
