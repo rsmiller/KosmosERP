@@ -18,6 +18,7 @@ public class ARInvoiceHeaderDto : BaseDto
 
     public string? customer_name { get; set; }
     public int? order_number { get; set; }
+    public string? payment_terms_name { get; set; }
 
     public List<ARInvoiceLineDto> ar_invoice_lines { get; set; } = new List<ARInvoiceLineDto>();
 }

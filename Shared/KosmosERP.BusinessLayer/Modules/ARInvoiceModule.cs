@@ -521,7 +521,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         dto.customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
         dto.order_number = await _Context.OrderHeaders.Where(m => m.id == databaseModel.order_header_id).Select(m => m.order_number).SingleOrDefaultAsync();
-        
+        dto.payment_terms_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PaymentTerms && m.int_value == databaseModel.payment_terms).Select(m => m.key).SingleOrDefaultAsync();
+
         return dto;
     }
 
@@ -559,6 +560,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
 
         dto.customer_name = await _Context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
         dto.order_number = await _Context.OrderHeaders.Where(m => m.id == databaseModel.order_header_id).Select(m => m.order_number).SingleOrDefaultAsync();
+        dto.payment_terms_name = await _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PaymentTerms && m.int_value == databaseModel.payment_terms).Select(m => m.key).SingleOrDefaultAsync();
 
         var lines = await _Context.ARInvoiceLines
             .Where(m => m.ar_invoice_header_id == databaseModel.id && !m.is_deleted)

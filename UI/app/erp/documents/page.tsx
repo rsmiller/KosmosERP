@@ -57,7 +57,6 @@ function DocumentsPage() {
     { field: "id", headerName: "Document Name", cellRenderer: (props: any) => {
                                     
                                     let revision = props.data.document_revisions.filter((m: any) => m.rev_num == props.data.rev_num);
-                                    console.log(revision);
                                     return revision[0].document_name;
                                   } 
     },
