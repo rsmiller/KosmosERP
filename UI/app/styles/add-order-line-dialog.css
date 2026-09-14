@@ -1,0 +1,21 @@
+.dialogContent {
+  height: 80vh !important;
+  max-height: 80vh !important;
+}
+
+.dialogBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.agGridContainer {
+  flex: 1;
+  min-height: 300px;
+}
+
+.add-order-line-dialog-content
+{
+    height: 450px !important;
+    max-height: 450px !important;
+}

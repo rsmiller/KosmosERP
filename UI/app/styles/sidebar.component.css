@@ -1,0 +1,12 @@
+.sidebar-menu a
+{
+    padding: 10px;
+    color: black;
+}
+
+.sidebar-menu a:hover
+{
+    color: white;
+    background-color: black;
+    border-radius: 4px;
+}

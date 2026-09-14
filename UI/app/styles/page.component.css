@@ -1,0 +1,95 @@
+h1 {
+    font-size: 2em;
+}
+
+h2{
+    font-size: 1.7em;
+}
+
+h3{
+    font-size: 1.4em;
+}
+
+.full-width
+{
+    width: 100%;
+}
+
+.page-action-dlt-btn
+{
+    margin-left: 20px;
+}
+
+.address_line
+{
+    padding: 0;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.display-item-block
+{
+    display: flex;
+    gap: 15px;
+    border-bottom: 1px dashed #ccc;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.display-item-block-label
+{
+    font-weight:600;
+    color:rgb(63, 63, 63);
+}
+
+.display-item-block-value
+{
+
+}
+
+.sit-me-side-by-side
+{
+    display: inline-block;
+}
+
+.pagination-block
+{
+    display: flex;
+    float: right;
+}
+
+.pagination-size-block
+{
+    order: 1;
+}
+
+.pagination-pagination-block
+{
+    order: 2;
+    margin-left: 20px;
+}
+
+.padding-sm-right
+{
+    padding-right: 20px;
+}
+
+.padding-md-right
+{
+    padding-right: 50px;
+}
+
+.massive-zindex
+{
+    z-index: 1000000 !important;
+}
+
+.chakra-combobox__positioner
+{
+    z-index: 1000000 !important;
+}
+
+.react-datepicker-popper
+{
+    z-index: 1000000 !important;
+}

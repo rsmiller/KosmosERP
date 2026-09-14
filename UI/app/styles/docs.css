@@ -1,0 +1,202 @@
+@media print {
+  .inner-lines-block {
+    break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+
+  .doc-control-header
+  {
+    height: 33px;
+    display: fixed;
+    overflow: hidden;
+  }
+}
+
+@page {
+    margin-top: 60px;
+}
+
+@page :first {
+    margin-top: 50px;
+}
+
+h1 {
+    font-size: 2em;
+}
+
+h2{
+    font-size: 1.7em;
+}
+
+h3 {
+    font-size: 1.4em;
+}
+
+
+.center-all
+{
+    text-align: center;
+    margin: auto;
+}
+
+.header-block
+{
+    margin-top: 17px;
+}
+
+.lines-block
+{
+    margin-top: 20px;
+}
+
+.header-block, .lines-block
+{
+    border: 2px solid #333;
+}
+
+.details-block
+{
+    border-left: 2px solid #333;
+    
+}
+
+.details-block-strong
+{
+    padding-left: 5px;
+    font-weight: bold;
+}
+
+
+.details-row
+{
+    border-bottom: 2px solid #333;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.details-row-no-border
+{
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.inner-lines-block
+{
+    
+}
+
+.line-header-first
+{
+    padding-left: 5px;
+}
+
+.line-header
+{
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-weight: bold;
+}
+
+.line-row-first-col
+{
+    border-left: 2px solid #333;
+    padding-left: 5px;
+}
+
+.line-row-last-col
+{
+    border-right: 2px solid #333;
+}
+
+.line-row
+{
+
+    border-bottom: 2px solid #333;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 0.9em;
+}
+
+.total-block
+{
+    margin-top: 15px;
+}
+
+.total-line-no-border
+{
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 5px;
+}
+
+.total-line
+{
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 5px;
+    border-top: 2px solid #333;
+}
+
+.total-line-price 
+{
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-right: 5px;
+    font-weight: bold;
+    border-top: 2px solid #333;
+}
+
+.total-line-price-no-border
+{
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-right: 5px;
+    font-weight: bold;
+}
+
+.doc-control-header
+{
+    border: 2px solid #696969;
+    width: 8.5in;
+    height: 33px;
+}
+
+.doc-control-block
+{
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #696969;
+    text-align: center;
+    border-right: 2px solid #696969;
+}
+
+.doc-control-block-last
+{
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #696969;
+    text-align: center;
+}
+
+body { margin: 0 !important; }
+
+.backedout
+{
+    background-color: #3d3737;
+    color: white;
+}
+
+.break-after
+{
+    break-after:column;
+    margin-top: 15px;
+}
+
+.top-border
+{
+    border-top: 2px solid #696969;
+}

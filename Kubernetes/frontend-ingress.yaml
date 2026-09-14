@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kosmos-erp-frontend-ingress
+  namespace: kosmos-demo
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - demo.kosmoserp.com
+    - www.demo.kosmoserp.com
+    secretName: kosmos-erp-frontend-tls
+  rules:
+  - host: demo.kosmoserp.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kosmos-erp-frontend-service
+            port:
+              number: 80
+  - host: www.demo.kosmoserp.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kosmos-erp-frontend-service
+            port:
+              number: 80

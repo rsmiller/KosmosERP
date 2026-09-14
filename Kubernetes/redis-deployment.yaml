@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kosmos-erp-redis-pvc
+  namespace: kosmos-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kosmos-erp-redis
+  namespace: kosmos-demo
+  labels:
+    app: kosmos-erp-redis
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kosmos-erp-redis
+  template:
+    metadata:
+      labels:
+        app: kosmos-erp-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379
+          name: redis
+        command:
+          - redis-server
+          - "--appendonly"
+          - "yes"
+          - "--requirepass"
+          - "$(REDIS_PASSWORD)"
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-redis-secret
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - redis-cli -a $REDIS_PASSWORD ping | grep -q PONG
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - redis-cli -a $REDIS_PASSWORD ping | grep -q PONG
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: kosmos-erp-redis-pvc
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kosmos-erp-redis-service
+  namespace: kosmos-demo
+  labels:
+    app: kosmos-erp-redis
+spec:
+  type: ClusterIP
+  selector:
+    app: kosmos-erp-redis
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP

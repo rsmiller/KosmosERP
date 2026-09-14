@@ -1,0 +1,619 @@
+﻿using KosmosERP.Database;
+using KosmosERP.Models.Helpers;
+using KosmosERP.Models.Interfaces;
+using KosmosERP.Models;
+using KosmosERP.Module;
+using KosmosERP.Database.Models;
+using Microsoft.EntityFrameworkCore;
+using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Create;
+using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Delete;
+using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Edit;
+using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Find;
+using KosmosERP.BusinessLayer.Models.Module.Transaction.Dto;
+using KosmosERP.BusinessLayer.Helpers;
+
+
+namespace KosmosERP.BusinessLayer.Modules;
+
+public interface ITransactionModule : IERPModule<
+    Transaction,
+    TransactionDto,
+    TransactionListDto,
+    TransactionCreateCommand,
+    TransactionEditCommand,
+    TransactionDeleteCommand,
+    TransactionFindCommand>, IBaseERPModule
+{
+
+}
+
+public class TransactionModule : BaseERPModule, ITransactionModule
+{
+    public override Guid ModuleIdentifier => Guid.Parse("416786e0-47b3-440a-90da-b7036d72b1f7");
+    public override string ModuleName => "Transactions";
+
+    private readonly IBaseERPContext _Context;
+
+    public TransactionModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    {
+        _Context = context;
+    }
+
+    public override void SeedPermissions()
+    {
+        var role = _Context.Roles.Any(m => m.name == "Transaction Administrators");
+
+        if (role == false)
+        {
+            _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
+            {
+                name = "Transaction Administrators",
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        
+        var inbound_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_inbound").SingleOrDefault();
+        var outbound_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_outbound").SingleOrDefault();
+        var planned_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_planned").SingleOrDefault();
+        var commited_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_commited").SingleOrDefault();
+        var reserved_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_reserved").SingleOrDefault();
+        var move_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_move").SingleOrDefault();
+        var adjustment_transaction_type = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
+                                    && m.key == "transaction_type_adjustment").SingleOrDefault();
+
+
+        if (inbound_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_inbound",
+                value = "Inbound",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 1
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (outbound_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_outbound",
+                value = "Outbound",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 2
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (planned_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_planned",
+                value = "Planned",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 3
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (commited_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_commited",
+                value = "Commited",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 5
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (reserved_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_reserved",
+                value = "Reserved",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 6
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (move_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_move",
+                value = "Move",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 7
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        if (move_transaction_type == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "transaction_type_adjustment",
+                value = "Adjustment",
+                module_id = this.ModuleIdentifier.ToString(),
+                int_value = 8
+            }, 1));
+
+            _Context.SaveChanges();
+        }
+
+        // Seed ModulePermissions for Transaction module
+        var existing_permissions = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString());
+        if (!existing_permissions)
+        {
+            _Context.ModulePermissions.AddRange(new[]
+            {
+                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
+                {
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    permission_name = "Read Transactions",
+                    internal_permission_name = "read_transaction",
+                    read = true,
+                    write = false,
+                    edit = false,
+                    delete = false,
+                    is_active = true
+                }, 1),
+                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
+                {
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    permission_name = "Create Transactions",
+                    internal_permission_name = "create_transaction",
+                    read = false,
+                    write = true,
+                    edit = false,
+                    delete = false,
+                    is_active = true
+                }, 1),
+                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
+                {
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    permission_name = "Edit Transactions",
+                    internal_permission_name = "edit_transaction",
+                    read = false,
+                    write = false,
+                    edit = true,
+                    delete = false,
+                    is_active = true
+                }, 1),
+                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
+                {
+                    module_id = this.ModuleIdentifier.ToString(),
+                    module_name = this.ModuleName,
+                    permission_name = "Delete Transactions",
+                    internal_permission_name = "delete_transaction",
+                    read = false,
+                    write = false,
+                    edit = false,
+                    delete = true,
+                    is_active = true
+                }, 1)
+            });
+
+            _Context.SaveChanges();
+        }
+    }
+
+    public Transaction? Get(int object_id)
+    {
+        return _Context.Transactions
+            .SingleOrDefault(m => m.id == object_id);
+    }
+
+    public async Task<Transaction?> GetAsync(int object_id)
+    {
+        return await _Context.Transactions
+            .SingleOrDefaultAsync(m => m.id == object_id);
+    }
+
+    public async Task<Response<TransactionDto>> GetDto(int object_id)
+    {
+        var entity = await GetAsync(object_id);
+        if (entity == null)
+            return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+
+        var dto = await MapToDto(entity);
+        return new Response<TransactionDto>(dto);
+    }
+
+    public async Task<Response<TransactionDto>> GetDtoByGuid(string guid)
+    {
+        var entity = await _Context.Transactions.FirstOrDefaultAsync(c => c.guid == guid && !c.is_deleted);
+        if (entity == null)
+            return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+
+        var dto = await MapToDto(entity);
+        return new Response<TransactionDto>(dto);
+    }
+
+    public async Task<Response<TransactionDto>> Create(TransactionCreateCommand commandModel)
+    {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var newTransaction = this.MapForCreate(commandModel);
+
+        _Context.Transactions.Add(newTransaction);
+        await _Context.SaveChangesAsync();
+
+        var dto = await MapToDto(newTransaction);
+        return new Response<TransactionDto>(dto);
+    }
+
+    public async Task<Response<TransactionDto>> Edit(TransactionEditCommand commandModel)
+    {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+        Transaction? existingEntity;
+
+        if (commandModel.id.HasValue)
+        {
+            existingEntity = await GetAsync(commandModel.id.Value);
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue && commandModel.object_sub_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id
+                                                                && m.object_sub_reference_id == commandModel.object_sub_reference_id
+                                                              ).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (!commandModel.object_reference_id.HasValue)
+        {
+            return new Response<TransactionDto>("You must supply an id or object_reference_id or a object_reference_id and a object_sub_reference_id", ResultCode.DataValidationError);
+        }
+        else
+        {
+            return new Response<TransactionDto>("An identifier is required to delete a transaction", ResultCode.DataValidationError);
+        }
+
+
+
+        if (commandModel.product_id.HasValue && existingEntity.product_id != commandModel.product_id)
+            existingEntity.product_id = commandModel.product_id.Value;
+
+        if (commandModel.transaction_type.HasValue && existingEntity.transaction_type != commandModel.transaction_type)
+            existingEntity.transaction_type = commandModel.transaction_type.Value;
+
+        if (commandModel.transaction_date.HasValue && existingEntity.transaction_date != commandModel.transaction_date)
+            existingEntity.transaction_date = commandModel.transaction_date.Value;
+
+        if (commandModel.units_sold.HasValue && existingEntity.units_sold != commandModel.units_sold)
+            existingEntity.units_sold = commandModel.units_sold.Value;
+
+        if (commandModel.units_shipped.HasValue && existingEntity.units_shipped != commandModel.units_shipped)
+            existingEntity.units_shipped = commandModel.units_shipped.Value;
+
+        if (commandModel.units_purchased.HasValue && existingEntity.units_purchased != commandModel.units_purchased)
+            existingEntity.units_purchased = commandModel.units_purchased.Value;
+
+        if (commandModel.units_received.HasValue && existingEntity.units_received != commandModel.units_received)
+            existingEntity.units_received = commandModel.units_received.Value;
+
+        if (commandModel.purchased_unit_cost.HasValue && existingEntity.purchased_unit_cost != commandModel.purchased_unit_cost)
+            existingEntity.purchased_unit_cost = commandModel.purchased_unit_cost.Value;
+
+        if (commandModel.sold_unit_price.HasValue && existingEntity.sold_unit_price != commandModel.sold_unit_price)
+            existingEntity.sold_unit_price = commandModel.sold_unit_price.Value;
+
+
+        existingEntity = CommonDataHelper<Transaction>.FillUpdateFields(existingEntity, commandModel.calling_user_id);
+
+
+        _Context.Transactions.Update(existingEntity);
+        await _Context.SaveChangesAsync();
+
+        var dto = await MapToDto(existingEntity);
+        return new Response<TransactionDto>(dto);
+    }
+
+    public async Task<Response<TransactionDto>> Delete(TransactionDeleteCommand commandModel)
+    {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<TransactionDto>(validationResult.Exception, ResultCode.DataValidationError);
+
+
+        Transaction? existingEntity;
+
+        if (commandModel.id.HasValue)
+        {
+            existingEntity = await GetAsync(commandModel.id.Value);
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue && commandModel.object_sub_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id
+                                                                && m.object_sub_reference_id == commandModel.object_sub_reference_id
+                                                              ).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (commandModel.object_reference_id.HasValue)
+        {
+            existingEntity = await _Context.Transactions.Where(m => m.object_reference_id == commandModel.object_reference_id).SingleOrDefaultAsync();
+            if (existingEntity == null)
+                return new Response<TransactionDto>("Transaction not found", ResultCode.NotFound);
+        }
+        else if (!commandModel.object_reference_id.HasValue)
+        {
+            return new Response<TransactionDto>("You must supply an id or object_reference_id or a object_reference_id and a object_sub_reference_id", ResultCode.DataValidationError);
+        }
+        else
+        {
+            return new Response<TransactionDto>("An identifier is required to delete a transaction", ResultCode.DataValidationError);
+        }
+
+
+        existingEntity = CommonDataHelper<Transaction>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+
+        _Context.Transactions.Update(existingEntity);
+        await _Context.SaveChangesAsync();
+
+        var dto = await MapToDto(existingEntity);
+        return new Response<TransactionDto>(dto);
+    }
+
+    public async Task<PagingResult<TransactionListDto>> Find(PagingSortingParameters parameters, TransactionFindCommand commandModel)
+    {
+        var response = new PagingResult<TransactionListDto>();
+
+        try
+        {
+
+            var query = _Context.Transactions.Where(m => m.is_deleted == false);
+
+            if (!string.IsNullOrEmpty(commandModel.wildcard))
+            {
+                var wild = commandModel.wildcard.ToLower();
+                query = query.Where(m => m.guid.ToLower().Contains(wild));
+            }
+
+            if (commandModel.product_id.HasValue)
+                query = query.Where(m => m.product_id == commandModel.product_id.Value);
+
+            if (commandModel.object_reference_id.HasValue)
+                query = query.Where(m => m.object_reference_id == commandModel.object_reference_id.Value);
+
+
+            if (commandModel.sales_order_number.HasValue)
+            {
+                var order_header = await _Context.OrderHeaders.Where(m => m.order_number == commandModel.sales_order_number.Value).SingleOrDefaultAsync();
+
+                if(order_header != null)
+                    query = query.Where(m => m.object_reference_id == order_header.id);
+            }
+                
+            if (commandModel.purchase_order_number.HasValue)
+            {
+                var purchase_order_header = await _Context.PurchaseOrderHeaders.Where(m => m.po_number == commandModel.purchase_order_number.Value).SingleOrDefaultAsync();
+
+                if(purchase_order_header != null)
+                    query = query.Where(m => m.object_reference_id == purchase_order_header.id);
+            }
+
+
+            var totalCount = await query.CountAsync();
+            var pagedItems = await query.SortAndPageBy(parameters).ToListAsync();
+
+            var dtos = new List<TransactionListDto>();
+            foreach (var item in pagedItems)
+                dtos.Add(await MapToListDto(item));
+
+            response.Data = dtos;
+            response.TotalResultCount = totalCount;
+        }
+        catch (Exception ex)
+        {
+            await LogError(50, this.GetType().Name, nameof(Find), ex);
+            response.SetException(ex.Message, ResultCode.Error);
+            response.TotalResultCount = 0;
+        }
+
+        return response;
+    }
+
+    public async Task<Response<List<TransactionListDto>>> GlobalSearch(GlobalSearchFindCommand commandModel)
+    {
+        var validationResult = ModelValidationHelper.ValidateModel(commandModel);
+        if (!validationResult.Success)
+            return new Response<List<TransactionListDto>>(validationResult.Exception, ResultCode.DataValidationError);
+
+        var response = new Response<List<TransactionListDto>>();
+
+        try
+        {
+            var query = _Context.Transactions.Where(m => m.is_deleted == false);
+
+            if (!string.IsNullOrEmpty(commandModel.wildcard))
+            {
+                var lower = commandModel.wildcard.ToLower();
+                query = query.Where(m => m.guid.ToLower().Contains(lower));
+            }
+
+            var pagedItems = await query.SortAndPageBy(commandModel.parameters).ToListAsync();
+
+            var dtos = new List<TransactionListDto>();
+            foreach (var item in pagedItems)
+            {
+                dtos.Add(await MapToListDto(item));
+            }
+
+            response.Data = dtos;
+        }
+        catch (Exception ex)
+        {
+            await LogError(50, this.GetType().Name, nameof(GlobalSearch), ex);
+            response.SetException(ex.Message, ResultCode.Error);
+        }
+
+        return response;
+    }
+
+
+    public async Task<TransactionListDto> MapToListDto(Transaction databaseModel)
+    {
+        var dto = new TransactionListDto
+        {
+            id = databaseModel.id,
+            is_deleted = databaseModel.is_deleted,
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            product_id = databaseModel.product_id,
+            transaction_type = databaseModel.transaction_type,
+            transaction_date = databaseModel.transaction_date,
+            object_reference_id = databaseModel.object_reference_id,
+            object_sub_reference_id = databaseModel.object_sub_reference_id,
+            units_sold = databaseModel.units_sold,
+            units_shipped = databaseModel.units_shipped,
+            units_purchased = databaseModel.units_purchased,
+            units_received = databaseModel.units_received,
+            purchased_unit_cost = databaseModel.purchased_unit_cost,
+            sold_unit_price = databaseModel.sold_unit_price,
+            guid = databaseModel.guid
+        };
+
+        dto.product_name = await _Context.Products
+                                    .Where(p => p.id == databaseModel.product_id)
+                                    .Select(p => p.product_name)
+                                    .SingleOrDefaultAsync();
+
+        dto.transaction_type_name = await _Context.KeyValueStores
+                                            .Where(kv => kv.module_id == this.ModuleIdentifier.ToString()
+                                                      && kv.int_value == databaseModel.transaction_type)
+                                            .Select(kv => kv.value)
+                                            .SingleOrDefaultAsync();
+
+        return dto;
+    }
+
+    public async Task<TransactionDto> MapToDto(Transaction databaseModel)
+    {
+        return new TransactionDto
+        {
+            id = databaseModel.id,
+            is_deleted = databaseModel.is_deleted,
+            created_on = databaseModel.created_on,
+            created_by = databaseModel.created_by,
+            updated_on = databaseModel.updated_on,
+            updated_by = databaseModel.updated_by,
+            deleted_on = databaseModel.deleted_on,
+            deleted_by = databaseModel.deleted_by,
+            created_on_string = databaseModel.created_on_string,
+            created_on_timezone = databaseModel.created_on_timezone,
+            updated_on_string = databaseModel.updated_on_string,
+            updated_on_timezone = databaseModel.updated_on_timezone,
+            deleted_on_string = databaseModel.deleted_on_string,
+            deleted_on_timezone = databaseModel.deleted_on_timezone,
+            product_id = databaseModel.product_id,
+            transaction_type = databaseModel.transaction_type,
+            transaction_date = databaseModel.transaction_date,
+            object_reference_id = databaseModel.object_reference_id,
+            object_sub_reference_id = databaseModel.object_sub_reference_id,
+            units_sold = databaseModel.units_sold,
+            units_shipped = databaseModel.units_shipped,
+            units_purchased = databaseModel.units_purchased,
+            units_received = databaseModel.units_received,
+            purchased_unit_cost = databaseModel.purchased_unit_cost,
+            sold_unit_price = databaseModel.sold_unit_price,
+            guid = databaseModel.guid
+        };
+    }
+
+    public Transaction MapToDatabaseModel(TransactionDto dtoModel)
+    {
+        return new Transaction
+        {
+            id = dtoModel.id,
+            is_deleted = dtoModel.is_deleted,
+            created_on = dtoModel.created_on,
+            created_by = dtoModel.created_by,
+            updated_on = dtoModel.updated_on,
+            updated_by = dtoModel.updated_by,
+            deleted_on = dtoModel.deleted_on,
+            deleted_by = dtoModel.deleted_by,
+
+            product_id = dtoModel.product_id,
+            transaction_type = dtoModel.transaction_type,
+            transaction_date = dtoModel.transaction_date,
+            object_reference_id = dtoModel.object_reference_id,
+            object_sub_reference_id = dtoModel.object_sub_reference_id,
+            units_sold = dtoModel.units_sold,
+            units_shipped = dtoModel.units_shipped,
+            units_purchased = dtoModel.units_purchased,
+            units_received = dtoModel.units_received,
+            purchased_unit_cost = dtoModel.purchased_unit_cost,
+            sold_unit_price = dtoModel.sold_unit_price,
+            guid = dtoModel.guid
+        };
+    }
+
+    private Transaction MapForCreate(TransactionCreateCommand createCommandModel)
+    {
+        var transaction = CommonDataHelper<Transaction>.FillCommonFields(new Transaction
+        {
+            product_id = createCommandModel.product_id,
+            transaction_type = createCommandModel.transaction_type,
+            transaction_date = createCommandModel.transaction_date,
+            object_reference_id = createCommandModel.object_reference_id,
+            object_sub_reference_id = createCommandModel.object_sub_reference_id,
+            units_sold = createCommandModel.units_sold,
+            units_shipped = createCommandModel.units_shipped,
+            units_purchased = createCommandModel.units_purchased,
+            units_received = createCommandModel.units_received,
+            purchased_unit_cost = createCommandModel.purchased_unit_cost,
+            sold_unit_price = createCommandModel.sold_unit_price,
+        }, createCommandModel.calling_user_id);
+
+        return transaction;
+    }
+}

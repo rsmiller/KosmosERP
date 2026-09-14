@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kosmos-erp-superset
+  namespace: kosmos-demo
+  labels:
+    app: kosmos-erp-superset
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kosmos-erp-superset
+  template:
+    metadata:
+      labels:
+        app: kosmos-erp-superset
+    spec:
+      containers:
+      - name: superset
+        image: apache/superset:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8088
+          name: http
+        env:
+        - name: SUPERSET_ENV
+          value: "production"
+        - name: SUPERSET_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-superset-secret
+              key: secret-key
+        - name: SUPERSET_DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-superset-secret
+              key: database-uri
+        - name: SQLALCHEMY_DATABASE_URI
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-superset-secret
+              key: database-uri
+        - name: REDIS_HOST
+          value: "kosmos-erp-redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_DB
+          value: "0"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-redis-secret
+              key: password
+        - name: CACHE_DEFAULT_TIMEOUT
+          value: "300"
+        - name: SUPERSET_WEBSERVER_PORT
+          value: "8088"
+        - name: SUPERSET_LOAD_EXAMPLES
+          value: "false"
+        - name: MAPBOX_API_KEY
+          value: ""
+        - name: SUPERSET_ROW_LIMIT
+          value: "50000"
+        - name: SUPERSET_SQLLAB_TIMEOUT
+          value: "30"
+        - name: SUPERSET_ENABLE_TIME_PIVOT
+          value: "true"
+        - name: SUPERSET_ENABLE_JAVASCRIPT_CONTROLS
+          value: "false"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8088
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8088
+          initialDelaySeconds: 30
+          periodSeconds: 5
+      restartPolicy: Always

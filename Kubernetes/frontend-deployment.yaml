@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kosmos-erp-frontend
+  namespace: kosmos-demo
+  labels:
+    app: kosmos-erp-frontend
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kosmos-erp-frontend
+  template:
+    metadata:
+      labels:
+        app: kosmos-erp-frontend
+    spec:
+      imagePullSecrets:
+      - name: registry-secret
+      containers:
+      - name: frontend
+        image: registry.gitlab.com/kosmitech-solutions/kosmos-erp/kosmos-erp-web:rc1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "80"
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://localhost:43576"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      restartPolicy: Always

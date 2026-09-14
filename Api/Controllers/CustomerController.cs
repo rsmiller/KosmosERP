@@ -1,0 +1,165 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using KosmosERP.BusinessLayer.Models.Module.Customer.Dto;
+using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Create;
+using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Delete;
+using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Edit;
+using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Find;
+using KosmosERP.BusinessLayer.Modules;
+using KosmosERP.Models;
+using KosmosERP.Module;
+using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
+using KosmosERP.Database.Models;
+
+namespace KosmosERP.Api.Controllers;
+
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class CustomerController : ERPApiController
+{
+    private ICustomerModule _Module;
+
+    public CustomerController(ICustomerModule module) : base(module)
+    {
+        _Module = module;
+    }
+
+    
+    [Authorize(Roles = "customers_read")]
+    [HttpGet("GetCustomer", Name = "GetCustomer")]
+    [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Get([FromQuery] int id)
+    {
+        var result = await _Module.GetDto(id);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "customers_read")]
+    [HttpGet("GetCustomerByGuid", Name = "GetCustomerByGuid")]
+    [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> GetByGuid([FromQuery] string guid)
+    {
+        var result = await _Module.GetDtoByGuid(guid);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "customers_read")]
+    [HttpGet("GetPaymentTerms", Name = "GetPaymentTerms")]
+    [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
+    public async Task<ActionResult> GetPaymentTerms()
+    {
+        var results = await _Module.GetPaymentTerms();
+
+        return Ok(results);
+    }
+
+    [Authorize(Roles = "customers_read")]
+    [HttpGet("GetShippingMethods", Name = "GetShippingMethods")]
+    [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
+    public async Task<ActionResult> GetShippingMethods()
+    {
+        var results = await _Module.GetShippingMethods();
+
+        return Ok(results);
+    }
+
+    [Authorize(Roles = "customers_read")]
+    [HttpGet("GetPayMethods", Name = "GetPayMethods")]
+    [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
+    public async Task<ActionResult> GetPayMethods()
+    {
+        var results = await _Module.GetPayMethods();
+
+        return Ok(results);
+    }
+
+
+    [Authorize(Roles = "customers_read")]
+    [HttpPost("FindCustomer", Name = "FindCustomer")]
+    [ProducesResponseType(typeof(PagingResult<CustomerListDto>), 200)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] CustomerFindCommand command)
+    {
+        try
+        {
+            if (command != null)
+            {
+                command.calling_user_id = this.CurrentUserId;
+
+                var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
+
+                var result = await _Module.Find(sortingParams, command);
+
+                return Ok(result);
+            }
+            else
+            {
+                return StatusCode(500, "Api body is null");
+            }
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [Authorize(Roles = "customers_write")]
+    [HttpPost("CreateCustomer", Name = "CreateCustomer")]
+    [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Create([FromBody] CustomerCreateCommand createCommand)
+    {
+        createCommand.calling_user_id = this.CurrentUserId;
+
+        var result = await _Module.Create(createCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "customers_edit")]
+    [HttpPut("UpdateCustomer", Name = "UpdateCustomer")]
+    [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Edit([FromBody] CustomerEditCommand editCommand)
+    {
+        editCommand.calling_user_id = this.CurrentUserId;
+
+        var result = await _Module.Edit(editCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "customers_delete")]
+    [HttpPost("DeleteCustomer", Name = "DeleteCustomer")]
+    [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> Delete([FromBody] CustomerDeleteCommand deleteCommand)
+    {
+        deleteCommand.calling_user_id = this.CurrentUserId;
+
+        var result = await _Module.Delete(deleteCommand);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+}
+

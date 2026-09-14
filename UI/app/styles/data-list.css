@@ -1,0 +1,16 @@
+dl
+{
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom-width: 1px;
+}
+
+dl.chunky
+{
+    height: 73px;
+}
+
+.chakra-data-list__item
+{
+    padding-top: 10px;
+}

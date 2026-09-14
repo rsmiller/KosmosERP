@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Module\Address\ListProfiles\" />
+    <Folder Include="Models\Module\Contact\ListProfile\" />
+    <Folder Include="Models\Module\Country\ListProfile\" />
+    <Folder Include="Models\Module\Customer\ListProfile\" />
+    <Folder Include="Models\Module\Lead\ListProfiles\" />
+    <Folder Include="Models\Module\Opportunity\ListProfiles\" />
+    <Folder Include="Models\Module\Product\ListProfiles\" />
+    <Folder Include="Models\Module\PurchaseOrder\ListProfile\" />
+    <Folder Include="Models\Module\Shipment\ListProfiles\" />
+    <Folder Include="Models\Module\State\ListProfile\" />
+    <Folder Include="Models\Module\Transaction\ListProfiles\" />
+    <Folder Include="Models\Module\Vendor\ListProfile\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="4.0.15.2" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
+    <PackageReference Include="Stripe.net" Version="50.1.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.1.0" />
+    <PackageReference Include="Serilog.Sinks.Datadog.Logs" Version="0.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KosmosERP.Models\KosmosERP.Models.csproj" />
+  </ItemGroup>
+
+</Project>

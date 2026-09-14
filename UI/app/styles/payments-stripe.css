@@ -1,0 +1,14 @@
+
+.hideSection
+{
+    display: none !important;
+}
+
+.CardElement-base {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.CardElement-invalid {
+    border-color: red;
+}

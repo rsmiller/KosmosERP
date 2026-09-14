@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kosmos-erp-database-ingress
+  namespace: kosmos-demo
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - db.demo.kosmoserp.com
+    secretName: kosmos-erp-database-tls
+  rules:
+  - host: db.demo.kosmoserp.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kosmos-erp-database-service
+            port:
+              number: 3306

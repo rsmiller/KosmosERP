@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KosmosERP.Database": {
+      "commandName": "Project",
+      "environmentVariables": {
+
+      }
+    }
+  }
+}

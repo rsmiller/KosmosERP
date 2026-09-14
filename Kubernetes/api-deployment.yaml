@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kosmos-erp-api
+  namespace: kosmos-demo
+  labels:
+    app: kosmos-erp-api
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kosmos-erp-api
+  template:
+    metadata:
+      labels:
+        app: kosmos-erp-api
+    spec:
+      imagePullSecrets:
+      - name: registry-secret
+      containers:
+      - name: api
+        image: registry.gitlab.com/kosmitech-solutions/kosmos-erp/kosmos-erp-api:rc1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: ASPNETCORE_URLS
+          value: "http://+:80"
+        - name: DatabaseConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-db-secret
+              key: connection-string
+        - name: HangfireConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-hangfire-secret
+              key: connection-string
+        - name: MessagePublisherAccountProvider
+          value: "Database"
+        - name: TransactionMovementTopic
+          value: "transaction_movement"
+        - name: AzureStorageConnectionString
+          value: ""
+        - name: AzureContainerName
+          value: ""
+        - name: AzureAccessKey
+          value: "
+        - name: FileStorageAccountProvider
+          value: "azure"
+        - name: APIUsername
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-api-secret
+              key: username
+        - name: APIPassword
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-api-secret
+              key: password
+        - name: APIPrivateKey
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-api-secret
+              key: private-key
+        - name: PaymentProvider
+          value: "Stripe"
+        - name: StripeApiKey
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-stripe-secret
+              key: api-key
+        - name: LogProvider
+          value: "database"
+        - name: ApplicationInsightsConnectionString
+          value: ""
+        - name: AuthenticationProvider
+          value: "keycloak"
+        - name: Realm
+          value: "" # Example: kosmitech
+        - name: BaseURL
+          value: "" # Example: http://your_url.com
+        - name: Authority
+          value: "" # Example: http://your_url.com/realms/kosmitech
+        - name: Audience
+          value: "" # Example: kosmos-erp-api
+        - name: TokenURL
+          value: "" # Example: http://your_url.com/realms/kosmitech/protocol/openid-connect/token
+        - name: ClientSecret
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-keycloak-secret
+              key: client-secret
+      restartPolicy: Always

@@ -1,0 +1,10 @@
+﻿using KosmosERP.Models;
+
+namespace KosmosERP.BusinessLayer.Models.Module.BOM.Command.Find;
+
+public class BOMFindCommand : DataCommand
+{
+    public string? wildcard { get; set; }
+    public int? parent_product_id { get; set; }
+    public int? product_id { get; set; }
+}

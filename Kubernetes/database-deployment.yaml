@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kosmos-erp-db-pvc
+  namespace: kosmos-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kosmos-erp-database
+  namespace: kosmos-demo
+  labels:
+    app: kosmos-erp-database
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kosmos-erp-database
+  template:
+    metadata:
+      labels:
+        app: kosmos-erp-database
+    spec:
+      containers:
+      - name: database
+        image: mysql:8.0.44
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-db-secret
+              key: root-password
+        - name: MYSQL_DATABASE
+          value: "kosmos_erp"
+        - name: MYSQL_DATABASE
+          value: "hangfire"
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-db-secret
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kosmos-erp-db-secret
+              key: password
+        volumeMounts:
+        - name: db-storage
+          mountPath: /var/lib/mysql
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - mysqladmin ping -u root -p$MYSQL_ROOT_PASSWORD
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - mysqladmin ping -u root -p$MYSQL_ROOT_PASSWORD
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: db-storage
+        persistentVolumeClaim:
+          claimName: kosmos-erp-db-pvc
+      restartPolicy: Always

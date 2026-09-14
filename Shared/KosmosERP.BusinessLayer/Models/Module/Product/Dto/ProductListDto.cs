@@ -1,0 +1,23 @@
+﻿using KosmosERP.Models;
+
+namespace KosmosERP.BusinessLayer.Models.Module.Product.Dto;
+
+public class ProductListDto : BaseDto
+{
+    public int vendor_id { get; set; }
+    public string? vendor_name { get; set; }
+    public string product_class { get; set; }
+    public string category { get; set; }
+    public string identifier1 { get; set; }
+    public string? identifier2 { get; set; }
+    public string? identifier3 { get; set; }
+    public string product_name { get; set; }
+    public string internal_description { get; set; }
+    public string? external_description { get; set; }
+    public decimal sales_price { get; set; }
+    public decimal list_price { get; set; }
+    public decimal unit_cost { get; set; }
+    public bool is_sales_item { get; set; }
+
+    public string? category_name { get; set; }
+}
