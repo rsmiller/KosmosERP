@@ -126,6 +126,7 @@ public class AuthenticiationProviders
 {
     public static string Database { get { return "database"; } }
     public static string Keycloak { get { return "keycloak"; } }
+    public static string SAML { get { return "saml"; } }
     public static string MOCK { get { return "mock"; } }
 }
 

@@ -10,4 +10,5 @@ public interface IAuthenticationSettings
     string ClientSecret { get; set; }
     string BaseURL { get; set; }
     string Realm { get; set; }
+    string IdPCertificate { get; set; }
 }

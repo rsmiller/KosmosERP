@@ -22,6 +22,16 @@ public class MockAuthenticationProvider : IAuthenticationProvider
         throw new NotImplementedException();
     }
 
+    public Task<Response<AuthenticatedUserDto>> Authenticate<T>(T responseObj)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<UserSessionState> FindCreateOrUpdateUserSession(string external_user_id)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<UserSessionState> FindCreateOrUpdateUserSession(int user_id)
     {
         throw new NotImplementedException();

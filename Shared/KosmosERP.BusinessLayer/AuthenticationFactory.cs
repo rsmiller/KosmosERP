@@ -1,8 +1,7 @@
 ﻿using KosmosERP.BusinessLayer.AuthenticationProviders;
+using KosmosERP.BusinessLayer.AuthenticiationProviders;
 using KosmosERP.BusinessLayer.Interfaces;
-using KosmosERP.BusinessLayer.MessagePublisher;
 using KosmosERP.Database;
-using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
 
 namespace KosmosERP.BusinessLayer;
@@ -21,26 +20,31 @@ public class AuthenticationFactory : IAuthenticationFactory
     {
         _Context = context;
         _Settings = settings;
-
+        
         ValidateSettings(settings);
 
-        if (settings.AuthenticationProvider.Equals(AuthenticiationProviders.Database, StringComparison.OrdinalIgnoreCase))
+        if (settings.AuthenticationProvider.Equals(KosmosERP.Models.AuthenticiationProviders.Database, StringComparison.OrdinalIgnoreCase))
         {
             _AuthenticationProvider = new DatabaseAuthenticationProvider(settings, context);
         }
-        else if (settings.AuthenticationProvider.Equals(AuthenticiationProviders.Keycloak, StringComparison.OrdinalIgnoreCase))
+        else if (settings.AuthenticationProvider.Equals(KosmosERP.Models.AuthenticiationProviders.Keycloak, StringComparison.OrdinalIgnoreCase))
         {
 
             _AuthenticationProvider = new KeycloakAuthenticationProvider(settings, context);
         }
-        else if (settings.AuthenticationProvider.Equals(AuthenticiationProviders.MOCK, StringComparison.OrdinalIgnoreCase))
+        else if (settings.AuthenticationProvider.Equals(KosmosERP.Models.AuthenticiationProviders.SAML, StringComparison.OrdinalIgnoreCase))
+        {
+
+            _AuthenticationProvider = new SAMLAuthenticationProvider(settings, context);
+        }
+        else if (settings.AuthenticationProvider.Equals(KosmosERP.Models.AuthenticiationProviders.MOCK, StringComparison.OrdinalIgnoreCase))
         {
 
             _AuthenticationProvider = new MockAuthenticationProvider(settings);
         }
         else
         {
-            throw new ArgumentNullException("Messaging account provider not supported.");
+            throw new ArgumentNullException("Authentication provider not supported.");
         }
     }
 

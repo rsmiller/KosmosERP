@@ -40,12 +40,13 @@ Environment.SetEnvironmentVariable("PaymentProvider", "Stripe");
 Environment.SetEnvironmentVariable("StripeApiKey", "sk_test_");
 Environment.SetEnvironmentVariable("LogProvider", "database");
 
-Environment.SetEnvironmentVariable("AuthenticationProvider", "keycloak");
-Environment.SetEnvironmentVariable("Realm", "kosmitech");
-Environment.SetEnvironmentVariable("BaseURL", "http://localhost:37167");
-Environment.SetEnvironmentVariable("Authority", "http://localhost:37167/realms/kosmitech");
-Environment.SetEnvironmentVariable("Audience", "kosmitech-react");
-Environment.SetEnvironmentVariable("TokenURL", "http://localhost:37167/realms/kosmitech/protocol/openid-connect/token");
+Environment.SetEnvironmentVariable("AuthenticationProvider", "SAML");
+Environment.SetEnvironmentVariable("Realm", "");
+Environment.SetEnvironmentVariable("BaseURL", "");
+Environment.SetEnvironmentVariable("Authority", "");
+Environment.SetEnvironmentVariable("Audience", "");
+Environment.SetEnvironmentVariable("TokenURL", "");
+Environment.SetEnvironmentVariable("IdPCertificate", "");
 Environment.SetEnvironmentVariable("ClientSecret", "");
 
 //Environment.SetEnvironmentVariable("DD_API_KEY", "");
@@ -163,7 +164,8 @@ var authenticationSettings = new AuthenticationSettings()
     TokenURL = Environment.GetEnvironmentVariable("TokenURL"),
     ClientSecret = Environment.GetEnvironmentVariable("ClientSecret"),
     BaseURL = Environment.GetEnvironmentVariable("BaseURL"),
-    Realm = Environment.GetEnvironmentVariable("Realm")
+    Realm = Environment.GetEnvironmentVariable("Realm"),
+    IdPCertificate = Environment.GetEnvironmentVariable("IdPCertificate")
 };
 
 builder.Services.AddSingleton<IAuthenticationSettings>(authenticationSettings);
