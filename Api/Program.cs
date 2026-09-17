@@ -1,26 +1,20 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Hangfire;
+using Hangfire.MySql;
+using KosmosERP.Api;
+using KosmosERP.Api.Filters;
+using KosmosERP.Api.Middleware;
 using KosmosERP.BusinessLayer;
+using KosmosERP.BusinessLayer.Interfaces;
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Database;
+using KosmosERP.Database.Models;
 using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
 using KosmosERP.Module;
-using KosmosERP.Database.Models;
-using Hangfire;
-using Hangfire.MySql;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Metrics;
-using Serilog;
-using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
-using System.Security.Claims;
-using System.Text.Json;
-using KosmosERP.Api.Filters;
-using KosmosERP.Api.Middleware;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using Serilog;
 
 
 
@@ -253,34 +247,7 @@ builder.Services.AddScoped<ILogProviderFactory, LogProviderFactory>();
 
 if(logProviderSettings.log_provider.ToLower() == LogProviderType.Azure)
 {
-    builder.Services.AddOpenTelemetry()
-        .UseAzureMonitor(options =>
-        {
-            options.ConnectionString = logProviderSettings.application_insights_connection_string;
-        })
-        .WithTracing(tracing =>
-        {
-            tracing
-                .AddHttpClientInstrumentation()
-                .AddSource("KomosERP");
-        })
-        .WithMetrics(metrics =>
-        {
-            metrics
-                .AddAspNetCoreInstrumentation()
-                .AddRuntimeInstrumentation()
-                .AddMeter("KosmosERP.Metrics");
-        });
-    
-    Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Debug()
-        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
-        .WriteTo.ApplicationInsights(
-            connectionString: logProviderSettings.application_insights_connection_string, 
-            telemetryConverter: new TraceTelemetryConverter())
-        .Enrich.FromLogContext()
-        .CreateLogger();
-
+    builder.Services.AddOpenTelemetryLogging(logProviderSettings);
 
     builder.Logging.ClearProviders();
     builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
@@ -288,54 +255,7 @@ if(logProviderSettings.log_provider.ToLower() == LogProviderType.Azure)
 }
 else if(logProviderSettings.log_provider.ToLower() == LogProviderType.DataDog)
 {
-
-    var datadogConfig = new Serilog.Sinks.Datadog.Logs.DatadogConfiguration
-    {
-        Url = $"https://http-intake.logs.{logProviderSettings.datadog_endpoint}"
-    };
-
-    builder.Services.AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing
-            .AddHttpClientInstrumentation()
-            .AddSource("KosmosERP")
-            .AddOtlpExporter(opts =>
-            {
-                opts.Endpoint = new Uri($"https://otlp.{logProviderSettings.datadog_endpoint}/v1/traces");
-
-                // Required for Datadog
-                opts.Headers = $"DD-API-KEY={logProviderSettings.datadog_api_key}";
-            });
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics
-            .AddAspNetCoreInstrumentation()
-            .AddRuntimeInstrumentation()
-            .AddMeter("Kosmos.Metrics")
-            .AddOtlpExporter(opts =>
-            {
-                opts.Endpoint = new Uri($"https://otlp.{logProviderSettings.datadog_endpoint}/v1/metrics");
-                opts.Headers = $"DD-API-KEY={logProviderSettings.datadog_api_key}";
-            });
-    });
-
-
-    Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Debug()
-        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
-        .MinimumLevel.Override("System.Net.Http.HttpClient", Serilog.Events.LogEventLevel.Warning)
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("env", Environment.GetEnvironmentVariable("DD_ENV") ?? "dev")
-        .WriteTo.DatadogLogs(
-            apiKey: logProviderSettings.datadog_api_key,
-            source: "csharp",
-            service: "Kosmos-erp-api",
-            host: Environment.MachineName,
-            configuration: datadogConfig)
-        .CreateLogger();
+    builder.Services.AddDataDogLogging(logProviderSettings);
 
     builder.Logging.ClearProviders();
     builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
@@ -370,141 +290,25 @@ builder.Services.AddHangfireServer();
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-builder.Services.AddScoped<ITokenModule, TokenModule>();
-
-builder.Services.AddScoped<IUserModule, UserModule>();
-builder.Services.AddScoped<IAddressModule, AddressModule>();
-builder.Services.AddScoped<IStateModule, StateModule>();
-builder.Services.AddScoped<ICountryModule, CountryModule>();
-
-builder.Services.AddScoped<ICustomerModule, CustomerModule>();
-builder.Services.AddScoped<IOpportunityModule, OpportunityModule>();
-builder.Services.AddScoped<ILeadModule, LeadModule>();
-builder.Services.AddScoped<IContactModule, ContactModule>();
-builder.Services.AddScoped<IActivityModule, ActivityModule>();
-
-builder.Services.AddScoped<IShipmentModule, ShipmentModule>();
-
-builder.Services.AddScoped<IAPInvoiceModule, APInvoiceModule>();
-builder.Services.AddScoped<IARInvoiceModule, ARInvoiceModule>();
-builder.Services.AddScoped<ICreditMemoModule, CreditMemoModule>();
-builder.Services.AddScoped<IPaymentModule, PaymentModule>();
-builder.Services.AddScoped<ISubscriptionModule, SubscriptionModule>();
-
-builder.Services.AddScoped<IChartOfAccountModule, ChartOfAccountModule>();
-builder.Services.AddScoped<IJournalEntryModule, JournalEntryModule>();
-builder.Services.AddScoped<IFinancialTransactionModule, FinancialTransactionModule>();
-
-builder.Services.AddScoped<IOrderModule, OrderModule>();
-builder.Services.AddScoped<IPurchaseOrderModule, PurchaseOrderModule>();
-builder.Services.AddScoped<IPurchaseOrderReceiveModule, PurchaseOrderReceiveModule>();
-
-builder.Services.AddScoped<IBOMModule, BOMModule>();
-builder.Services.AddScoped<IProductionOrderModule, ProductionOrderModule>();
-
-builder.Services.AddScoped<IDocumentUploadModule, DocumentUploadModule>();
-
-builder.Services.AddScoped<IProductModule, ProductModule>();
-builder.Services.AddScoped<IVendorModule, VendorModule>();
-builder.Services.AddScoped<ITransactionModule, TransactionModule>();
-builder.Services.AddScoped<IInventoryModule, InventoryModule>();
-
-builder.Services.AddScoped<INotificationModule, NotificationModule>();
-builder.Services.AddScoped<IKeyValueModule, KeyValueModule>();
-builder.Services.AddScoped<ICommentModule, CommentModule>();
-
-builder.Services.AddScoped<IGlobalSearchModule, GlobalSearchModule>();
-builder.Services.AddScoped<ISettingsModule, SettingsModule>();
+builder.Services.AddModules();
 
 builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(Environment.GetEnvironmentVariable("DatabaseConnectionString")));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Memory Service
-builder.Services.AddScoped<IMemoryCacheService<KeyValueStore>, MemoryCacheService<KeyValueStore>>();
-builder.Services.AddScoped<IMemoryCacheService<Customer>, MemoryCacheService<Customer>>();
-builder.Services.AddScoped<IMemoryCacheService<OrderHeader>, MemoryCacheService<OrderHeader>>();
-builder.Services.AddScoped<IMemoryCacheService<Product>, MemoryCacheService<Product>>();
+builder.Services.AddMemoryServices();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Add authentication
 
-if(authenticationSettings.AuthenticationProvider.ToLower() == AuthenticiationProviders.Keycloak)
+if (authenticationSettings.AuthenticationProvider.ToLower() == AuthenticiationProviders.Keycloak)
 {
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = authenticationSettings.Authority;
-        options.RequireHttpsMetadata = false; // set false only for dev
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(5), // Allow 5 min clock skew
-            NameClaimType = "preferred_username",
-            RoleClaimType = ClaimTypes.Role
-        };
-        options.Events = new JwtBearerEvents
-        {
-            OnTokenValidated = context =>
-            {
-                var identity = context.Principal!.Identity as ClaimsIdentity;
-                if (identity == null) return Task.CompletedTask;
-
-                // -------- Realm Roles --------
-                var realmAccess = context.Principal.FindFirst("realm_access")?.Value;
-                if (realmAccess != null)
-                {
-                    using var doc = JsonDocument.Parse(realmAccess);
-                    if (doc.RootElement.TryGetProperty("roles", out var roles))
-                    {
-                        foreach (var role in roles.EnumerateArray())
-                        {
-                            var roleValue = role.GetString()!;
-                            if(!identity.HasClaim(ClaimTypes.Role, roleValue))
-                                identity.AddClaim(new Claim(ClaimTypes.Role, roleValue));
-                        }
-                    }
-                }
-
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine("=== AUTH FAILED ===");
-                Console.WriteLine($"Exception Type: {context.Exception.GetType().Name}");
-                Console.WriteLine($"Message: {context.Exception.Message}");
-                if (context.Exception.InnerException != null)
-                {
-                    Console.WriteLine($"Inner Exception: {context.Exception.InnerException.Message}");
-                }
-                return Task.CompletedTask;
-            },
-            OnChallenge = context =>
-            {
-                Console.WriteLine("=== AUTH CHALLENGE ===");
-                Console.WriteLine($"Error: {context.Error}");
-                Console.WriteLine($"Error Description: {context.ErrorDescription}");
-                return Task.CompletedTask;
-            }
-        };
-    });
-
+    builder.Services.AddKeycloakAuthentication(authenticationSettings);
     //builder.Services.AddAuthorization();
 }
 else
 {
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(m =>
-    {
-        m.TokenValidationParameters =
-            new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateIssuerSigningKey = true,
-                ValidateAudience = false,
-                ValidIssuer = TokenModule.Issuer,
-                IssuerSigningKey = TokenModule.CreateSecurityKey(Environment.GetEnvironmentVariable("APIPrivateKey"))
-            };
-    });
+    builder.Services.AddJwtAuthentication(authenticationSettings);
 }
 
 builder.Services.AddScoped<IAuthenticationFactory, AuthenticationFactory>();

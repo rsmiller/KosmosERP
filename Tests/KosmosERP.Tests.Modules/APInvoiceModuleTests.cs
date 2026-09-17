@@ -42,8 +42,10 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
         var arModule = new ARInvoiceModule(base._Context, logProviderFactory);
         var docModule = new DocumentUploadModule(base._Context, logProviderFactory);
         var poRModule = new PurchaseOrderReceiveModule(base._Context, logProviderFactory);
+        var financialTransactionModule = new FinancialTransactionModule(base._Context, logProviderFactory);
+        var chartOfAccountModule = new ChartOfAccountModule(base._Context, logProviderFactory);
 
-        var the_module = new APInvoiceModule(base._Context, poModule, orderModule, arModule, poRModule, docModule, logProviderFactory);
+        var the_module = new APInvoiceModule(base._Context, poModule, orderModule, arModule, poRModule, docModule, financialTransactionModule, chartOfAccountModule, logProviderFactory);
 
         await base.SetupModule(the_module);
     }

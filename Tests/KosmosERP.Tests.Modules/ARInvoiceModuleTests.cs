@@ -41,7 +41,10 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
         var orderMemCache = new MemoryCacheService<OrderHeader>(new MemoryCache(new MemoryCacheOptions()), _Context);
 
         var paymentProvider = new PaymentProviderFactory(new PaymentProviderSettings() { payment_provider = PaymentProviderType.MOCK }, _Context);
-        var the_module = new ARInvoiceModule(base._Context, kcMemCache, custMemCache, orderMemCache, paymentProvider, logProviderFactory);
+        var financialTransactionModule = new FinancialTransactionModule(base._Context, logProviderFactory);
+        var chartOfAccountModule = new ChartOfAccountModule(base._Context, logProviderFactory);
+
+        var the_module = new ARInvoiceModule(base._Context, kcMemCache, custMemCache, orderMemCache, paymentProvider, financialTransactionModule, chartOfAccountModule, logProviderFactory);
 
         await base.SetupModule(the_module);
     }
