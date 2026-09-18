@@ -23,6 +23,11 @@ public class DatabaseAuthenticationProvider : IAuthenticationProvider
         _Context = context;
     }
 
+    public Task<Response<AuthenticatedUserDto>> Authenticate<T>(T responseObj)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Response<AuthenticatedUserDto>> Authenticate(string username, string password)
     {
         var result = await _Context.Users.SingleOrDefaultAsync(m => m.username.ToLower() == username);
@@ -69,6 +74,11 @@ public class DatabaseAuthenticationProvider : IAuthenticationProvider
         return new Response<AuthenticatedUserDto>("Credentials could not be authenticated", ResultCode.Invalid);
     }
 
+    public async Task<UserSessionState> FindCreateOrUpdateUserSession(string external_user_id)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<UserSessionState> FindCreateOrUpdateUserSession(int user_id)
     {
         var session = await _Context.UserSessionStates.FirstOrDefaultAsync(m => m.user_id == user_id);
@@ -95,7 +105,12 @@ public class DatabaseAuthenticationProvider : IAuthenticationProvider
 
         return session;
     }
-    
+
+    public async Task<Response<bool>> Logout(string session_id)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Response<AuthProviderUserDto>> CreateUser(UserCreateCommand commandModel, string auth_token)
     {
         return new Response<AuthProviderUserDto>();

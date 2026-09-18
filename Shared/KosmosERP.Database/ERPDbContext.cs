@@ -115,7 +115,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         // Uncomment for migrations
         //if (optionsBuilder.IsConfigured == false)
         //{
-          //  optionsBuilder.UseMySQL("server=localhost;port=3306;uid=auser;pwd=12345;database=kosmos-erp");
+        //    optionsBuilder.UseMySQL("server=localhost;port=3306;uid=auser;pwd=12345;database=kosmos_erp_new");
         //}
     }
 

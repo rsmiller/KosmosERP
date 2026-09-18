@@ -9,7 +9,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace KosmosERP.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class InitialDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -115,6 +115,9 @@ namespace KosmosERP.Database.Migrations
                     association_is_ar_invoice = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     packing_list_is_required = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     is_paid = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    is_posted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    posted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    posted_by = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     guid = table.Column<string>(type: "longtext", nullable: false),
                     is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     created_on = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
@@ -155,6 +158,9 @@ namespace KosmosERP.Database.Migrations
                     paid_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     payment_external_id = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true),
                     payment_invoice_url = table.Column<string>(type: "longtext", nullable: true),
+                    is_posted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    posted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    posted_by = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     guid = table.Column<string>(type: "longtext", nullable: false),
                     is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     created_on = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
@@ -173,6 +179,45 @@ namespace KosmosERP.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ar_invoice_headers", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "chart_of_accounts",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    account_number = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    account_name = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    account_type = table.Column<int>(type: "int", nullable: false),
+                    parent_account_id = table.Column<int>(type: "int", nullable: true),
+                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    normal_balance = table.Column<int>(type: "int", nullable: false),
+                    description = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
+                    guid = table.Column<string>(type: "varchar(255)", nullable: false),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    created_on = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_on_timezone = table.Column<string>(type: "longtext", nullable: false),
+                    created_on_string = table.Column<string>(type: "longtext", nullable: false),
+                    created_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updated_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    updated_on_string = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_string = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_chart_of_accounts", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_chart_of_accounts_chart_of_accounts_parent_account_id",
+                        column: x => x.parent_account_id,
+                        principalTable: "chart_of_accounts",
+                        principalColumn: "id");
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -457,6 +502,44 @@ namespace KosmosERP.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_inventory_counts", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "journal_entry_headers",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    entry_number = table.Column<int>(type: "int", nullable: false),
+                    entry_date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    description = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
+                    reference_type = table.Column<int>(type: "int", nullable: true),
+                    reference_id = table.Column<int>(type: "int", nullable: true),
+                    is_posted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    posted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    posted_by = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    is_reversed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    reversed_by_entry_id = table.Column<int>(type: "int", nullable: true),
+                    fiscal_period = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true),
+                    guid = table.Column<string>(type: "varchar(255)", nullable: false),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    created_on = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_on_timezone = table.Column<string>(type: "longtext", nullable: false),
+                    created_on_string = table.Column<string>(type: "longtext", nullable: false),
+                    created_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updated_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    updated_on_string = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_string = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_journal_entry_headers", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1030,6 +1113,52 @@ namespace KosmosERP.Database.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "financial_transactions",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    transaction_date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    transaction_type = table.Column<int>(type: "int", nullable: false),
+                    source_module = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    source_id = table.Column<int>(type: "int", nullable: false),
+                    source_guid = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    chart_of_account_id = table.Column<int>(type: "int", nullable: false),
+                    debit_amount = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
+                    credit_amount = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
+                    running_balance = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
+                    description = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
+                    fiscal_period = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true),
+                    journal_entry_id = table.Column<int>(type: "int", nullable: true),
+                    is_reversal = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    guid = table.Column<string>(type: "varchar(255)", nullable: false),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    created_on = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_on_timezone = table.Column<string>(type: "longtext", nullable: false),
+                    created_on_string = table.Column<string>(type: "longtext", nullable: false),
+                    created_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updated_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    updated_on_string = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_string = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_financial_transactions", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_financial_transactions_chart_of_accounts_chart_of_account_id",
+                        column: x => x.chart_of_account_id,
+                        principalTable: "chart_of_accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "credit_memo_headers",
                 columns: table => new
                 {
@@ -1217,6 +1346,51 @@ namespace KosmosERP.Database.Migrations
                         name: "FK_document_uploads_object_tag_template_document_uploads_object~",
                         column: x => x.document_object_id,
                         principalTable: "document_uploads_object",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "journal_entry_lines",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    journal_entry_header_id = table.Column<int>(type: "int", nullable: false),
+                    line_number = table.Column<int>(type: "int", nullable: false),
+                    chart_of_account_id = table.Column<int>(type: "int", nullable: false),
+                    debit_amount = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
+                    credit_amount = table.Column<decimal>(type: "decimal(14,3)", precision: 14, scale: 3, nullable: false),
+                    description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
+                    guid = table.Column<string>(type: "varchar(255)", nullable: false),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    created_on = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_on_timezone = table.Column<string>(type: "longtext", nullable: false),
+                    created_on_string = table.Column<string>(type: "longtext", nullable: false),
+                    created_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updated_by = table.Column<string>(type: "longtext", nullable: false),
+                    updated_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    updated_on_string = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_timezone = table.Column<string>(type: "longtext", nullable: true),
+                    deleted_on_string = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_journal_entry_lines", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_journal_entry_lines_chart_of_accounts_chart_of_account_id",
+                        column: x => x.chart_of_account_id,
+                        principalTable: "chart_of_accounts",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_journal_entry_lines_journal_entry_headers_journal_entry_head~",
+                        column: x => x.journal_entry_header_id,
+                        principalTable: "journal_entry_headers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -2250,12 +2424,12 @@ namespace KosmosERP.Database.Migrations
                 columns: new[] { "id", "category_name", "created_by", "created_on", "created_on_string", "created_on_timezone", "deleted_by", "deleted_on", "deleted_on_string", "deleted_on_timezone", "guid", "internal_category_name", "is_deleted", "parent_category_id", "updated_by", "updated_on", "updated_on_string", "updated_on_timezone" },
                 values: new object[,]
                 {
-                    { 1, "Accounting", "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "dc6bd3b8-962b-4d12-8c84-588fd8928695", "accounting", false, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 2, "Sales", "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "5d3fb88f-43fe-41c4-8807-be244cbebda7", "sales", false, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 3, "Customers", "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "57225634-3e9f-46c7-bd27-48cbf4511d26", "customer", false, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 4, "Service", "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "c668a5a9-4c57-4219-be3d-93e8c995a4c9", "service", false, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 5, "Manufacturing", "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "0a636bf2-51a6-407d-b885-a366f0b2013c", "manufacturing", false, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 6, "Engineering", "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "c3286967-5285-4ea1-a78e-46f18c9ec2b9", "engineering", false, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 606, DateTimeKind.Utc).AddTicks(4906), "2026-01-01 19:46:24Z", "-06:00" }
+                    { 1, "Accounting", "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "dc6bd3b8-962b-4d12-8c84-588fd8928695", "accounting", false, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 2, "Sales", "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "5d3fb88f-43fe-41c4-8807-be244cbebda7", "sales", false, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 3, "Customers", "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "57225634-3e9f-46c7-bd27-48cbf4511d26", "customer", false, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 4, "Service", "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "c668a5a9-4c57-4219-be3d-93e8c995a4c9", "service", false, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 5, "Manufacturing", "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "0a636bf2-51a6-407d-b885-a366f0b2013c", "manufacturing", false, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 6, "Engineering", "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "c3286967-5285-4ea1-a78e-46f18c9ec2b9", "engineering", false, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937), "2026-09-18 15:20:26Z", "-07:00" }
                 });
 
             migrationBuilder.InsertData(
@@ -2263,14 +2437,14 @@ namespace KosmosERP.Database.Migrations
                 columns: new[] { "id", "approve_by_id", "created_by", "created_on", "created_on_string", "created_on_timezone", "deleted_by", "deleted_on", "deleted_on_string", "deleted_on_timezone", "friendly_name", "guid", "internal_name", "is_deleted", "requires_approval", "updated_by", "updated_on", "updated_on_string", "updated_on_timezone" },
                 values: new object[,]
                 {
-                    { 1, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "AR Invoice", "6a98c7ed-1478-4684-9070-9f60f42b9c2c", "ar_invoice", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 2, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "AP Invoice", "de6bd73f-88bd-4862-8a7b-0a618396641f", "ap_invoice", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 3, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "Tax Exempt Form", "b86bfbe7-d7ed-4be0-9ff2-06a370e48553", "tax_exempt_form", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 4, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "Customer EIN/TIN Form", "49f4800d-673b-4ae8-aff3-2b700fb1df3b", "customer_formation_form", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 5, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "PO Receive Upload", "6af485a4-402e-4476-82c2-e91a4d3f83fa", "po_receive_upload", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 6, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "CAD Drawings", "da0af931-7424-460f-956d-e43a69b00f81", "cad_drawings", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 7, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "Service Contracts", "857d4113-ab2d-489b-a267-ada6ca7d411d", "service_constracts", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 8, null, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, "Internal Price Lists", "212cc82c-b151-45a3-997d-bd06d05fa327", "internal_price_listes", false, false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 589, DateTimeKind.Utc).AddTicks(6026), "2026-01-01 19:46:24Z", "-06:00" }
+                    { 1, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "AR Invoice", "6a98c7ed-1478-4684-9070-9f60f42b9c2c", "ar_invoice", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 2, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "AP Invoice", "de6bd73f-88bd-4862-8a7b-0a618396641f", "ap_invoice", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 3, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "Tax Exempt Form", "b86bfbe7-d7ed-4be0-9ff2-06a370e48553", "tax_exempt_form", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 4, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "Customer EIN/TIN Form", "49f4800d-673b-4ae8-aff3-2b700fb1df3b", "customer_formation_form", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 5, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "PO Receive Upload", "6af485a4-402e-4476-82c2-e91a4d3f83fa", "po_receive_upload", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 6, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "CAD Drawings", "da0af931-7424-460f-956d-e43a69b00f81", "cad_drawings", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 7, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "Service Contracts", "857d4113-ab2d-489b-a267-ada6ca7d411d", "service_constracts", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 8, null, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, "Internal Price Lists", "212cc82c-b151-45a3-997d-bd06d05fa327", "internal_price_listes", false, false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978), "2026-09-18 15:20:26Z", "-07:00" }
                 });
 
             migrationBuilder.InsertData(
@@ -2278,14 +2452,14 @@ namespace KosmosERP.Database.Migrations
                 columns: new[] { "id", "created_by", "created_on", "created_on_string", "created_on_timezone", "deleted_by", "deleted_on", "deleted_on_string", "deleted_on_timezone", "document_upload_category_id", "document_upload_object_id", "guid", "is_deleted", "updated_by", "updated_on", "updated_on_string", "updated_on_timezone" },
                 values: new object[,]
                 {
-                    { 1, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 1, 1, "bff44e3f-d330-49ea-ae04-a310b30e362c", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 2, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 1, 2, "96bf8fab-3095-4617-87f0-15db6a97f817", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 3, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 3, 3, "dd555129-83da-4b71-a50f-9102792487d1", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 4, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 3, 4, "cdd23bbe-5e33-41c8-9eab-c8c1f383ec02", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 5, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 5, 5, "03230d3a-f849-459a-b444-bcaa4e3abb18", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 6, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 6, 6, "8a20d9ee-5cf2-4402-8310-c4e607457377", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 7, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 4, 7, "906df905-1bd1-4a9f-9ba4-427037998aec", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" },
-                    { 8, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00", null, null, null, null, 2, 8, "264ab60a-6aef-41fd-adcb-fba3265cb572", false, "1", new DateTime(2026, 1, 1, 19, 46, 24, 605, DateTimeKind.Utc).AddTicks(3568), "2026-01-01 19:46:24Z", "-06:00" }
+                    { 1, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 1, 1, "bff44e3f-d330-49ea-ae04-a310b30e362c", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 2, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 1, 2, "96bf8fab-3095-4617-87f0-15db6a97f817", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 3, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 3, 3, "dd555129-83da-4b71-a50f-9102792487d1", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 4, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 3, 4, "cdd23bbe-5e33-41c8-9eab-c8c1f383ec02", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 5, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 5, 5, "03230d3a-f849-459a-b444-bcaa4e3abb18", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 6, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 6, 6, "8a20d9ee-5cf2-4402-8310-c4e607457377", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 7, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 4, 7, "906df905-1bd1-4a9f-9ba4-427037998aec", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" },
+                    { 8, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00", null, null, null, null, 2, 8, "264ab60a-6aef-41fd-adcb-fba3265cb572", false, "1", new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450), "2026-09-18 15:20:26Z", "-07:00" }
                 });
 
             migrationBuilder.InsertData(
@@ -2424,6 +2598,32 @@ namespace KosmosERP.Database.Migrations
                 name: "IX_boms_product_id",
                 table: "boms",
                 column: "product_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chart_of_accounts_account_number",
+                table: "chart_of_accounts",
+                column: "account_number",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chart_of_accounts_account_type",
+                table: "chart_of_accounts",
+                column: "account_type");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chart_of_accounts_guid",
+                table: "chart_of_accounts",
+                column: "guid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chart_of_accounts_is_active",
+                table: "chart_of_accounts",
+                column: "is_active");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chart_of_accounts_parent_account_id",
+                table: "chart_of_accounts",
+                column: "parent_account_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_comments_object_guid",
@@ -2576,9 +2776,99 @@ namespace KosmosERP.Database.Migrations
                 columns: new[] { "tag_name", "tag_value" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_chart_of_account_id",
+                table: "financial_transactions",
+                column: "chart_of_account_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_fiscal_period",
+                table: "financial_transactions",
+                column: "fiscal_period");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_guid",
+                table: "financial_transactions",
+                column: "guid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_journal_entry_id",
+                table: "financial_transactions",
+                column: "journal_entry_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_source_id",
+                table: "financial_transactions",
+                column: "source_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_source_module",
+                table: "financial_transactions",
+                column: "source_module");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_transaction_date",
+                table: "financial_transactions",
+                column: "transaction_date");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_financial_transactions_transaction_type",
+                table: "financial_transactions",
+                column: "transaction_type");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_inventory_counts_id",
                 table: "inventory_counts",
                 column: "id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_entry_date",
+                table: "journal_entry_headers",
+                column: "entry_date");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_entry_number",
+                table: "journal_entry_headers",
+                column: "entry_number");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_fiscal_period",
+                table: "journal_entry_headers",
+                column: "fiscal_period");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_guid",
+                table: "journal_entry_headers",
+                column: "guid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_is_posted",
+                table: "journal_entry_headers",
+                column: "is_posted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_reference_id",
+                table: "journal_entry_headers",
+                column: "reference_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_headers_reference_type",
+                table: "journal_entry_headers",
+                column: "reference_type");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_lines_chart_of_account_id",
+                table: "journal_entry_lines",
+                column: "chart_of_account_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_lines_guid",
+                table: "journal_entry_lines",
+                column: "guid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journal_entry_lines_journal_entry_header_id",
+                table: "journal_entry_lines",
+                column: "journal_entry_header_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_key_value_stores_key",
@@ -3161,7 +3451,13 @@ namespace KosmosERP.Database.Migrations
                 name: "document_uploads_revisions_tag");
 
             migrationBuilder.DropTable(
+                name: "financial_transactions");
+
+            migrationBuilder.DropTable(
                 name: "inventory_counts");
+
+            migrationBuilder.DropTable(
+                name: "journal_entry_lines");
 
             migrationBuilder.DropTable(
                 name: "key_value_stores");
@@ -3240,6 +3536,12 @@ namespace KosmosERP.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "document_uploads_revisions");
+
+            migrationBuilder.DropTable(
+                name: "chart_of_accounts");
+
+            migrationBuilder.DropTable(
+                name: "journal_entry_headers");
 
             migrationBuilder.DropTable(
                 name: "opportunities");

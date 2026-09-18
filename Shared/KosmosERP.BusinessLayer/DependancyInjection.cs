@@ -60,6 +60,8 @@ namespace KosmosERP.BusinessLayer
 
             services.AddScoped<IGlobalSearchModule, GlobalSearchModule>();
             services.AddScoped<ISettingsModule, SettingsModule>();
+
+            services.AddScoped<ISAMLModule, SAMLModule>();
         }
     }
 }
