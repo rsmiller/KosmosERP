@@ -62,7 +62,8 @@
     Authority = URL TO REALM LIKE http://yoururl.com:37167/realms/kosmitech"
     Audience = THE AUDIENCE
     TokenURL = TOKEN URL LIKE http://yoururl.com:37167/realms/YOUREALM/protocol/openid-connect/token
-    ClientSecret = THE CLIENT SECRET
+    IdPCertificate = THE CERTIFICATE FROM THE IDP
+    SingleLogoutURL = IDP SLO URL
 
 ---
 
