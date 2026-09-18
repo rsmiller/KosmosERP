@@ -115,6 +115,22 @@ namespace KosmosERP.BusinessLayer.AuthenticiationProviders
             return session;
         }
 
+        public async Task<Response<bool>> Logout(string session_id)
+        {
+
+            var session = await _Context.UserSessionStates.FirstOrDefaultAsync(m => m.session_id == session_id);
+
+            if (session != null)
+            {
+                session.session_expires = DateTime.UtcNow;
+
+                _Context.UserSessionStates.Update(session);
+                await _Context.SaveChangesAsync();
+            }
+
+            return new Response<bool>(true);
+        }
+
         public Task<Response<AuthProviderUserDto>> CreateUser(UserCreateCommand commandModel, string auth_token)
         {
             throw new NotImplementedException();

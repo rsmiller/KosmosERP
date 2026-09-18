@@ -11,4 +11,5 @@ public interface IAuthenticationSettings
     string BaseURL { get; set; }
     string Realm { get; set; }
     string IdPCertificate { get; set; }
+    string SingleLogoutURL { get; set; }
 }

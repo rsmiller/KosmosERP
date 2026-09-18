@@ -13,4 +13,5 @@ public class AuthenticationSettings : IAuthenticationSettings
     public string BaseURL { get; set; }
     public string Realm { get; set; }
     public string IdPCertificate { get; set; }
+    public string SingleLogoutURL { get; set; }
 }

@@ -37,6 +37,11 @@ public class MockAuthenticationProvider : IAuthenticationProvider
         throw new NotImplementedException();
     }
 
+    public async Task<Response<bool>> Logout(string session_id)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Response<AuthProviderUserDto>> CreateUser(UserCreateCommand commandModel, string auth_token)
     {
         throw new NotImplementedException();

@@ -18,11 +18,25 @@ namespace KosmosERP.Api.Controllers
             _Module = module;
         }
 
+        [HttpGet("metadata")]
+        [Produces("application/samlmetadata+xml")]
+        [ProducesResponseType(typeof(string), 200)]
+        public IActionResult Metadata()
+        {
+            var metadata = _Module.GetMetadata();
+            return Content(metadata, "application/samlmetadata+xml");
+        }
+
         [HttpPost("init")]
         [ProducesResponseType(typeof(Response<SAMLRequest>), 200)]
+        [ProducesResponseType(typeof(Response<SAMLRequest>), 400)]
         public async Task<IActionResult> BeginSAML([FromBody] SAMLRequest command)
         {
             var result = await _Module.BeginSAML(command);
+
+            if (!result.Success)
+                return BadRequest(result);
+
             return Ok(result);
         }
 
@@ -38,6 +52,32 @@ namespace KosmosERP.Api.Controllers
 
             return Ok(result);
 
+        }
+
+        [HttpPost("logout")]
+        [ProducesResponseType(typeof(Response<SAMLRequest>), 200)]
+        [ProducesResponseType(typeof(Response<SAMLRequest>), 400)]
+        public async Task<IActionResult> BeginLogout([FromBody] SAMLLogoutCommand command)
+        {
+            var result = await _Module.BeginLogout(command?.SessionId, command?.RelayState);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("logout/response")]
+        [ProducesResponseType(typeof(Response<bool>), 200)]
+        [ProducesResponseType(typeof(Response<bool>), 400)]
+        public async Task<IActionResult> CompleteLogout([FromBody] SAMLWrapper logoutResponse)
+        {
+            var result = await _Module.CompleteLogout(logoutResponse);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
     }

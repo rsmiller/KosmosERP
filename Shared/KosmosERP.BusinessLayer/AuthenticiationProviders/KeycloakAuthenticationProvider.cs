@@ -118,6 +118,11 @@ public class KeycloakAuthenticationProvider : IAuthenticationProvider
         return session;
     }
 
+    public async Task<Response<bool>> Logout(string session_id)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Response<AuthProviderUserDto>> CreateUser(UserCreateCommand commandModel, string auth_token)
     {
         Response<AuthProviderUserDto> response = new Response<AuthProviderUserDto>();
