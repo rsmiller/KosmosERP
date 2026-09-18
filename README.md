@@ -1,3 +1,4 @@
+![](https://raw.githubusercontent.com/rsmiller/KosmosERP/refs/heads/main/docs/kosmos_erp_logo.png)
 
 # Kosmos ERP
 Kosmos ERP is a basic enterprise resource system written in C# and uses a React/NextJs as the programming frameworks for the front-end. 
