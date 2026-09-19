@@ -24,7 +24,7 @@ import ARInvoiceSelectorComponent from '@/components/ar-invoice-selector';
 import { keyValueService } from '@/services/keyvalue-service';
 import DatePicker from 'react-datepicker';
 import creditMemoService from '@/services/credit-memo-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
@@ -34,7 +34,7 @@ function ViewCreditMemoPage() {
     const params = useParams();
     const router = useRouter();
     
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
 
     const [gLAccounts, setGLAccounts] = useState<any[]>([]);
@@ -59,9 +59,9 @@ function ViewCreditMemoPage() {
     } = useForm<CreditMemoHeaderDto>();
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.CreditMemoModule,
           ERPModulePermission.Read,
@@ -86,7 +86,7 @@ function ViewCreditMemoPage() {
 
         setLoading(true);
 
-        keyValueService.GetDtoByModule("eea9df53-1b36-41ea-94fa-31420315ff60", keycloak.token || "").then((gl_response) =>
+        keyValueService.GetDtoByModule("eea9df53-1b36-41ea-94fa-31420315ff60", auth.token || "").then((gl_response) =>
         {
             if (gl_response.success && gl_response.data !== undefined) 
             {
@@ -98,7 +98,7 @@ function ViewCreditMemoPage() {
                 setGLAccounts(accounts);
             }
 
-            creditMemoService.getByGuid(creditMemo, keycloak.token || "").then((response) => {
+            creditMemoService.getByGuid(creditMemo, auth.token || "").then((response) => {
                 //console.log('Credit memo response:', response);
 
                 if (response.success && response.data) 
@@ -125,7 +125,7 @@ function ViewCreditMemoPage() {
                 }
             });
         });
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     useEffect(() => {
         setColDefs([

@@ -26,7 +26,7 @@ import {
   JournalEntryHeaderDto 
 } from '@/models/journal-entry-models';
 import { journalEntryService } from '@/services/journal-entry-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -44,7 +44,7 @@ interface LineItem {
 }
 
 function NewJournalEntryPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
 
     const [hasAccess, setHasAccess] = useState(true);
@@ -69,12 +69,12 @@ function NewJournalEntryPage() {
     } = useForm<JournalEntryHeaderCreateCommand>();
 
     useEffect(() => {
-        if (keycloak.authenticated == false) return;
+        if (auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.JournalEntryModule,
           ERPModulePermission.Write,
@@ -87,7 +87,7 @@ function NewJournalEntryPage() {
           return;
         }
         setHasWritePermission(true);
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     const handleDeleteClick = async () => {
         router.push("/erp/journalentries/");
@@ -111,7 +111,7 @@ function NewJournalEntryPage() {
         });
 
         try {
-            await journalEntryService.create(command, keycloak.token || "").then((response) => {
+            await journalEntryService.create(command, auth.token || "").then((response) => {
                 if(response.success) {
                     setSuccessSaved(true);
                     setFailedSaved(false);

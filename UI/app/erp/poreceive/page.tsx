@@ -17,7 +17,7 @@ import ReceivingCountsRenderer from '@/components/ag-grid/receiving-counts-rende
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
 import { FaMagnifyingGlass, FaPenToSquare } from 'react-icons/fa6';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 
@@ -25,7 +25,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 
 function ReceievePurchaseOrdersPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
@@ -40,14 +40,14 @@ function ReceievePurchaseOrdersPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.PurchaseOrderReceiveModule,
       ERPModulePermission.Read,
@@ -68,7 +68,7 @@ function ReceievePurchaseOrdersPage() {
 
     getTableData();
     
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/poreceive/new");
@@ -98,7 +98,7 @@ function ReceievePurchaseOrdersPage() {
 
     let command = new PurchaseOrderReceiveHeaderFindCommand();
 
-    await poReceiveService.find(command, keycloak.token || "", pageStart, pageSize).then((response)=> {
+    await poReceiveService.find(command, auth.token || "", pageStart, pageSize).then((response)=> {
 
       setLoading(false);
 

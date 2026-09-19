@@ -53,7 +53,7 @@ public class OrderModule : BaseERPModule, IOrderModule
     private IPaymentProviderFactory _PaymentFactory;
     private ILogProviderFactory _LogProviderFactory;
 
-    public OrderModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public OrderModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _LogProviderFactory = logProviderFactory;
@@ -67,7 +67,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                         IProductionOrderModule productionOrderModule,
                         IPaymentProviderFactory providerFactory, 
                         ILogProviderFactory logProviderFactory,
-                        IAddressModule addressModule) : base(logProviderFactory)
+                        IAddressModule addressModule) : base(context, logProviderFactory)
     {
         _Context = context;
         _MessageFactory = messageFactory;
@@ -96,6 +96,8 @@ public class OrderModule : BaseERPModule, IOrderModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
 

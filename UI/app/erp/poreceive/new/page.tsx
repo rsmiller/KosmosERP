@@ -19,14 +19,14 @@ import { documentService } from '@/services/document-service';
 import { DateTimeRender } from '@/components/ag-grid/date-time-renderer';
 import POReceiveUnitsReceiveEditor from '@/components/ag-grid/po-receive-units-receive-editor';
 import ViewDocumentDialog from '@/components/dialogs/view-document.dialog';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useRouter } from 'next/navigation';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function NewPOReceivePage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
 
     const [hasAccess, setHasAccess] = useState(true);
@@ -57,9 +57,9 @@ function NewPOReceivePage() {
     const hasInitialized = useRef(false);
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
             ERPModules.PurchaseOrderModule,
             ERPModulePermission.Write,
@@ -71,7 +71,7 @@ function NewPOReceivePage() {
             return;
         }
         setHasWritePermission(true);
-    }, [keycloak.authenticated, router]);
+    }, [auth.authenticated, router]);
 
     useEffect(() => {
     if (hasInitialized.current) return;
@@ -98,7 +98,7 @@ function NewPOReceivePage() {
         try {
             
             setIsWorking(true);
-            const response = await purchaseOrderService.getByPONumber(parseInt(poNumber), keycloak.token || "");
+            const response = await purchaseOrderService.getByPONumber(parseInt(poNumber), auth.token || "");
             
             //console.log(response);
             if (!response.data || !response.success) {
@@ -109,7 +109,7 @@ function NewPOReceivePage() {
             {
                 setPurchaseOrder(response.data);
 
-                const find_response = await poReceiveService.getDtoByPOId(response.data.id, keycloak.token || "");
+                const find_response = await poReceiveService.getDtoByPOId(response.data.id, auth.token || "");
 
                 console.log(find_response);
 
@@ -241,7 +241,7 @@ function NewPOReceivePage() {
             //console.log(documentUploadCreate)
             //return;
 
-            const docResponse = await documentService.create(keycloak.token || "", selectedFile, documentUploadCreate);
+            const docResponse = await documentService.create(auth.token || "", selectedFile, documentUploadCreate);
 
             if (!docResponse.success || !docResponse.data) { setIsWorking(false); setDisplayBadAlert(true); return; }
 
@@ -270,7 +270,7 @@ function NewPOReceivePage() {
 
             //console.log(headerCreate);
 
-            const createResponse = await poReceiveService.create(headerCreate, keycloak.token || "");
+            const createResponse = await poReceiveService.create(headerCreate, auth.token || "");
 
             //console.log(createResponse);
 

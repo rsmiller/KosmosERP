@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -24,7 +25,7 @@ public class CommentController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "comment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "comment_read")]
     [HttpGet("GetComment", Name = "GetComment")]
     [ProducesResponseType(typeof(Response<CommentDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,7 +39,7 @@ public class CommentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "comment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "comment_read")]
     [HttpGet("GetCommentByGuid", Name = "GetCommentByGuid")]
     [ProducesResponseType(typeof(Response<CommentDto>), 200)]
     [ProducesResponseType(400)]
@@ -52,7 +53,7 @@ public class CommentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "comment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "comment_read")]
     [HttpPost("FindComment", Name = "FindComment")]
     [ProducesResponseType(typeof(PagingResult<CommentListDto>), 200)]
     [ProducesResponseType(500)]
@@ -81,7 +82,7 @@ public class CommentController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "comment_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "comment_write")]
     [HttpPost("CreateComment", Name = "CreateComment")]
     [ProducesResponseType(typeof(Response<CommentDto>), 200)]
     [ProducesResponseType(400)]
@@ -97,7 +98,7 @@ public class CommentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "comment_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "comment_edit")]
     [HttpPut("UpdateComment", Name = "UpdateComment")]
     [ProducesResponseType(typeof(Response<CommentDto>), 200)]
     [ProducesResponseType(400)]
@@ -113,7 +114,7 @@ public class CommentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "comment_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "comment_delete")]
     [HttpPost("DeleteComment", Name = "DeleteComment")]
     [ProducesResponseType(typeof(Response<CommentDto>), 200)]
     [ProducesResponseType(400)]

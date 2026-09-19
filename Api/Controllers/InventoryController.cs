@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.BusinessLayer.Models.Module.Inventory.Dto;
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 
 namespace KosmosERP.Api.Controllers;
 
@@ -17,7 +18,7 @@ public class InventoryController : ControllerBase
         _Module = module;
     }
 
-    [Authorize(Roles = "inventory_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "inventory_read")]
     [HttpGet("GetCounts", Name = "GetCounts")]
     [ProducesResponseType(typeof(Response<List<InventoryDto>>), 200)]
     public async Task<ActionResult> GetCounts()
@@ -26,7 +27,7 @@ public class InventoryController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "inventory_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "inventory_write")]
     [HttpPost("RebuildCounts", Name = "RebuildCounts")]
     [ProducesResponseType(typeof(Response<bool>), 200)]
     public async Task<ActionResult> RebuildCounts()

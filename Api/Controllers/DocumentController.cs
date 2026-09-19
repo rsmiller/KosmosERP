@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.DocumentUpload.Command.Edit;
@@ -24,7 +25,7 @@ public class DocumentController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetDocument", Name = "GetDocument")]
     [ProducesResponseType(typeof(Response<DocumentUploadDto>), 200)]
     public async Task<ActionResult> Get([FromQuery] int id)
@@ -34,7 +35,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetDocumentByGuid", Name = "GetDocumentByGuid")]
     [ProducesResponseType(typeof(Response<DocumentUploadDto>), 200)]
     public async Task<ActionResult> GetByGuid([FromQuery] string guid)
@@ -44,7 +45,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpPost("FindDocument", Name = "FindDocument")]
     [ProducesResponseType(typeof(PagingResult<DocumentUploadListDto>), 200)]
     [ProducesResponseType(500)]
@@ -72,7 +73,7 @@ public class DocumentController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpPost("SearchDocuments", Name = "SearchDocuments")]
     [ProducesResponseType(typeof(PagingResult<DocumentUploadDto>), 200)]
     [ProducesResponseType(500)]
@@ -100,7 +101,7 @@ public class DocumentController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "document_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "document_write")]
     [HttpPost("CreateDocument", Name = "CreateDocument")]
     [ProducesResponseType(typeof(Response<DocumentUploadDto>), 200)]
     [ProducesResponseType(400)]
@@ -115,7 +116,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "document_write")]
     [HttpPost("CreateNewFileRevision", Name = "CreateNewFileRevision")]
     [ProducesResponseType(typeof(Response<DocumentUploadDto>), 200)]
     [ProducesResponseType(400)]
@@ -130,7 +131,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetObjectCategories", Name = "GetObjectCategories")]
     [ProducesResponseType(typeof(Response<List<DocumentUploadCategoryDto>>), 200)]
     [ProducesResponseType(404)]
@@ -144,7 +145,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetUploadObjects", Name = "GetUploadObjects")]
     [ProducesResponseType(typeof(Response<List<DocumentUploadObjectDto>>), 200)]
     [ProducesResponseType(404)]
@@ -158,7 +159,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetDocumentObjectTags", Name = "GetDocumentObjectTags")]
     [ProducesResponseType(typeof(Response<List<DocumentUploadObjectTagDto>>), 200)]
     [ProducesResponseType(404)]
@@ -172,7 +173,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "document_write")]
     [HttpPost("CreateCategory", Name = "CreateCategory")]
     [ProducesResponseType(typeof(Response<DocumentUploadCategoryDto>), 200)]
     [ProducesResponseType(400)]
@@ -187,7 +188,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "document_write")]
     [HttpPost("CreateUploadObject", Name = "CreateUploadObject")]
     [ProducesResponseType(typeof(Response<DocumentUploadCategoryDto>), 200)]
     [ProducesResponseType(400)]
@@ -202,7 +203,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "document_write")]
     [HttpPost("CreateDocumentObjectTags", Name = "CreateDocumentObjectTags")]
     [ProducesResponseType(typeof(Response<DocumentUploadObjectTagDto>), 200)]
     [ProducesResponseType(400)]
@@ -217,7 +218,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "document_edit")]
     [HttpPut("EditDocumentObjectTags", Name = "EditDocumentObjectTags")]
     [ProducesResponseType(typeof(Response<DocumentUploadObjectTagDto>), 200)]
     [ProducesResponseType(400)]
@@ -232,7 +233,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "document_edit")]
     [HttpPut("EditCategory", Name = "EditCategory")]
     [ProducesResponseType(typeof(Response<DocumentUploadCategoryDto>), 200)]
     [ProducesResponseType(400)]
@@ -247,7 +248,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "document_edit")]
     [HttpPut("EditUploadObject", Name = "EditUploadObject")]
     [ProducesResponseType(typeof(Response<DocumentUploadObjectDto>), 200)]
     [ProducesResponseType(400)]
@@ -262,7 +263,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "document_delete")]
     [HttpDelete("DeleteCategory", Name = "DeleteCategory")]
     [ProducesResponseType(typeof(Response<DocumentUploadCategoryDto>), 200)]
     [ProducesResponseType(400)]
@@ -277,7 +278,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "document_delete")]
     [HttpDelete("DeleteUploadObject", Name = "DeleteUploadObject")]
     [ProducesResponseType(typeof(Response<DocumentUploadObjectDto>), 200)]
     [ProducesResponseType(400)]
@@ -292,7 +293,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "document_delete")]
     [HttpDelete("DeleteDocumentObjectTags", Name = "DeleteDocumentObjectTags")]
     [ProducesResponseType(typeof(Response<DocumentUploadObjectDto>), 200)]
     [ProducesResponseType(400)]
@@ -307,7 +308,7 @@ public class DocumentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetFile", Name = "GetFile")]
     [ProducesResponseType(typeof(FileStreamResult), 200)]
     [ProducesResponseType(404)]
@@ -335,7 +336,7 @@ public class DocumentController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "document_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "document_read")]
     [HttpGet("GetFileByGuid", Name = "GetFileByGuid")]
     [ProducesResponseType(typeof(FileStreamResult), 200)]
     [ProducesResponseType(404)]

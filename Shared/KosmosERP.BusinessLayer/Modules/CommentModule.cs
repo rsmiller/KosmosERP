@@ -27,7 +27,7 @@ public class CommentModule : BaseERPModule, ICommentModule
     public override Guid ModuleIdentifier => Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
     public override string ModuleName => "Comments";
 
-    public CommentModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public CommentModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -44,6 +44,8 @@ public class CommentModule : BaseERPModule, ICommentModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

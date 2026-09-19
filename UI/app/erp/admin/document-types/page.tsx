@@ -10,12 +10,12 @@ import { DocumentUploadObjectCreateCommand, DocumentUploadObjectDeleteCommand, D
 import { documentService } from '@/services/document-service';
 import { AgGridReact } from 'ag-grid-react';
 import { useForm } from 'react-hook-form';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminDocumentTypePage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
 
     const [rowData, setRowData] = useState<DocumentUploadObjectDto[]>([]);
@@ -53,7 +53,7 @@ function AdminDocumentTypePage() {
         setRowData([]);
         setLoading(true);
 
-        await documentService.getUploadObjects(keycloak.token || "").then( (response) => {
+        await documentService.getUploadObjects(auth.token || "").then( (response) => {
             setLoading(false);
 
             if(response.success && response.data)
@@ -65,7 +65,7 @@ function AdminDocumentTypePage() {
 
     useEffect(() => {
 
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current)
             return;
@@ -76,7 +76,7 @@ function AdminDocumentTypePage() {
         
         fetchData();
 
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     const cellEdited = (event: any) =>
     {
@@ -88,7 +88,7 @@ function AdminDocumentTypePage() {
             command.id = event.data.id;
             command.friendly_name = event.data.friendly_name;
 
-            documentService.editUploadObject(command, keycloak.token || "").then( (response) =>
+            documentService.editUploadObject(command, auth.token || "").then( (response) =>
             {
                 if(response && response.success == false)
                 {
@@ -181,7 +181,7 @@ function AdminDocumentTypePage() {
         command.friendly_name = watch('friendly_name');
         command.internal_name = watch('internal_name');
 
-        documentService.createUploadObject(command, keycloak.token || "").then( (response) => 
+        documentService.createUploadObject(command, auth.token || "").then( (response) => 
         {
             if(response.success && response.data)
             {
@@ -203,7 +203,7 @@ function AdminDocumentTypePage() {
 
         setIsWorking(true);
 
-        documentService.deleteUploadObject(command, keycloak.token || "").then( (response) => {
+        documentService.deleteUploadObject(command, auth.token || "").then( (response) => {
             setIsWorking(false);
             setIsDeleteDialogOpen(false);
 
@@ -225,7 +225,7 @@ function AdminDocumentTypePage() {
         setRowTagsData([]);
         setSelectedLineId(id);
         
-        documentService.getUploadObjectTags(id, keycloak.token || "").then( (response) =>
+        documentService.getUploadObjectTags(id, auth.token || "").then( (response) =>
         {
             setIsWorking(false);
 
@@ -244,7 +244,7 @@ function AdminDocumentTypePage() {
         command.name = watchCreate("name");
         command.document_object_id = Number(selectedLineId);
 
-        documentService.createUploadObjectTag(command, keycloak.token || "").then( (response) => 
+        documentService.createUploadObjectTag(command, auth.token || "").then( (response) => 
         {
             if(response.success)
             {
@@ -272,7 +272,7 @@ function AdminDocumentTypePage() {
             command.is_required = Boolean(event.data.is_required);
             command.name = event.data.name;
 
-            documentService.editUploadObjectTag(command, keycloak.token || "").then( (response) => 
+            documentService.editUploadObjectTag(command, auth.token || "").then( (response) => 
             {
                 if(!response.success)
                 {
@@ -295,7 +295,7 @@ function AdminDocumentTypePage() {
 
         setIsWorking(true);
 
-        documentService.deleteUploadObjectTag(command, keycloak.token || "").then( (response) => 
+        documentService.deleteUploadObjectTag(command, auth.token || "").then( (response) => 
         {
             if(response.success)
             {

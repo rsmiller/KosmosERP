@@ -24,13 +24,13 @@ import PurchaseOrdersListComponentPage from '@/components/lists/purchase-orders-
 import CommentsListComponent from '@/components/lists/comments-list-component';
 import { vendorService } from '@/services/vendor-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useRouter } from 'next/navigation';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewVendorsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const params = useParams();
   const [hasAccess, setHasAccess] = useState(true);
@@ -42,9 +42,9 @@ function ViewVendorsPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.VendorModule,
       ERPModulePermission.Read,
@@ -55,7 +55,7 @@ function ViewVendorsPage() {
       router.push('/erp');
       return;
     }
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const loadVendor = async () => {
       try {
@@ -67,7 +67,7 @@ function ViewVendorsPage() {
           return;
         }
 
-        const response = await vendorService.getByGuid(vendorId, keycloak?.token || "");
+        const response = await vendorService.getByGuid(vendorId, auth.token || "");
 
         if (response.success && response.data) {
           setVendor(response.data);
@@ -83,14 +83,14 @@ function ViewVendorsPage() {
   };
 
   useEffect(() => {
-    if (keycloak.authenticated == false) return;
+    if (auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
 
     loadVendor();
-  }, [params.id, keycloak.authenticated]);
+  }, [params.id, auth.authenticated]);
 
   const getApprovedDate = () => {
     return vendor?.approved_on ? new Date(vendor.approved_on) : undefined;

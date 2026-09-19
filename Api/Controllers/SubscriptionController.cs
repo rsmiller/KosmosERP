@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Subscription.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Subscription.Command.Create;
@@ -25,7 +26,7 @@ public class SubscriptionController : ERPApiController
     }
 
     
-    [Authorize(Roles = "subscription_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "subscription_read")]
     [HttpGet("GetSubscription", Name = "GetSubscription")]
     [ProducesResponseType(typeof(Response<SubscriptionDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class SubscriptionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "subscription_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "subscription_read")]
     [HttpGet("GetSubscriptionByGuid", Name = "GetSubscriptionByGuid")]
     [ProducesResponseType(typeof(Response<SubscriptionDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class SubscriptionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "subscription_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "subscription_read")]
     [HttpPost("FindSubscription", Name = "FindSubscription")]
     [ProducesResponseType(typeof(PagingResult<SubscriptionListDto>), 200)]
     [ProducesResponseType(500)]
@@ -80,7 +81,7 @@ public class SubscriptionController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "subscription_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "subscription_write")]
     [HttpPost("CreateSubscription", Name = "CreateSubscription")]
     [ProducesResponseType(typeof(Response<SubscriptionDto>), 200)]
     [ProducesResponseType(400)]
@@ -94,7 +95,7 @@ public class SubscriptionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "subscription_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "subscription_edit")]
     [HttpPut("UpdateSubscription", Name = "UpdateSubscription")]
     [ProducesResponseType(typeof(Response<SubscriptionDto>), 200)]
     [ProducesResponseType(400)]
@@ -108,7 +109,7 @@ public class SubscriptionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "subscription_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "subscription_delete")]
     [HttpPost("DeleteSubscription", Name = "DeleteSubscription")]
     [ProducesResponseType(typeof(Response<SubscriptionDto>), 200)]
     [ProducesResponseType(400)]

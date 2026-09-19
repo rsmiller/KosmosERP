@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Payment.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Payment.Command.Create;
@@ -27,7 +28,7 @@ public class PaymentController : ERPApiController
     }
 
     
-    [Authorize(Roles = "payment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "payment_read")]
     [HttpGet("GetPayment", Name = "GetPayment")]
     [ProducesResponseType(typeof(Response<PaymentDto>), 200)]
     [ProducesResponseType(400)]
@@ -41,7 +42,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "payment_read")]
     [HttpGet("GetPaymentByGuid", Name = "GetPaymentGuid")]
     [ProducesResponseType(typeof(Response<PaymentDto>), 200)]
     [ProducesResponseType(400)]
@@ -55,7 +56,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "payment_read")]
     [HttpPost("FindPayment", Name = "FindPayment")]
     [ProducesResponseType(typeof(PagingResult<PaymentListDto>), 200)]
     [ProducesResponseType(500)]
@@ -84,7 +85,7 @@ public class PaymentController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "payment_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "payment_write")]
     [HttpPost("CreatePayment", Name = "CreatePayment")]
     [ProducesResponseType(typeof(Response<PaymentDto>), 200)]
     [ProducesResponseType(400)]
@@ -100,7 +101,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "payment_edit")]
     [HttpPut("UpdatePayment", Name = "UpdatePayment")]
     [ProducesResponseType(typeof(Response<PaymentDto>), 200)]
     [ProducesResponseType(400)]
@@ -116,7 +117,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "payment_delete")]
     [HttpPost("DeletePayment", Name = "DeletePayment")]
     [ProducesResponseType(typeof(Response<PaymentDto>), 200)]
     [ProducesResponseType(400)]
@@ -132,7 +133,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "payment_write")]
     [HttpPost("GetStripePaymentIntentFromARInvoce", Name = "GetStripePaymentIntentFromARInvoce")]
     [ProducesResponseType(typeof(string), 200)]
     [ProducesResponseType(400)]
@@ -147,7 +148,7 @@ public class PaymentController : ERPApiController
     }
 
 
-    [Authorize(Roles = "payment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "payment_read")]
     [HttpPost("GetStripePaymentIntentStatus", Name = "GetStripePaymentIntentStatus")]
     [ProducesResponseType(typeof(string), 200)]
     [ProducesResponseType(400)]
@@ -161,7 +162,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "payment_read")]
     [HttpPost("GetSavedPaymentMethods", Name = "GetSavedPaymentMethods")]
     [ProducesResponseType(typeof(Response<SavedPaymentMethodsDto>), 200)]
     [ProducesResponseType(400)]
@@ -172,7 +173,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "payment_write")]
     [HttpPost("PayStripePaymentIntent", Name = "PayStripePaymentIntent")]
     [ProducesResponseType(typeof(Response<PaymentProviderTransactionGetDto>), 200)]
     [ProducesResponseType(400)]
@@ -183,7 +184,7 @@ public class PaymentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "payment_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "payment_write")]
     [HttpPost("CreateStripeNewCard", Name = "CreateStripeNewCard")]
     [ProducesResponseType(typeof(Response<PaymentCardGetDto>), 200)]
     [ProducesResponseType(400)]

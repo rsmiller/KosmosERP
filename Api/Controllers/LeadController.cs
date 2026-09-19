@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Lead.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Lead.Command.Create;
@@ -25,7 +26,7 @@ public class LeadController : ERPApiController
     }
 
     
-    [Authorize(Roles = "crm_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "crm_read")]
     [HttpGet("GetLead", Name = "GetLead")]
     [ProducesResponseType(typeof(Response<LeadDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class LeadController : ERPApiController
         return Ok(result);
     }
     
-    [Authorize(Roles = "crm_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "crm_read")]
     [HttpGet("GetLeadByGuid", Name = "GetLeadByGuid")]
     [ProducesResponseType(typeof(Response<LeadDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class LeadController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "crm_read")]
     [HttpPost("FindLead", Name = "FindLead")]
     [ProducesResponseType(typeof(PagingResult<LeadListDto>), 200)]
     [ProducesResponseType(500)]
@@ -82,7 +83,7 @@ public class LeadController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "crm_create")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "crm_create")]
     [HttpPost("CreateLead", Name = "CreateLead")]
     [ProducesResponseType(typeof(Response<LeadDto>), 200)]
     [ProducesResponseType(400)]
@@ -98,7 +99,7 @@ public class LeadController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "crm_edit")]
     [HttpPut("UpdateLead", Name = "UpdateLead")]
     [ProducesResponseType(typeof(Response<LeadDto>), 200)]
     [ProducesResponseType(400)]
@@ -114,7 +115,7 @@ public class LeadController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "crm_delete")]
     [HttpPost("DeleteLead", Name = "DeleteLead")]
     [ProducesResponseType(typeof(Response<LeadDto>), 200)]
     [ProducesResponseType(400)]

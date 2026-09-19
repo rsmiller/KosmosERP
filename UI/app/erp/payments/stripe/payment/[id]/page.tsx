@@ -10,11 +10,11 @@ import { stripePromise } from '@/lib/stripe';
 import { CreateStripePaymentIntent, PaymentProviderCreateDto, StripePaymentIntentStatusCommand } from '@/models/payment-models';
 import SessionStorage from '@/components/session-storage';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 
 export default function StripePaymentPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const searchParams = useSearchParams();
 
@@ -51,7 +51,7 @@ export default function StripePaymentPage() {
                 command.payment_method_id = payment_method_id;
             }
 
-            let response = await paymentService.getStripeSessionFromARInvoce(command, keycloak.token || "");
+            let response = await paymentService.getStripeSessionFromARInvoce(command, auth.token || "");
 
             if (response && response.data) {
                 setStripePaymentResponse(response.data);
@@ -77,7 +77,7 @@ export default function StripePaymentPage() {
 
     useEffect(() => {
         
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
         
 
         if(hasInitialized.current)
@@ -88,14 +88,14 @@ export default function StripePaymentPage() {
         
 
         fetchStripeSession();
-    }, [params, searchParams, keycloak.authenticated]);
+    }, [params, searchParams, auth.authenticated]);
 
 
     const processIndividualPayment = async () => {
         let command = new StripePaymentIntentStatusCommand();
         command.payment_intent_id = stripePaymentResponse?.id || "";
 
-        await paymentService.payStripePaymentIntent(command, keycloak.token || "").then((response) => {
+        await paymentService.payStripePaymentIntent(command, auth.token || "").then((response) => {
             if (response && response.data) {
                 setPaymentStatus(response.data.status || null);
 
@@ -225,7 +225,7 @@ export default function StripePaymentPage() {
 
 
 function StripePaymentForm({ payment_intent_id }: { payment_intent_id: string }) {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const stripe = useStripe();
     const elements = useElements();
@@ -239,7 +239,7 @@ function StripePaymentForm({ payment_intent_id }: { payment_intent_id: string })
             let command = new StripePaymentIntentStatusCommand();
             command.payment_intent_id = payment_intent_id;
 
-            const status_response = await paymentService.getStripeSessionStatus(command, keycloak.token || "");
+            const status_response = await paymentService.getStripeSessionStatus(command, auth.token || "");
             //console.log('Payment status:', status_response);
 
             if (status_response && status_response.data) {
@@ -294,7 +294,7 @@ function StripePaymentForm({ payment_intent_id }: { payment_intent_id: string })
                             let command = new StripePaymentIntentStatusCommand();
                             command.payment_intent_id = payment_intent_id;
 
-                            const status_response = await paymentService.getStripeSessionStatus(command, keycloak.token || "");
+                            const status_response = await paymentService.getStripeSessionStatus(command, auth.token || "");
                             
                             if (status_response && status_response.data) {
                                 const status = status_response.data.status;

@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Dto;
 using KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Create;
@@ -25,7 +26,7 @@ public class PurchaseOrderController : ERPApiController
     }
 
     
-    [Authorize(Roles = "purchase_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_read")]
     [HttpGet("GetPurchaseOrderHeader", Name = "GetPurchaseOrderHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_read")]
     [HttpGet("GetPurchaseOrderHeaderByGuid", Name = "GetPurchaseOrderHeaderByGuid")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_read")]
     [HttpGet("GetByPONumber", Name = "GetByPONumber")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -67,7 +68,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_read")]
     [HttpGet("GetPurchaseOrderLine", Name = "GetPurchaseOrderLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -81,7 +82,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_read")]
     [HttpPost("FindPurchaseOrderHeader", Name = "FindPurchaseOrderHeader")]
     [ProducesResponseType(typeof(PagingResult<PurchaseOrderHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -109,7 +110,7 @@ public class PurchaseOrderController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "purchase_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "purchase_order_write")]
     [HttpPost("CreatePurchaseOrderHeader", Name = "CreatePurchaseOrderHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -124,7 +125,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "purchase_order_write")]
     [HttpPost("CreatePurchaseOrderLine", Name = "CreatePurchaseOrderLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -139,7 +140,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "purchase_order_edit")]
     [HttpPut("UpdatePurchaseOrderHeader", Name = "UpdatePurchaseOrderHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -154,7 +155,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "purchase_order_edit")]
     [HttpPut("UpdatePurchaseOrderLine", Name = "UpdatePurchaseOrderLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -169,7 +170,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "purchase_order_delete")]
     [HttpPost("DeletePurchaseOrderHeader", Name = "DeletePurchaseOrderHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -184,7 +185,7 @@ public class PurchaseOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "purchase_order_delete")]
     [HttpPost("DeletePurchaseOrderLine", Name = "DeletePurchaseOrderLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]

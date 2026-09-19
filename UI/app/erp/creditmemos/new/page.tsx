@@ -29,7 +29,7 @@ import { format } from 'date-fns';
 import { creditMemoService } from '@/services/credit-memo-service';
 import ARInvoiceSelectorComponent from '@/components/ar-invoice-selector';
 import { keyValueService } from '@/services/keyvalue-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
@@ -38,7 +38,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function NewCreditMemoPage() {
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
   const [saveable, canSave] = useState(false);
@@ -62,9 +62,9 @@ function NewCreditMemoPage() {
   } = useForm<CreditMemoHeaderCreateCommand>();
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.CreditMemoModule,
       ERPModulePermission.Write,
@@ -80,7 +80,7 @@ function NewCreditMemoPage() {
     hasInitialized.current = true;
 
 
-    keyValueService.GetDtoByModule("eea9df53-1b36-41ea-94fa-31420315ff60", keycloak.token || "").then((gl_response) =>
+    keyValueService.GetDtoByModule("eea9df53-1b36-41ea-94fa-31420315ff60", auth.token || "").then((gl_response) =>
     {
       //console.log("KEY VALUES ", response)
       if (gl_response.success && gl_response.data !== undefined) 
@@ -95,7 +95,7 @@ function NewCreditMemoPage() {
           setGLAccounts(accounts);
       }
     });
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   useEffect(() => {
       setColDefs([
@@ -194,7 +194,7 @@ function NewCreditMemoPage() {
     //console.log(command);
 
     try {
-      const response = await creditMemoService.create(command, keycloak.token || "");
+      const response = await creditMemoService.create(command, auth.token || "");
 
       if (response && response.success) {
         setSuccessSaved(true);

@@ -10,4 +10,5 @@ public class AuthenticatedUserDto
     public UserDto user { get; set; }
     public required UserSessionState session { get; set; }
     public required IAuthenticationToken token { get; set; }
+    public List<UserRoleDto> roles { get; set; } = new List<UserRoleDto>();
 }

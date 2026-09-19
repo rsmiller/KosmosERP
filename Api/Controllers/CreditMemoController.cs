@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -24,7 +25,7 @@ public class CreditMemoController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "credit_memo_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "credit_memo_read")]
     [HttpGet("GetCreditMemo", Name = "GetCreditMemo")]
     [ProducesResponseType(typeof(Response<CreditMemoHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -38,7 +39,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "credit_memo_read")]
     [HttpGet("GetCreditMemoByGuid", Name = "GetCreditMemoByGuid")]
     [ProducesResponseType(typeof(Response<CreditMemoHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -52,7 +53,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "credit_memo_read")]
     [HttpPost("FindCreditMemo", Name = "FindCreditMemo")]
     [ProducesResponseType(typeof(PagingResult<CreditMemoHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -80,7 +81,7 @@ public class CreditMemoController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "credit_memo_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "credit_memo_write")]
     [HttpPost("CreateCreditMemo", Name = "CreateCreditMemo")]
     [ProducesResponseType(typeof(Response<CreditMemoHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -95,7 +96,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "credit_memo_write")]
     [HttpPost("CreateCreditMemoLine", Name = "CreateCreditMemoLine")]
     [ProducesResponseType(typeof(Response<CreditMemoLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -110,7 +111,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "credit_memo_edit")]
     [HttpPut("UpdateCreditMemo", Name = "UpdateCreditMemo")]
     [ProducesResponseType(typeof(Response<CreditMemoHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -125,7 +126,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "credit_memo_edit")]
     [HttpPut("UpdateCreditMemoLine", Name = "UpdateCreditMemoLine")]
     [ProducesResponseType(typeof(Response<CreditMemoLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -140,7 +141,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "credit_memo_delete")]
     [HttpPost("DeleteCreditMemo", Name = "DeleteCreditMemo")]
     [ProducesResponseType(typeof(Response<CreditMemoHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -155,7 +156,7 @@ public class CreditMemoController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "credit_memo_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "credit_memo_delete")]
     [HttpPost("DeleteCreditMemoLine", Name = "DeleteCreditMemoLine")]
     [ProducesResponseType(typeof(Response<CreditMemoLineDto>), 200)]
     [ProducesResponseType(400)]

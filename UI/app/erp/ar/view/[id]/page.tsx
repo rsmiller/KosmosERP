@@ -23,7 +23,7 @@ import { useEffect, useRef, useState } from "react";
 import { format, parse } from 'date-fns';
 import { AgGridReact } from 'ag-grid-react';
 import { addressService } from '@/services/address-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
@@ -34,7 +34,7 @@ function AccountsReceivableViewPage() {
     const params = useParams();
     const router = useRouter();
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
 
     const [ar_invoice_header_id, setAR_invoice_header_id] = useState<string>("");
@@ -56,12 +56,12 @@ function AccountsReceivableViewPage() {
         
         //console.log(keycloak);
 
-        if(keycloak.authenticated === false)
+        if(auth.authenticated === false)
         {
             return;
         }
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ARModule,
           ERPModulePermission.Read,
@@ -91,7 +91,7 @@ function AccountsReceivableViewPage() {
 
         //console.log("Loading AR Invoice Header ID: " + invoice_header_id);
 
-        arInvoiceService.getByGuid(invoice_header_id, keycloak?.token || "").then((arResponse) => {
+        arInvoiceService.getByGuid(invoice_header_id, auth.token || "").then((arResponse) => {
             
             //console.log("AR Invoice Header Response: ", arResponse);
             if (arResponse.success && arResponse.data) {
@@ -112,7 +112,7 @@ function AccountsReceivableViewPage() {
                 address_find_comment.customer_id = arResponse.data.customer_id || 0;
                 address_find_comment.address_type_id = 2; // Billing
 
-                addressService.find(address_find_comment, keycloak?.token || "").then( (addresses_response) =>
+                addressService.find(address_find_comment, auth.token || "").then( (addresses_response) =>
                 {
                     if(addresses_response.success && addresses_response.data)
                     {
@@ -121,13 +121,13 @@ function AccountsReceivableViewPage() {
                 });
 
 
-                orderService.get(arResponse.data.order_header_id || 0, keycloak?.token || "").then((orderResponse) => {
+                orderService.get(arResponse.data.order_header_id || 0, auth.token || "").then((orderResponse) => {
 
                     if (orderResponse.success && orderResponse.data) 
                     {
                         setOrderModel(orderResponse.data);
 
-                        customerService.get(orderResponse.data.customer_id || 0, keycloak?.token || "").then((customerResponse) => {
+                        customerService.get(orderResponse.data.customer_id || 0, auth.token || "").then((customerResponse) => {
 
                             if (customerResponse.success && customerResponse.data) 
                             {
@@ -141,7 +141,7 @@ function AccountsReceivableViewPage() {
             }
         });
 
-    }, [params.id, ar_invoice_header_id, keycloak.authenticated]);
+    }, [params.id, ar_invoice_header_id, auth.authenticated]);
 
     const formatDateString = (dateString: string | undefined): string => {
         if(!dateString || dateString.trim() === ""){

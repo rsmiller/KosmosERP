@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Address.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Address.Command.Create;
@@ -25,7 +26,7 @@ public class AddressController : ERPApiController
     }
 
     
-    [Authorize(Roles = "contact_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "contact_read")]
     [HttpGet("GetAddress", Name = "GetAddress")]
     [ProducesResponseType(typeof(Response<AddressDto>), 200)]
     public async Task<ActionResult> Get([FromQuery] int id)
@@ -35,7 +36,7 @@ public class AddressController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "contact_read")]
     [HttpGet("GetAddressByGuid", Name = "GetAddressByGuid")]
     [ProducesResponseType(typeof(Response<AddressDto>), 200)]
     public async Task<ActionResult> GetByGuid([FromQuery] string guid)
@@ -45,7 +46,7 @@ public class AddressController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "contact_read")]
     [HttpPost("FindAddress", Name = "FindAddress")]
     [ProducesResponseType(typeof(PagingResult<AddressListDto>), 200)]
     [ProducesResponseType(500)]
@@ -74,7 +75,7 @@ public class AddressController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "contact_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "contact_write")]
     [HttpPost("CreateAddress", Name = "CreateAddress")]
     [ProducesResponseType(typeof(Response<AddressDto>), 200)]
     [ProducesResponseType(400)]
@@ -90,7 +91,7 @@ public class AddressController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "contact_edit")]
     [HttpPut("UpdateAddress", Name = "UpdateAddress")]
     [ProducesResponseType(typeof(Response<AddressDto>), 200)]
     [ProducesResponseType(400)]
@@ -106,7 +107,7 @@ public class AddressController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "contact_delete")]
     [HttpPost("DeleteAddress", Name = "DeleteAddress")]
     [ProducesResponseType(typeof(Response<AddressDto>), 200)]
     [ProducesResponseType(400)]

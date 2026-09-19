@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Product.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Product.Command.Create;
@@ -25,7 +26,7 @@ public class ProductController : ERPApiController
     }
 
     
-    [Authorize(Roles = "product_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "product_read")]
     [HttpGet("GetProduct", Name = "GetProduct")]
     [ProducesResponseType(typeof(Response<ProductDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class ProductController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "product_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "product_read")]
     [HttpGet("GetProductByGuid", Name = "GetProductByGuid")]
     [ProducesResponseType(typeof(Response<ProductDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class ProductController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "product_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "product_read")]
     [HttpGet("GetProductCategories", Name = "GetProductCategories")]
     [ProducesResponseType(typeof(List<ActionResult>), 200)]
     [ProducesResponseType(400)]
@@ -64,7 +65,7 @@ public class ProductController : ERPApiController
         return Ok(results);
     }
 
-    [Authorize(Roles = "product_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "product_read")]
     [HttpPost("FindProduct", Name = "FindProduct")]
     [ProducesResponseType(typeof(PagingResult<ProductListDto>), 200)]
     [ProducesResponseType(500)]
@@ -93,7 +94,7 @@ public class ProductController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "product_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "product_write")]
     [HttpPost("CreateProduct", Name = "CreateProduct")]
     [ProducesResponseType(typeof(Response<ProductDto>), 200)]
     [ProducesResponseType(400)]
@@ -109,7 +110,7 @@ public class ProductController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "product_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "product_edit")]
     [HttpPut("UpdateProduct", Name = "UpdateProduct")]
     [ProducesResponseType(typeof(Response<ProductDto>), 200)]
     [ProducesResponseType(400)]
@@ -125,7 +126,7 @@ public class ProductController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "product_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "product_delete")]
     [HttpPost("DeleteProduct", Name = "DeleteProduct")]
     [ProducesResponseType(typeof(Response<ProductDto>), 200)]
     [ProducesResponseType(400)]

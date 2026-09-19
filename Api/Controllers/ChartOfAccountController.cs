@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.ChartOfAccount.Dto;
 using KosmosERP.BusinessLayer.Models.Module.ChartOfAccount.Command.Create;
@@ -24,7 +25,7 @@ public class ChartOfAccountController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "chart_of_account_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "chart_of_account_read")]
     [HttpGet("GetChartOfAccount", Name = "GetChartOfAccount")]
     [ProducesResponseType(typeof(Response<ChartOfAccountDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,7 +39,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "chart_of_account_read")]
     [HttpGet("GetChartOfAccountByGuid", Name = "GetChartOfAccountByGuid")]
     [ProducesResponseType(typeof(Response<ChartOfAccountDto>), 200)]
     [ProducesResponseType(400)]
@@ -52,7 +53,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "chart_of_account_read")]
     [HttpGet("GetChartOfAccountByAccountNumber", Name = "GetChartOfAccountByAccountNumber")]
     [ProducesResponseType(typeof(Response<ChartOfAccountDto>), 200)]
     [ProducesResponseType(400)]
@@ -66,7 +67,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "chart_of_account_read")]
     [HttpGet("GetChildAccounts", Name = "GetChildAccounts")]
     [ProducesResponseType(typeof(Response<List<ChartOfAccountListDto>>), 200)]
     [ProducesResponseType(400)]
@@ -80,7 +81,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "chart_of_account_read")]
     [HttpGet("GetAccountsByType", Name = "GetAccountsByType")]
     [ProducesResponseType(typeof(Response<List<ChartOfAccountListDto>>), 200)]
     [ProducesResponseType(400)]
@@ -94,7 +95,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "chart_of_account_read")]
     [HttpPost("FindChartOfAccount", Name = "FindChartOfAccount")]
     [ProducesResponseType(typeof(PagingResult<ChartOfAccountListDto>), 200)]
     [ProducesResponseType(500)]
@@ -123,7 +124,7 @@ public class ChartOfAccountController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "chart_of_account_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "chart_of_account_write")]
     [HttpPost("CreateChartOfAccount", Name = "CreateChartOfAccount")]
     [ProducesResponseType(typeof(Response<ChartOfAccountDto>), 200)]
     [ProducesResponseType(400)]
@@ -139,7 +140,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "chart_of_account_edit")]
     [HttpPut("UpdateChartOfAccount", Name = "UpdateChartOfAccount")]
     [ProducesResponseType(typeof(Response<ChartOfAccountDto>), 200)]
     [ProducesResponseType(400)]
@@ -155,7 +156,7 @@ public class ChartOfAccountController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "chart_of_account_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "chart_of_account_delete")]
     [HttpPost("DeleteChartOfAccount", Name = "DeleteChartOfAccount")]
     [ProducesResponseType(typeof(Response<ChartOfAccountDto>), 200)]
     [ProducesResponseType(400)]

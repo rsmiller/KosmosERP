@@ -1,15 +1,16 @@
-﻿using System.Security.Claims;
-using System.Text.Json;
+﻿using Azure.Monitor.OpenTelemetry.AspNetCore;
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace KosmosERP.Api
 {

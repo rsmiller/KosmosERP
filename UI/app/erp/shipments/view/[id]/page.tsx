@@ -9,7 +9,7 @@ import { ShipmentHeaderDto, ShipmentHeaderEditCommand, ShipmentLineDto } from '@
 import { shipmentService } from '@/services/shipment-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { DataList, Grid, GridItem } from '@chakra-ui/react';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
@@ -19,7 +19,7 @@ import { AllCommunityModule, ColDef, ModuleRegistry } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewShipmentsPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
     const params = useParams();
     const [hasAccess, setHasAccess] = useState(true);
@@ -34,9 +34,9 @@ function ViewShipmentsPage() {
 
     useEffect(() => {
     
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
     
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ShippingModule,
           ERPModulePermission.Read,
@@ -54,7 +54,7 @@ function ViewShipmentsPage() {
         
     
         loadShipment();
-    }, [params.id, keycloak.authenticated, router]);
+    }, [params.id, auth.authenticated, router]);
 
     const loadShipment = async () => {
         try {
@@ -66,7 +66,7 @@ function ViewShipmentsPage() {
                 return;
             }
 
-            await shipmentService.getByGuid(shipmentId, keycloak?.token || "").then((response) => {
+            await shipmentService.getByGuid(shipmentId, auth.token || "").then((response) => {
                 if (response.success && response.data) {
                     //console.log(response.data);
                     setShipment(response.data);
@@ -86,7 +86,7 @@ function ViewShipmentsPage() {
         command.id = shipment?.id;
         command.is_released = true;
 
-        await shipmentService.update(command, keycloak?.token || "").then((response) => {
+        await shipmentService.update(command, auth.token || "").then((response) => {
             if (response.success) {
                 loadShipment();
             }

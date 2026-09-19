@@ -34,7 +34,7 @@ public class SettingsModule : BaseERPModule, ISettingsModule
 
     private readonly IBaseERPContext _Context;
 
-    public SettingsModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public SettingsModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -61,6 +61,8 @@ public class SettingsModule : BaseERPModule, ISettingsModule
 
             _Context.Settings.Add(settings);
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

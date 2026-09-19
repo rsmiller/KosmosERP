@@ -20,11 +20,11 @@ import { useRouter } from 'next/navigation';
 import PageActionsComponent from '@/components/page-actions';
 import { ChartOfAccountCreateCommand, ChartOfAccountDto, AccountType, NormalBalance } from '@/models/chart-of-account-models';
 import { chartOfAccountService } from '@/services/chart-of-account-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 function NewChartOfAccountPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
 
     const [hasAccess, setHasAccess] = useState(true);
@@ -47,12 +47,12 @@ function NewChartOfAccountPage() {
     } = useForm<ChartOfAccountCreateCommand>();
 
     useEffect(() => {
-        if (keycloak.authenticated == false) return;
+        if (auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ChartOfAccountModule,
           ERPModulePermission.Write,
@@ -70,7 +70,7 @@ function NewChartOfAccountPage() {
         setValue('is_active', true);
         setValue('account_type', AccountType.Asset);
         setValue('normal_balance', NormalBalance.Debit);
-    }, [setValue, keycloak.authenticated]);
+    }, [setValue, auth.authenticated]);
 
     const handleDeleteClick = async () => {
         router.push("/erp/chartofaccounts/");
@@ -89,7 +89,7 @@ function NewChartOfAccountPage() {
         command.parent_account_id = watch('parent_account_id') ? Number(watch('parent_account_id')) : null;
 
         try {
-            await chartOfAccountService.create(command, keycloak.token || "").then((response) => {
+            await chartOfAccountService.create(command, auth.token || "").then((response) => {
                 if(response.success) {
                     setSuccessSaved(true);
                     setFailedSaved(false);

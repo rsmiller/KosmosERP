@@ -18,13 +18,13 @@ import CountriesCombobox, { CountriesComboboxRef } from '@/components/countries-
 import StatesCombobox, { StatesComboboxRef } from '@/components/states-combobox';
 import { countryService } from '@/services/country-service';
 import { CountryFindCommand } from '@/models/country-models';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules } from '@/services/permissions-service';
 
 
 function AdminSettingsPage() {
     const router = useRouter();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
     const [hasAccess, setHasAccess] = useState(true);
@@ -52,9 +52,9 @@ function AdminSettingsPage() {
     });
         
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.Admin,
           '',
@@ -100,7 +100,7 @@ function AdminSettingsPage() {
                     let countryCommand = new CountryFindCommand();
                     countryCommand.wildcard = response.data.company_country;
 
-                    countryService.find(countryCommand, keycloak.token || "").then( (countryResponse) => {
+                    countryService.find(countryCommand, auth.token || "").then( (countryResponse) => {
                         if(countryResponse.success && countryResponse.data && countryResponse.data.length > 0)
                         {
                             var filtered = countryResponse.data.filter(c => c.iso3 == response.data?.company_country);
@@ -113,7 +113,7 @@ function AdminSettingsPage() {
                 }
             }
         });
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     const getStartDate = () => {
         const val = watch('fiscal_year_start');
@@ -169,7 +169,7 @@ function AdminSettingsPage() {
         command.company_zip = watch('company_zip');
         command.company_country = watch('company_country');
 
-        await settingsService.update(command, keycloak.token || "").then((response) => {
+        await settingsService.update(command, auth.token || "").then((response) => {
             if(response.success)
             {
                 setSuccessSaved(true);

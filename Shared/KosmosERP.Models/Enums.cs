@@ -1,5 +1,11 @@
 ﻿namespace KosmosERP.Models;
 
+public static class ModuleIdentifiers
+{
+    public static Guid CustomerModule { get { return Guid.Parse("ecf469ca-0a18-459b-954d-47de0bf23cf6"); } }
+}
+
+
 public enum SortOrder
 {
     /// <summary>

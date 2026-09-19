@@ -39,13 +39,13 @@ import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import AddOpportunityLineDialog, { AddOpportunityLineDialogRef } from '@/components/dialogs/add-opportunity-line';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function EditOpportunityPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
     const [hasAccess, setHasAccess] = useState(true);
@@ -96,7 +96,7 @@ function EditOpportunityPage() {
                 return;
             }
 
-            const response = await opportunityService.getByGuid(opportunityId, keycloak.token || "");
+            const response = await opportunityService.getByGuid(opportunityId, auth.token || "");
             //console.log(response)
             if (response.success && response.data) {
                 setOpportunity(response.data);
@@ -130,9 +130,9 @@ function EditOpportunityPage() {
     };
     
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.OpportunityModule,
           ERPModulePermission.Read,
@@ -166,7 +166,7 @@ function EditOpportunityPage() {
 
 
         loadOpportunity();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
 
     const handleCustomerSelect = (value: any) => {
@@ -203,7 +203,7 @@ function EditOpportunityPage() {
 
         try
         {
-            await opportunityService.delete(command, keycloak.token || "").then((response) => {
+            await opportunityService.delete(command, auth.token || "").then((response) => {
                 //console.log(response)
                 if(response.success)
                 {
@@ -270,7 +270,7 @@ function EditOpportunityPage() {
 
             try
             {
-                await opportunityService.update(command, keycloak.token || "").then((response) =>
+                await opportunityService.update(command, auth.token || "").then((response) =>
                 {
                     //console.log(response)
                     if(response.success)
@@ -358,7 +358,7 @@ function EditOpportunityPage() {
         let command = new OpportunityLineDeleteCommand();
         command.id = selectedLineId;
 
-        opportunityService.deleteLine(command, keycloak.token || "").then( (response) => {
+        opportunityService.deleteLine(command, auth.token || "").then( (response) => {
             //console.log(response);
 
             setIsWorking(false);
@@ -386,7 +386,7 @@ function EditOpportunityPage() {
             command.line_number = rowData.length + 1;
             command.opportunity_id = opportunity?.id;
             
-            await opportunityService.createLine(command, keycloak.token || "").then((response) =>
+            await opportunityService.createLine(command, auth.token || "").then((response) =>
             {
                 if(response.success && response.data)
                 {

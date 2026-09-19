@@ -42,7 +42,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
     private IFinancialTransactionModule? _FinancialTransactionModule;
     private IChartOfAccountModule? _ChartOfAccountModule;
 
-    public APInvoiceModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public APInvoiceModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -55,7 +55,7 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
                                 IDocumentUploadModule document_module,
                                 IFinancialTransactionModule financial_transaction_module,
                                 IChartOfAccountModule chart_of_account_module,
-                                ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                                ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _POModule = po_module;
@@ -83,7 +83,10 @@ public class APInvoiceModule : BaseERPModule, IAPInvoiceModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
+
     }
 
     public APInvoiceHeader? Get(int object_id)

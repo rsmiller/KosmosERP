@@ -40,7 +40,7 @@ public class PaymentModule : BaseERPModule, IPaymentModule
 
     public PaymentModule(IServer server, IBaseERPContext context, 
                             IPaymentProviderFactory providerFactory, 
-                            ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                            ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Server = server;
         _Context = context;
@@ -59,6 +59,8 @@ public class PaymentModule : BaseERPModule, IPaymentModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
 

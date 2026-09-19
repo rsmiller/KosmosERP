@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Transaction.Command.Create;
@@ -24,7 +25,7 @@ public class TransactionController : ERPApiController
     }
 
     
-    [Authorize(Roles = "transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "transaction_read")]
     [HttpGet("GetTransaction", Name = "GetTransaction")]
     [ProducesResponseType(typeof(Response<TransactionDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,7 +39,7 @@ public class TransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "transaction_read")]
     [HttpGet("GetTransactionByGuid", Name = "GetTransactionByGuid")]
     [ProducesResponseType(typeof(Response<TransactionDto>), 200)]
     [ProducesResponseType(400)]
@@ -52,7 +53,7 @@ public class TransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "transaction_read")]
     [HttpPost("FindTransaction", Name = "FindTransaction")]
     [ProducesResponseType(typeof(PagingResult<TransactionListDto>), 200)]
     [ProducesResponseType(500)]
@@ -81,7 +82,7 @@ public class TransactionController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "transaction_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "transaction_write")]
     [HttpPost("CreateTransaction", Name = "CreateTransaction")]
     [ProducesResponseType(typeof(Response<TransactionDto>), 200)]
     [ProducesResponseType(400)]
@@ -97,7 +98,7 @@ public class TransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "transaction_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "transaction_edit")]
     [HttpPut("UpdateTransaction", Name = "UpdateTransaction")]
     [ProducesResponseType(typeof(Response<TransactionDto>), 200)]
     [ProducesResponseType(400)]
@@ -113,7 +114,7 @@ public class TransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "transaction_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "transaction_delete")]
     [HttpPost("DeleteTransaction", Name = "DeleteTransaction")]
     [ProducesResponseType(typeof(Response<TransactionDto>), 200)]
     [ProducesResponseType(400)]

@@ -6,22 +6,22 @@ import '../../styles/page.component.css'
 
 import { Grid, GridItem } from '@chakra-ui/react'
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 
 function ActivitiesPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    if (keycloak.authenticated == false) return;
+    if (auth.authenticated == false) return;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.ActivityModule,
       ERPModulePermission.Read,
@@ -33,7 +33,7 @@ function ActivitiesPage() {
       router.push('/erp');
       return;
     }
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   if (!hasAccess) {
     return <div>Redirecting...</div>;

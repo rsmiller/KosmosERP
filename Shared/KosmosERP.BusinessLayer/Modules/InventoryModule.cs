@@ -24,7 +24,7 @@ public class InventoryModule : BaseERPModule, IInventoryModule
 
     private IBaseERPContext _Context;
 
-    public InventoryModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public InventoryModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -41,6 +41,8 @@ public class InventoryModule : BaseERPModule, IInventoryModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         // Seed ModulePermissions for Order module

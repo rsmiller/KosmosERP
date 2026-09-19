@@ -33,7 +33,7 @@ public class ActivityModule : BaseERPModule, IActivityModule
 
     private readonly IBaseERPContext _Context;
 
-    public ActivityModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ActivityModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -50,6 +50,8 @@ public class ActivityModule : BaseERPModule, IActivityModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

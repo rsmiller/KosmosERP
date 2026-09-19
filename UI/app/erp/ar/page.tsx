@@ -17,7 +17,7 @@ import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -36,19 +36,19 @@ function AccountsReceivablePage() {
   const [rowReadyData, setRowReadyData] = useState<vm_OrdersReadyForInvoicing[]>([]);
   const [rowPartialData, setRowPartialData] = useState<vw_PartialInvoices[]>([]);
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    if(keycloak.authenticated === false)
+    if(auth.authenticated === false)
     {
         return;
     }
     
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.ARModule,
       ERPModulePermission.Read,
@@ -64,7 +64,7 @@ function AccountsReceivablePage() {
     getTableData();
     getTableReadyData();
     getTablePartialData();
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/ar/new");
@@ -80,12 +80,12 @@ function AccountsReceivablePage() {
   {
     setRowReadyData([]);
 
-    if(keycloak.authenticated === false)
+    if(auth.authenticated === false)
     {
         return;
     }
 
-    await arInvoiceService.getOrdersReadyForInvoicing(keycloak?.token || "").then((response) => {
+    await arInvoiceService.getOrdersReadyForInvoicing(auth.token || "").then((response) => {
       if(response.success && response.data)
       {
         for(let i=0;i<response.data?.length; i++)
@@ -108,14 +108,14 @@ function AccountsReceivablePage() {
 
   const getTablePartialData = async () => 
   {
-    if(keycloak.authenticated === false)
+    if(auth.authenticated === false)
     {
         return;
     }
 
     setRowPartialData([]);
 
-    await arInvoiceService.getPartialInvoices(keycloak?.token || "").then((response) => {
+    await arInvoiceService.getPartialInvoices(auth.token || "").then((response) => {
       if(response.success && response.data)
       {
         for(let i=0;i<response.data?.length; i++)
@@ -141,7 +141,7 @@ function AccountsReceivablePage() {
 
   const getTableData = async () =>
   {
-    if(keycloak.authenticated === false)
+    if(auth.authenticated === false)
     {
         return;
     }
@@ -159,7 +159,7 @@ function AccountsReceivablePage() {
 
     let command = new ARInvoiceHeaderFindCommand();
 
-    await arInvoiceService.find(command, keycloak?.token || "", pageRecentStart, pageRecentSize).then((response) => {
+    await arInvoiceService.find(command, auth.token || "", pageRecentStart, pageRecentSize).then((response) => {
 
       setLoading(false);
 

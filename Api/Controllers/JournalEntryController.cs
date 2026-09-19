@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.JournalEntry.Dto;
 using KosmosERP.BusinessLayer.Models.Module.JournalEntry.Command;
@@ -25,7 +26,7 @@ public class JournalEntryController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "journal_entry_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "journal_entry_read")]
     [HttpGet("GetJournalEntry", Name = "GetJournalEntry")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "journal_entry_read")]
     [HttpGet("GetJournalEntryByGuid", Name = "GetJournalEntryByGuid")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "journal_entry_read")]
     [HttpGet("GetJournalEntryLine", Name = "GetJournalEntryLine")]
     [ProducesResponseType(typeof(Response<JournalEntryLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -67,7 +68,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "journal_entry_read")]
     [HttpGet("GetUnpostedEntries", Name = "GetUnpostedEntries")]
     [ProducesResponseType(typeof(PagingResult<JournalEntryHeaderListDto>), 200)]
     [ProducesResponseType(400)]
@@ -82,7 +83,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "journal_entry_read")]
     [HttpPost("ValidateJournalBalance", Name = "ValidateJournalBalance")]
     [ProducesResponseType(typeof(Response<bool>), 200)]
     [ProducesResponseType(400)]
@@ -96,7 +97,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "journal_entry_read")]
     [HttpPost("FindJournalEntry", Name = "FindJournalEntry")]
     [ProducesResponseType(typeof(PagingResult<JournalEntryHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -125,7 +126,7 @@ public class JournalEntryController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "journal_entry_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "journal_entry_write")]
     [HttpPost("CreateJournalEntry", Name = "CreateJournalEntry")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -141,7 +142,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "journal_entry_write")]
     [HttpPost("CreateJournalEntryLine", Name = "CreateJournalEntryLine")]
     [ProducesResponseType(typeof(Response<JournalEntryLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -157,7 +158,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "journal_entry_edit")]
     [HttpPut("UpdateJournalEntry", Name = "UpdateJournalEntry")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -173,7 +174,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "journal_entry_edit")]
     [HttpPut("UpdateJournalEntryLine", Name = "UpdateJournalEntryLine")]
     [ProducesResponseType(typeof(Response<JournalEntryLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -189,7 +190,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "journal_entry_delete")]
     [HttpPost("DeleteJournalEntry", Name = "DeleteJournalEntry")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -205,7 +206,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "journal_entry_delete")]
     [HttpPost("DeleteJournalEntryLine", Name = "DeleteJournalEntryLine")]
     [ProducesResponseType(typeof(Response<JournalEntryLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -221,7 +222,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "journal_entry_edit")]
     [HttpPost("PostJournalEntry", Name = "PostJournalEntry")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -237,7 +238,7 @@ public class JournalEntryController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "journal_entry_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "journal_entry_edit")]
     [HttpPost("ReverseJournalEntry", Name = "ReverseJournalEntry")]
     [ProducesResponseType(typeof(Response<JournalEntryHeaderDto>), 200)]
     [ProducesResponseType(400)]

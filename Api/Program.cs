@@ -24,8 +24,8 @@ var builder = WebApplication.CreateBuilder(args);
 /// For development debug
 ///
 
-Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=localhost;uid=;pwd=;database=kosmos-erp");
-Environment.SetEnvironmentVariable("HangfireConnectionString", "server=localhost;uid=;pwd=;database=hangfire;Allow User Variables=true");
+Environment.SetEnvironmentVariable("DatabaseConnectionString", "server=192.168.1.148;uid=auser;pwd=12345;database=kosmos_erp_new");
+Environment.SetEnvironmentVariable("HangfireConnectionString", "server=192.168.1.148;uid=auser;pwd=12345;database=hangfire;Allow User Variables=true");
 Environment.SetEnvironmentVariable("MessagePublisherAccountProvider", "Database");
 
 Environment.SetEnvironmentVariable("TransactionMovementTopic", "transaction_movement");
@@ -40,7 +40,7 @@ Environment.SetEnvironmentVariable("PaymentProvider", "Stripe");
 Environment.SetEnvironmentVariable("StripeApiKey", "sk_test_");
 Environment.SetEnvironmentVariable("LogProvider", "database");
 
-Environment.SetEnvironmentVariable("AuthenticationProvider", "SAML");
+Environment.SetEnvironmentVariable("AuthenticationProvider", "database");
 Environment.SetEnvironmentVariable("Realm", "");
 Environment.SetEnvironmentVariable("BaseURL", "");
 Environment.SetEnvironmentVariable("Authority", "");
@@ -317,6 +317,10 @@ else
 
 builder.Services.AddScoped<IAuthenticationFactory, AuthenticationFactory>();
 
+// Custom authorization seam for [ERPAuthorize]. Defers to the default claim/role
+// check until ErpCustomAuthorizationHandler is implemented.
+builder.Services.AddScoped<KosmosERP.Api.Authorization.IERPAuthorizationHandler, KosmosERP.Api.Authorization.ErpCustomAuthorizationHandler>();
+
 
 var app = builder.Build();
 
@@ -342,6 +346,7 @@ foreach (var module in modules)
             var casted_module = (IBaseERPModule)activated_module;
             try
             {
+                casted_module.StartUp();
                 casted_module.SeedPermissions();
             }
             catch (Exception) { }

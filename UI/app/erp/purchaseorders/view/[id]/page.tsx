@@ -17,7 +17,7 @@ import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import HeaderTypeSelectorCombobox from '@/components/header-type-selector';
 import { purchaseOrderService } from '@/services/purchase-order-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useParams, useRouter } from 'next/navigation';
 
@@ -28,7 +28,7 @@ function ViewPurchaseOrdersPage() {
   const router = useRouter();
   const params = useParams();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderHeaderDto | null>(null);
@@ -56,7 +56,7 @@ function ViewPurchaseOrdersPage() {
           return;
         }
 
-        const response = await purchaseOrderService.getByGuid(purchaseOrderId, keycloak?.token || "");
+        const response = await purchaseOrderService.getByGuid(purchaseOrderId, auth.token || "");
         if (response.success && response.data) {
           setPurchaseOrder(response.data);
           
@@ -88,9 +88,9 @@ function ViewPurchaseOrdersPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.PurchaseOrderModule,
       ERPModulePermission.Read,
@@ -108,7 +108,7 @@ function ViewPurchaseOrdersPage() {
     
 
     loadPurchaseOrder();
-  }, [params.id, setValue, setPurchaseOrder, keycloak.authenticated]);
+  }, [params.id, setValue, setPurchaseOrder, auth.authenticated]);
 
   const RenderLines = (purchase_order_lines: PurchaseOrderLineDto[]) =>
   {

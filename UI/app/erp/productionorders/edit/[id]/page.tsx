@@ -17,13 +17,13 @@ import PageActionsComponent from '@/components/page-actions';
 import ProductionStatusCellEditor from '@/components/ag-grid/production-status-cell-editor';
 import ProductionStatusCellRenderer from '@/components/ag-grid/production-status-cell-renderer';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function EditProductionOrderPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
     const params = useParams();
     const [hasAccess, setHasAccess] = useState(true);
@@ -56,7 +56,7 @@ function EditProductionOrderPage() {
                 return;
             }
 
-            const response = await productionOrderService.getByGuid(salesOrderId, keycloak.token || "");
+            const response = await productionOrderService.getByGuid(salesOrderId, auth.token || "");
             //console.log(response)
             if (response.success && response.data) {
                 setProductionOrder(response.data);
@@ -92,9 +92,9 @@ function EditProductionOrderPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ProductionOrderModule,
           ERPModulePermission.Read,
@@ -118,7 +118,7 @@ function EditProductionOrderPage() {
         hasInitialized.current = true;
 
         loadSalesOrder();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
 
     const CheckFormValidity = () => {

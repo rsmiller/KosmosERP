@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -23,7 +24,7 @@ public class ActivityController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles="activity_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "activity_read")]
     [HttpGet("GetActivity", Name = "GetActivity")]
     [ProducesResponseType(typeof(Response<ActivityDto>), 200)]
     [ProducesResponseType(400)]
@@ -37,7 +38,7 @@ public class ActivityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles="activity_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "activity_read")]
     [HttpGet("GetActivityByGuid", Name = "GetActivityByGuid")]
     [ProducesResponseType(typeof(Response<ActivityDto>), 200)]
     [ProducesResponseType(400)]
@@ -51,7 +52,7 @@ public class ActivityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles="activity_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "activity_read")]
     [HttpPost("FindActivity", Name = "FindActivity")]
     [ProducesResponseType(typeof(PagingResult<ActivityListDto>), 200)]
     [ProducesResponseType(500)]
@@ -80,7 +81,7 @@ public class ActivityController : ERPApiController
         }
     }
 
-    [Authorize(Roles="activity_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "activity_write")]
     [HttpPost("CreateActivity", Name = "CreateActivity")]
     [ProducesResponseType(typeof(Response<ActivityDto>), 200)]
     [ProducesResponseType(400)]
@@ -96,7 +97,7 @@ public class ActivityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles="activity_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "activity_edit")]
     [HttpPut("UpdateActivity", Name = "UpdateActivity")]
     [ProducesResponseType(typeof(Response<ActivityDto>), 200)]
     [ProducesResponseType(400)]
@@ -112,7 +113,7 @@ public class ActivityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles="activity_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "activity_delete")]
     [HttpPost("DeleteActivity", Name = "DeleteActivity")]
     [ProducesResponseType(typeof(Response<ActivityDto>), 200)]
     [ProducesResponseType(400)]

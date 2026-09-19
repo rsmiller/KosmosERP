@@ -48,7 +48,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
     private IMessageFactory? _MessageFactory;
     private IMessagePublisherSettings? _MessagePublisherSettings;
 
-    public PurchaseOrderModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public PurchaseOrderModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -56,7 +56,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
     public PurchaseOrderModule(IBaseERPContext context, 
                                     IMessageFactory messageFactory, 
                                     IMessagePublisherSettings messageSettings, 
-                                    ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                                    ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _MessageFactory = messageFactory;
@@ -75,6 +75,8 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
 

@@ -6,7 +6,7 @@ import '../../../styles/tree-view.css'
 
 import SessionStorage from "@/components/session-storage";
 import { userService } from "@/services/user-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { Alert, Button, Checkbox, CloseButton, Combobox, createTreeCollection, Dialog, Field, Grid, GridItem, Input, Portal, Spinner, Tabs, TreeView, useFilter, useListCollection } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import { FaUser } from "react-icons/fa";
@@ -21,7 +21,7 @@ import { UserRoleRenderer } from '@/components/ag-grid/user-role-renderer';
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminUserPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const { contains } = useFilter({ sensitivity: "base" })
 
     interface Node {
@@ -104,7 +104,7 @@ function AdminUserPage() {
 
     const fetchData = (id?: number) => 
     {
-        userService.getUsers(keycloak?.token || "").then( (response) => {
+        userService.getUsers(auth.token || "").then( (response) => {
             //console.log(response);
 
             if(response.success && response.data)
@@ -142,7 +142,7 @@ function AdminUserPage() {
 
         fetchData();
 
-        userService.getRoles(keycloak?.token || "").then( (response) => {
+        userService.getRoles(auth.token || "").then( (response) => {
             //console.log(response)
             if(response.success && response.data)
             {
@@ -205,7 +205,7 @@ function AdminUserPage() {
         //return;
         setIsWorking(true);
 
-        await userService.update(command, keycloak?.token || "").then( (response) => 
+        await userService.update(command, auth.token || "").then( (response) => 
         {
             setIsWorking(false);
 
@@ -277,7 +277,7 @@ function AdminUserPage() {
 
         setIsWorking(true);
 
-        await userService.create(command, keycloak?.token || "").then( (response) => {
+        await userService.create(command, auth.token || "").then( (response) => {
             //console.log(response);
 
             if(response.success && response.data != undefined)
@@ -337,7 +337,7 @@ function AdminUserPage() {
             command.user_id = Number(userSelected?.id);
             command.role_id = selectedRole[0].role_id;
             
-            userService.assignUserRole(command, keycloak?.token || "").then( (response) => {
+            userService.assignUserRole(command, auth.token || "").then( (response) => {
                 //console.log(response)
                 if(response && response.success)
                 {

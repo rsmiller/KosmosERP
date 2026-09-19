@@ -155,35 +155,19 @@ public class ModuleTests
     public async Task ErrorLog_BaseERPModule()
     {
         var logProviderFactory = new LogProviderFactory(new LogProviderSettings() { log_provider = LogProviderType.MOCK }, _Context, null);
-        var base_module = new BaseERPModule(logProviderFactory);
+        var base_module = new BaseERPModule(_Context, logProviderFactory);
         base_module.ModuleIdentifier = Guid.Parse(_ModuleId);
 
         await base_module.LogError(10, "Here", "There", new Exception("ASDASD"));
-/*
-        var log_result = await _Context.ErrorLogs.FirstAsync();
-
-        Assert.That(log_result, Is.Not.Null);
-        Assert.That(log_result.error_severity == 10);
-        Assert.That(log_result.source == "Here");
-        Assert.That(log_result.method == "There");
-        Assert.That(log_result.error_message == "ASDASD");*/
     }
 
     [Test]
     public async Task GeneralLog_BaseERPModule()
     {
         var logProviderFactory = new LogProviderFactory(new LogProviderSettings() { log_provider = LogProviderType.MOCK }, _Context, null);
-        var base_module = new BaseERPModule(logProviderFactory);
+        var base_module = new BaseERPModule(_Context, logProviderFactory);
         base_module.ModuleIdentifier = Guid.Parse(_ModuleId);
 
         await base_module.LogTrace("Admin", "Someone did something");
-        
-        /*
-        var log_result = await _Context.GeneralLogs.FirstAsync();
-
-        
-        Assert.That(log_result, Is.Not.Null);
-        Assert.That(log_result.category == "Admin");
-        Assert.That(log_result.message == "Someone did something");*/
     }
 }

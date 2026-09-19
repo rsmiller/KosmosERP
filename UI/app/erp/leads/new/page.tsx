@@ -22,7 +22,7 @@ import LeadStageCombobox, { LeadStageComboboxRef } from '@/components/lead-stage
 import StatesCombobox, { StatesComboboxRef } from '@/components/states-combobox';
 import CountriesCombobox, { CountriesComboboxRef } from '@/components/countries-combobox';
 import { leadService } from '@/services/lead-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
@@ -32,7 +32,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function NewLeadPage() {
     const router = useRouter();
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
     const [hasWritePermission, setHasWritePermission] = useState(false);
 
@@ -56,9 +56,9 @@ function NewLeadPage() {
     } = useForm<LeadCreateCommand>();
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.LeadModule,
           ERPModulePermission.Write,
@@ -70,7 +70,7 @@ function NewLeadPage() {
           return;
         }
         setHasWritePermission(true);
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     const handleStageSelect = (value: any) => {
       //console.log(value)
@@ -121,7 +121,7 @@ function NewLeadPage() {
         //return;
         try
         {
-            await leadService.create(command, keycloak.token || "").then((response) =>
+            await leadService.create(command, auth.token || "").then((response) =>
             {
                 if(response.success)
                 {

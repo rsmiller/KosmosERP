@@ -7,10 +7,11 @@ namespace KosmosERP.Module;
 public class ERPApiController : ControllerBase 
 {
     private IBaseERPModule _Module;
-
+    public static Guid? ModuleIdentifier { get; private set; }
     public ERPApiController(IBaseERPModule module)
     {
         _Module = module;
+        ModuleIdentifier = module.ModuleIdentifier;
     }
 
     /// <summary>

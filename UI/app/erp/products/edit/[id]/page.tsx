@@ -34,13 +34,13 @@ import { BaseBOMData, BOMCreateCommand, BOMDeleteCommand, BOMEditCommand, BOMFin
 import { bomService } from '@/services/bom-service';
 import AddBOMItemDialog, { AddBomItemDialogRef } from '@/components/dialogs/add-bom-item';
 import VendorCombobox, { VendorComboboxRef } from '@/components/vendor-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function EditProductPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -113,7 +113,7 @@ function EditProductPage() {
                 return;
             }
 
-            const response = await productService.getByGuid(productId, keycloak.token || "");
+            const response = await productService.getByGuid(productId, auth.token || "");
             if (response.success && response.data) {
                 setProduct(response.data);
                 //console.log(response)
@@ -149,7 +149,7 @@ function EditProductPage() {
                 bomFindCommand.parent_product_id = response.data.id;
                 //console.log(bomFindCommand);
                 
-                await bomService.find(bomFindCommand, keycloak.token || "").then( (bom_response) =>
+                await bomService.find(bomFindCommand, auth.token || "").then( (bom_response) =>
                 {
                     setRowBOMData([]);
 
@@ -171,13 +171,13 @@ function EditProductPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
         // Check permission
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ProductModule,
           ERPModulePermission.Read,
@@ -207,7 +207,7 @@ function EditProductPage() {
         setHasDeletePermission(canDelete);
 
         loadProduct();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
     const handleDeleteClick = async () => {
         let command = new ProductDeleteCommand();
@@ -215,7 +215,7 @@ function EditProductPage() {
 
         try
         {
-            await productService.delete(command, keycloak.token || "").then((response) => {
+            await productService.delete(command, auth.token || "").then((response) => {
                 if(response.success)
                 {
                     router.push("/erp/products/");
@@ -276,7 +276,7 @@ function EditProductPage() {
 
         try
         {
-            await productService.update(command, keycloak.token || "").then((response) =>
+            await productService.update(command, auth.token || "").then((response) =>
             {
                 if(response.success)
                 {
@@ -349,7 +349,7 @@ function EditProductPage() {
 
             try
             {
-                await bomService.create(item, keycloak.token || "").then( (response) =>
+                await bomService.create(item, auth.token || "").then( (response) =>
                 {
                     if(response.success && response.data && response.data !== undefined)
                     {
@@ -392,7 +392,7 @@ function EditProductPage() {
 
             try
             {
-                await bomService.delete(command, keycloak.token || "").then( (response) =>
+                await bomService.delete(command, auth.token || "").then( (response) =>
                 {
                     if(response.success && response.data && response.data !== undefined)
                     {
@@ -483,7 +483,7 @@ function EditProductPage() {
 
             try
             {
-                await bomService.update(command, keycloak.token || "").then( (response) => 
+                await bomService.update(command, auth.token || "").then( (response) => 
                 {
                     if(!response.success)
                     {

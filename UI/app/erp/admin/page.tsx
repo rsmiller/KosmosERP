@@ -5,21 +5,21 @@ import { FaRegUser, FaThList } from "react-icons/fa";
 import { IoDocumentText, IoSettings } from "react-icons/io5";
 import { useRouter } from 'next/navigation';
 import { FaUsersViewfinder } from "react-icons/fa6";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { HiAdjustments } from "react-icons/hi";
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useEffect, useState } from "react";
 
 function AdminDashboardPage() {
     const router = useRouter();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
 
     useEffect(() => {
-        if (keycloak.authenticated == false) return;
+        if (auth.authenticated == false) return;
 
         // Check permission
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
             ERPModules.Admin,
             ERPModulePermission.Read,
@@ -31,7 +31,7 @@ function AdminDashboardPage() {
             router.push('/erp');
             return;
         }
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     if (!hasAccess) {
         return <div>Redirecting...</div>;

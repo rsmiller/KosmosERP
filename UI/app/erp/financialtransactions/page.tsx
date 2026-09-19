@@ -12,13 +12,13 @@ import { FinancialTransactionFindCommand, FinancialTransactionListDto } from '@/
 import { financialTransactionService } from '@/services/financial-transaction-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function FinancialTransactionsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
 
@@ -42,7 +42,7 @@ function FinancialTransactionsPage() {
 
     let command = new FinancialTransactionFindCommand();
 
-    await financialTransactionService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await financialTransactionService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
       setLoading(false);
 
       if(response.success && response.data) {
@@ -69,13 +69,13 @@ function FinancialTransactionsPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.FinancialTransactionModule,
       ERPModulePermission.Read,
@@ -90,7 +90,7 @@ function FinancialTransactionsPage() {
 
     fetchData();
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const handleViewClick = (guid: any) => {
     router.push("/erp/financialtransactions/view/" + guid);

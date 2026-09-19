@@ -13,7 +13,7 @@ import { DocumentUploadCreateCommand, DocumentUploadDto, DocumentUploadFindComma
 import { DateTimeRender } from '@/components/ag-grid/date-time-renderer';
 import { useForm } from 'react-hook-form';
 import { documentService } from '@/services/document-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -22,7 +22,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function DocumentsPage() {
 
   const router = useRouter();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
   const {
@@ -59,10 +59,10 @@ function DocumentsPage() {
   const [displayBadAlert, setDisplayBadAlert] = useState(false);
 
    useEffect(() => {
-    if (keycloak.authenticated == false) return;
+    if (auth.authenticated == false) return;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.DocumentModule,
       ERPModulePermission.Read,
@@ -76,10 +76,10 @@ function DocumentsPage() {
     }
 
     fetchCategoryData();
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const fetchCategoryData = async () => {
-      documentService.getObjectCategories(keycloak.token || "").then( (response) =>
+      documentService.getObjectCategories(auth.token || "").then( (response) =>
       {
         //console.log(response)
         if(response.success && response.data)
@@ -132,7 +132,7 @@ function DocumentsPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
@@ -141,7 +141,7 @@ function DocumentsPage() {
     
     fetchCategoryData();
     
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
 
   const [colDefs, setColDefs] = useState<ColDef<DocumentUploadDto>[]>([
@@ -194,7 +194,7 @@ function DocumentsPage() {
     {
       setRevisionDto(most_recent);
 
-      documentService.downloadFileByGuid(most_recent.guid, keycloak.token || "").then((blob) => {
+      documentService.downloadFileByGuid(most_recent.guid, auth.token || "").then((blob) => {
         try
         {
           if (blob) {
@@ -315,7 +315,7 @@ function DocumentsPage() {
     setLoading(true);
 
     try{
-      await documentService.searchDocuments(command, keycloak.token || "").then( (response) => {
+      await documentService.searchDocuments(command, auth.token || "").then( (response) => {
         //console.log(response)
 
         if(response.success && response.data)
@@ -379,7 +379,7 @@ function DocumentsPage() {
     setLoading(true);
 
     try{
-      await documentService.searchDocuments(command, keycloak.token || "").then( (response) => {
+      await documentService.searchDocuments(command, auth.token || "").then( (response) => {
         //console.log(response)
 
         if(response.success && response.data)
@@ -473,7 +473,7 @@ function DocumentsPage() {
 
       setIsWorking(true);
 
-      const docResponse = await documentService.create(keycloak.token || "", selectedFile, documentUploadCreate);
+      const docResponse = await documentService.create(auth.token || "", selectedFile, documentUploadCreate);
 
       if (!docResponse.success || !docResponse.data) { setIsWorking(false); setDisplayBadAlert(true); return; }
       

@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.User.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.User.Command.Delete;
@@ -62,7 +63,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUsers", Name = "GetUsers")]
     [ProducesResponseType(typeof(Response<List<UserAdminListDto>>), 200)]
     [ProducesResponseType(400)]
@@ -76,7 +77,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetRoles", Name = "GetRoles")]
     [ProducesResponseType(typeof(Response<List<RoleDto>>), 200)]
     [ProducesResponseType(400)]
@@ -159,7 +160,7 @@ public class UserController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("CreateUser", Name = "CreateUser")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -184,7 +185,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("CreateRole", Name = "CreateRole")]
     [ProducesResponseType(typeof(Response<RoleDto>), 200)]
     [ProducesResponseType(400)]
@@ -198,7 +199,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
     
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("AssignUserRole", Name = "AssignUserRole")]
     [ProducesResponseType(typeof(Response<bool>), 200)]
     [ProducesResponseType(400)]
@@ -213,7 +214,7 @@ public class UserController : ERPApiController
     }
 
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPut("UpdateUser", Name = "UpdateUser")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -227,7 +228,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPut("EditRoleModulePermission", Name = "EditRoleModulePermission")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -256,7 +257,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("DeleteUser", Name = "DeleteUser")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -270,7 +271,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("DeleteRoleModulePermission", Name = "DeleteRoleModulePermission")]
     [ProducesResponseType(typeof(Response<bool>), 200)]
     [ProducesResponseType(400)]
@@ -284,7 +285,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("DeleteRole", Name = "DeleteRole")]
     [ProducesResponseType(typeof(Response<bool>), 200)]
     [ProducesResponseType(400)]
@@ -298,7 +299,7 @@ public class UserController : ERPApiController
         return Ok(result);
     }
     
-    [Authorize(Roles = "admin")]
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("CreateNewRoleModulePermission", Name = "CreateNewRoleModulePermission")]
     [ProducesResponseType(typeof(Response<bool>), 200)]
     [ProducesResponseType(400)]

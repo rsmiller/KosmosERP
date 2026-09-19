@@ -13,7 +13,7 @@ import { ContactFindCommand, ContactListDto } from '@/models/contact-models';
 import { contactService } from '@/services/contact-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -22,7 +22,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function ContactsPage() {
 
   const router = useRouter();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
 
@@ -34,14 +34,14 @@ function ContactsPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.ContactModule,
       ERPModulePermission.Read,
@@ -62,7 +62,7 @@ function ContactsPage() {
 
     getTableData();
     
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/contacts/new");
@@ -91,7 +91,7 @@ function ContactsPage() {
 
     let command = new ContactFindCommand();
 
-    await contactService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await contactService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
 
       setLoading(false);
 

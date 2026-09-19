@@ -15,12 +15,12 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from 'next/navigation';
 import { FinancialTransactionDto } from '@/models/financial-transaction-models';
 import { financialTransactionService } from '@/services/financial-transaction-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 
 function ViewFinancialTransactionPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -41,7 +41,7 @@ function ViewFinancialTransactionPage() {
                 return;
             }
 
-            const response = await financialTransactionService.getByGuid(transactionId, keycloak.token || "");
+            const response = await financialTransactionService.getByGuid(transactionId, auth.token || "");
             if (response.success && response.data) {
                 setTransaction(response.data);
             } else {
@@ -56,12 +56,12 @@ function ViewFinancialTransactionPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
         
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.FinancialTransactionModule,
           ERPModulePermission.Read,
@@ -75,7 +75,7 @@ function ViewFinancialTransactionPage() {
         }
 
         loadTransaction();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const formatCurrency = (value: number | undefined) => {
         if (value === undefined) return '$0.00';

@@ -25,7 +25,7 @@ import ARInvoiceQuantityEditor from '@/components/ag-grid/ar-invoice-quantity-ed
 import { addressService } from '@/services/address-service';
 import { AddressDto, AddressFindCommand } from '@/models/address-models';
 import { arInvoiceService } from '@/services/ar-invoice-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { format, parse } from 'date-fns';
 
@@ -37,7 +37,7 @@ function NewARFromCustomerPage() {
   const params = useParams();
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
 
@@ -67,7 +67,7 @@ function NewARFromCustomerPage() {
           return;
         }
 
-        const response = await orderService.getByGuid(orderId, keycloak?.token || "");
+        const response = await orderService.getByGuid(orderId, auth.token || "");
         if (response.success && response.data) {
 
           setOrderModel(response.data);
@@ -77,7 +77,7 @@ function NewARFromCustomerPage() {
           // Get customer information if available
           if (response.data.customer_id) {
               try {
-              const customerResponse = await customerService.get(response.data.customer_id, keycloak?.token || "");
+              const customerResponse = await customerService.get(response.data.customer_id, auth.token || "");
               if (customerResponse.success && customerResponse.data) {
                 console.log(customerResponse)
                 setCustomerModel(customerResponse.data);
@@ -143,7 +143,7 @@ function NewARFromCustomerPage() {
                 address_find_comment.customer_id = customerResponse.data.id;
                 address_find_comment.address_type_id = 2; // Billing
 
-                addressService.find(address_find_comment, keycloak?.token || "").then( (addresses_response) =>
+                addressService.find(address_find_comment, auth.token || "").then( (addresses_response) =>
                 {
                   if(addresses_response.success && addresses_response.data)
                   {
@@ -172,11 +172,11 @@ function NewARFromCustomerPage() {
 
   useEffect(() => {
 
-    if(keycloak?.authenticated == false){
+    if(auth.authenticated == false){
       return;
     }
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.ARModule,
       ERPModulePermission.Write,
@@ -197,7 +197,7 @@ function NewARFromCustomerPage() {
 
 
     loadOrderData();
-  }, [params.id, keycloak.authenticated]);
+  }, [params.id, auth.authenticated]);
 
   const handleSaveClick = async () => {
     let command = new ARInvoiceHeaderCreateCommand();
@@ -250,7 +250,7 @@ function NewARFromCustomerPage() {
     setSaving(true);
     try
     {
-      await arInvoiceService.create(command, keycloak?.token || "").then( (response) =>
+      await arInvoiceService.create(command, auth.token || "").then( (response) =>
       {
         setSaving(false);
 

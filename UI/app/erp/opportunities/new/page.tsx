@@ -36,13 +36,13 @@ import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import AddOpportunityLineDialog, { AddOpportunityLineDialogRef } from '@/components/dialogs/add-opportunity-line';
 import { AgGridReact } from 'ag-grid-react';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function NewOpportunityPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const userId = SessionStorage.getUserId();
     const router = useRouter();
     const [hasAccess, setHasAccess] = useState(true);
@@ -75,9 +75,9 @@ function NewOpportunityPage() {
     } = useForm<OpportunityCreateCommand>();
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.OpportunityModule,
           ERPModulePermission.Write,
@@ -89,7 +89,7 @@ function NewOpportunityPage() {
           return;
         }
         setHasWritePermission(true);
-    }, [keycloak.authenticated, router]);
+    }, [auth.authenticated, router]);
 
     const handleCustomerSelect = (value: any) => {
         setValue('customer_id', value?.id);
@@ -161,7 +161,7 @@ function NewOpportunityPage() {
             //return;
             try
             {
-                await opportunityService.create(command, keycloak.token || "").then((response) =>
+                await opportunityService.create(command, auth.token || "").then((response) =>
                 {
                     //console.log(response)
                     if(response.success)

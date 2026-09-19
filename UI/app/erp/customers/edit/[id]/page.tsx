@@ -29,7 +29,7 @@ import CommentsListComponent from '@/components/lists/comments-list-component';
 import { customerService } from '@/services/customer-service';
 import CustomerCategoriesCombobox, { CustomerCategoriesComboboxRef } from '@/components/customer-categories-combobox';
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -38,7 +38,7 @@ function EditCustomerPage() {
   const params = useParams();
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
   const [hasDeletePermission, setHasDeletePermission] = useState(false);
@@ -74,7 +74,7 @@ function EditCustomerPage() {
           return;
         }
 
-        const response = await customerService.getByGuid(customerId, keycloak.token || "");
+        const response = await customerService.getByGuid(customerId, auth.token || "");
         if (response.success && response.data) {
           //console.log(response)
           setCustomer(response.data);
@@ -104,13 +104,13 @@ function EditCustomerPage() {
   };
 
   useEffect(() => {
-    if (keycloak.authenticated == false) return;
+    if (auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.CustomerModule,
       ERPModulePermission.Read,
@@ -141,14 +141,14 @@ function EditCustomerPage() {
     console.log("Delete Permission: ", canDelete);
 
     loadCustomer();
-  }, [params.id, setValue, keycloak.authenticated]);
+  }, [params.id, setValue, auth.authenticated]);
 
   const handleDeleteClick = async () => {
     let command = new CustomerDeleteCommand();
     command.id = customer?.id;
 
     try {
-      await customerService.delete(command, keycloak.token || "").then((response) => {
+      await customerService.delete(command, auth.token || "").then((response) => {
         if (response.success) {
           router.push("/erp/customers/");
         } else {
@@ -182,7 +182,7 @@ function EditCustomerPage() {
     //return;
 
     try {
-      await customerService.update(command, keycloak.token || "").then((response) => {
+      await customerService.update(command, auth.token || "").then((response) => {
         if (response.success) {
           setSuccessSaved(true);
           setFailedSaved(false);

@@ -37,14 +37,14 @@ public class CustomerModule : BaseERPModule, ICustomerModule
     private IMemoryCacheService<KeyValueStore> _KVMemoryService;
     private IMemoryCacheService<Customer> _CustomerMemoryService;
 
-    public CustomerModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public CustomerModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
 
     }
 
     public CustomerModule(IBaseERPContext context, IMemoryCacheService<KeyValueStore> kvMService,
                             IMemoryCacheService<Customer> customerMemService, 
-                            ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                            ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _KVMemoryService = kvMService;
@@ -63,6 +63,8 @@ public class CustomerModule : BaseERPModule, ICustomerModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

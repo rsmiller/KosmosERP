@@ -43,7 +43,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
     private IFinancialTransactionModule? _FinancialTransactionModule;
     private IChartOfAccountModule? _ChartOfAccountModule;
 
-    public ARInvoiceModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ARInvoiceModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -55,7 +55,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                             IPaymentProviderFactory providerFactory,
                             IFinancialTransactionModule financialTransactionModule,
                             IChartOfAccountModule chartOfAccountModule,
-                            ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                            ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _KVMemoryService = kvMService;
@@ -78,6 +78,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         var payment_terms_net_15 = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.PaymentTerms && m.key == "payment_terms_net_15").SingleOrDefault();

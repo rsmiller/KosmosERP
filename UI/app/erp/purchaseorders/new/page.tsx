@@ -20,7 +20,7 @@ import HeaderTypeSelectorCombobox from '@/components/header-type-selector';
 import PageActionsComponent from '@/components/page-actions';
 import { purchaseOrderService } from '@/services/purchase-order-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useRouter } from 'next/navigation';
 import SessionStorage from '@/components/session-storage';
 import AddPurchaseOrderLineDialog, { AddPurchaseOrderLineDialogRef } from '@/components/dialogs/add-purchase-order-line';
@@ -34,7 +34,7 @@ function NewPurchaseOrdersPage() {
 
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasWritePermission, setHasWritePermission] = useState(false);
 
@@ -59,9 +59,9 @@ function NewPurchaseOrdersPage() {
   } = useForm<PurchaseOrderHeaderCreateCommand>();
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.PurchaseOrderModule,
       ERPModulePermission.Write,
@@ -73,7 +73,7 @@ function NewPurchaseOrdersPage() {
       return;
     }
     setHasWritePermission(true);
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const CheckFormValidity = () => {
     const vendorValid = vendorComboboxRef.current?.isValid() || false;
@@ -128,7 +128,7 @@ function NewPurchaseOrdersPage() {
     command.purchase_order_lines = purchaseOrderLines;
     
     try {
-      await purchaseOrderService.create(command, keycloak?.token || "").then((response) => {
+      await purchaseOrderService.create(command, auth.token || "").then((response) => {
         console.log(response)
 
         if (response.success) {

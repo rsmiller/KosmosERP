@@ -9,7 +9,8 @@ using KosmosERP.BusinessLayer.Models.Module.KeyValue.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.KeyValue.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.KeyValue.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module;
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 
 namespace KosmosERP.Api.Controllers;
 
@@ -25,7 +26,7 @@ public class KeyValueController : ControllerBase
         _Module = module;
     }
 
-    [Authorize(Roles = "data_type_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "data_type_read")]
     [HttpGet("GetModuleInfo", Name = "GetModuleInfo")]
     [ProducesResponseType(typeof(Response<List<ModuleObjectDto>>), 200)]
     public async Task<ActionResult> GetModuleInfo()
@@ -35,7 +36,7 @@ public class KeyValueController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "data_type_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "data_type_read")]
     [HttpGet("GetKeyValuesByModule", Name = "GetKeyValuesByModule")]
     [ProducesResponseType(typeof(Response<List<KeyValueDto>>), 200)]
     public async Task<ActionResult> GetKeyValuesByModule([FromQuery] string module_id)
@@ -45,7 +46,7 @@ public class KeyValueController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "data_type_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "data_type_read")]
     [HttpPost("FindKeyValue", Name = "FindKeyValue")]
     [ProducesResponseType(typeof(PagingResult<KeyValueDto>), 200)]
     [ProducesResponseType(500)]
@@ -72,7 +73,7 @@ public class KeyValueController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "data_type_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "data_type_write")]
     [HttpPost("CreateKeyValue", Name = "CreateKeyValue")]
     [ProducesResponseType(typeof(Response<KeyValueDto>), 200)]
     [ProducesResponseType(400)]
@@ -86,7 +87,7 @@ public class KeyValueController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "data_type_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "data_type_edit")]
     [HttpPut("UpdateKeyValue", Name = "UpdateKeyValue")]
     [ProducesResponseType(typeof(Response<KeyValueDto>), 200)]
     [ProducesResponseType(400)]
@@ -100,7 +101,7 @@ public class KeyValueController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Roles = "data_type_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "data_type_delete")]
     [HttpPost("DeleteKeyValue", Name = "DeleteKeyValue")]
     [ProducesResponseType(typeof(Response<KeyValueDto>), 200)]
     [ProducesResponseType(400)]

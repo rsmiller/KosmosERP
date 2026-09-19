@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Customer.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Customer.Command.Create;
@@ -10,6 +10,7 @@ using KosmosERP.Models;
 using KosmosERP.Module;
 using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
 using KosmosERP.Database.Models;
+using KosmosERP.Api.Models;
 
 namespace KosmosERP.Api.Controllers;
 
@@ -25,8 +26,8 @@ public class CustomerController : ERPApiController
         _Module = module;
     }
 
-    
-    [Authorize(Roles = "customers_read")]
+
+    [ERPAuthorize(new[] { ERPPermission.Read }, "customers_read")]
     [HttpGet("GetCustomer", Name = "GetCustomer")]
     [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
     [ProducesResponseType(400)]
@@ -40,7 +41,7 @@ public class CustomerController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "customers_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "customers_read")]
     [HttpGet("GetCustomerByGuid", Name = "GetCustomerByGuid")]
     [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
     [ProducesResponseType(400)]
@@ -54,7 +55,7 @@ public class CustomerController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "customers_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "customers_read")]
     [HttpGet("GetPaymentTerms", Name = "GetPaymentTerms")]
     [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
     public async Task<ActionResult> GetPaymentTerms()
@@ -64,7 +65,7 @@ public class CustomerController : ERPApiController
         return Ok(results);
     }
 
-    [Authorize(Roles = "customers_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "customers_read")]
     [HttpGet("GetShippingMethods", Name = "GetShippingMethods")]
     [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
     public async Task<ActionResult> GetShippingMethods()
@@ -74,7 +75,7 @@ public class CustomerController : ERPApiController
         return Ok(results);
     }
 
-    [Authorize(Roles = "customers_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "customers_read")]
     [HttpGet("GetPayMethods", Name = "GetPayMethods")]
     [ProducesResponseType(typeof(List<KeyValueStore>), 200)]
     public async Task<ActionResult> GetPayMethods()
@@ -85,7 +86,7 @@ public class CustomerController : ERPApiController
     }
 
 
-    [Authorize(Roles = "customers_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "customers_read")]
     [HttpPost("FindCustomer", Name = "FindCustomer")]
     [ProducesResponseType(typeof(PagingResult<CustomerListDto>), 200)]
     [ProducesResponseType(500)]
@@ -114,7 +115,7 @@ public class CustomerController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "customers_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "customers_write")]
     [HttpPost("CreateCustomer", Name = "CreateCustomer")]
     [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
     [ProducesResponseType(400)]
@@ -130,7 +131,7 @@ public class CustomerController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "customers_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "customers_edit")]
     [HttpPut("UpdateCustomer", Name = "UpdateCustomer")]
     [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
     [ProducesResponseType(400)]
@@ -146,7 +147,7 @@ public class CustomerController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "customers_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "customers_delete")]
     [HttpPost("DeleteCustomer", Name = "DeleteCustomer")]
     [ProducesResponseType(typeof(Response<CustomerDto>), 200)]
     [ProducesResponseType(400)]

@@ -9,7 +9,7 @@ import { ShipmentHeaderCreateCommand, ShipmentHeaderDto, ShipmentHeaderEditComma
 import { shipmentService } from '@/services/shipment-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { DataList, Field, Grid, GridItem, NumberInput, Input } from '@chakra-ui/react';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { AllCommunityModule, ColDef, ModuleRegistry } from "ag-grid-community";
 
@@ -27,7 +27,7 @@ import ShipmentMethodCombobox from '@/components/shipment-method-combobox';
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function NewShipmentPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const router = useRouter();
     const params = useParams();
@@ -59,9 +59,9 @@ function NewShipmentPage() {
 
     useEffect(() => {
     
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
     
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ShippingModule,
           ERPModulePermission.Write,
@@ -81,7 +81,7 @@ function NewShipmentPage() {
         
     
         loadShipment();
-    }, [params.id, keycloak.authenticated, router]);
+    }, [params.id, auth.authenticated, router]);
 
     const loadShipment = async () => {
         try {
@@ -94,7 +94,7 @@ function NewShipmentPage() {
             }
             setRowData([]);
 
-            await orderService.getByGuid(orderId, keycloak?.token || "").then(async (response) => {
+            await orderService.getByGuid(orderId, auth.token || "").then(async (response) => {
                 
 
                 if (response.success && response.data) 
@@ -107,7 +107,7 @@ function NewShipmentPage() {
                     var findCommand = new ShipmentHeaderFindCommand();
                     findCommand.order_guid = orderId;
                     
-                    await shipmentService.find(findCommand, keycloak?.token || "").then(async (order_response) => {
+                    await shipmentService.find(findCommand, auth.token || "").then(async (order_response) => {
 
                         let all_lines = new Array<ShipmentLineDto>();
 
@@ -204,7 +204,7 @@ function NewShipmentPage() {
         //console.log("Create Shipment Command: ", command);
 
         //return;
-        await shipmentService.create(command, keycloak?.token || "").then((response) => {
+        await shipmentService.create(command, auth.token || "").then((response) => {
             //console.log(response);
 
             if (response.success) {

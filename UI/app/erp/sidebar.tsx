@@ -7,73 +7,27 @@ import { BsListColumnsReverse } from "react-icons/bs";
 import { Link as ChakraLink, Menu, Portal, VStack } from "@chakra-ui/react";
 import { ERPModulePermission, ERPModules, permissionsService } from '@/services/permissions-service';
 import { useEffect, useState } from "react";
-import { useKeycloak } from "@react-keycloak/web";
+import { useAuth } from "@/lib/auth/auth-context";
 import { useRouter } from "next/navigation";
-import SessionStorage from "@/components/session-storage";
 
 function SidebarComponent({ onNavigate } : any)
 {
     const router = useRouter();
-    const { keycloak } = useKeycloak();
-    
+    const auth = useAuth();
+
     const PermissionsService = permissionsService;
     const [userPermissions, setUserPermissions] = useState<string[]>([]);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
-    
+
 
     useEffect(() => {
-        if(keycloak?.tokenParsed != undefined)
-        {
-            const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
-
-            //console.log(keycloak);
-
-            setUserPermissions(realmRoles);
-        }
-    }, [keycloak.tokenParsed]);
+        setUserPermissions(auth.roles || []);
+    }, [auth.roles]);
 
     const doRoute = (url: string) => () => {
-        //console.log("Navigating to: " + url);
-        //console.log(keycloak);
-
-        if (keycloak) 
-        {
-            /*
-            console.log("Updating token before navigating to: " + url);
-
-            window.dispatchEvent(
-                new CustomEvent("app:navigate", { detail: { url: url } })
-            );*/
-
-            keycloak
-                .updateToken(120)
-                .then((refreshed) => {
-                    //console.log("Token REFRESHED: " + refreshed);
-                    if (refreshed) {
-                        if(keycloak.token != SessionStorage.getToken())
-                        {
-                            SessionStorage.setToken(keycloak.token || "");
-                            SessionStorage.setName(keycloak.tokenParsed?.name || "")
-                        }
-                    }
-
-
-                    setTimeout(() => {
-                        // Do window event emit
-                        router.push(url);
-
-                        //console.log("Token refreshed AFTER navigating to: " + url);
-                    }, 500);
-                })
-                .catch((error) => {
-                    console.error("Failed to refresh token before navigating to: " + url, error);
-                    SessionStorage.removeName();
-                    SessionStorage.removeToken();
-
-                    keycloak.logout({ redirectUri: window.location.origin });
-                });
-        }
-        
+        // Token refresh is now owned by the active auth provider in the
+        // background, so navigation is a plain route change.
+        router.push(url);
     };
 
     const hasAccountingAcccess = () => 
@@ -173,7 +127,7 @@ function SidebarComponent({ onNavigate } : any)
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.InventoryModule, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/inventory')}><FaBoxes style={{ marginRight: 6 }} />Inventory</ChakraLink>
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.VendorModule, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/vendors')}><FaCity style={{ marginRight: 6 }} />Vendors</ChakraLink>
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.ProductModule, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/products')}><FaTh style={{ marginRight: 6 }} />Product Catalog</ChakraLink>
-            <ChakraLink href={process.env.NEXT_PUBLIC_SUPERSET_URL} target="blank"><FaChartBar style={{ marginRight: 6 }} />Reports</ChakraLink>
+            <ChakraLink href={process.env.NEXT_PUBLIC_REPORTS_URL} target="blank"><FaChartBar style={{ marginRight: 6 }} />Reports</ChakraLink>
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.Admin, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/admin')}><FaCogs style={{ marginRight: 6 }} />Administration</ChakraLink>
             
         </VStack>

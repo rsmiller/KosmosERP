@@ -171,7 +171,46 @@ class SessionStorage {
       localStorage.removeItem("n");
     }
     catch(e){}
-    
+
+  }
+
+  static setRoles(roles: string[]) {
+    try
+    {
+      if(!window.localStorage || localStorage == null || localStorage == undefined)
+      return;
+
+      localStorage.setItem("r", JSON.stringify(roles ?? []));
+    }
+    catch(e){}
+  }
+
+  static getRoles(): string[] {
+    try
+    {
+      if(!window.localStorage || localStorage == null || localStorage == undefined)
+      return [];
+
+      const raw = localStorage.getItem("r");
+      if(!raw) return [];
+
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+    catch(e){
+      return [];
+    }
+  }
+
+  static removeRoles() {
+    try
+    {
+      if(!window.localStorage || localStorage == null || localStorage == undefined)
+      return;
+
+      localStorage.removeItem("r");
+    }
+    catch(e){}
   }
 }
 

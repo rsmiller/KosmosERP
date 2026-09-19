@@ -25,13 +25,13 @@ import { vendorService } from '@/services/vendor-service';
 import NewAddressBlock, { NewAddressBlockRef, NewAddressBlockResponse } from '@/components/new-address-block';
 import { AddressEditCommand } from '@/models/address-models';
 import VendorCategoriesCombobox, { VendorCategoriesComboboxRef } from '@/components/vendor-categories-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function NewVendorsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasWritePermission, setHasWritePermission] = useState(false);
@@ -47,9 +47,9 @@ function NewVendorsPage() {
   const categoryComboboxRef = useRef<VendorCategoriesComboboxRef>(null);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.VendorModule,
       ERPModulePermission.Write,
@@ -61,7 +61,7 @@ function NewVendorsPage() {
       return;
     }
     setHasWritePermission(true);
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const {
     register,
@@ -167,7 +167,7 @@ function NewVendorsPage() {
     //return;
 
     try {
-      await vendorService.create(command, keycloak?.token || "").then((response) => {
+      await vendorService.create(command, auth.token || "").then((response) => {
         if (response.success) {
           setSuccessSaved(true);
           setFailedSaved(false);

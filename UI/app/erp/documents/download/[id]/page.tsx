@@ -2,10 +2,10 @@
 
 import SessionStorage from "@/components/session-storage";
 import { useParams, useRouter } from 'next/navigation';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 function DownloadFilePage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
     

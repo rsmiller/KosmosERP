@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -27,7 +28,7 @@ public class ARInvoiceController : ERPApiController
     }
 
 
-    [Authorize(Roles = "ar_invoice_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "ar_invoice_read")]
     [HttpGet("GetARInvoice", Name = "GetARInvoice")]
     [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -41,7 +42,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "ar_invoice_read")]
     [HttpGet("GetARInvoiceByGuid", Name = "GetARInvoiceByGuid")]
     [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -55,7 +56,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "ar_invoice_read")]
     [HttpGet("GetOrdersReadyForInvoicing", Name = "GetOrdersReadyForInvoicing")]
     [ProducesResponseType(typeof(Response<List<vw_OrdersReadyForInvoicing>>), 200)]
     [ProducesResponseType(500)]
@@ -70,7 +71,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "ar_invoice_read")]
     [HttpGet("GetPartialInvoices", Name = "GetPartialInvoices")]
     [ProducesResponseType(typeof(Response<List<vw_PartialInvoices>>), 200)]
     [ProducesResponseType(500)]
@@ -84,7 +85,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "ar_invoice_read")]
     [HttpPost("FindARInvoice", Name = "FindARInvoice")]
     [ProducesResponseType(typeof(PagingResult<ARInvoiceHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -113,7 +114,7 @@ public class ARInvoiceController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "ar_invoice_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "ar_invoice_write")]
     [HttpPost("CreateARInvoice", Name = "CreateARInvoice")]
     [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -129,7 +130,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "ar_invoice_write")]
     [HttpPost("CreateARInvoiceLine", Name = "CreateARInvoiceLine")]
     [ProducesResponseType(typeof(Response<ARInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -145,7 +146,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "ar_invoice_edit")]
     [HttpPut("UpdateARInvoice", Name = "UpdateARInvoice")]
     [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -161,7 +162,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "ar_invoice_edit")]
     [HttpPut("UpdateARInvoiceLine", Name = "UpdateARInvoiceLine")]
     [ProducesResponseType(typeof(Response<ARInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -177,7 +178,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "ar_invoice_delete")]
     [HttpPost("DeleteARInvoice", Name = "DeleteARInvoice")]
     [ProducesResponseType(typeof(Response<ARInvoiceHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -193,7 +194,7 @@ public class ARInvoiceController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "ar_invoice_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "ar_invoice_delete")]
     [HttpPost("DeleteARInvoiceLine", Name = "DeleteARInvoiceLine")]
     [ProducesResponseType(typeof(Response<ARInvoiceLineDto>), 200)]
     [ProducesResponseType(400)]

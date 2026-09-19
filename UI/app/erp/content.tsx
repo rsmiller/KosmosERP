@@ -5,20 +5,20 @@ import { useEffect, useState } from "react";
 import { Provider } from "@/components/ui/provider"
 import { Box, Flex, Text, Menu, Portal, HStack, Grid, GridItem, Avatar } from '@chakra-ui/react';
 import SidebarComponent from './sidebar';
-import { useKeycloak } from "@react-keycloak/web";
-import SessionStorage from '@/components/session-storage';
-import { usePathname } from 'next/navigation';
+import { useAuth } from "@/lib/auth/auth-context";
+import { usePathname, useRouter } from 'next/navigation';
 
 function ContentComponent({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) 
+}>)
 {
     const pathname = usePathname();
+    const router = useRouter();
     const [ userFullName, setUserFullName ] = useState<string>("");
 
-    const { keycloak } = useKeycloak();
+    const { ready, authenticated, name, logout } = useAuth();
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -39,67 +39,26 @@ function ContentComponent({
 
 
     useEffect(() => {
-        //return;
-        
-        if (!keycloak) {
+        // Wait for the active auth provider to finish initializing.
+        if (!ready) {
             setIsLoading(true);
             return;
         }
-        /*
-        console.log('Keycloak authenticated, token info:', {
-            authenticated: keycloak.authenticated,
-            hasToken: !!keycloak.token,
-            exp: keycloak.tokenParsed?.exp,
-            name: keycloak.tokenParsed?.name
-        });*/
 
-        if (!keycloak.authenticated) {
+        // Provider-agnostic route guard: no session -> back to the landing page.
+        if (!authenticated) {
+            router.push('/');
             return;
         }
 
+        setUserFullName(name || "");
+        setIsLoading(false);
 
-        setUserFullName(keycloak.tokenParsed?.name || "");
-        setTimeout(() => { setIsLoading(false); }, 2000);
-        
-
-        SessionStorage.setToken(keycloak.token || "");
-        SessionStorage.setName(keycloak.tokenParsed?.name || "");
-
-        // Refresh token proactively - check every 30 seconds, refresh if < 60s remaining
-        const refreshInterval = setInterval(() => {
-
-            if (keycloak.authenticated) {
-                keycloak
-                    .updateToken(120)
-                    .then((refreshed) => {
-                        if (refreshed) {
-                            if(keycloak.token != SessionStorage.getToken())
-                            {
-                                SessionStorage.setToken(keycloak.token || "");
-                                SessionStorage.setName(keycloak.tokenParsed?.name || "")
-                            }
-
-                            //console.log('Token refreshed successfully');
-                        }
-                    })
-                    .catch((error) => {
-                        SessionStorage.removeName();
-                        SessionStorage.removeToken();
-
-                        keycloak.logout({ redirectUri: window.location.origin });
-                    });
-            }
-        }, 30000); // check every 30s
-
-        return () => clearInterval(refreshInterval);
-
-    }, [keycloak?.authenticated]);
+    }, [ready, authenticated, name]);
 
     const doLogoff = () =>
     {
-        SessionStorage.removeName();
-        SessionStorage.removeToken();
-        keycloak?.logout({ redirectUri: window.location.origin });
+        logout();
     }
 
     const navigating = () => {

@@ -7,22 +7,22 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import { Button } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
 import CreditMemosListComponent from '@/components/lists/credit-memos-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useEffect, useState } from 'react';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function CreditMemosPage() {
-	const { keycloak } = useKeycloak();
+	const auth = useAuth();
 	const router = useRouter();
 	const [hasAccess, setHasAccess] = useState(true);
 
 	useEffect(() => {
-		if (keycloak.authenticated == false) return;
+		if (auth.authenticated == false) return;
 
 		// Check permission
-		const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+		const realmRoles = auth.roles || [];
 		const hasPermission = permissionsService.HasPermission(
 			ERPModules.CreditMemoModule,
 			ERPModulePermission.Read,
@@ -34,7 +34,7 @@ function CreditMemosPage() {
 			router.push('/erp');
 			return;
 		}
-	}, [keycloak.authenticated]);
+	}, [auth.authenticated]);
 
 	const handleNewClick = () => {
 		router.push("/erp/creditmemos/new");

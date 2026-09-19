@@ -33,7 +33,7 @@ public class AddressModule : BaseERPModule, IAddressModule
 
     private readonly IBaseERPContext _Context;
 
-    public AddressModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public AddressModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }

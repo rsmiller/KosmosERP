@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -26,7 +27,7 @@ public class OrderController : ERPApiController
     }
 
 
-    [Authorize(Roles = "sales_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "sales_order_read")]
     [HttpGet("GetOrder", Name = "GetOrder")]
     [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -40,7 +41,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "sales_order_read")]
     [HttpGet("GetOrderByGuid", Name = "GetOrderByGuid")]
     [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -54,7 +55,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "sales_order_read")]
     [HttpPost("FindOrder", Name = "FindOrder")]
     [ProducesResponseType(typeof(PagingResult<OrderHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -83,7 +84,7 @@ public class OrderController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "sales_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "sales_order_write")]
     [HttpPost("CreateOrder", Name = "CreateOrder")]
     [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -99,7 +100,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "sales_order_write")]
     [HttpPost("CreateOrderLine", Name = "CreateOrderLine")]
     [ProducesResponseType(typeof(Response<OrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -115,7 +116,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "sales_order_write")]
     [HttpPost("CreateOrderLineAttribute", Name = "CreateOrderLineAttribute")]
     [ProducesResponseType(typeof(Response<OrderLineAttributeDto>), 200)]
     [ProducesResponseType(400)]
@@ -131,7 +132,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "sales_order_edit")]
     [HttpPut("UpdateOrder", Name = "UpdateOrder")]
     [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -147,7 +148,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "sales_order_edit")]
     [HttpPut("UpdateOrderLine", Name = "UpdateOrderLine")]
     [ProducesResponseType(typeof(Response<OrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -163,7 +164,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "sales_order_edit")]
     [HttpPut("UpdateOrderLineAttribute", Name = "UpdateOrderLineAttribute")]
     [ProducesResponseType(typeof(Response<OrderLineAttributeDto>), 200)]
     [ProducesResponseType(400)]
@@ -179,7 +180,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "sales_order_delete")]
     [HttpPost("DeleteOrder", Name = "DeleteOrder")]
     [ProducesResponseType(typeof(Response<OrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -195,7 +196,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "sales_order_delete")]
     [HttpPost("DeleteOrderLine", Name = "DeleteOrderLine")]
     [ProducesResponseType(typeof(Response<OrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -211,7 +212,7 @@ public class OrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "sales_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "sales_order_delete")]
     [HttpPost("DeleteOrderLineAttribute", Name = "DeleteOrderLineAttribute")]
     [ProducesResponseType(typeof(Response<OrderLineAttributeDto>), 200)]
     [ProducesResponseType(400)]
