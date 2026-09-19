@@ -15,10 +15,10 @@ import { format } from 'date-fns';
 
 import SalesOrdersLinesComponent from '@/components/lists/sales-order-lines-component';
 import { CurrencyHelper } from '@/helpers/CurrencyHelper';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 function ViewSubscriptionsPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     
     const [subscription, setSubscription] = useState<SubscriptionDto | null>(null);
@@ -38,7 +38,7 @@ function ViewSubscriptionsPage() {
                 return;
             }
     
-            const response = await subscriptionService.getByGuid(subscriptionId, keycloak?.token || "");
+            const response = await subscriptionService.getByGuid(subscriptionId, auth.token || "");
             if (response.success && response.data) {
                 //console.log(response)
                 setSubscription(response.data);
@@ -54,7 +54,7 @@ function ViewSubscriptionsPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
             
         if (hasInitialized.current) return;
         hasInitialized.current = true;
@@ -62,7 +62,7 @@ function ViewSubscriptionsPage() {
         
     
         loadSubscription();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
 
     const DateFormatter = (date: any) =>

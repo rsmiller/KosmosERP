@@ -23,13 +23,13 @@ import { CustomerCreateCommand } from '@/models/customer-models';
 import CustomerPaymentTermsCombobox, { CustomerPaymentTermsComboboxRef } from '@/components/customer-payment-terms-combobox';
 import { customerService } from '@/services/customer-service';
 import CustomerCategoriesCombobox, { CustomerCategoriesComboboxRef } from '@/components/customer-categories-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 function NewCustomerPage() {
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasWritePermission, setHasWritePermission] = useState(false);
 
@@ -43,10 +43,10 @@ function NewCustomerPage() {
   const categoryComboboxRef = useRef<CustomerCategoriesComboboxRef>(null);
 
   useEffect(() => {
-    if (keycloak.authenticated == false) return;
+    if (auth.authenticated == false) return;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.CustomerModule,
       ERPModulePermission.Write,
@@ -59,7 +59,7 @@ function NewCustomerPage() {
       return;
     }
     setHasWritePermission(true);
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const {
     register,
@@ -88,7 +88,7 @@ function NewCustomerPage() {
 
     //console.log(command);
     try {
-      await customerService.create(command, keycloak.token || "").then((response) => {
+      await customerService.create(command, auth.token || "").then((response) => {
         if (response.success) {
           setSuccessSaved(true);
           setFailedSaved(false);

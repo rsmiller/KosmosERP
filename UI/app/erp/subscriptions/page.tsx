@@ -13,13 +13,13 @@ import { subscriptionService } from '@/services/subscription-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
 import { format } from 'date-fns';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function SubscriptionsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
@@ -52,7 +52,7 @@ function SubscriptionsPage() {
 
     let command = new SubscriptionFindCommand();
 
-    await subscriptionService.find(command, keycloak?.token || "", pageStart, pageSize).then((response) => {
+    await subscriptionService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
 
       setLoading(false);
 
@@ -77,13 +77,13 @@ function SubscriptionsPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.SubscriptionModule,
       ERPModulePermission.Read,
@@ -103,7 +103,7 @@ function SubscriptionsPage() {
     ));
 
     getTableData();
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const onPageEvent = async (page: any) => {
     setPage(page);

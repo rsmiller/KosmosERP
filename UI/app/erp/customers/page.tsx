@@ -13,7 +13,7 @@ import { CustomerFindCommand, CustomerListDto } from '@/models/customer-models';
 import { customerService } from '@/services/customer-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -22,7 +22,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function CustomersPage() {
 
   const router = useRouter();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
 
@@ -35,14 +35,14 @@ function CustomersPage() {
 
   useEffect(() => {
 
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.CustomerModule,
       ERPModulePermission.Read,
@@ -66,7 +66,7 @@ function CustomersPage() {
     console.log("Edit Permission: ", editPermission);
     getTableData();
     
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/customers/new");
@@ -95,7 +95,7 @@ function CustomersPage() {
 
     let command = new CustomerFindCommand();
 
-    await customerService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await customerService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
       console.log(response)
       setLoading(false);
 

@@ -1,81 +1,82 @@
 "use client"
 
-import React, { use, useEffect, useMemo } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import Keycloak from 'keycloak-js';
-import { ReactKeycloakProvider, useKeycloak } from '@react-keycloak/web';
+import { Box, Button, Stack, Text, HStack, Image } from '@chakra-ui/react'
 
-const keycloak = new Keycloak({
-    url: process.env.NEXT_PUBLIC_AUTHORIZATION_URL || "",
-    realm: process.env.NEXT_PUBLIC_AUTHORIZATION_REALM || "",
-    clientId: process.env.NEXT_PUBLIC_AUTHORIZATION_CLIENT_ID || "",
-});
+const authMethods = [
+  {
+    key: 'database',
+    label: 'Username & Password',
+    description: 'Sign in with your Kosmos ERP account',
+    href: '/login/database',
+  },
+  {
+    key: 'saml',
+    label: 'Single Sign-On (SSO)',
+    description: 'Redirect to your organization identity provider',
+    href: '/login/saml',
+  },
+  {
+    key: 'keycloak',
+    label: 'Keycloak',
+    description: 'Sign in through Keycloak',
+    href: '/login/keycloak',
+  },
+]
 
-const LoginGate = () => {
-  const { keycloak, initialized } = useKeycloak();
-  const router = useRouter();
-
-  useEffect(() => {
-    
-    if (initialized) {
-      if (keycloak?.authenticated) {
-        // User is logged in, redirect to ERP
-        router.push('/erp/');
-      } else {
-        // User is not logged in, trigger login
-        keycloak?.login();
-      }
-    }
-  }, [keycloak?.authenticated]);
-
-  // Show loading while initializing
-  if (!initialized) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-      }}>
-        <div>
-          <h2>Checking authentication status...</h2>
-        </div>
-      </div>
-    );
-  }
-
-  // Show login message while redirecting
-  return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '100vh',
-    }}>
-      <div>
-        <h2>Redirecting to application...</h2>
-      </div>
-    </div>
-  );
-};
-
-
-
-const App = () => {
-  
+const LandingPage = () => {
+  const router = useRouter()
 
   return (
-    <ReactKeycloakProvider 
-      authClient={keycloak} 
-      initOptions={{
-        onLoad: 'login-required',
-        pkceMethod: 'S256',
-        checkLoginIframe: false
-      }}
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bg="gray.50"
+      p={4}
+    >
+      <Box
+        w="100%"
+        maxW="650px"
+        bg="white"
+        borderRadius="lg"
+        boxShadow="lg"
+        p={8}
       >
-      <LoginGate />
-    </ReactKeycloakProvider>
+        <Stack gap={2} mb={8} textAlign="center">
+          <Image src="./kosmos_erp_med.png" alt="Kosmos ERP Logo" mb={4} p="auto" m="auto" height="200px" width="200px" />
+          <Text color="gray.600">Choose how you would like to sign in</Text>
+        </Stack>
+
+        <HStack 
+          gap={4}
+          justifyContent="center"
+          textAlign="center"
+          alignItems="center">
+          {authMethods.map((method) => (
+            <Button
+              key={method.key}
+              onClick={() => router.push(method.href)}
+              variant="outline"
+              size="lg"
+              height="auto"
+              py={4}
+              justifyContent="center"
+              textAlign="center"
+              alignItems="center"
+              whiteSpace="normal"
+            >
+              <Stack gap={0}>
+                <Text fontWeight="bold">{method.label}</Text>
+              </Stack>
+            </Button>
+          ))}
+        </HStack>
+      </Box>
+    </Box>
   )
 }
 
-export default App
+export default LandingPage

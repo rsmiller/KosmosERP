@@ -28,7 +28,7 @@ public class BOMModule : BaseERPModule, IBOMModule
     public override Guid ModuleIdentifier => Guid.Parse("737d367d-3a2d-4b07-87ca-33baf7bb55f3");
     public override string ModuleName => "Bill of Materials";
 
-    public BOMModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public BOMModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -49,6 +49,8 @@ public class BOMModule : BaseERPModule, IBOMModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

@@ -13,7 +13,7 @@ import { LeadFindCommand, LeadListDto } from '@/models/lead-models';
 import { leadService } from '@/services/lead-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -22,7 +22,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function LeadsPage() {
 
   const router = useRouter();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
 
@@ -37,10 +37,10 @@ function LeadsPage() {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.LeadModule,
       ERPModulePermission.Read,
@@ -65,7 +65,7 @@ function LeadsPage() {
     };
     fetchData();
     
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/leads/new");
@@ -94,7 +94,7 @@ function LeadsPage() {
 
     let command = new LeadFindCommand();
 
-    await leadService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await leadService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
 
       setLoading(false);
 

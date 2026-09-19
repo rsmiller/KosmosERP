@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.FinancialTransaction.Dto;
 using KosmosERP.BusinessLayer.Models.Module.FinancialTransaction.Command.Find;
@@ -21,7 +22,7 @@ public class FinancialTransactionController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "financial_transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "financial_transaction_read")]
     [HttpGet("GetFinancialTransaction", Name = "GetFinancialTransaction")]
     [ProducesResponseType(typeof(Response<FinancialTransactionDto>), 200)]
     [ProducesResponseType(400)]
@@ -35,7 +36,7 @@ public class FinancialTransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "financial_transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "financial_transaction_read")]
     [HttpGet("GetFinancialTransactionByGuid", Name = "GetFinancialTransactionByGuid")]
     [ProducesResponseType(typeof(Response<FinancialTransactionDto>), 200)]
     [ProducesResponseType(400)]
@@ -49,7 +50,7 @@ public class FinancialTransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "financial_transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "financial_transaction_read")]
     [HttpPost("GetAccountBalance", Name = "GetAccountBalance")]
     [ProducesResponseType(typeof(Response<AccountBalanceDto>), 200)]
     [ProducesResponseType(400)]
@@ -63,7 +64,7 @@ public class FinancialTransactionController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "financial_transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "financial_transaction_read")]
     [HttpGet("GetAccountLedger", Name = "GetAccountLedger")]
     [ProducesResponseType(typeof(PagingResult<FinancialTransactionListDto>), 200)]
     [ProducesResponseType(500)]
@@ -87,7 +88,7 @@ public class FinancialTransactionController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "financial_transaction_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "financial_transaction_read")]
     [HttpPost("FindFinancialTransaction", Name = "FindFinancialTransaction")]
     [ProducesResponseType(typeof(PagingResult<FinancialTransactionListDto>), 200)]
     [ProducesResponseType(500)]

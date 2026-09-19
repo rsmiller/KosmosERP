@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -24,7 +25,7 @@ public class ContactController : ERPApiController
     }
 
     
-    [Authorize(Roles = "contact_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "contact_read")]
     [HttpGet("GetContact", Name = "GetContact")]
     [ProducesResponseType(typeof(Response<ContactDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,7 +39,7 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "contact_read")]
     [HttpGet("GetContactByGuid", Name = "GetContactByGuid")]
     [ProducesResponseType(typeof(Response<ContactDto>), 200)]
     [ProducesResponseType(400)]
@@ -52,7 +53,7 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "contact_read")]
     [HttpPost("FindContact", Name = "FindContact")]
     [ProducesResponseType(typeof(PagingResult<ContactListDto>), 200)]
     [ProducesResponseType(500)]
@@ -81,7 +82,7 @@ public class ContactController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "contact_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "contact_write")]
     [HttpPost("CreateContact", Name = "CreateContact")]
     [ProducesResponseType(typeof(Response<ContactDto>), 200)]
     [ProducesResponseType(400)]
@@ -97,7 +98,7 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "contact_edit")]
     [HttpPut("UpdateContact", Name = "UpdateContact")]
     [ProducesResponseType(typeof(Response<ContactDto>), 200)]
     [ProducesResponseType(400)]
@@ -113,7 +114,7 @@ public class ContactController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "contact_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "contact_delete")]
     [HttpPost("DeleteContact", Name = "DeleteContact")]
     [ProducesResponseType(typeof(Response<ContactDto>), 200)]
     [ProducesResponseType(400)]

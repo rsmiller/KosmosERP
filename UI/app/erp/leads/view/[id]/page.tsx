@@ -21,7 +21,7 @@ import { leadService } from '@/services/lead-service';
 import { CountryDto } from '@/models/country-models';
 import { countryService } from '@/services/country-service';
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
@@ -31,7 +31,7 @@ function ViewLeadPage() {
     const params = useParams();
     const router = useRouter();
     
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
     
     const [lead, setLead] = useState<LeadDto | null>(null);
@@ -51,7 +51,7 @@ function ViewLeadPage() {
                 return;
             }
 
-            const response = await leadService.getByGuid(leadId, keycloak.token || "");
+            const response = await leadService.getByGuid(leadId, auth.token || "");
             if (response.success && response.data) {
                 setLead(response.data);
                 
@@ -72,9 +72,9 @@ function ViewLeadPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.LeadModule,
           ERPModulePermission.Read,
@@ -92,12 +92,12 @@ function ViewLeadPage() {
 
         
         loadLead();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const fetchCountry = async (iso: string): Promise<CountryDto | undefined> => {
         try {
             setLoading(true);
-            const response = await countryService.getByISOAsync(iso, keycloak.token || "");
+            const response = await countryService.getByISOAsync(iso, auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {

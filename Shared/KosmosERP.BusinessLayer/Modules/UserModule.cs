@@ -1,21 +1,22 @@
-﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using System.Security.Cryptography;
-using KosmosERP.Database.Models;
-using KosmosERP.Models.Helpers;
-using KosmosERP.Models;
-using KosmosERP.Models.Interfaces;
-using KosmosERP.Module;
-using KosmosERP.Database;
-using Microsoft.EntityFrameworkCore;
-using KosmosERP.BusinessLayer.Models.Module.User.Dto;
+﻿using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.BusinessLayer.Interfaces;
+using KosmosERP.BusinessLayer.Models.Module;
 using KosmosERP.BusinessLayer.Models.Module.User.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.User.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.User.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.User.Command.Find;
-using KosmosERP.BusinessLayer.Helpers;
-using KosmosERP.BusinessLayer.Models.Module;
+using KosmosERP.BusinessLayer.Models.Module.User.Dto;
 using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
-using KosmosERP.BusinessLayer.Interfaces;
+using KosmosERP.Database;
+using KosmosERP.Database.Models;
+using KosmosERP.Models;
+using KosmosERP.Models.Helpers;
+using KosmosERP.Models.Interfaces;
+using KosmosERP.Module;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+
 namespace KosmosERP.BusinessLayer.Modules;
 
 public partial interface IUserModule : IERPModule<KosmosERP.Database.Models.User, UserDto, UserListDto, UserCreateCommand, UserEditCommand, UserDeleteCommand, UserFindCommand>, IBaseERPModule
@@ -48,7 +49,7 @@ public partial class UserModule : BaseERPModule, IUserModule
     private IKeyValueModule _KVModule;
     private IAuthenticationProvider _AuthenticationProvider;
 
-    public UserModule(IBaseERPContext context, IAuthenticationFactory authFactory, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public UserModule(IBaseERPContext context, IAuthenticationFactory authFactory, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _IContext = context;
         _AuthenticationProvider = authFactory.GetProvider();
@@ -58,7 +59,7 @@ public partial class UserModule : BaseERPModule, IUserModule
                         IAuthenticationSettings authenticationSettings, 
                         IKeyValueModule keyValueModule, 
                         IAuthenticationFactory authFactory, 
-                        ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                        ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _IContext = context;
         _AuthenticationSettings = authenticationSettings;
@@ -79,6 +80,8 @@ public partial class UserModule : BaseERPModule, IUserModule
             }, 1));
 
             _IContext.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         if (system_user == false)
@@ -117,66 +120,6 @@ public partial class UserModule : BaseERPModule, IUserModule
                 user_id = user_id,
             }, 1));
 
-            _IContext.SaveChanges();
-        }
-
-        // Seed ModulePermissions for User module
-        var existing_permissions = _IContext.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString());
-        if (!existing_permissions)
-        {
-            var permissions = new List<ModulePermission>
-            {
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Read Users",
-                    internal_permission_name = "read_user",
-                    read = true,
-                    write = false,
-                    edit = false,
-                    delete = false,
-                    is_active = true
-                }, 1),
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Create Users",
-                    internal_permission_name = "create_user",
-                    read = false,
-                    write = true,
-                    edit = false,
-                    delete = false,
-                    is_active = true
-                }, 1),
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Edit Users",
-                    internal_permission_name = "edit_user",
-                    read = false,
-                    write = false,
-                    edit = true,
-                    delete = false,
-                    is_active = true
-                }, 1),
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Delete Users",
-                    internal_permission_name = "delete_user",
-                    read = false,
-                    write = false,
-                    edit = false,
-                    delete = true,
-                    is_active = true
-                }, 1)
-            };
-
-            _IContext.ModulePermissions.AddRange(permissions);
             _IContext.SaveChanges();
         }
     }
@@ -415,6 +358,38 @@ public partial class UserModule : BaseERPModule, IUserModule
                     return new Response<AuthenticatedUserDto>(user.Exception, user.ResultCode);
 
                 dto.user = user.Data;
+
+                var dbUser = await _IContext.Users.SingleAsync(m => m.id == response.Data.id);
+
+                var associated_user_roles = await (from r in _IContext.Roles
+                                                   join ur in _IContext.UserRoles on r.id equals ur.role_id
+                                                   where ur.user_id == dto.id
+                                                   && !ur.is_deleted
+                                                   select new { role = r, user_role = ur }).ToListAsync();
+
+                foreach (var user_role in associated_user_roles)
+                {
+
+                    var user_role_dto = new UserRoleDto()
+                    {
+                        id = user_role.user_role.id,
+                        role_id = user_role.user_role.role_id,
+                        role_name = user_role.role.name
+                    };
+
+                    List<RolePermission> role_permissions = new List<RolePermission>();
+
+                    if (dbUser.is_admin == true || user_role.user_role.id == 1 || user_role.role.name.ToLower() == "administrators")
+                        role_permissions = await this.BuildGlobalAdminPermissions();
+                    else
+                        role_permissions = await _IContext.RolePermissions.Where(m => m.role_id == user_role.role.id).ToListAsync();
+
+                    foreach (var role_perm in role_permissions)
+                        user_role_dto.permissions.Add(await this.MapToPermissionDto(role_perm, null));
+
+
+                    dto.roles.Add(user_role_dto);
+                }
 
                 return new Response<AuthenticatedUserDto>(dto);
             }
@@ -932,6 +907,18 @@ public partial class UserModule : BaseERPModule, IUserModule
 
     public async Task<UserAdminListDto> MapToAdminListDto(User databaseModel, List<ModuleObjectDto> module_data)
     {
+        if(module_data == null)
+        {
+            var module_response = await _KVModule.GetModuleInfo();
+            if (!module_response.Success)
+            {
+                await LogError(50, this.GetType().Name, "MapToAdminListDto", new Exception("Could not load Module assemlby data"));
+                throw new Exception("Could not load Module assemlby data");
+            }
+
+            module_data = module_response.Data;
+        }
+
         var dto = new UserAdminListDto
         {
             id = databaseModel.id,
@@ -1012,11 +999,13 @@ public partial class UserModule : BaseERPModule, IUserModule
             updated_on_timezone = databaseModel.updated_on_timezone,
         };
 
-        var associated_module = module_data.Where(m => m.module_id == databaseModel.module_id).FirstOrDefault();
-        if (associated_module != null)
-            dto.module_name = associated_module.module_name;
-
-
+        if(!string.IsNullOrEmpty(databaseModel.module_id) && module_data != null && module_data.Count > 0)
+        {
+            var associated_module = module_data.Where(m => m.module_id == databaseModel.module_id).SingleOrDefault();
+            if (associated_module != null)
+                dto.module_name = associated_module.module_name;
+        }
+        
         return dto;
     }
 
@@ -1093,6 +1082,33 @@ public partial class UserModule : BaseERPModule, IUserModule
         throw new NotImplementedException();
     }
 
+    private async Task<List<RolePermission>> BuildGlobalAdminPermissions()
+    {
+        var modules = await _IContext.Modules.ToListAsync();
+      
+        List<RolePermission> permissions = new List<RolePermission>();
+
+        foreach (var module in modules)
+        {
+            permissions.Add(new RolePermission()
+            {
+                role_id = 1,
+                module_id = module.module_id,
+                read = true,
+                delete = true,
+                write = true,
+                edit = true,
+                id = 0,
+                created_by = "1",
+                updated_by = "1",
+                created_on = DateTime.UtcNow,
+                updated_on = DateTime.UtcNow,
+                is_deleted = false
+            });
+        }
+
+        return permissions;
+    }
 
     private class UserPassword
     {

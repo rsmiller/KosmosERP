@@ -15,14 +15,14 @@ import ProductionStatusCellRenderer from '@/components/ag-grid/production-status
 import { format } from 'date-fns';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
 import { PurchaseOrderLineDto } from '@/models/purchase-order-models';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import PageActionsComponent from '@/components/page-actions';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewProductionOrderPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
     const params = useParams();
     const [hasAccess, setHasAccess] = useState(true);
@@ -51,7 +51,7 @@ function ViewProductionOrderPage() {
                 return;
             }
 
-            const response = await productionOrderService.getByGuid(productionOrderId, keycloak.token || "");
+            const response = await productionOrderService.getByGuid(productionOrderId, auth.token || "");
             console.log(response)
 
             if (response.success && response.data) {
@@ -85,9 +85,9 @@ function ViewProductionOrderPage() {
         if(String(params.id) == undefined || String(params.id) == "")
             return;
 
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
         
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ProductionOrderModule,
           ERPModulePermission.Read,
@@ -105,7 +105,7 @@ function ViewProductionOrderPage() {
         hasInitialized.current = true;
 
         loadProductionOrder();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const formatDateString = (dateString: string | undefined): string => {
         if(!dateString || dateString.trim() === ""){

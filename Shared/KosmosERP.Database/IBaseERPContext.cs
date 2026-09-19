@@ -17,6 +17,7 @@ namespace KosmosERP.Database
         DbSet<ProductAttribute> ProductAttributes { get; set; }
         DbSet<Role> Roles { get; set; }
         DbSet<RolePermission> RolePermissions { get; set; }
+        DbSet<Module> Modules { get; set; }
         DbSet<ModulePermission> ModulePermissions { get; set; }
         DbSet<Vendor> Vendors { get; set; }
         DbSet<Customer> Customers { get; set; }

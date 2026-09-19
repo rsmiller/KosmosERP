@@ -21,13 +21,13 @@ import { ContactCreateCommand } from '@/models/contact-models';
 import CustomerCombobox, { CustomerComboboxRef } from '@/components/customer-combobox';
 import { contactService } from '@/services/contact-service';
 import SessionStorage from '@/components/session-storage';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function NewContactPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
     const [hasAccess, setHasAccess] = useState(true);
     const [hasWritePermission, setHasWritePermission] = useState(false);
@@ -72,7 +72,7 @@ function NewContactPage() {
 
         try
         {
-            await contactService.create(command, keycloak?.token || "").then((response) =>
+            await contactService.create(command, auth.token || "").then((response) =>
             {
                 if(response.success)
                 {
@@ -119,9 +119,9 @@ function NewContactPage() {
     }
 
     useEffect(() => {
-      if(keycloak.authenticated == false) return;
+      if(auth.authenticated == false) return;
 
-      const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+      const realmRoles = auth.roles || [];
       const hasPermission = permissionsService.HasPermission(
         ERPModules.ContactModule,
         ERPModulePermission.Write,
@@ -133,7 +133,7 @@ function NewContactPage() {
         return;
       }
       setHasWritePermission(true);
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     return (
         <form onChange={FormChange}>

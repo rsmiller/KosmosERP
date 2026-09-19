@@ -25,14 +25,14 @@ import { ColDef, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { BaseBOMData, BOMFindCommand } from '@/models/bom-models';
 import { bomService } from '@/services/bom-service';
 import VendorCombobox from '@/components/vendor-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewProductPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -59,14 +59,14 @@ function ViewProductPage() {
                 return;
             }
 
-            const response = await productService.getByGuid(productId, keycloak.token || "");
+            const response = await productService.getByGuid(productId, auth.token || "");
             if (response.success && response.data) {
                 setProduct(response.data);
                 
                 var bomFindCommand = new BOMFindCommand();
                 bomFindCommand.parent_product_id = response.data.id;
                 
-                await bomService.find(bomFindCommand, keycloak.token || "").then( (bom_response) =>
+                await bomService.find(bomFindCommand, auth.token || "").then( (bom_response) =>
                 {
                     setRowBOMData([]);
 
@@ -87,13 +87,13 @@ function ViewProductPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
         
         // Check permission
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ProductModule,
           ERPModulePermission.Read,
@@ -107,7 +107,7 @@ function ViewProductPage() {
         }
 
         loadProduct();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     if (loading) {
         return <div>Loading product...</div>;

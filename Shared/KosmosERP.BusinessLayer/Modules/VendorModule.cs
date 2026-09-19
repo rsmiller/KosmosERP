@@ -35,12 +35,12 @@ public class VendorModule : BaseERPModule, IVendorModule
     private readonly IBaseERPContext _Context;
     private readonly IAddressModule _AddressModule;
 
-    public VendorModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public VendorModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
 
-    public VendorModule(IBaseERPContext context, IAddressModule address_module, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public VendorModule(IBaseERPContext context, IAddressModule address_module, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _AddressModule = address_module;
@@ -58,6 +58,8 @@ public class VendorModule : BaseERPModule, IVendorModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         var general_vendor = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
@@ -73,79 +75,6 @@ public class VendorModule : BaseERPModule, IVendorModule
                 module_id = this.ModuleIdentifier.ToString()
             }, 1));
 
-            _Context.SaveChanges();
-        }
-
-        // Seed ModulePermissions for Vendor module
-        var existing_permissions = _Context.ModulePermissions.Any(m => m.module_id == this.ModuleIdentifier.ToString());
-
-        if (!existing_permissions)
-        {
-            var permissions = new List<ModulePermission>
-            {
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Read Vendors",
-                    internal_permission_name = VendorPermissions.Read,
-                    read = true,
-                    write = false,
-                    edit = false,
-                    delete = false,
-                    requires_admin = false,
-                    requires_management = false,
-                    requires_guest = false,
-                    is_active = true
-                }, 1),
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Create Vendors",
-                    internal_permission_name = VendorPermissions.Create,
-                    read = false,
-                    write = true,
-                    edit = false,
-                    delete = false,
-                    requires_admin = false,
-                    requires_management = false,
-                    requires_guest = false,
-                    is_active = true
-                }, 1),
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Edit Vendors",
-                    internal_permission_name = VendorPermissions.Edit,
-                    read = false,
-                    write = false,
-                    edit = true,
-                    delete = false,
-                    requires_admin = false,
-                    requires_management = false,
-                    requires_guest = false,
-                    is_active = true
-                }, 1),
-                CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
-                {
-                    module_id = this.ModuleIdentifier.ToString(),
-                    module_name = this.ModuleName,
-                    permission_name = "Delete Vendors",
-                    internal_permission_name = VendorPermissions.Delete,
-                    read = false,
-                    write = false,
-                    edit = false,
-                    delete = true,
-                    requires_admin = false,
-                    requires_management = false,
-                    requires_guest = false,
-                    is_active = true
-                }, 1)
-            };
-
-            _Context.ModulePermissions.AddRange(permissions);
             _Context.SaveChanges();
         }
     }

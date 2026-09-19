@@ -15,14 +15,14 @@ import { poReceiveService } from '@/services/po-receive-service';
 import { DocumentUploadRevisionDto } from '@/models/document-models';
 import { DateTimeRender } from '@/components/ag-grid/date-time-renderer';
 import ViewDocumentDialog from '@/components/dialogs/view-document.dialog';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useParams, useRouter } from 'next/navigation';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewPOReceivePage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const params = useParams();
     const router = useRouter();
@@ -48,9 +48,9 @@ function ViewPOReceivePage() {
     const hasInitialized = useRef(false);
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
             ERPModules.PurchaseOrderModule,
             ERPModulePermission.Write,
@@ -70,7 +70,7 @@ function ViewPOReceivePage() {
             return;
         }
 
-        poReceiveService.getByGuid(poReceiveId, keycloak.token || "").then(response => {
+        poReceiveService.getByGuid(poReceiveId, auth.token || "").then(response => {
             if (!response.success || !response.data) {
                 setError('Error fetching PO Receive data');
                 return;
@@ -82,7 +82,7 @@ function ViewPOReceivePage() {
 
             if(response.data.purchase_order_id)
             {
-                purchaseOrderService.get(response.data.purchase_order_id, keycloak.token || "").then((pageOrderResponse) => {
+                purchaseOrderService.get(response.data.purchase_order_id, auth.token || "").then((pageOrderResponse) => {
                     if (!pageOrderResponse.success || !pageOrderResponse.data) {
                         setError('Error fetching Purchase Order data');
                         return;
@@ -101,7 +101,7 @@ function ViewPOReceivePage() {
 
         });
 
-    }, [keycloak.authenticated, router, params.id]);
+    }, [auth.authenticated, router, params.id]);
 
     useEffect(() => {
 

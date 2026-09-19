@@ -27,7 +27,7 @@ import { leadService } from '@/services/lead-service';
 import { CountryDto } from '@/models/country-models';
 import { countryService } from '@/services/country-service';
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
@@ -37,7 +37,7 @@ function EditLeadPage() {
     const params = useParams();
     const router = useRouter();
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
     const [hasEditPermission, setHasEditPermission] = useState(false);
     const [hasDeletePermission, setHasDeletePermission] = useState(false);
@@ -74,7 +74,7 @@ function EditLeadPage() {
                 return;
             }
 
-            const response = await leadService.getByGuid(leadId, keycloak.token || "");
+            const response = await leadService.getByGuid(leadId, auth.token || "");
             if (response.success && response.data) {
                 setLead(response.data);
                 
@@ -115,9 +115,9 @@ function EditLeadPage() {
 
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.LeadModule,
           ERPModulePermission.Read,
@@ -150,12 +150,12 @@ function EditLeadPage() {
         hasInitialized.current = true;
 
         loadLead();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
     const fetchCountry = async (iso: string): Promise<CountryDto | undefined> => {
         try {
             setLoading(true);
-            const response = await countryService.getByISOAsync(iso, keycloak.token || "");
+            const response = await countryService.getByISOAsync(iso, auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {
@@ -201,7 +201,7 @@ function EditLeadPage() {
 
       try
       {
-          await leadService.delete(command, keycloak.token || "").then((response) => {
+          await leadService.delete(command, auth.token || "").then((response) => {
               //console.log(response)
               if(response.success)
               {
@@ -250,7 +250,7 @@ function EditLeadPage() {
         //return;
         try
         {
-            await leadService.update(command, keycloak.token || "").then((response) =>
+            await leadService.update(command, auth.token || "").then((response) =>
             {
                 if(response.success)
                 {

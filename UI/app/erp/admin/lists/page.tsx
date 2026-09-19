@@ -13,12 +13,12 @@ import { AgGridReact } from 'ag-grid-react';
 import { ModuleNameRenderer } from '@/components/ag-grid/module-name-renderer';
 import { useForm } from 'react-hook-form';
 import ModuleListCombobox, { ModuleListComboboxRef } from '@/components/module-list-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminListsPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const [rowData, setRowData] = useState<KeyValueDto[]>([]);
     const [page, setPage] = useState<number>(1);
@@ -48,14 +48,14 @@ function AdminListsPage() {
     } = useForm<KeyValueCreateCommand>();
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current)
             return;
 
         hasInitialized.current = true;
 
-        keyValueService.getModuleAndKeyValueTypes(keycloak.token || "").then( (response) => 
+        keyValueService.getModuleAndKeyValueTypes(auth.token || "").then( (response) => 
         {
             //console.log(response)
             if(response.success && response.data)
@@ -63,10 +63,10 @@ function AdminListsPage() {
                 setModuleData(response.data);
             }
         });
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         const fetchData = async () => {
             let pageStart = (page * pageSize) - pageSize + 1;
@@ -80,7 +80,7 @@ function AdminListsPage() {
 
             let command = new KeyValueFindCommand();
             
-            await keyValueService.find(command, keycloak.token || "", pageStart, pageSize).then( (response) => {
+            await keyValueService.find(command, auth.token || "", pageStart, pageSize).then( (response) => {
                 //console.log(response);
                 setLoading(false);
 
@@ -106,7 +106,7 @@ function AdminListsPage() {
         
         fetchData();
     
-    }, [page, pageSize, keycloak.authenticated]);
+    }, [page, pageSize, auth.authenticated]);
 
     const onPageEvent = async (page: any) =>
     {
@@ -126,7 +126,7 @@ function AdminListsPage() {
         command.id = event.data.id;
         command.value = event.value;
 
-        keyValueService.update(command, keycloak.token || "").then( (response) => {
+        keyValueService.update(command, auth.token || "").then( (response) => {
             //console.log(response);
         });
     }
@@ -144,7 +144,7 @@ function AdminListsPage() {
         let command = new KeyValueDeleteCommand();
         command.id = selectedLineId;
 
-        keyValueService.delete(command, keycloak.token || "").then( (response) => {
+        keyValueService.delete(command, auth.token || "").then( (response) => {
             //console.log(response);
 
             setIsWorking(false);
@@ -171,7 +171,7 @@ function AdminListsPage() {
         command.key = watch("key");
         command.value = watch("value");
 
-        keyValueService.create(command, keycloak.token || "").then( (response) => {
+        keyValueService.create(command, auth.token || "").then( (response) => {
             //console.log(response);
 
             setIsWorking(false);

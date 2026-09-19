@@ -23,7 +23,7 @@ import { ContactEditCommand, ContactDto, ContactDeleteCommand } from '@/models/c
 import CustomerCombobox, { CustomerComboboxRef } from '@/components/customer-combobox';
 import { contactService } from '@/services/contact-service';
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -32,7 +32,7 @@ function EditContactPage() {
     const params = useParams();
     const router = useRouter();
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
     const [hasEditPermission, setHasEditPermission] = useState(false);
     const [hasDeletePermission, setHasDeletePermission] = useState(false);
@@ -70,7 +70,7 @@ function EditContactPage() {
                 return;
             }
 
-            const response = await contactService.getByGuid(contactId, keycloak.token || "");
+            const response = await contactService.getByGuid(contactId, auth.token || "");
             if (response.success && response.data) {
                 setContact(response.data);
                 
@@ -98,9 +98,9 @@ function EditContactPage() {
     // Load contact data on component mount
     useEffect(() => {
 
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ContactModule,
           ERPModulePermission.Read,
@@ -134,7 +134,7 @@ function EditContactPage() {
         
 
         loadContact();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
     const handleCustomerSelect = (value: any) => {
       setValue('customer_id', value?.id);
@@ -147,7 +147,7 @@ function EditContactPage() {
 
         try
         {
-          await contactService.delete(command, keycloak.token || "").then((response) => {
+          await contactService.delete(command, auth.token || "").then((response) => {
               if(response.success)
               {
                 router.push("/erp/contacts/");
@@ -182,7 +182,7 @@ function EditContactPage() {
 
         try
         {
-            await contactService.update(command, keycloak.token || "").then((response) =>
+            await contactService.update(command, auth.token || "").then((response) =>
             {
                 if(response.success)
                 {

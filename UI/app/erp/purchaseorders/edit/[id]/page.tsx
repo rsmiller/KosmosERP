@@ -20,7 +20,7 @@ import HeaderTypeSelectorCombobox from '@/components/header-type-selector';
 import PageActionsComponent from '@/components/page-actions';
 import { purchaseOrderService } from '@/services/purchase-order-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useParams, useRouter } from 'next/navigation';
 import AddPurchaseOrderLineDialog, { AddPurchaseOrderLineDialogRef } from '@/components/dialogs/add-purchase-order-line';
 
@@ -32,7 +32,7 @@ function EditPurchaseOrdersPage() {
   const params = useParams();
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
   const [hasDeletePermission, setHasDeletePermission] = useState(false);
@@ -73,7 +73,7 @@ function EditPurchaseOrdersPage() {
           return;
         }
 
-        const response = await purchaseOrderService.getByGuid(purchaseOrderId, keycloak?.token || "");
+        const response = await purchaseOrderService.getByGuid(purchaseOrderId, auth.token || "");
         if (response.success && response.data) {
           setPurchaseOrder(response.data);
           
@@ -115,9 +115,9 @@ function EditPurchaseOrdersPage() {
 
   useEffect(() => {
 
-    if(keycloak.authenticated == false) return; 
+    if(auth.authenticated == false) return; 
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.PurchaseOrderModule,
       ERPModulePermission.Read,
@@ -150,7 +150,7 @@ function EditPurchaseOrdersPage() {
     
 
     loadPurchaseOrder();
-  }, [params.id, setValue, setPurchaseOrder, keycloak.authenticated]);
+  }, [params.id, setValue, setPurchaseOrder, auth.authenticated]);
 
 
   const RenderLines = (purchase_order_lines: PurchaseOrderLineDto[]) =>
@@ -199,7 +199,7 @@ function EditPurchaseOrdersPage() {
     //return;
 
     try {
-      await purchaseOrderService.delete(command, keycloak?.token || "").then((response) => {
+      await purchaseOrderService.delete(command, auth.token || "").then((response) => {
         if (response.success) {
           router.push("/erp/purchaseorders/");
         } else {
@@ -248,7 +248,7 @@ function EditPurchaseOrdersPage() {
     //return;
 
     try {
-      await purchaseOrderService.update(command, keycloak?.token || "").then((response) => {
+      await purchaseOrderService.update(command, auth.token || "").then((response) => {
         console.log(response)
 
         if (response.success) {
@@ -278,9 +278,9 @@ function EditPurchaseOrdersPage() {
     {
       if(id && purchase_order_header_id)
       {
-        await purchaseOrderService.deleteLine(command, keycloak?.token || "").then( async (response) => 
+        await purchaseOrderService.deleteLine(command, auth.token || "").then( async (response) => 
         {
-          await purchaseOrderService.get(purchase_order_header_id, keycloak?.token || "").then((line_response) => {
+          await purchaseOrderService.get(purchase_order_header_id, auth.token || "").then((line_response) => {
             if (line_response.success && line_response.data && line_response.data.purchase_order_lines) 
             {
               RenderLines(line_response.data.purchase_order_lines);
@@ -321,7 +321,7 @@ function EditPurchaseOrdersPage() {
 
     try
     {
-      await purchaseOrderService.createLine(line, keycloak?.token || "").then( (response) =>
+      await purchaseOrderService.createLine(line, auth.token || "").then( (response) =>
       {
         //console.log(response)
         if(response.success && response.data)

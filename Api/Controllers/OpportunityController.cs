@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Opportunity.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Opportunity.Command.Create;
@@ -24,7 +25,7 @@ public class OpportunityController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "crm_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "crm_read")]
     [HttpGet("GetOpportunity", Name = "GetOpportunity")]
     [ProducesResponseType(typeof(Response<OpportunityDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,7 +39,7 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "crm_read")]
     [HttpGet("GetOpportunityByGuid", Name = "GetOpportunityByGuid")]
     [ProducesResponseType(typeof(Response<OpportunityDto>), 200)]
     [ProducesResponseType(400)]
@@ -95,7 +96,7 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_create")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "crm_create")]
     [HttpPost("CreateOpportunityLine", Name = "CreateOpportunityLine")]
     [ProducesResponseType(typeof(Response<OpportunityLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -111,7 +112,7 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "crm_edit")]
     [HttpPut("UpdateOpportunity", Name = "UpdateOpportunity")]
     [ProducesResponseType(typeof(Response<OpportunityDto>), 200)]
     [ProducesResponseType(400)]
@@ -127,7 +128,7 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "crm_edit")]
     [HttpPut("UpdateOpportunityLine", Name = "UpdateOpportunityLine")]
     [ProducesResponseType(typeof(Response<OpportunityLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -143,7 +144,7 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "crm_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "crm_delete")]
     [HttpPost("DeleteOpportunity", Name = "DeleteOpportunity")]
     [ProducesResponseType(typeof(Response<OpportunityDto>), 200)]
     [ProducesResponseType(400)]
@@ -159,7 +160,7 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
     
-    [Authorize(Roles = "crm_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "crm_delete")]
     [HttpPost("DeleteOpportunityLine", Name = "DeleteOpportunityLine")]
     [ProducesResponseType(typeof(Response<OpportunityLineDto>), 200)]
     [ProducesResponseType(400)]

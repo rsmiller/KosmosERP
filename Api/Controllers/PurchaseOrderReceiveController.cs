@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -25,7 +26,7 @@ public class PurchaseOrderReceiveController : ERPApiController
     }
 
     
-    [Authorize(Roles = "purchase_order_receive_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_receive_read")]
     [HttpGet("GetPurchaseOrderReceiveHeader", Name = "GetPurchaseOrderReceiveHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_receive_read")]
     [HttpGet("GetPurchaseOrderReceiveHeaderByGuid", Name = "GetPurchaseOrderReceiveHeaderByGuid")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_receive_read")]
     [HttpGet("GetPurchaseOrderReceiveLine", Name = "GetPurchaseOrderReceiveLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -67,7 +68,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_receive_read")]
     [HttpGet("GetDtoByPOId", Name = "GetDtoByPOId")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -82,7 +83,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "purchase_order_receive_read")]
     [HttpPost("FindPurchaseOrderReceiveHeader", Name = "FindPurchaseOrderReceiveHeader")]
     [ProducesResponseType(typeof(PagingResult<PurchaseOrderReceiveHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -110,7 +111,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "purchase_order_receive_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "purchase_order_receive_write")]
     [HttpPost("CreatePurchaseOrderReceiveHeader", Name = "CreatePurchaseOrderReceiveHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -125,7 +126,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "purchase_order_receive_write")]
     [HttpPost("CreatePurchaseOrderReceiveLine", Name = "CreatePurchaseOrderReceiveLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -140,7 +141,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "purchase_order_receive_write")]
     [HttpPost("CreatePurchaseOrderReceiveUpload", Name = "CreatePurchaseOrderReceiveUpload")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveUploadDto>), 200)]
     [ProducesResponseType(400)]
@@ -155,7 +156,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "purchase_order_receive_edit")]
     [HttpPut("UpdatePurchaseOrderReceiveHeader", Name = "UpdatePurchaseOrderReceiveHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -170,7 +171,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "purchase_order_receive_edit")]
     [HttpPut("UpdatePurchaseOrderReceiveLine", Name = "UpdatePurchaseOrderReceiveLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -185,7 +186,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "purchase_order_receive_delete")]
     [HttpPost("DeletePurchaseOrderReceiveHeader", Name = "DeletePurchaseOrderReceiveHeader")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -200,7 +201,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "purchase_order_receive_delete")]
     [HttpPost("DeletePurchaseOrderReceiveLine", Name = "DeletePurchaseOrderReceiveLine")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -216,7 +217,7 @@ public class PurchaseOrderReceiveController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "purchase_order_receive_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "purchase_order_receive_delete")]
     [HttpPost("DeletePurchaseOrderReceiveUpload", Name = "DeletePurchaseOrderReceiveUpload")]
     [ProducesResponseType(typeof(Response<PurchaseOrderReceiveUploadDto>), 200)]
     [ProducesResponseType(400)]

@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Shipment.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Shipment.Command.Create;
@@ -26,7 +27,7 @@ public class ShipmentController : ERPApiController
     }
 
     
-    [Authorize(Roles = "shipping_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "shipping_read")]
     [HttpGet("GetShipmentHeader", Name = "GetShipmentHeader")]
     [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -40,7 +41,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "shipping_read")]
     [HttpGet("GetShipmentHeaderByGuid", Name = "GetShipmentHeaderByGuid")]
     [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -54,7 +55,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "shipping_read")]
     [HttpGet("GetShipmentLine", Name = "GetShipmentLine")]
     [ProducesResponseType(typeof(Response<ShipmentLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -68,7 +69,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "shipping_read")]
     [HttpPost("FindShipmentHeader", Name = "FindShipmentHeader")]
     [ProducesResponseType(typeof(PagingResult<ShipmentHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -96,7 +97,7 @@ public class ShipmentController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "shipping_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "shipping_read")]
     [HttpGet("GetReadyToShip", Name = "GetReadyToShip")]
     [ProducesResponseType(typeof(Response<vw_ReadyToShip>), 200)]
     [ProducesResponseType(400)]
@@ -107,7 +108,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "shipping_write")]
     [HttpPost("CreateShipmentHeader", Name = "CreateShipmentHeader")]
     [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -122,7 +123,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "shipping_write")]
     [HttpPost("CreateShipmentLine", Name = "CreateShipmentLine")]
     [ProducesResponseType(typeof(Response<ShipmentLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -137,7 +138,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "shipping_edit")]
     [HttpPut("UpdateShipmentHeader", Name = "UpdateShipmentHeader")]
     [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -152,7 +153,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "shipping_edit")]
     [HttpPut("UpdateShipmentLine", Name = "UpdateShipmentLine")]
     [ProducesResponseType(typeof(Response<ShipmentLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -167,7 +168,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "shipping_delete")]
     [HttpPost("DeleteShipmentHeader", Name = "DeleteShipmentHeader")]
     [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -182,7 +183,7 @@ public class ShipmentController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "shipping_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "shipping_delete")]
     [HttpPost("DeleteShipmentLine", Name = "DeleteShipmentLine")]
     [ProducesResponseType(typeof(Response<ShipmentHeaderDto>), 200)]
     [ProducesResponseType(400)]

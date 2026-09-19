@@ -28,7 +28,7 @@ public class ChartOfAccountModule : BaseERPModule, IChartOfAccountModule
 
     private IBaseERPContext _Context;
 
-    public ChartOfAccountModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ChartOfAccountModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -45,6 +45,8 @@ public class ChartOfAccountModule : BaseERPModule, IChartOfAccountModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

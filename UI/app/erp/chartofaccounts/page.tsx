@@ -12,13 +12,13 @@ import { ChartOfAccountFindCommand, ChartOfAccountListDto, AccountTypeNames } fr
 import { chartOfAccountService } from '@/services/chart-of-account-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ChartOfAccountsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
@@ -43,7 +43,7 @@ function ChartOfAccountsPage() {
 
     let command = new ChartOfAccountFindCommand();
 
-    await chartOfAccountService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await chartOfAccountService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
       setLoading(false);
 
       if(response.success && response.data) {
@@ -66,13 +66,13 @@ function ChartOfAccountsPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.ChartOfAccountModule,
       ERPModulePermission.Read,
@@ -93,7 +93,7 @@ function ChartOfAccountsPage() {
 
     fetchData();
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/chartofaccounts/new");

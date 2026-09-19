@@ -37,13 +37,13 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
     private readonly IBaseERPContext _Context;
     private IMemoryCacheService<KeyValueStore> _KVMemoryService;
 
-    public OpportunityModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public OpportunityModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
 
     public OpportunityModule(IBaseERPContext context, IMemoryCacheService<KeyValueStore> kvMService, 
-                                ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                                ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _KVMemoryService = kvMService;
@@ -57,10 +57,12 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         {
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
-                name = "CRM Users",
+                name = "CRM Administrators",
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         

@@ -29,7 +29,7 @@ public class CreditMemoModule : BaseERPModule, ICreditMemoModule
 
     private IBaseERPContext _Context;
 
-    public CreditMemoModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public CreditMemoModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -46,6 +46,8 @@ public class CreditMemoModule : BaseERPModule, ICreditMemoModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

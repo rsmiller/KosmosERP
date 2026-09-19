@@ -15,13 +15,13 @@ import AddressRenderer from '@/components/ag-grid/address-renderer';
 import ShippingCountsRenderer from '@/components/ag-grid/shipping-counts-renderer';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdEditDocument, MdOutlinePageview, MdPreview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ShipmentsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
 
   const router = useRouter();
   const hasInitialized = useRef(false);
@@ -40,14 +40,14 @@ function ShipmentsPage() {
   
 
   useEffect(() => {
-      if(keycloak.authenticated == false) return;
+      if(auth.authenticated == false) return;
   
       if (hasInitialized.current) return;
   
       hasInitialized.current = true;
       
       // Check permission
-      const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+      const realmRoles = auth.roles || [];
       const hasPermission = permissionsService.HasPermission(
         ERPModules.ShippingModule,
         ERPModulePermission.Read,
@@ -68,7 +68,7 @@ function ShipmentsPage() {
   
       getTableData();
       getReadyToShipTableData();
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/shipments/new");
@@ -97,7 +97,7 @@ function ShipmentsPage() {
     
     setLoadingReadyToShip(true);
 
-    await shipmentService.getReadyToShip(keycloak?.token || "").then((response) => {
+    await shipmentService.getReadyToShip(auth.token || "").then((response) => {
       //console.log("Ready to ship response:", response);
       if(response.success && response.data) 
       {
@@ -122,7 +122,7 @@ function ShipmentsPage() {
 
     let command = new ShipmentHeaderFindCommand();
 
-    await shipmentService.find(command, keycloak?.token || "", pageStart, pageSize).then((response) => {
+    await shipmentService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
 
       setLoading(false);
 

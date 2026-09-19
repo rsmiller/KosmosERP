@@ -46,12 +46,12 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
     private IBaseERPContext _Context;
     private IStorageProvider _StorageProvider;
 
-    public DocumentUploadModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public DocumentUploadModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
 
-    public DocumentUploadModule(IBaseERPContext context, IStorageProvider storageProvider, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public DocumentUploadModule(IBaseERPContext context, IStorageProvider storageProvider, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _StorageProvider = storageProvider;
@@ -70,6 +70,8 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

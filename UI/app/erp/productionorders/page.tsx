@@ -24,13 +24,13 @@ import { getDay } from 'date-fns/getDay'
 import { enUS } from 'date-fns/locale/en-US';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ProductionOrdersPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
@@ -77,14 +77,14 @@ function ProductionOrdersPage() {
   };
 
   useEffect(() => {
-      if(keycloak.authenticated == false) return;
+      if(auth.authenticated == false) return;
 
       if (hasInitialized.current) return;
 
       hasInitialized.current = true;
 
       // Check permission
-      const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+      const realmRoles = auth.roles || [];
       const hasPermission = permissionsService.HasPermission(
         ERPModules.ProductionOrderModule,
         ERPModulePermission.Read,
@@ -105,7 +105,7 @@ function ProductionOrdersPage() {
 
       getTableData();
       
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const getTableData = async () => {
     let pageStart = (page * pageSize) - pageSize;
@@ -120,7 +120,7 @@ function ProductionOrdersPage() {
 
     let command = new ProductionOrderHeaderFindCommand();
 
-    await productionOrderService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await productionOrderService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
 
       setLoading(false);
 

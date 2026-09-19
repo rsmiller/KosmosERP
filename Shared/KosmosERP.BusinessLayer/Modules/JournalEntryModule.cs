@@ -35,12 +35,12 @@ public class JournalEntryModule : BaseERPModule, IJournalEntryModule
     private IBaseERPContext _Context;
     private IFinancialTransactionModule? _FinancialTransactionModule;
 
-    public JournalEntryModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public JournalEntryModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
 
-    public JournalEntryModule(IBaseERPContext context, IFinancialTransactionModule financialTransactionModule, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public JournalEntryModule(IBaseERPContext context, IFinancialTransactionModule financialTransactionModule, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _FinancialTransactionModule = financialTransactionModule;
@@ -58,6 +58,8 @@ public class JournalEntryModule : BaseERPModule, IJournalEntryModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

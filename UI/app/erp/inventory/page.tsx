@@ -13,7 +13,7 @@ import { InventoryDto } from '@/models/inventory-models';
 import { inventoryService } from '@/services/inventory-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { FaCalculator, FaPlus } from 'react-icons/fa6';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 
@@ -23,7 +23,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function InventoryPage() {
 
   const router = useRouter();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
   const [rowData, setRowData] = useState<InventoryDto[]>([]);
@@ -34,14 +34,14 @@ function InventoryPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.InventoryModule,
       ERPModulePermission.Read,
@@ -56,7 +56,7 @@ function InventoryPage() {
 
     getTableData();
     
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
 
   const getTableData = async () =>
@@ -65,7 +65,7 @@ function InventoryPage() {
     setLoading(true); // Show loading
 
     try {
-      const response = await inventoryService.getCounts(keycloak.token || "");
+      const response = await inventoryService.getCounts(auth.token || "");
       
       setLoading(false);
 

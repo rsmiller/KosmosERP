@@ -17,11 +17,11 @@ import DatePicker from 'react-datepicker';
 import SalesOrdersLinesComponent from '@/components/lists/sales-order-lines-component';
 import { CurrencyHelper } from '@/helpers/CurrencyHelper';
 import PageActionsComponent from '@/components/page-actions';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 function EditSubscriptionsPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
     const [hasAccess, setHasAccess] = useState(true);
@@ -74,7 +74,7 @@ function EditSubscriptionsPage() {
                 return;
             }
     
-            const response = await subscriptionService.getByGuid(subscriptionId, keycloak?.token || "");
+            const response = await subscriptionService.getByGuid(subscriptionId, auth.token || "");
             if (response.success && response.data) {
                 //console.log(response)
                 setSubscription(response.data);
@@ -108,9 +108,9 @@ function EditSubscriptionsPage() {
 
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.SubscriptionModule,
           ERPModulePermission.Read,
@@ -143,7 +143,7 @@ function EditSubscriptionsPage() {
         
     
         loadSubscription();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
 
     const DateFormatter = (date: any) =>
@@ -229,7 +229,7 @@ function EditSubscriptionsPage() {
         command.start_date = watch("start_date");
 
         try {
-            await subscriptionService.update(command, keycloak?.token || "").then((response) => {
+            await subscriptionService.update(command, auth.token || "").then((response) => {
             if (response.success && response.data) {
 
                 setSubscription(response.data);
@@ -253,7 +253,7 @@ function EditSubscriptionsPage() {
         command.id = subscription?.id;
     
         try {
-            await subscriptionService.delete(command, keycloak?.token || "").then((response) => {
+            await subscriptionService.delete(command, auth.token || "").then((response) => {
                 if (response.success) {
                     router.push("/erp/subscriptions/");
                 } else {

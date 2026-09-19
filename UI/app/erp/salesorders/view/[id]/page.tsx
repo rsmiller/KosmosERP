@@ -28,13 +28,13 @@ import { CurrencyFormatter} from '@/components/ag-grid/currency-formatter';
 import { useParams } from 'next/navigation';
 import { orderService } from '@/services/order-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useRouter } from 'next/navigation';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewSalesOrderPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const params = useParams();
   const [hasAccess, setHasAccess] = useState(true);
@@ -50,9 +50,9 @@ function ViewSalesOrderPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.OrderModule,
       ERPModulePermission.Read,
@@ -63,7 +63,7 @@ function ViewSalesOrderPage() {
       router.push('/erp');
       return;
     }
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const loadSalesOrder = async () => {
       try {
@@ -75,7 +75,7 @@ function ViewSalesOrderPage() {
           return;
         }
 
-        const response = await orderService.getByGuid(salesOrderId, keycloak?.token || "");
+        const response = await orderService.getByGuid(salesOrderId, auth.token || "");
         //console.log(response)
         if (response.success && response.data) {
           setSalesOrder(response.data);
@@ -96,14 +96,14 @@ function ViewSalesOrderPage() {
 
   useEffect(() => {
 
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
 
     loadSalesOrder();
-  }, [params.id, keycloak.authenticated]);
+  }, [params.id, auth.authenticated]);
 
   const RenderLines = (order_lines: OrderLineDto[]) => {
     setRowData(order_lines);

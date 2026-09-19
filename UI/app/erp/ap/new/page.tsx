@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
 
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import PageActionsComponent from "@/components/page-actions";
 
@@ -41,7 +41,7 @@ class SuperCoolObjectDto
 
 function NewAPPage() {
     const router = useRouter();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
 
     const [loading, setLoading] = useState(true);
@@ -82,9 +82,9 @@ function NewAPPage() {
 
       useEffect(() => {
     
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
     
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.APModule,
           ERPModulePermission.Write,
@@ -107,7 +107,7 @@ function NewAPPage() {
         setObjectTypeCollection(types);
 
 
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     const handleReceivedDateChange = (date: Date | null) => {
         setValue('invoice_received_date', date || undefined);
@@ -173,7 +173,7 @@ function NewAPPage() {
         //return;
 
         setSaving(true);
-        apInvoiceService.create(command, keycloak?.token || "").then((response) => {
+        apInvoiceService.create(command, auth.token || "").then((response) => {
             setSaving(false);
             if (response.success) {
                 setSuccessSaved(true);
@@ -252,7 +252,7 @@ function NewAPPage() {
                 let command = new PurchaseOrderHeaderFindCommand();
                 command.wildcard = inputValue;
 
-                purchaseOrderService.find(command, keycloak?.token || "").then((response) =>
+                purchaseOrderService.find(command, auth.token || "").then((response) =>
                 {
                     if(response.success && response.data)
                     {
@@ -271,7 +271,7 @@ function NewAPPage() {
                 let command = new OrderHeaderFindCommand();
                 command.wildcard = inputValue;
 
-                orderService.find(command, keycloak?.token || "").then((response) =>
+                orderService.find(command, auth.token || "").then((response) =>
                 {
                     if(response.success && response.data)
                     {
@@ -290,7 +290,7 @@ function NewAPPage() {
                 let command = new ARInvoiceHeaderFindCommand();
                 command.wildcard = inputValue;
 
-                arInvoiceService.find(command, keycloak?.token || "").then((response) =>
+                arInvoiceService.find(command, auth.token || "").then((response) =>
                 {
                     if(response.success && response.data)
                     {

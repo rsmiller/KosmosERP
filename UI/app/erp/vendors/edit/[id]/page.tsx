@@ -28,13 +28,13 @@ import DatePicker from 'react-datepicker';
 import { vendorService } from '@/services/vendor-service';
 import NewAddressBlock, { NewAddressBlockRef, NewAddressBlockResponse } from '@/components/new-address-block';
 import VendorCategoriesCombobox, { VendorCategoriesComboboxRef } from '@/components/vendor-categories-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function EditVendorsPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const params = useParams();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
@@ -54,9 +54,9 @@ function EditVendorsPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.VendorModule,
       ERPModulePermission.Read,
@@ -83,7 +83,7 @@ function EditVendorsPage() {
       realmRoles
     );
     setHasDeletePermission(canDelete);
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const {
     register,
@@ -128,7 +128,7 @@ function EditVendorsPage() {
           return;
         }
 
-        const response = await vendorService.getByGuid(vendorId, keycloak?.token || "");
+        const response = await vendorService.getByGuid(vendorId, auth.token || "");
         //console.log(response);
 
         if (response.success && response.data) {
@@ -160,14 +160,14 @@ function EditVendorsPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
 
     loadVendor();
-  }, [params.id, setValue, keycloak.authenticated]);
+  }, [params.id, setValue, auth.authenticated]);
 
 
   const IsDirty = (formName: any) => {
@@ -214,7 +214,7 @@ function EditVendorsPage() {
     command.id = vendor?.id;
 
     try {
-      await vendorService.delete(command, keycloak?.token || "").then((response) => {
+      await vendorService.delete(command, auth.token || "").then((response) => {
         if (response.success) {
           router.push("/erp/vendors/");
         } else {
@@ -260,7 +260,7 @@ function EditVendorsPage() {
     //return;
 
     try {
-      await vendorService.update(command, keycloak?.token || "").then((response) => {
+      await vendorService.update(command, auth.token || "").then((response) => {
         if (response.success) {
           setSuccessSaved(true);
           setFailedSaved(false);

@@ -2,7 +2,7 @@
 
 import SessionStorage from "@/components/session-storage";
 import { userService } from "@/services/user-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useEffect, useState, useRef } from "react";
 import { AllCommunityModule, ColDef, ModuleRegistry } from "ag-grid-community";
 import { RoleCreateCommand, RoleDto } from "@/models/user-models";
@@ -16,7 +16,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 
 function AdminRolesPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
 
@@ -47,13 +47,13 @@ function AdminRolesPage() {
 
     
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
         setLoading(true);
-        userService.getRoles(keycloak?.token || "").then( (role_response) => 
+        userService.getRoles(auth.token || "").then( (role_response) => 
         {
             //console.log("getRoles:", role_response);
 
@@ -63,7 +63,7 @@ function AdminRolesPage() {
             }
             
 
-            keyValueService.getModuleInfo(keycloak.token || "").then( (module_response) =>
+            keyValueService.getModuleInfo(auth.token || "").then( (module_response) =>
             {
                 //console.log("getModuleInfo:", module_response);
                 
@@ -96,7 +96,7 @@ function AdminRolesPage() {
                 }
             });
         });
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     
     useEffect(() => {
@@ -126,7 +126,7 @@ function AdminRolesPage() {
         let command = new RoleCreateCommand();
         command.role_name = watch("role_name");
 
-        userService.createRole(command, keycloak?.token || "").then( (response) => {
+        userService.createRole(command, auth.token || "").then( (response) => {
             setIsDialogOpen(false);
             
             if(response.success && response.data != undefined)

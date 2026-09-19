@@ -35,7 +35,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
     private IPaymentProviderFactory _PaymentFactory;
     private ILogProviderFactory _LogProviderFactory;
 
-    public ProductionOrderModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ProductionOrderModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _LogProviderFactory = logProviderFactory;
@@ -45,7 +45,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
                                     IMessagePublisherSettings messageSettings,
                                     IMemoryCacheService<Customer> customerMemService,
                                     IPaymentProviderFactory providerFactory, 
-                                    ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                                    ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _KVMemoryService = kvMService;
@@ -67,6 +67,8 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
 

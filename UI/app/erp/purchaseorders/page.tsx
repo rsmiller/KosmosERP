@@ -6,21 +6,21 @@ import '../../styles/page.component.css'
 import { Button } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
 import PurchaseOrdersListComponentPage from '@/components/lists/purchase-orders-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useEffect, useState } from 'react';
 
 
 function PurchaseOrdersPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    if (keycloak.authenticated == false) return;
+    if (auth.authenticated == false) return;
 
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.PurchaseOrderModule,
       ERPModulePermission.Read,
@@ -32,7 +32,7 @@ function PurchaseOrdersPage() {
       router.push('/erp');
       return;
     }
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/purchaseorders/new");

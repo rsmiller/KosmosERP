@@ -36,12 +36,12 @@ import { orderService } from '@/services/order-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { format } from 'date-fns';
 import AddSalesOrderLineDialog, { AddSalesOrderLineDialogRef } from '@/components/dialogs/add-sales-order-line';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function EditSalesOrderPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const params = useParams();
   const router = useRouter();
 
@@ -69,9 +69,9 @@ function EditSalesOrderPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.OrderModule,
       ERPModulePermission.Read,
@@ -98,7 +98,7 @@ function EditSalesOrderPage() {
       realmRoles
     );
     setHasDeletePermission(canDelete);
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const {
     register,
@@ -120,7 +120,7 @@ function EditSalesOrderPage() {
           return;
         }
 
-        const response = await orderService.getByGuid(salesOrderId, keycloak?.token || "");
+        const response = await orderService.getByGuid(salesOrderId, auth.token || "");
         console.log(response)
         if (response.success && response.data) {
           setSalesOrder(response.data);
@@ -172,7 +172,7 @@ function EditSalesOrderPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
@@ -180,7 +180,7 @@ function EditSalesOrderPage() {
     
 
     loadSalesOrder();
-  }, [params.id, setValue, keycloak.authenticated]);
+  }, [params.id, setValue, auth.authenticated]);
 
   const RenderLines = (order_lines: OrderLineDto[]) => {
     setRowData(order_lines);
@@ -219,7 +219,7 @@ function EditSalesOrderPage() {
     command.id = salesOrder?.id;
 
     try {
-      await orderService.delete(command, keycloak?.token || "").then((response) => {
+      await orderService.delete(command, auth.token || "").then((response) => {
         if (response.success) {
           router.push("/erp/salesorders/");
         } else {
@@ -269,7 +269,7 @@ function EditSalesOrderPage() {
     command.order_lines = orderLines;
 
     try {
-      await orderService.update(command, keycloak?.token || "").then((response) => {
+      await orderService.update(command, auth.token || "").then((response) => {
         if (response.success) {
           setSuccessSaved(true);
           setFailedSaved(false);
@@ -293,7 +293,7 @@ function EditSalesOrderPage() {
     //console.log(lineId)
     //return;
     try {
-      await orderService.deleteLine(command, keycloak?.token || "").then((response) => {
+      await orderService.deleteLine(command, auth.token || "").then((response) => {
         if (response.success) {
           // Remove the line from the grid
           setRowData(prev => prev.filter(line => line.id !== lineId));
@@ -362,7 +362,7 @@ function EditSalesOrderPage() {
     {
       line.order_header_id = salesOrder?.id;
 
-      await orderService.createLine(line, keycloak?.token || "").then( (response) => 
+      await orderService.createLine(line, auth.token || "").then( (response) => 
       {
         //console.log(response);
 

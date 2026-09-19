@@ -11,11 +11,11 @@ import { Box, Heading, VStack, HStack, Card, Button, Text, Spinner, Icon } from 
 import { FaCashRegister, FaCreditCard, FaUniversity } from "react-icons/fa";
 import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { stripePromise } from '@/lib/stripe';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 
 export default function StripeExistingPaymentPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
     
@@ -55,7 +55,7 @@ export default function StripeExistingPaymentPage() {
         let command = new GetSavedPaymentMethodsCommand();
         command.ar_invoice_header_guid = arInvoiceGuid;
 
-        paymentService.getSavedPaymentMethods(command, keycloak.token || "").then((response) => 
+        paymentService.getSavedPaymentMethods(command, auth.token || "").then((response) => 
         {
             //console.log("Saved Payment Methods Response:", response);
 
@@ -301,7 +301,7 @@ export default function StripeExistingPaymentPage() {
 
 function NewCardForm({ ar_header_guid, onCreated }: { ar_header_guid: string, onCreated: () => void })
 {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const stripe = useStripe();
     const elements = useElements();
 
@@ -318,7 +318,7 @@ function NewCardForm({ ar_header_guid, onCreated }: { ar_header_guid: string, on
         let command = new CreateStripeNewCardIntentCommand();
         command.ar_header_guid = ar_header_guid;
 
-        paymentService.createStripeNewCardIntent(command, keycloak.token || "").then(async (response) => 
+        paymentService.createStripeNewCardIntent(command, auth.token || "").then(async (response) => 
         {
             //console.log("Create New Card Intent Response:", response);
 

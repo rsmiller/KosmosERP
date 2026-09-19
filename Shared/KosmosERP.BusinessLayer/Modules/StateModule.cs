@@ -33,7 +33,7 @@ public class StateModule : BaseERPModule, IStateModule
 
     private readonly IBaseERPContext _Context;
 
-    public StateModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public StateModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }

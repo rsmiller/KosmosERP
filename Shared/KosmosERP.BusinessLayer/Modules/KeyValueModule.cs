@@ -38,7 +38,7 @@ public class KeyValueModule : BaseERPModule, IKeyValueModule
     private IBaseERPContext _Context;
 
 
-    public KeyValueModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public KeyValueModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     } 

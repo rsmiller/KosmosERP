@@ -12,13 +12,13 @@ import { JournalEntryHeaderFindCommand, JournalEntryHeaderListDto } from '@/mode
 import { journalEntryService } from '@/services/journal-entry-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function JournalEntriesPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
@@ -43,7 +43,7 @@ function JournalEntriesPage() {
 
     let command = new JournalEntryHeaderFindCommand();
 
-    await journalEntryService.find(command, keycloak.token || "", pageStart, pageSize).then((response) => {
+    await journalEntryService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
       setLoading(false);
 
       if(response.success && response.data) {
@@ -68,13 +68,13 @@ function JournalEntriesPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.JournalEntryModule,
       ERPModulePermission.Read,
@@ -95,7 +95,7 @@ function JournalEntriesPage() {
 
     fetchData();
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/journalentries/new");

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.BOM.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.BOM.Command.Delete;
@@ -23,7 +24,7 @@ public class BOMController : ERPApiController
         _Module = module;
     }
 
-    [Authorize(Roles = "bom_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "bom_read")]
     [HttpGet("GetBOM", Name = "GetBOM")]
     [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
@@ -37,7 +38,7 @@ public class BOMController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "bom_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "bom_read")]
     [HttpGet("GetBOMByGuid", Name = "GetBOMByGuid")]
     [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
@@ -51,7 +52,7 @@ public class BOMController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "bom_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "bom_read")]
     [HttpPost("FindBOM", Name = "FindBOM")]
     [ProducesResponseType(typeof(PagingResult<BOMListDto>), 200)]
     [ProducesResponseType(500)]
@@ -80,7 +81,7 @@ public class BOMController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "bom_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "bom_write")]
     [HttpPost("CreateBOM", Name = "CreateBOM")]
     [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
@@ -96,7 +97,7 @@ public class BOMController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "bom_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "bom_edit")]
     [HttpPut("UpdateBOM", Name = "UpdateBOM")]
     [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]
@@ -112,7 +113,7 @@ public class BOMController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "bom_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "bom_delete")]
     [HttpPost("DeleteBOM", Name = "DeleteBOM")]
     [ProducesResponseType(typeof(Response<BOMDto>), 200)]
     [ProducesResponseType(400)]

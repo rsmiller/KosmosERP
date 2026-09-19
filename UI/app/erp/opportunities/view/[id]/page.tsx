@@ -28,14 +28,14 @@ import ActivitiesListComponent from '@/components/lists/activities-list-componen
 import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import { AgGridReact } from 'ag-grid-react';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewOpportunityPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
     const params = useParams();
     const [hasAccess, setHasAccess] = useState(true);
@@ -66,7 +66,7 @@ function ViewOpportunityPage() {
                 return;
             }
 
-            const response = await opportunityService.getByGuid(opportunityId, keycloak.token || "");
+            const response = await opportunityService.getByGuid(opportunityId, auth.token || "");
             if (response.success && response.data) {
                 setOpportunity(response.data);
                 
@@ -101,9 +101,9 @@ function ViewOpportunityPage() {
 
     useEffect(() => {
 
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.OpportunityModule,
           ERPModulePermission.Read,
@@ -121,7 +121,7 @@ function ViewOpportunityPage() {
         
 
         loadOpportunity();
-    }, [params.id, setValue, keycloak.authenticated]);
+    }, [params.id, setValue, auth.authenticated]);
 
     const getExpirationDate = () => {
         const expectedClose = watch('expected_close');

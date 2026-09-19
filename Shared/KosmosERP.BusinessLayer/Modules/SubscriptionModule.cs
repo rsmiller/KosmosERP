@@ -39,7 +39,7 @@ public class SubscriptionModule : BaseERPModule, ISubscriptionModule
                                         IOrderModule order_module,
                                         IMemoryCacheService<Customer> customerMemService,
                                         IMemoryCacheService<Product> productMemService, 
-                                        ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                                        ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _CustomerModule = customer_module;
@@ -61,6 +61,8 @@ public class SubscriptionModule : BaseERPModule, ISubscriptionModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -26,7 +27,7 @@ public class ProductionOrderController : ERPApiController
     }
 
 
-    [Authorize(Roles = "production_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "production_order_read")]
     [HttpGet("GetProductionOrder", Name = "GetProductionOrder")]
     [ProducesResponseType(typeof(Response<ProductionOrderHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -40,7 +41,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "production_order_read")]
     [HttpGet("GetProductionOrderByGuid", Name = "GetProductionOrderByGuid")]
     [ProducesResponseType(typeof(Response<ProductionOrderHeaderDto>), 200)]
     [ProducesResponseType(500)]
@@ -54,7 +55,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "production_order_read")]
     [HttpPost("FindProductionOrder", Name = "FindProductionOrder")]
     [ProducesResponseType(typeof(PagingResult<ProductionOrderHeaderListDto>), 200)]
     [ProducesResponseType(500)]
@@ -82,7 +83,7 @@ public class ProductionOrderController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "production_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "production_order_write")]
     [HttpPost("CreateProductionOrder", Name = "CreateProductionOrder")]
     [ProducesResponseType(typeof(Response<ProductionOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -97,7 +98,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "production_order_write")]
     [HttpPost("CreateProductionOrderLine", Name = "CreateProductionOrderLine")]
     [ProducesResponseType(typeof(Response<ProductionOrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -112,7 +113,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "production_order_edit")]
     [HttpPut("UpdateProductionOrder", Name = "UpdateProductionOrder")]
     [ProducesResponseType(typeof(Response<ProductionOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -127,7 +128,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "production_order_edit")]
     [HttpPut("UpdateProductionOrderLine", Name = "UpdateProductionOrderLine")]
     [ProducesResponseType(typeof(Response<ProductionOrderLineDto>), 200)]
     [ProducesResponseType(400)]
@@ -142,7 +143,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "production_order_delete")]
     [HttpPost("DeleteProductionOrder", Name = "DeleteProductionOrder")]
     [ProducesResponseType(typeof(Response<ProductionOrderHeaderDto>), 200)]
     [ProducesResponseType(400)]
@@ -157,7 +158,7 @@ public class ProductionOrderController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "production_order_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "production_order_delete")]
     [HttpPost("DeleteProductionOrderLine", Name = "DeleteProductionOrderLine")]
     [ProducesResponseType(typeof(Response<ProductionOrderLineDto>), 200)]
     [ProducesResponseType(400)]

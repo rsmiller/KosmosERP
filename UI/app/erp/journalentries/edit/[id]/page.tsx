@@ -33,7 +33,7 @@ import {
   JournalEntryReverseCommand
 } from '@/models/journal-entry-models';
 import { journalEntryService } from '@/services/journal-entry-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -42,7 +42,7 @@ import { MdDelete } from 'react-icons/md';
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function EditJournalEntryPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -78,7 +78,7 @@ function EditJournalEntryPage() {
                 return;
             }
 
-            const response = await journalEntryService.getByGuid(entryId, keycloak.token || "");
+            const response = await journalEntryService.getByGuid(entryId, auth.token || "");
             if (response.success && response.data) {
                 setEntry(response.data);
                 setValue('id', response.data.id);
@@ -98,12 +98,12 @@ function EditJournalEntryPage() {
     };
 
     useEffect(() => {
-        if (keycloak.authenticated == false) return;
+        if (auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.JournalEntryModule,
           ERPModulePermission.Edit,
@@ -123,7 +123,7 @@ function EditJournalEntryPage() {
         ));
 
         loadEntry();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const handleDeleteClick = async () => {
         if (!entry) return;
@@ -132,7 +132,7 @@ function EditJournalEntryPage() {
         deleteCommand.id = entry.id;
 
         try {
-            await journalEntryService.delete(deleteCommand, keycloak.token || "").then((response) => {
+            await journalEntryService.delete(deleteCommand, auth.token || "").then((response) => {
                 if(response.success) {
                     router.push("/erp/journalentries/");
                 } else {
@@ -154,7 +154,7 @@ function EditJournalEntryPage() {
         command.fiscal_period = entryDate ? `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}` : undefined;
 
         try {
-            await journalEntryService.update(command, keycloak.token || "").then((response) => {
+            await journalEntryService.update(command, auth.token || "").then((response) => {
                 if(response.success) {
                     setSuccessSaved(true);
                     setFailedSaved(false);
@@ -176,7 +176,7 @@ function EditJournalEntryPage() {
         postCommand.id = entry.id;
 
         try {
-            await journalEntryService.post(postCommand, keycloak.token || "").then((response) => {
+            await journalEntryService.post(postCommand, auth.token || "").then((response) => {
                 if(response.success) {
                     setSuccessSaved(true);
                     setFailedSaved(false);
@@ -201,7 +201,7 @@ function EditJournalEntryPage() {
         reverseCommand.reversal_description = `Reversal of ${entry.entry_number}`;
 
         try {
-            await journalEntryService.reverse(reverseCommand, keycloak.token || "").then((response) => {
+            await journalEntryService.reverse(reverseCommand, auth.token || "").then((response) => {
                 if(response.success && response.data) {
                     setSuccessSaved(true);
                     setFailedSaved(false);
@@ -227,7 +227,7 @@ function EditJournalEntryPage() {
         lineCmd.credit_amount = 0;
 
         try {
-            await journalEntryService.createLine(lineCmd, keycloak.token || "").then((response) => {
+            await journalEntryService.createLine(lineCmd, auth.token || "").then((response) => {
                 if(response.success && response.data) {
                     setLines([...lines, response.data]);
                     CheckFormValidity();
@@ -243,7 +243,7 @@ function EditJournalEntryPage() {
         deleteCmd.id = lineId;
 
         try {
-            await journalEntryService.deleteLine(deleteCmd, keycloak.token || "").then((response) => {
+            await journalEntryService.deleteLine(deleteCmd, auth.token || "").then((response) => {
                 if(response.success) {
                     setLines(lines.filter(line => line.id !== lineId));
                     CheckFormValidity();
@@ -266,7 +266,7 @@ function EditJournalEntryPage() {
         editCmd.description = field === 'description' ? value : line.description;
 
         try {
-            await journalEntryService.updateLine(editCmd, keycloak.token || "").then((response) => {
+            await journalEntryService.updateLine(editCmd, auth.token || "").then((response) => {
                 if(response.success && response.data) {
                     const updatedLine = response.data;
                     setLines(lines.map(l => l.id === lineId ? updatedLine : l));

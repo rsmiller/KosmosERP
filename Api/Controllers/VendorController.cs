@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Command.Create;
@@ -25,7 +26,7 @@ public class VendorController : ERPApiController
     }
 
     
-    [Authorize(Roles = "vendor_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "vendor_read")]
     [HttpGet("GetVendor", Name = "GetVendor")]
     [ProducesResponseType(typeof(Response<VendorDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,7 +40,7 @@ public class VendorController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "vendor_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "vendor_read")]
     [HttpGet("GetVendorByGuid", Name = "GetVendorByGuid")]
     [ProducesResponseType(typeof(Response<VendorDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,7 +54,7 @@ public class VendorController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "vendor_read")]
+    [ERPAuthorize(new[] { ERPPermission.Read }, "vendor_read")]
     [HttpPost("FindVendor", Name = "FindVendor")]
     [ProducesResponseType(typeof(PagingResult<VendorListDto>), 200)]
     [ProducesResponseType(500)]
@@ -82,7 +83,7 @@ public class VendorController : ERPApiController
         }
     }
 
-    [Authorize(Roles = "vendor_write")]
+    [ERPAuthorize(new[] { ERPPermission.Write }, "vendor_write")]
     [HttpPost("CreateVendor", Name = "CreateVendor")]
     [ProducesResponseType(typeof(Response<VendorDto>), 200)]
     [ProducesResponseType(400)]
@@ -98,7 +99,7 @@ public class VendorController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "vendor_edit")]
+    [ERPAuthorize(new[] { ERPPermission.Edit }, "vendor_edit")]
     [HttpPut("UpdateVendor", Name = "UpdateVendor")]
     [ProducesResponseType(typeof(Response<VendorDto>), 200)]
     [ProducesResponseType(400)]
@@ -114,7 +115,7 @@ public class VendorController : ERPApiController
         return Ok(result);
     }
 
-    [Authorize(Roles = "vendor_delete")]
+    [ERPAuthorize(new[] { ERPPermission.Delete }, "vendor_delete")]
     [HttpPost("DeleteVendor", Name = "DeleteVendor")]
     [ProducesResponseType(typeof(Response<VendorDto>), 200)]
     [ProducesResponseType(400)]

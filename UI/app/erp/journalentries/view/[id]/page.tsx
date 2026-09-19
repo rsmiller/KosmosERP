@@ -19,14 +19,14 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from 'next/navigation';
 import { JournalEntryHeaderDto, JournalEntryLineDto } from '@/models/journal-entry-models';
 import { journalEntryService } from '@/services/journal-entry-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ViewJournalEntryPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -47,7 +47,7 @@ function ViewJournalEntryPage() {
                 return;
             }
 
-            const response = await journalEntryService.getByGuid(entryId, keycloak.token || "");
+            const response = await journalEntryService.getByGuid(entryId, auth.token || "");
             if (response.success && response.data) {
                 setEntry(response.data);
             } else {
@@ -62,12 +62,12 @@ function ViewJournalEntryPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
         
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.JournalEntryModule,
           ERPModulePermission.Read,
@@ -81,7 +81,7 @@ function ViewJournalEntryPage() {
         }
 
         loadEntry();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const formatCurrency = (value: number | undefined) => {
         if (value === undefined) return '$0.00';

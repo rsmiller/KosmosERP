@@ -20,7 +20,7 @@ import { ContactDto } from '@/models/contact-models';
 import CustomerCombobox from '@/components/customer-combobox';
 import { contactService } from '@/services/contact-service';
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -28,7 +28,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function ViewContactPage() {
     const params = useParams();
     const router = useRouter();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [hasAccess, setHasAccess] = useState(true);
 
     const [contact, setContact] = useState<ContactDto | null>(null);
@@ -46,7 +46,7 @@ function ViewContactPage() {
                 return;
             }
 
-            const response = await contactService.getByGuid(contactId, keycloak.token || "");
+            const response = await contactService.getByGuid(contactId, auth.token || "");
             if (response.success && response.data) {
                 setContact(response.data);
             } else {
@@ -63,13 +63,13 @@ function ViewContactPage() {
 
     // Load contact data on component mount
     useEffect(() => {
-        if(!keycloak.authenticated) return;
+        if(!auth.authenticated) return;
         
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
         // Check permission
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
             ERPModules.ContactModule,
             ERPModulePermission.Read,
@@ -83,7 +83,7 @@ function ViewContactPage() {
         }
 
         loadContact();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     if (loading) {
         return <div>Loading contact...</div>;

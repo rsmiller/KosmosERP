@@ -35,7 +35,7 @@ import { DocumentUploadDto } from '@/models/document-models';
 import { DateTimeRender } from '@/components/ag-grid/date-time-renderer';
 import  GLAccountSelector from '@/components/ag-grid/gl-account-selector';
 import CommentsListComponent from '@/components/lists/comments-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
@@ -45,7 +45,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function EditAPPage() {
   const params = useParams();
   const router = useRouter();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
   const [hasDeletePermission, setHasDeletePermission] = useState(false);
@@ -81,9 +81,9 @@ function EditAPPage() {
   // Load AP invoice data on component mount
   useEffect(() => {
 
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.APModule,
       ERPModulePermission.Read,
@@ -124,7 +124,7 @@ function EditAPPage() {
           return;
         }
 
-        await keyValueService.GetDtoByModule("eea9df53-1b36-41ea-94fa-31420315ff60", keycloak?.token || "").then(async (gl_response) =>
+        await keyValueService.GetDtoByModule("eea9df53-1b36-41ea-94fa-31420315ff60", auth.token || "").then(async (gl_response) =>
         {
             //console.log("KEY VALUES ", response)
             if (gl_response.success && gl_response.data !== undefined) {
@@ -138,7 +138,7 @@ function EditAPPage() {
                 setGLAccounts(accounts);
 
 
-            const response = await apInvoiceService.getByGuid(apInvoiceId, keycloak?.token || "");
+            const response = await apInvoiceService.getByGuid(apInvoiceId, auth.token || "");
             if (response.success && response.data) {
               //setHeaderModel(response.data);
 
@@ -286,7 +286,7 @@ function EditAPPage() {
     };
 
     loadAPInvoice();
-  }, [params.id, setValue, setGLAccounts, keycloak.authenticated]);
+  }, [params.id, setValue, setGLAccounts, auth.authenticated]);
 
 
   const GeMaxLineQuantity = (association_line_id: number, association_line_quantity: number, existing_lines?: APInvoiceLineDto[]) =>
@@ -358,7 +358,7 @@ function EditAPPage() {
     command.id = headerModel.id;
 
     try {
-      const response = await apInvoiceService.delete(command, keycloak?.token || "");
+      const response = await apInvoiceService.delete(command, auth.token || "");
       if (response.success) {
         router.push("/erp/ap/");
       } else {
@@ -404,7 +404,7 @@ function EditAPPage() {
     //return;
 
     try {
-      const response = await apInvoiceService.update(command, keycloak?.token || "");
+      const response = await apInvoiceService.update(command, auth.token || "");
       if (response.success) {
         setSuccessSaved(true);
         setFailedSaved(false);

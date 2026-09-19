@@ -9,7 +9,7 @@ import { TransactionCreateCommand, TransactionEditCommand, TransactionFindComman
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { AgGridReact } from 'ag-grid-react';
 import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
@@ -43,15 +43,15 @@ class AdminAdjustmentForm
 }
 
 function AdminAdjustmentsPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
     const [hasAccess, setHasAccess] = useState(true);
     const [hasEditPermission, setHasEditPermission] = useState(false);
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.Admin,
           '',
@@ -63,7 +63,7 @@ function AdminAdjustmentsPage() {
           return;
         }
         setHasEditPermission(true);
-    }, [keycloak.authenticated, router]);
+    }, [auth.authenticated, router]);
 
     const [rowSalesData, setRowSalesData] = useState<TransactionListDto[]>([]);
     const [rowPurchaseData, setRowPurchaseData] = useState<TransactionListDto[]>([]);
@@ -110,7 +110,7 @@ function AdminAdjustmentsPage() {
         let command = new TransactionFindCommand();
         command.sales_order_number = Number(watch("salesOrderNumber"));
 
-        await transactionService.find(command, keycloak.token ?? "", page, pageSize).then((response) => {
+        await transactionService.find(command, auth.token ?? "", page, pageSize).then((response) => {
             //console.log(response);
             if(response.data)
             {
@@ -123,7 +123,7 @@ function AdminAdjustmentsPage() {
         let command = new TransactionFindCommand();
         command.purchase_order_number = Number(watch("purchaseOrderNumber"));
 
-        await transactionService.find(command, keycloak.token ?? "", page, pageSize).then((response) => {
+        await transactionService.find(command, auth.token ?? "", page, pageSize).then((response) => {
             //console.log(response);
             if(response.data)
             {
@@ -158,7 +158,7 @@ function AdminAdjustmentsPage() {
         command.purchased_unit_cost = event.data.purchased_unit_cost;
         command.sold_unit_price = event.data.sold_unit_price;
 
-        await transactionService.update(command, keycloak.token ?? "").then((response) => {
+        await transactionService.update(command, auth.token ?? "").then((response) => {
             //console.log("Edit response:", response);
         });
     }
@@ -175,7 +175,7 @@ function AdminAdjustmentsPage() {
         command.purchased_unit_cost = event.data.purchased_unit_cost;
         command.sold_unit_price = event.data.sold_unit_price;
 
-        await transactionService.update(command, keycloak.token ?? "").then((response) => {
+        await transactionService.update(command, auth.token ?? "").then((response) => {
             //console.log("Edit response:", response);
         });
     }
@@ -234,7 +234,7 @@ function AdminAdjustmentsPage() {
 
         //console.log("Creating transaction with command:", command);
         //return;
-        await transactionService.create(command, keycloak.token ?? "").then((response) => {
+        await transactionService.create(command, auth.token ?? "").then((response) => {
             //console.log("Create response:", response);
         });
     }

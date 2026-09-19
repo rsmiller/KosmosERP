@@ -34,12 +34,12 @@ import { orderService } from '@/services/order-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { format } from 'date-fns';
 import AddSalesOrderLineDialog, { AddSalesOrderLineDialogRef } from '@/components/dialogs/add-sales-order-line';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function NewSalesOrderPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasWritePermission, setHasWritePermission] = useState(false);
@@ -57,9 +57,9 @@ function NewSalesOrderPage() {
   const addSalesOrderLineDialogRef = useRef<AddSalesOrderLineDialogRef>(null);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.OrderModule,
       ERPModulePermission.Write,
@@ -71,7 +71,7 @@ function NewSalesOrderPage() {
       return;
     }
     setHasWritePermission(true);
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const {
     register,
@@ -123,7 +123,7 @@ function NewSalesOrderPage() {
     command.order_lines = orderLines;
 
     try {
-      await orderService.create(command, keycloak?.token || "").then((response) => {
+      await orderService.create(command, auth.token || "").then((response) => {
         if (response.success) {
           setSuccessSaved(true);
           setFailedSaved(false);

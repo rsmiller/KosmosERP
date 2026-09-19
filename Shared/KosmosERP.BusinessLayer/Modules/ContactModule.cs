@@ -34,7 +34,7 @@ public class ContactModule : BaseERPModule, IContactModule
 
     private readonly IBaseERPContext _Context;
 
-    public ContactModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ContactModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -51,6 +51,8 @@ public class ContactModule : BaseERPModule, IContactModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

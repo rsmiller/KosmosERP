@@ -26,7 +26,7 @@ import AddressViewBlock from '@/components/address-view-block';
 import { AddressDto } from '@/models/address-models';
 import { shipmentService } from '@/services/shipment-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useParams, useRouter } from 'next/navigation';
 import NumericWithBenefits from '@/components/ag-grid/numeric-wth-benefits';
 
@@ -36,7 +36,7 @@ function NewARFromCustomerPage() {
   const params = useParams();
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
   const [hasDeletePermission, setHasDeletePermission] = useState(false);
@@ -58,9 +58,9 @@ function NewARFromCustomerPage() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.ShippingModule,
       ERPModulePermission.Read,
@@ -87,7 +87,7 @@ function NewARFromCustomerPage() {
       realmRoles
     );
     setHasDeletePermission(canDelete);
-  }, [keycloak.authenticated, router]);
+  }, [auth.authenticated, router]);
 
   const {
     register,
@@ -107,7 +107,7 @@ function NewARFromCustomerPage() {
           return;
         }
 
-        const response = await shipmentService.getByGuid(shipmentId, keycloak?.token || "");
+        const response = await shipmentService.getByGuid(shipmentId, auth.token || "");
 
         //console.log(response)
 
@@ -158,14 +158,14 @@ function NewARFromCustomerPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
 
     loadShipment();
-  }, [params.id, setValue, keycloak.authenticated]);
+  }, [params.id, setValue, auth.authenticated]);
 
   const RenderLines = (shipment_lines: ShipmentLineDto[]) => {
     setRowData([]);
@@ -212,7 +212,7 @@ function NewARFromCustomerPage() {
     command.id = shipment?.id;
 
     try {
-      await shipmentService.delete(command, keycloak?.token || "").then((response) => {
+      await shipmentService.delete(command, auth.token || "").then((response) => {
         if (response.success) {
           router.push("/erp/shipments/");
         } else {
@@ -257,7 +257,7 @@ function NewARFromCustomerPage() {
     //return;
 
     try {
-      await shipmentService.update(command, keycloak?.token || "").then((response) => {
+      await shipmentService.update(command, auth.token || "").then((response) => {
         console.log(response);
 
         if (response.success) {
@@ -292,10 +292,10 @@ function NewARFromCustomerPage() {
     };
 
     try {
-      await shipmentService.updateLine(updatedLine, keycloak?.token || "").then(async (response) => {
+      await shipmentService.updateLine(updatedLine, auth.token || "").then(async (response) => {
         if (response.success) {
           // Reload the shipment to get updated data
-          const shipmentResponse = await shipmentService.get(shipment?.id || 0, keycloak?.token || "");
+          const shipmentResponse = await shipmentService.get(shipment?.id || 0, auth.token || "");
           if (shipmentResponse.success && shipmentResponse.data && shipmentResponse.data.shipment_lines) {
             RenderLines(shipmentResponse.data.shipment_lines);
           }
@@ -329,7 +329,7 @@ function NewARFromCustomerPage() {
     command.is_released = true;
 
     try {
-      await shipmentService.update(command, keycloak?.token || "").then((response) => {
+      await shipmentService.update(command, auth.token || "").then((response) => {
         //console.log(response);
 
         if (response.success) {

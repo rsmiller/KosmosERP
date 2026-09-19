@@ -20,11 +20,11 @@ import { useParams, useRouter } from 'next/navigation';
 import PageActionsComponent from '@/components/page-actions';
 import { ChartOfAccountEditCommand, ChartOfAccountDeleteCommand, ChartOfAccountDto, AccountType, NormalBalance } from '@/models/chart-of-account-models';
 import { chartOfAccountService } from '@/services/chart-of-account-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 function EditChartOfAccountPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -59,7 +59,7 @@ function EditChartOfAccountPage() {
                 return;
             }
 
-            const response = await chartOfAccountService.getByGuid(accountId, keycloak.token || "");
+            const response = await chartOfAccountService.getByGuid(accountId, auth.token || "");
             if (response.success && response.data) {
                 setAccount(response.data);
                 setValue('id', response.data.id);
@@ -82,12 +82,12 @@ function EditChartOfAccountPage() {
     };
 
     useEffect(() => {
-        if (keycloak.authenticated == false) return;
+        if (auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ChartOfAccountModule,
           ERPModulePermission.Edit,
@@ -107,7 +107,7 @@ function EditChartOfAccountPage() {
         ));
 
         loadAccount();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const handleDeleteClick = async () => {
         if (!account) return;
@@ -116,7 +116,7 @@ function EditChartOfAccountPage() {
         deleteCommand.id = account.id;
 
         try {
-            await chartOfAccountService.delete(deleteCommand, keycloak.token || "").then((response) => {
+            await chartOfAccountService.delete(deleteCommand, auth.token || "").then((response) => {
                 if(response.success) {
                     router.push("/erp/chartofaccounts/");
                 } else {
@@ -142,7 +142,7 @@ function EditChartOfAccountPage() {
         command.parent_account_id = watch('parent_account_id') ? Number(watch('parent_account_id')) : null;
 
         try {
-            await chartOfAccountService.update(command, keycloak.token || "").then((response) => {
+            await chartOfAccountService.update(command, auth.token || "").then((response) => {
                 if(response.success) {
                     setSuccessSaved(true);
                     setFailedSaved(false);

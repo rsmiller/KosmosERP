@@ -23,12 +23,12 @@ import { ProductCreateCommand, ProductDto } from '@/models/product-models';
 import { productService } from '@/services/product-service';
 import ProductCategoryCombobox, { ProductCategoryComboboxRef } from '@/components/product-category-combobox';
 import VendorCombobox, { VendorComboboxRef } from '@/components/vendor-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 
 function NewProductPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const router = useRouter();
 
     const [hasAccess, setHasAccess] = useState(true);
@@ -55,13 +55,13 @@ function NewProductPage() {
 
     // Load product data on component mount
     useEffect(() => {
-        if (keycloak.authenticated == false) return;
+        if (auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
         // Check permission
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ProductModule,
           ERPModulePermission.Write,
@@ -146,7 +146,7 @@ function NewProductPage() {
 
         try
         {
-            await productService.create(command, keycloak.token || "").then((response) =>
+            await productService.create(command, auth.token || "").then((response) =>
             {
                 if(response.success)
                 {

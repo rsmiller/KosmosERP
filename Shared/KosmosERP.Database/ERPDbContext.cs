@@ -49,6 +49,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
         modelBuilder.ApplyConfiguration(new ModulePermissionConfiguration());
+        modelBuilder.ApplyConfiguration(new ModuleConfiguration());
         modelBuilder.ApplyConfiguration(new VendorConfiguration());
         modelBuilder.ApplyConfiguration(new CustomerConfiguration());
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
@@ -129,6 +130,7 @@ public partial class ERPDbContext : DbContext, IERPDatabaseContext, IBaseERPCont
     public DbSet<Role> Roles { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<ModulePermission> ModulePermissions { get; set; }
+    public DbSet<Module> Modules { get; set; }
     public DbSet<Vendor> Vendors { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<CustomerAddress> CustomerAddresses { get; set; }

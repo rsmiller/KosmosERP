@@ -6,6 +6,7 @@ export interface AuthenticatedUserDto {
   user: UserDto;
   session: UserSessionState;
   token: JwtToken;
+  roles?: UserRoleDto[];
 }
 
 

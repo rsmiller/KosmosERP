@@ -36,7 +36,7 @@ public class ProductModule : BaseERPModule, IProductModule
     private IMessagePublisherSettings? _MessagePublisherSettings;
     private IMemoryCacheService<KeyValueStore> _KVMemoryService;
 
-    public ProductModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ProductModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -45,7 +45,7 @@ public class ProductModule : BaseERPModule, IProductModule
                             IMessageFactory messageFactory, 
                             IMessagePublisherSettings messagePublisherSettings, 
                             IMemoryCacheService<KeyValueStore> kvMService, 
-                            ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                            ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _MessageFactory = messageFactory;
@@ -65,6 +65,8 @@ public class ProductModule : BaseERPModule, IProductModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         // Seed ModulePermissions for Product module

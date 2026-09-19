@@ -42,7 +42,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
     private IDocumentUploadModule? _DocumentUploadModule;
     private IMessagePublisherSettings? _MessagePublisherSettings;
 
-    public PurchaseOrderReceiveModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public PurchaseOrderReceiveModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -51,7 +51,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
                                         IMessageFactory messageFactory, 
                                         IDocumentUploadModule documentUploadModule, 
                                         IMessagePublisherSettings messageSettings, 
-                                        ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+                                        ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
         _MessageFactory = messageFactory;
@@ -71,6 +71,8 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

@@ -26,7 +26,7 @@ import CommentsListComponent from '@/components/lists/comments-list-component';
 import { customerService } from '@/services/customer-service';
 import ActivitiesListComponent from '@/components/lists/activities-list-component';
 import SubscriptionListComponent from '@/components/lists/subscription-list-component';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 
@@ -36,7 +36,7 @@ function ViewCustomerPage() {
   const params = useParams();
   const router = useRouter();
 
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
@@ -54,7 +54,7 @@ function ViewCustomerPage() {
           return;
         }
 
-        const response = await customerService.getByGuid(customerId, keycloak.token || "");
+        const response = await customerService.getByGuid(customerId, auth.token || "");
         if (response.success && response.data) {
           setCustomer(response.data);
         } else {
@@ -69,13 +69,13 @@ function ViewCustomerPage() {
   };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     if (hasInitialized.current) return;
     hasInitialized.current = true;
     
     // Check permission
-    const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+    const realmRoles = auth.roles || [];
     const hasPermission = permissionsService.HasPermission(
       ERPModules.CustomerModule,
       ERPModulePermission.Read,
@@ -89,7 +89,7 @@ function ViewCustomerPage() {
     }
 
     loadCustomer();
-  }, [params.id, keycloak.authenticated]);
+  }, [params.id, auth.authenticated]);
 
   if (!hasAccess) {
     return <div>Redirecting...</div>;

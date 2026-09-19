@@ -27,7 +27,7 @@ public class LeadModule : BaseERPModule, ILeadModule
     public override Guid ModuleIdentifier => Guid.Parse("6a4897a8-571d-4f5b-99c4-9eb15f56f619");
     public override string ModuleName => "Leads";
 
-    public LeadModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public LeadModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -40,10 +40,12 @@ public class LeadModule : BaseERPModule, ILeadModule
         {
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
-                name = "CRM Users",
+                name = "CRM Administrators",
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
 

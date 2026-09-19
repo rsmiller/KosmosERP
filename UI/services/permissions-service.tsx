@@ -2,35 +2,24 @@ import { RolePermissionsDto } from "@/models/user-models"
 
 export const permissionsService = {
     HasPermission(module_start: string, erp_module_permission: string, permissions: string[] | undefined){
-        console.log(permissions);
+        //console.log(permissions);
+        console.log("Checking permission for module:", module_start, "with permission:", erp_module_permission);
         if(permissions == undefined)
         {
             return false;
         }
-        if(module_start == "admin")
-        {
-            let role_build = module_start;
 
-            for(let i=0; i<permissions.length; i++){
-                let perm = permissions[i];
-                if(perm == role_build)
-                {
-                    return true;
-                }
+        let role_build = module_start + "_" + erp_module_permission;
+
+        for(let i=0; i<permissions.length; i++)
+        {
+            let perm = permissions[i];
+            if(perm == role_build)
+            {
+                return true;
             }
         }
-        else
-        {
-            let role_build = module_start + "_" + erp_module_permission;
-
-            for(let i=0; i<permissions.length; i++){
-                let perm = permissions[i];
-                if(perm == role_build)
-                {
-                    return true;
-                }
-            }
-        }
+        
         return false;
     }
 }
@@ -57,7 +46,6 @@ export const ERPModules = {
     SubscriptionModule: "subscription",
     ShippingModule: "shipping",
     TransactionModule: "transaction",
-    UserModule: "admin",
     VendorModule: "vendor",
     GeneralLedgerModule: "general_ledger",
     ChartOfAccountModule: "chart_of_account",

@@ -33,7 +33,7 @@ public class CountryModule : BaseERPModule, ICountryModule
 
     private readonly IBaseERPContext _Context;
 
-    public CountryModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public CountryModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }

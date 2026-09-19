@@ -29,7 +29,7 @@ namespace KosmosERP.BusinessLayer.Modules
         private readonly ILogProvider _LogProvider;
         private readonly IAuthenticationSettings _AuthenticationSettings;
 
-        public SAMLModule(IBaseERPContext context, IAuthenticationFactory authenticationFactory, IAuthenticationSettings authenticationSettings, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+        public SAMLModule(IBaseERPContext context, IAuthenticationFactory authenticationFactory, IAuthenticationSettings authenticationSettings, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
         {
             _Context = context;
 

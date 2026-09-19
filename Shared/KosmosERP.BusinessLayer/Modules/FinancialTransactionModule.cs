@@ -42,7 +42,7 @@ public class FinancialTransactionModule : BaseERPModule, IFinancialTransactionMo
 
     private IBaseERPContext _Context;
 
-    public FinancialTransactionModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public FinancialTransactionModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -59,6 +59,8 @@ public class FinancialTransactionModule : BaseERPModule, IFinancialTransactionMo
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
     }
 

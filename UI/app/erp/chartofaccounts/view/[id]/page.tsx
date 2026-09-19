@@ -16,12 +16,12 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from 'next/navigation';
 import { ChartOfAccountDto } from '@/models/chart-of-account-models';
 import { chartOfAccountService } from '@/services/chart-of-account-service';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
 
 function ViewChartOfAccountPage() {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const params = useParams();
     const router = useRouter();
 
@@ -42,7 +42,7 @@ function ViewChartOfAccountPage() {
                 return;
             }
 
-            const response = await chartOfAccountService.getByGuid(accountId, keycloak.token || "");
+            const response = await chartOfAccountService.getByGuid(accountId, auth.token || "");
             if (response.success && response.data) {
                 setAccount(response.data);
             } else {
@@ -57,12 +57,12 @@ function ViewChartOfAccountPage() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
         
-        const realmRoles = keycloak?.tokenParsed?.realm_access?.roles || [];
+        const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.ChartOfAccountModule,
           ERPModulePermission.Read,
@@ -76,7 +76,7 @@ function ViewChartOfAccountPage() {
         }
 
         loadAccount();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     if (loading) {
         return <div>Loading account...</div>;

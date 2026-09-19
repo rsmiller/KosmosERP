@@ -24,7 +24,7 @@ import LeadSearchResult from '@/components/search-results/lead-search-result';
 import SalesOrderSearchResult from '@/components/search-results/order-search-result';
 import VendorSearchResult from '@/components/search-results/vendor-search-result';
 import DocumentUploadSearchResult from '@/components/search-results/document-upload-search-result';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 
 class SearchForm {
@@ -32,7 +32,7 @@ class SearchForm {
 }
 
 function ERPPage() {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const [loading, setLoading] = useState(false);
   const [searchData, setSearchData] = useState<GlobalSearchResultDto>();
   
@@ -60,7 +60,7 @@ function ERPPage() {
     setLoading(true);
     setSearchData(undefined);
 
-    globalSearchService.search(command, keycloak?.token || "").then((response) => {
+    globalSearchService.search(command, auth.token || "").then((response) => {
         //console.log(response);
 
         if(response.success && response.data)

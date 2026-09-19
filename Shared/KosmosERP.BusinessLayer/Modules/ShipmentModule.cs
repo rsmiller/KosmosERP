@@ -50,7 +50,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
     private IMessagePublisherSettings? _MessagePublisherSettings;
     private IMemoryCacheService<KeyValueStore> _KVMemoryService;
 
-    public ShipmentModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(logProviderFactory)
+    public ShipmentModule(IBaseERPContext context, ILogProviderFactory logProviderFactory) : base(context, logProviderFactory)
     {
         _Context = context;
     }
@@ -60,7 +60,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                             IAddressModule addressModule, 
                             IMessagePublisherSettings messageSettings, 
                             ILogProviderFactory logProviderFactory,
-                            IMemoryCacheService<KeyValueStore> kvMService) : base(logProviderFactory)
+                            IMemoryCacheService<KeyValueStore> kvMService) : base(context, logProviderFactory)
     {
         _Context = context;
         _MessageFactory = messageFactory;
@@ -81,6 +81,8 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             }, 1));
 
             _Context.SaveChanges();
+
+            base.CreateFirstRunRolePermissions();
         }
 
         
