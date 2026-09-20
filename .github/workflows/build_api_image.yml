@@ -1,0 +1,77 @@
+name: Build API Docker Image
+
+# Manual trigger only ("Run workflow" button in the Actions tab).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override version, e.g. 0.13.823. Leave blank to use/auto-increment the stored version."
+        required: false
+        default: ""
+
+permissions:
+  contents: write   # commit the bumped version file back
+  packages: write   # push the image to GHCR
+
+env:
+  IMAGE_NAME: kosmos-erp-api
+  VERSION_FILE: .github/versions/api.version
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: ver
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="$(tr -d '[:space:]' < "$VERSION_FILE")"
+          fi
+
+          MAJOR="$(echo "$VERSION" | cut -d. -f1)"
+          MINOR="$(echo "$VERSION" | cut -d. -f2)"
+          PATCH="$(echo "$VERSION" | cut -d. -f3)"
+          NEXT="${MAJOR}.${MINOR}.$((PATCH + 1))"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "Building $IMAGE_NAME beta-$VERSION (next auto-increment: $NEXT)"
+
+      - name: Compute lowercase owner
+        id: owner
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ steps.owner.outputs.owner }}/${{ env.IMAGE_NAME }}:beta-${{ steps.ver.outputs.version }}
+
+      - name: Bump stored version (auto-increment)
+        if: ${{ github.event.inputs.version == '' }}
+        run: |
+          echo "${{ steps.ver.outputs.next }}" > "$VERSION_FILE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$VERSION_FILE"
+          git commit -m "ci: bump API image version to ${{ steps.ver.outputs.next }} [skip ci]"
+          git push
+
+      - name: Job summary
+        run: |
+          echo "### API image pushed 🚀" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`ghcr.io/${{ steps.owner.outputs.owner }}/${{ env.IMAGE_NAME }}:beta-${{ steps.ver.outputs.version }}\`" >> "$GITHUB_STEP_SUMMARY"
