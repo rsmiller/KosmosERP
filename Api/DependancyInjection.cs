@@ -3,7 +3,6 @@ using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -16,6 +15,114 @@ namespace KosmosERP.Api
 {
     public static class DependancyInjection
     {
+        public static Tuple<AuthenticationSettings, 
+                        FileStorageSettings, 
+                        MessagePublisherSettings, 
+                        PaymentProviderSettings, 
+                        LogProviderSettings,
+                        HangfireSettings,
+                        DatabaseSettings> 
+                        ConfigureSettings(this IServiceCollection services, ConfigurationManager configManager)
+        {
+            var authenticationSettings = new AuthenticationSettings()
+            {
+                APIPrivateKey = GetSettingValue(configManager, "APIPrivateKey", "AuthenticationSettings"),
+                AuthenticationProvider = GetSettingValue(configManager, "AuthenticationProvider", "AuthenticationSettings"),
+                Authority = GetSettingValue(configManager, "Authority", "AuthenticationSettings"),
+                Audience = GetSettingValue(configManager, "Audience", "AuthenticationSettings"),
+                TokenURL = GetSettingValue(configManager, "TokenURL", "AuthenticationSettings"),
+                ClientSecret = GetSettingValue(configManager, "ClientSecret", "AuthenticationSettings"),
+                BaseURL = GetSettingValue(configManager, "BaseURL", "AuthenticationSettings"),
+                Realm = GetSettingValue(configManager, "Realm", "AuthenticationSettings"),
+                IdPCertificate = GetSettingValue(configManager, "IdPCertificate", "AuthenticationSettings"),
+                SingleLogoutURL = GetSettingValue(configManager, "SingleLogoutURL", "AuthenticationSettings"),
+            };
+
+
+            var storageAccountSettings = new FileStorageSettings()
+            {
+                account_provider = GetSettingValue(configManager, "FileStorageAccountProvider", "FileStorageSettings"),
+                azure_connection_string = GetSettingValue(configManager, "AzureStorageConnectionString", "FileStorageSettings"),
+                azure_container_name = GetSettingValue(configManager, "AzureContainerName", "FileStorageSettings"),
+                azure_access_key = GetSettingValue(configManager, "AzureAccessKey", "FileStorageSettings"),
+                aws_access_key = GetSettingValue(configManager, "AWSAccessKey", "FileStorageSettings"),
+                aws_secret_key = GetSettingValue(configManager, "AWSSecretKey", "FileStorageSettings"),
+                aws_bucket_name = GetSettingValue(configManager, "AWSBucketName", "FileStorageSettings"),
+                aws_region = GetSettingValue(configManager, "AWSRegion", "FileStorageSettings"),
+                gpc_json_file_path = GetSettingValue(configManager, "GPCJsonFilePath", "FileStorageSettings"),
+                gpc_bucket_name = GetSettingValue(configManager, "GPCBucketName", "FileStorageSettings"),
+                local_storage_path = GetSettingValue(configManager, "LocalStoragePath", "FileStorageSettings")
+            };
+
+
+            var messagePublisherSettings = new MessagePublisherSettings()
+            {
+                account_provider = GetSettingValue(configManager, "MessagePublisherAccountProvider", "MessagePublisherSettings"),
+                rabbitmq_host = GetSettingValue(configManager, "RabbitMQHost", "MessagePublisherSettings"),
+                rabbitmq_username = GetSettingValue(configManager, "RabbitMQUsername", "MessagePublisherSettings"),
+                rabbitmq_password = GetSettingValue(configManager, "RabbitMQPassword", "MessagePublisherSettings"),
+                rabbitmq_port = GetSettingValue(configManager, "RabbitMQPort", "MessagePublisherSettings"),
+                rabbitmq_virtual_host = GetSettingValue(configManager, "RabbitMQVirtualHost", "MessagePublisherSettings"),
+                rabbitmq_exchange = GetSettingValue(configManager, "RabbitMQExchange", "MessagePublisherSettings"),
+                aws_region = GetSettingValue(configManager, "AWSRegion", "MessagePublisherSettings"),
+                azure_connection_string = GetSettingValue(configManager, "AzureBusConnectionString", "MessagePublisherSettings"),
+                rabbitmq_routing_key = GetSettingValue(configManager, "RabbitMQRoutingKey", "MessagePublisherSettings"),
+                transaction_movement_topic = GetSettingValue(configManager, "TransactionMovementTopic", "MessagePublisherSettings")
+            };
+
+            var paymentProviderSettings = new PaymentProviderSettings()
+            {
+                payment_provider = GetSettingValue(configManager, "PaymentProvider", "PaymentProviderSettings"),
+                square_token = GetSettingValue(configManager, "SquareToken", "PaymentProviderSettings"),
+                stripe_api_key = GetSettingValue(configManager, "StripeApiKey", "PaymentProviderSettings")
+            };
+
+            var logProviderSettings = new LogProviderSettings()
+            {
+                log_provider = GetSettingValue(configManager, "LogProvider", "LogProviderSettings"),
+                application_insights_connection_string = GetSettingValue(configManager, "ApplicationInsightsConnectionString", "LogProviderSettings"),
+                datadog_api_key = GetSettingValue(configManager, "DatadogApiKey", "LogProviderSettings"),
+                datadog_endpoint = GetSettingValue(configManager, "DatadogSite", "LogProviderSettings"),
+                datadog_environment = GetSettingValue(configManager, "DatadogEnv", "LogProviderSettings"),
+                database_connection_string = GetSettingValue(configManager, "DatabaseConnectionString", "LogProviderSettings")
+            };
+
+            var hangFireSettings = new HangfireSettings()
+            {
+                HangfireConnectionString = GetSettingValue(configManager, "HangfireConnectionString", "HangfireSettings")
+            };
+
+            var databaseSettings = new DatabaseSettings()
+            {
+                DatabaseConnectionString = GetSettingValue(configManager, "DatabaseConnectionString", "DatabaseSettings")
+            };
+
+
+            services.AddSingleton<IAuthenticationSettings>(authenticationSettings);
+            services.AddSingleton<IFileStorageSettings>(storageAccountSettings);
+            services.AddSingleton<IMessagePublisherSettings>(messagePublisherSettings);
+            services.AddSingleton<IPaymentProviderSettings>(paymentProviderSettings);
+            services.AddSingleton<ILogProviderSettings>(logProviderSettings);
+            services.AddSingleton<IHangfireSettings>(hangFireSettings);
+            services.AddSingleton<IDatabaseSettings>(databaseSettings);
+
+            return new Tuple<AuthenticationSettings, 
+                            FileStorageSettings, 
+                            MessagePublisherSettings, 
+                            PaymentProviderSettings, 
+                            LogProviderSettings,
+                            HangfireSettings,
+                            DatabaseSettings>(
+                authenticationSettings,
+                storageAccountSettings,
+                messagePublisherSettings,
+                paymentProviderSettings,
+                logProviderSettings,
+                hangFireSettings,
+                databaseSettings
+            );
+        }
+
         public static void AddJwtAuthentication(this IServiceCollection services, IAuthenticationSettings authenticationSettings)
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(m =>
@@ -27,7 +134,7 @@ namespace KosmosERP.Api
                         ValidateIssuerSigningKey = true,
                         ValidateAudience = false,
                         ValidIssuer = TokenModule.Issuer,
-                        IssuerSigningKey = TokenModule.CreateSecurityKey(Environment.GetEnvironmentVariable("APIPrivateKey"))
+                        IssuerSigningKey = TokenModule.CreateSecurityKey(authenticationSettings.APIPrivateKey)
                     };
             });
         }
@@ -133,7 +240,7 @@ namespace KosmosERP.Api
                 .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
                 .MinimumLevel.Override("System.Net.Http.HttpClient", Serilog.Events.LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .Enrich.WithProperty("env", Environment.GetEnvironmentVariable("DD_ENV") ?? "dev")
+                .Enrich.WithProperty("env", logProviderSettings.datadog_environment ?? "dev")
                 .WriteTo.DatadogLogs(
                     apiKey: logProviderSettings.datadog_api_key,
                     source: "csharp",
@@ -173,6 +280,18 @@ namespace KosmosERP.Api
                 .Enrich.FromLogContext()
                 .CreateLogger();
 
+        }
+
+        private static string? GetSettingValue(ConfigurationManager configManager, string settingName, string configRoot)
+        {
+            if(configManager.GetSection("Settings").Exists())
+            {
+                return configManager.GetSection("Settings").GetSection(configRoot).GetValue<string>(settingName);
+            }
+            else
+            {
+                return Environment.GetEnvironmentVariable(settingName);
+            }
         }
     }
 }
