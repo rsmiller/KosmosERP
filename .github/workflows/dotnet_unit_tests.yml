@@ -21,6 +21,12 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
+    # FastReport.OpenSource renders via System.Drawing.Common, which needs libgdiplus on Linux.
+    # Installing it here lets the headless report-render smoke tests (ReportingTests) run in CI
+    # and catches the System.Drawing/GDI regression the reporting spec calls out (§2.1).
+    - name: Install libgdiplus (report rendering)
+      run: sudo apt-get update && sudo apt-get install -y libgdiplus libc6-dev fontconfig fonts-dejavu-core
+
     - name: Restore dependencies
       run: dotnet restore KosmosERP.sln
 
@@ -29,5 +35,9 @@ jobs:
 
     # Runs every test project in the solution — i.e. both projects under /Tests
     # (KosmosERP.Tests.Modules and KosmosERP.Tests.Shared).
+    # REQUIRE_REPORT_RENDER=1 makes the headless report-render tests fail (not skip) if
+    # libgdiplus/System.Drawing is broken, so the GDI regression is caught here.
     - name: Test
+      env:
+        REQUIRE_REPORT_RENDER: "1"
       run: dotnet test KosmosERP.sln --configuration Release --no-build --verbosity normal

@@ -28,6 +28,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Shared\KosmosERP.BusinessLayer\KosmosERP.BusinessLayer.csproj" />
 	  <ProjectReference Include="..\..\Shared\KosmosERP.Database\KosmosERP.Database.csproj" />
+	  <ProjectReference Include="..\..\Shared\KosmosERP.Reporting\KosmosERP.Reporting.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

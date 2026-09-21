@@ -12,6 +12,7 @@ using KosmosERP.Database.Models;
 using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
 using KosmosERP.Module;
+using KosmosERP.Reporting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -181,6 +182,9 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddModules();
 
+// Reporting module (FastReport-based reports) — service, module identity, and generators.
+builder.Services.AddReporting();
+
 builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(databaseSettings.DatabaseConnectionString));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,6 +243,19 @@ foreach (var module in modules)
     }
 }
 
+
+// The Reporting module lives outside the BusinessLayer assembly scanned above, so
+// register its module row and permissions explicitly here (idempotent).
+var reporting_module = scope.ServiceProvider.GetService<IReportingModule>();
+if (reporting_module != null)
+{
+    try
+    {
+        reporting_module.StartUp();
+        reporting_module.SeedPermissions();
+    }
+    catch (Exception) { }
+}
 
 var activated_mem_cache = scope.ServiceProvider.GetService(typeof(IMemoryCacheService<KeyValueStore>));
 
