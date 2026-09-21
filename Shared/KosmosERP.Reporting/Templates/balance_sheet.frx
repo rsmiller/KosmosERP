@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="AsOfDate" DataType="System.String"/>
+    <Parameter Name="TotalAssets" DataType="System.String"/>
+    <Parameter Name="TotalLiabilities" DataType="System.String"/>
+    <Parameter Name="TotalEquity" DataType="System.String"/>
+    <Parameter Name="LiabPlusEquity" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Assets" ReferenceName="Assets" DataType="System.Int32" Enabled="true">
+      <Column Name="Name" DataType="System.String"/>
+      <Column Name="Amount" DataType="System.String"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="LiabSection" ReferenceName="LiabSection" DataType="System.Int32" Enabled="true">
+      <Column Name="Marker" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="Liabilities" ReferenceName="Liabilities" DataType="System.Int32" Enabled="true">
+      <Column Name="Name" DataType="System.String"/>
+      <Column Name="Amount" DataType="System.String"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="EquitySection" ReferenceName="EquitySection" DataType="System.Int32" Enabled="true">
+      <Column Name="Marker" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="Equity" ReferenceName="Equity" DataType="System.Int32" Enabled="true">
+      <Column Name="Name" DataType="System.String"/>
+      <Column Name="Amount" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="118">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="BALANCE SHEET" HorzAlign="Right" Font="Arial, 16pt, style=Bold"/>
+      <TextObject Name="AsOfText" Left="318" Top="28" Width="400.2" Height="16" Text="As of [AsOfDate]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="AssetsTitle" Left="0" Top="80" Width="500" Height="18" Text="Assets" Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="HdrName" Left="0" Top="100" Width="578.2" Height="16" Text="Account" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrAmount" Left="578.2" Top="100" Width="140" Height="16" Text="Amount" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="AssetsData" Top="122" Width="718.2" Height="16" DataSource="Assets">
+      <TextObject Name="AName" Left="0" Top="0" Width="578.2" Height="16" Text="[Assets.Name]" Font="Arial, 8pt"/>
+      <TextObject Name="AAmount" Left="578.2" Top="0" Width="140" Height="16" Text="[Assets.Amount]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <DataBand Name="LiabSectionData" Top="142" Width="718.2" Height="56" DataSource="LiabSection">
+      <TextObject Name="AssetsTotalLabel" Left="0" Top="2" Width="578.2" Height="16" Text="Total Assets" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="AssetsTotalText" Left="578.2" Top="2" Width="140" Height="16" Text="[TotalAssets]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="LiabTitle" Left="0" Top="22" Width="500" Height="18" Text="Liabilities" Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="LHdrName" Left="0" Top="40" Width="578.2" Height="16" Text="Account" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="LHdrAmount" Left="578.2" Top="40" Width="140" Height="16" Text="Amount" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </DataBand>
+    <DataBand Name="LiabData" Top="202" Width="718.2" Height="16" DataSource="Liabilities">
+      <TextObject Name="LName" Left="0" Top="0" Width="578.2" Height="16" Text="[Liabilities.Name]" Font="Arial, 8pt"/>
+      <TextObject Name="LAmount" Left="578.2" Top="0" Width="140" Height="16" Text="[Liabilities.Amount]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <DataBand Name="EquitySectionData" Top="222" Width="718.2" Height="56" DataSource="EquitySection">
+      <TextObject Name="LiabTotalLabel" Left="0" Top="2" Width="578.2" Height="16" Text="Total Liabilities" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="LiabTotalText" Left="578.2" Top="2" Width="140" Height="16" Text="[TotalLiabilities]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="EquityTitle" Left="0" Top="22" Width="500" Height="18" Text="Equity" Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="EHdrName" Left="0" Top="40" Width="578.2" Height="16" Text="Account" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="EHdrAmount" Left="578.2" Top="40" Width="140" Height="16" Text="Amount" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </DataBand>
+    <DataBand Name="EquityData" Top="282" Width="718.2" Height="16" DataSource="Equity">
+      <TextObject Name="EName" Left="0" Top="0" Width="578.2" Height="16" Text="[Equity.Name]" Font="Arial, 8pt"/>
+      <TextObject Name="EAmount" Left="578.2" Top="0" Width="140" Height="16" Text="[Equity.Amount]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="302" Width="718.2" Height="60">
+      <TextObject Name="EquityTotalLabel" Left="0" Top="2" Width="578.2" Height="16" Text="Total Equity" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="EquityTotalText" Left="578.2" Top="2" Width="140" Height="16" Text="[TotalEquity]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="LEqLabel" Left="0" Top="24" Width="578.2" Height="18" Text="Total Liabilities &amp; Equity" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="LEqText" Left="578.2" Top="24" Width="140" Height="18" Text="[LiabPlusEquity]" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

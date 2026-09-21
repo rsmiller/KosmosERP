@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="PeriodText" DataType="System.String"/>
+    <Parameter Name="RevenueTotal" DataType="System.String"/>
+    <Parameter Name="ExpenseTotal" DataType="System.String"/>
+    <Parameter Name="NetIncome" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Revenue" ReferenceName="Revenue" DataType="System.Int32" Enabled="true">
+      <Column Name="Name" DataType="System.String"/>
+      <Column Name="Amount" DataType="System.String"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="ExpSection" ReferenceName="ExpSection" DataType="System.Int32" Enabled="true">
+      <Column Name="Marker" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+    <BusinessObjectDataSource Name="Expenses" ReferenceName="Expenses" DataType="System.Int32" Enabled="true">
+      <Column Name="Name" DataType="System.String"/>
+      <Column Name="Amount" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="118">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="INCOME STATEMENT" HorzAlign="Right" Font="Arial, 16pt, style=Bold"/>
+      <TextObject Name="PeriodTextObj" Left="318" Top="28" Width="400.2" Height="16" Text="[PeriodText]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RevSectionTitle" Left="0" Top="80" Width="500" Height="18" Text="Revenue" Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="HdrName" Left="0" Top="100" Width="578.2" Height="16" Text="Account" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrAmount" Left="578.2" Top="100" Width="140" Height="16" Text="Amount" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="RevData" Top="122" Width="718.2" Height="16" DataSource="Revenue">
+      <TextObject Name="RevName" Left="0" Top="0" Width="578.2" Height="16" Text="[Revenue.Name]" Font="Arial, 8pt"/>
+      <TextObject Name="RevAmount" Left="578.2" Top="0" Width="140" Height="16" Text="[Revenue.Amount]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <DataBand Name="ExpSectionData" Top="142" Width="718.2" Height="56" DataSource="ExpSection">
+      <TextObject Name="RevTotalLabel" Left="0" Top="2" Width="578.2" Height="16" Text="Total Revenue" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="RevTotalText" Left="578.2" Top="2" Width="140" Height="16" Text="[RevenueTotal]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="ExpSectionTitle" Left="0" Top="22" Width="500" Height="18" Text="Expenses" Font="Arial, 10pt, style=Bold"/>
+      <TextObject Name="EHdrName" Left="0" Top="40" Width="578.2" Height="16" Text="Account" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="EHdrAmount" Left="578.2" Top="40" Width="140" Height="16" Text="Amount" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </DataBand>
+    <DataBand Name="ExpData" Top="202" Width="718.2" Height="16" DataSource="Expenses">
+      <TextObject Name="ExpName" Left="0" Top="0" Width="578.2" Height="16" Text="[Expenses.Name]" Font="Arial, 8pt"/>
+      <TextObject Name="ExpAmount" Left="578.2" Top="0" Width="140" Height="16" Text="[Expenses.Amount]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="222" Width="718.2" Height="60">
+      <TextObject Name="ExpTotalLabel" Left="0" Top="2" Width="578.2" Height="16" Text="Total Expenses" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="ExpTotalText" Left="578.2" Top="2" Width="140" Height="16" Text="[ExpenseTotal]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="NetLabel" Left="0" Top="24" Width="578.2" Height="18" Text="Net Income" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="NetText" Left="578.2" Top="24" Width="140" Height="18" Text="[NetIncome]" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

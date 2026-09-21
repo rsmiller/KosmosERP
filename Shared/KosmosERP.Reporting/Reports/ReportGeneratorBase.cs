@@ -118,6 +118,31 @@ public abstract class ReportGeneratorBase : IReportGenerator
         }
     }
 
+    /// <summary>Reads a parameter as a <see cref="DateOnly"/> (accepts DateOnly, DateTime, or ISO/parseable string).</summary>
+    protected static DateOnly? GetDate(ReportRequest request, string key)
+    {
+        if (!request.Parameters.TryGetValue(key, out var raw) || raw == null)
+            return null;
+
+        switch (raw)
+        {
+            case DateOnly d:
+                return d;
+            case DateTime dt:
+                return DateOnly.FromDateTime(dt);
+            default:
+                if (DateOnly.TryParse(raw.ToString(), out var parsed))
+                    return parsed;
+                if (DateTime.TryParse(raw.ToString(), out var parsedDt))
+                    return DateOnly.FromDateTime(parsedDt);
+                return null;
+        }
+    }
+
+    /// <summary>Reads a date parameter, defaulting to today (UTC) when absent or unparseable.</summary>
+    protected static DateOnly GetDateOrToday(ReportRequest request, string key)
+        => GetDate(request, key) ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
     /// <summary>Reads a parameter as a string, or null when absent/blank.</summary>
     protected static string? GetString(ReportRequest request, string key)
     {

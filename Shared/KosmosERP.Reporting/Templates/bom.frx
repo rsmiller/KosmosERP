@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="AssemblyName" DataType="System.String"/>
+    <Parameter Name="AssemblySku" DataType="System.String"/>
+    <Parameter Name="ComponentCount" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Components" ReferenceName="Components" DataType="System.Int32" Enabled="true">
+      <Column Name="Order" DataType="System.Int32"/>
+      <Column Name="Sku" DataType="System.String"/>
+      <Column Name="Component" DataType="System.String"/>
+      <Column Name="QtyPer" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="120">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="BILL OF MATERIALS" HorzAlign="Right" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="AssemblyLabel" Left="0" Top="60" Width="80" Height="16" Text="Assembly:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="AssemblyText" Left="80" Top="60" Width="500" Height="16" Text="[AssemblyName] ([AssemblySku])" Font="Arial, 9pt"/>
+      <TextObject Name="CountText" Left="0" Top="78" Width="500" Height="16" Text="[ComponentCount] component(s)" Font="Arial, 8pt"/>
+      <TextObject Name="HdrOrder" Left="0" Top="98" Width="60" Height="20" Text="Seq" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrSku" Left="60" Top="98" Width="140" Height="20" Text="Component SKU" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrComp" Left="200" Top="98" Width="418.2" Height="20" Text="Component" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrQty" Left="618.2" Top="98" Width="100" Height="20" Text="Qty / Unit" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="124" Width="718.2" Height="16" DataSource="Components">
+      <TextObject Name="RowOrder" Left="0" Top="0" Width="60" Height="16" Text="[Components.Order]" Font="Arial, 8pt"/>
+      <TextObject Name="RowSku" Left="60" Top="0" Width="140" Height="16" Text="[Components.Sku]" Font="Arial, 8pt"/>
+      <TextObject Name="RowComp" Left="200" Top="0" Width="418.2" Height="16" Text="[Components.Component]" Font="Arial, 8pt"/>
+      <TextObject Name="RowQty" Left="618.2" Top="0" Width="100" Height="16" Text="[Components.QtyPer]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="144" Width="718.2" Height="20">
+      <TextObject Name="FooterText" Left="0" Top="2" Width="718.2" Height="16" Text="Single-level bill of materials." Font="Arial, 8pt, style=Italic"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

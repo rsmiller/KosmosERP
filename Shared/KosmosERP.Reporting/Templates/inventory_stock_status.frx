@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="AsOfDate" DataType="System.String"/>
+    <Parameter Name="CategoryFilter" DataType="System.String"/>
+    <Parameter Name="GrandValue" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Stock" ReferenceName="Stock" DataType="System.Int32" Enabled="true">
+      <Column Name="Category" DataType="System.String"/>
+      <Column Name="Sku" DataType="System.String"/>
+      <Column Name="Description" DataType="System.String"/>
+      <Column Name="OnHand" DataType="System.Int32"/>
+      <Column Name="UnitCost" DataType="System.String"/>
+      <Column Name="ExtendedValue" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="120">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="INVENTORY STOCK STATUS" HorzAlign="Right" Font="Arial, 13pt, style=Bold"/>
+      <TextObject Name="AsOfText" Left="318" Top="28" Width="400.2" Height="16" Text="As of [AsOfDate] — [CategoryFilter]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="HdrCat" Left="0" Top="98" Width="120" Height="20" Text="Category" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrSku" Left="120" Top="98" Width="110" Height="20" Text="SKU" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrDesc" Left="230" Top="98" Width="248.2" Height="20" Text="Description" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrOnHand" Left="478.2" Top="98" Width="80" Height="20" Text="On Hand" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrCost" Left="558.2" Top="98" Width="80" Height="20" Text="Unit Cost" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrExt" Left="638.2" Top="98" Width="80" Height="20" Text="Ext. Value" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="124" Width="718.2" Height="16" DataSource="Stock">
+      <TextObject Name="RowCat" Left="0" Top="0" Width="120" Height="16" Text="[Stock.Category]" Font="Arial, 8pt"/>
+      <TextObject Name="RowSku" Left="120" Top="0" Width="110" Height="16" Text="[Stock.Sku]" Font="Arial, 8pt"/>
+      <TextObject Name="RowDesc" Left="230" Top="0" Width="248.2" Height="16" Text="[Stock.Description]" Font="Arial, 8pt"/>
+      <TextObject Name="RowOnHand" Left="478.2" Top="0" Width="80" Height="16" Text="[Stock.OnHand]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowCost" Left="558.2" Top="0" Width="80" Height="16" Text="[Stock.UnitCost]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowExt" Left="638.2" Top="0" Width="80" Height="16" Text="[Stock.ExtendedValue]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="144" Width="718.2" Height="24">
+      <TextObject Name="GrandLabel" Left="0" Top="2" Width="638.2" Height="18" Text="Total Inventory Value" HorzAlign="Right" Font="Arial, 9pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="GrandText" Left="638.2" Top="2" Width="80" Height="18" Text="[GrandValue]" HorzAlign="Right" Font="Arial, 9pt, style=Bold" Border.Lines="Top"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>
