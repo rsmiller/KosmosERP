@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import SessionStorage from "./session-storage";
 import { countryService } from "@/services/country-service";
 import { Control, FieldError } from "react-hook-form";
@@ -50,7 +50,7 @@ const CountriesCombobox = forwardRef<CountriesComboboxRef, CountriesComboboxPara
         itemToValue: (item) => item.country_name ? item.country_name : "-- ERROR --",
     })
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
@@ -98,7 +98,7 @@ const CountriesCombobox = forwardRef<CountriesComboboxRef, CountriesComboboxPara
     const fetchCountry = async (iso: string): Promise<CountryDto | undefined> => {
         try {
             setLoading(true);
-            const response = await countryService.getByISOAsync(iso,keycloak?.token || "");
+            const response = await countryService.getByISOAsync(iso,auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {
@@ -120,7 +120,7 @@ const CountriesCombobox = forwardRef<CountriesComboboxRef, CountriesComboboxPara
             setLoading(true);
             let findCommand = new CountryFindCommand();
             findCommand.wildcard = searchTerm;
-            const response = await countryService.find(findCommand, keycloak?.token || "", 1, 20, "country_name-asc");
+            const response = await countryService.find(findCommand, auth.token || "", 1, 20, "country_name-asc");
 
             if (response.success && response.data !== undefined) {
                 set(response.data);

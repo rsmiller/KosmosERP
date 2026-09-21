@@ -1,7 +1,7 @@
 import { RoleDeleteCommand, RolePermissionsDto } from "@/models/user-models";
 import { userService } from "@/services/user-service";
 import { Button, CloseButton, Dialog, Portal, Spinner } from "@chakra-ui/react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { AllCommunityModule, ColDef, ModuleRegistry } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 export function UserRoleRenderer(params: any)
 {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     //console.log(params);
     
 
@@ -57,7 +57,7 @@ export function UserRoleRenderer(params: any)
 
         setIsWorking(true);
 
-        userService.deleteRole(command, keycloak?.token || "").then((response) => {
+        userService.deleteRole(command, auth.token || "").then((response) => {
             setIsWorking(false);
             setIsDeleteRoleDialogOpen(false);
             // optionally refresh view or notify parent

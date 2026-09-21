@@ -2,7 +2,7 @@
 
 import { AddressCreateCommand, AddressDto, AddressFindCommand, AddressListDto } from "@/models/address-models";
 import { addressService } from "@/services/address-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import {
   Combobox,
   Portal,
@@ -39,7 +39,7 @@ const AddressSelectorCombobox = forwardRef<AddressSelectorComboboxRef, AddressSe
     ({dbKey, customer_id, onChange, control, name, error, disabled, hideAddBtn, onValidationChange, title}, ref) => {
         const userId = SessionStorage.getUserId();
         const sessionId = SessionStorage.getSession();
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [addresses, setAddresses] = useState<AddressListDto[]>([]);
         const [loading, setLoading] = useState(false);
@@ -124,7 +124,7 @@ const AddressSelectorCombobox = forwardRef<AddressSelectorComboboxRef, AddressSe
         const fetchAddress = async (id: number): Promise<AddressDto | undefined> => {
             try {
                 setLoading(true);
-                const response = await addressService.get(id, keycloak?.token || "");
+                const response = await addressService.get(id, auth.token || "");
                 
                 if (response.success && response.data !== undefined) 
                 {
@@ -148,7 +148,7 @@ const AddressSelectorCombobox = forwardRef<AddressSelectorComboboxRef, AddressSe
                 findCommand.wildcard = searchTerm;
                 findCommand.customer_id = customer_id;
                 //console.log(findCommand)
-                const response = await addressService.find(findCommand, keycloak?.token || "", 1, 20, "street_address1-asc");
+                const response = await addressService.find(findCommand, auth.token || "", 1, 20, "street_address1-asc");
                 
                 if (response.success && response.data !== undefined) {
                     set(response.data);
@@ -223,7 +223,7 @@ const AddressSelectorCombobox = forwardRef<AddressSelectorComboboxRef, AddressSe
             console.log(command);
 
 
-            await addressService.create(command, keycloak?.token || "").then( async (response) => 
+            await addressService.create(command, auth.token || "").then( async (response) => 
             {
                 setOpenAddressDialog(false);
 

@@ -16,7 +16,7 @@ import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -29,7 +29,7 @@ function CreditMemosListComponent({customer_id, onChange}: CreditMemosListCompon
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   
   const [rowData, setRowData] = useState<CreditMemoHeaderListDto[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -61,7 +61,7 @@ function CreditMemosListComponent({customer_id, onChange}: CreditMemosListCompon
       setTotalCount(1);
 
       
-      await creditMemoService.find(command, keycloak?.token || "", pageStart, pageSize).then( (response) =>
+      await creditMemoService.find(command, auth.token || "", pageStart, pageSize).then( (response) =>
       {
           //console.log(response);
           setLoading(false);
@@ -88,10 +88,10 @@ function CreditMemosListComponent({customer_id, onChange}: CreditMemosListCompon
 };
 
   useEffect(() => {
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     fetchData();
-  }, [page, pageSize, customer_id, keycloak.authenticated]);
+  }, [page, pageSize, customer_id, auth.authenticated]);
 
   const onPageEvent = async (p: any) => { setPage(p); };
   const onPageSizeEvent = async (s: any) => { setPageSize(s); };

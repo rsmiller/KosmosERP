@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { Control, FieldError } from "react-hook-form";
 import SessionStorage from "./session-storage";
 import { StateDto, StateFindCommand, StateListDto } from "@/models/country-models";
@@ -38,7 +38,7 @@ const StatesCombobox = forwardRef<StatesComboboxRef, StatesComboboxParams>(
     ({dbKey, country_id, onChange, control, name, error, onValidationChange}, ref) => {
     const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const { contains } = useFilter({ sensitivity: "base" })
     const [states, setStates] = useState<StateListDto[]>([]);
@@ -134,7 +134,7 @@ const StatesCombobox = forwardRef<StatesComboboxRef, StatesComboboxParams>(
     const fetchState = async (country_id: number, iso: string): Promise<StateDto | undefined> => {
         try {
             setLoading(true);
-            const response = await stateService.getByISOAsync(country_id, iso, keycloak?.token || "");
+            const response = await stateService.getByISOAsync(country_id, iso, auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {
@@ -167,7 +167,7 @@ const StatesCombobox = forwardRef<StatesComboboxRef, StatesComboboxParams>(
             let findCommand = new StateFindCommand();
             findCommand.wildcard = searchTerm;
             
-            const response = await stateService.find(findCommand, keycloak?.token || "", 1, 200, "state_name-asc");
+            const response = await stateService.find(findCommand, auth.token || "", 1, 200, "state_name-asc");
             
             if (response.success && response.data !== undefined) {
                 set(response.data);
@@ -197,7 +197,7 @@ const StatesCombobox = forwardRef<StatesComboboxRef, StatesComboboxParams>(
             let findCommand = new StateFindCommand();
             findCommand.country_id = country_id;
             
-            const response = await stateService.find(findCommand, keycloak?.token || "", 1, 100, "state_name-asc");
+            const response = await stateService.find(findCommand, auth.token || "", 1, 100, "state_name-asc");
             
             if (response.success && response.data !== undefined) {
                 set(response.data);

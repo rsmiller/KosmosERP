@@ -12,7 +12,7 @@ import {
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { useAsync } from "react-use";
 import { Controller, Control, FieldError } from "react-hook-form";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class OpportunityStageComboboxParams
 {
@@ -35,7 +35,7 @@ const OpportunityStageCombobox = forwardRef<OpportunityStageComboboxRef, Opportu
     ({dbKey, onChange, control, name, error, disabled, onValidationChange}, ref) => {
         const { contains } = useFilter({ sensitivity: "base" })
 
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [stages, setStages] = useState<KeyValueDto[]>([]);
         const [selectedValue, setSelectedValue] = useState<string>();
@@ -103,7 +103,7 @@ const OpportunityStageCombobox = forwardRef<OpportunityStageComboboxRef, Opportu
 
         
         const fetchData = useAsync(async () => {
-            await keyValueService.GetDtoByModule("0c3959c3-15dc-44ab-8e2c-9b9e2773e65f", keycloak?.token || "").then((response) =>
+            await keyValueService.GetDtoByModule("0c3959c3-15dc-44ab-8e2c-9b9e2773e65f", auth.token || "").then((response) =>
             {
                 if (response.success && response.data !== undefined) {
                     set(response.data);

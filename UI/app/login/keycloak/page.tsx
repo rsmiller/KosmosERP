@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Keycloak from 'keycloak-js'
 import { ReactKeycloakProvider, useKeycloak } from '@react-keycloak/web'
@@ -44,6 +44,14 @@ const LoginGate = () => {
 }
 
 const KeycloakLoginPage = () => {
+  // keycloak-js is browser-only; don't mount the provider during SSR/prerender.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <ReactKeycloakProvider
       authClient={keycloak}

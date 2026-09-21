@@ -17,7 +17,7 @@ import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
 import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -28,7 +28,7 @@ export class PurchaseOrdersListComponentParams
 }
 
 function PurchaseOrdersListComponentPage({vendor_id, onChange}: PurchaseOrdersListComponentParams) {
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
@@ -62,7 +62,7 @@ function PurchaseOrdersListComponentPage({vendor_id, onChange}: PurchaseOrdersLi
       setTotalCount(1);
 
       
-      let response = await purchaseOrderService.find(command, keycloak?.token || "", pageStart, pageSize);
+      let response = await purchaseOrderService.find(command, auth.token || "", pageStart, pageSize);
     
       setLoading(false);
       
@@ -91,12 +91,12 @@ function PurchaseOrdersListComponentPage({vendor_id, onChange}: PurchaseOrdersLi
 
   useEffect(() => {
     /// FETCH DATA
-    if(keycloak && keycloak.authenticated == true )
+    if(auth.authenticated == true )
     {
       fetchData();
     }
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const handleViewClick = (guid: any) => {
     router.push("/erp/purchaseorders/view/" + guid);

@@ -8,7 +8,7 @@ import {
     useListCollection,
 } from "@chakra-ui/react"
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react"
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { Controller, Control, FieldError } from "react-hook-form";
 
 
@@ -33,7 +33,7 @@ export interface ChartOfAccountComboboxRef {
 
 const ChartOfAccountCombobox = forwardRef<ChartOfAccountComboboxRef, ChartOfAccountComboboxParams>(
     ({dbKey, onChange, control, name, error, disabled, onValidationChange, required, accountType}, ref) => {
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [accounts, setAccounts] = useState<ChartOfAccountListDto[]>([]);
         const [loading, setLoading] = useState(false);
@@ -106,12 +106,12 @@ const ChartOfAccountCombobox = forwardRef<ChartOfAccountComboboxRef, ChartOfAcco
         }, [dbKey]);
 
         const fetchAccount = async (id: number): Promise<ChartOfAccountDto | undefined> => {
-            if (keycloak.authenticated == false) return;
+            if (auth.authenticated == false) return;
 
             let command = new ChartOfAccountFindCommand();
             // We'll fetch the specific account by ID if it's a number
             try {
-                const response = await chartOfAccountService.get(id, keycloak.token || "");
+                const response = await chartOfAccountService.get(id, auth.token || "");
                 if(response.success && response.data) {
                     return response.data;
                 }
@@ -122,7 +122,7 @@ const ChartOfAccountCombobox = forwardRef<ChartOfAccountComboboxRef, ChartOfAcco
         };
 
         const searchAccounts = async (query: string) => {
-            if (keycloak.authenticated == false) return;
+            if (auth.authenticated == false) return;
             
             setLoading(true);
 
@@ -134,7 +134,7 @@ const ChartOfAccountCombobox = forwardRef<ChartOfAccountComboboxRef, ChartOfAcco
             }
 
             try {
-                const response = await chartOfAccountService.find(command, keycloak.token || "", 1, 50, "account_number-asc");
+                const response = await chartOfAccountService.find(command, auth.token || "", 1, 50, "account_number-asc");
                 
                 if(response.success && response.data) {
                     setAccounts(response.data);

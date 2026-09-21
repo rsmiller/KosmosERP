@@ -13,7 +13,7 @@ import { Control, Controller, FieldError } from "react-hook-form";
 import { keyValueService } from "@/services/keyvalue-service";
 import { KeyValueDto } from "@/models/key-value-models";
 import { useAsync } from "react-use";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class ProductCategoryComboboxParams
 {
@@ -36,7 +36,7 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
     ({dbKey, onChange, control, name, error, disabled, onValidationChange}, ref) => {
             const { contains } = useFilter({ sensitivity: "base" })
 
-            const { keycloak } = useKeycloak();
+            const auth = useAuth();
 
             const [stages, setStages] = useState<KeyValueDto[]>([]);
             const [selectedValue, setSelectedValue] = useState<string>();
@@ -104,7 +104,7 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
     
             
             const fetchData = useAsync(async () => {
-                await keyValueService.GetDtoByModule("f6e28b05-265d-4416-b5fd-48399036493a", keycloak?.token || "").then((response) =>
+                await keyValueService.GetDtoByModule("f6e28b05-265d-4416-b5fd-48399036493a", auth.token || "").then((response) =>
                 {
                     if (response.success && response.data !== undefined) {
                         set(response.data);

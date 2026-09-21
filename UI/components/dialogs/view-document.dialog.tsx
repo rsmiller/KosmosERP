@@ -1,7 +1,7 @@
 
 import { documentService } from "@/services/document-service";
 import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
-import { useKeycloak } from "@react-keycloak/web";
+import { useAuth } from "@/lib/auth/auth-context";
 import { forwardRef, useEffect, useState } from "react";
 
 export class ViewDocumentDialogParams
@@ -18,7 +18,7 @@ export interface ViewDocumentDialogRef {
 
 const ViewDocumentDialog = forwardRef<ViewDocumentDialogRef, ViewDocumentDialogParams>(
     ({openDialog, onClose, document_revision_guid}, ref) => {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [isValid, setIsValid] = useState(false);
     const [fileData, setFileData] = useState<Blob | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -26,11 +26,11 @@ const ViewDocumentDialog = forwardRef<ViewDocumentDialogRef, ViewDocumentDialogP
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         if (openDialog && document_revision_guid) {
             setIsLoading(true);
-            documentService.downloadFileByGuid(document_revision_guid, keycloak?.token || "")
+            documentService.downloadFileByGuid(document_revision_guid, auth.token || "")
                 .then((blob) => {
                     if (blob) {
                         setFileData(blob);
@@ -62,7 +62,7 @@ const ViewDocumentDialog = forwardRef<ViewDocumentDialogRef, ViewDocumentDialogP
                 setFileUrl(null);
             }
         };
-    }, [openDialog, document_revision_guid, keycloak.authenticated]);
+    }, [openDialog, document_revision_guid, auth.authenticated]);
 
     const handleClose = () => {
         // Clean up the file URL

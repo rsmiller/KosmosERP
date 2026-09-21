@@ -2,17 +2,17 @@ import { useState, useEffect } from "react";
 import { CustomCellRendererProps } from "ag-grid-react";
 import { KeyValueDto } from "@/models/key-value-models";
 import { keyValueService } from "@/services/keyvalue-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 const ProductionStatusCellRenderer = (params: CustomCellRendererProps) => {
     const [stages, setStages] = useState<KeyValueDto[]>([]);
     const [displayValue, setDisplayValue] = useState<string>("");
     const [loading, setLoading] = useState(true);
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const fetchData = async () => {
         try {
-            const response = await keyValueService.GetDtoByModule("f157469e-5e5c-4a5b-b071-89a28b2a0310", keycloak?.token || "");
+            const response = await keyValueService.GetDtoByModule("f157469e-5e5c-4a5b-b071-89a28b2a0310", auth.token || "");
             if (response.success && response.data !== undefined) {
                 setStages(response.data);
                 
@@ -37,10 +37,10 @@ const ProductionStatusCellRenderer = (params: CustomCellRendererProps) => {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         fetchData();
-    }, [params.value, keycloak.authenticated]);
+    }, [params.value, auth.authenticated]);
 
     return <span>{displayValue}</span>;
 };

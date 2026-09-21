@@ -8,7 +8,7 @@ import {
     Input,
     Stack,
 } from "@chakra-ui/react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Control, FieldError, useForm } from "react-hook-form";
 import StatesCombobox, { StatesComboboxRef } from "./states-combobox";
@@ -61,7 +61,7 @@ const AddressBlock = forwardRef<AddressBlockRef, AddressBlockParams>(
         watch,
     } = useForm<AddressEditCommand>();
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
@@ -82,7 +82,7 @@ const AddressBlock = forwardRef<AddressBlockRef, AddressBlockParams>(
                     return;
                 }
 
-                const response = await addressService.get(address_id, keycloak?.token || "");
+                const response = await addressService.get(address_id, auth.token || "");
 
                 //console.log(response)
 
@@ -120,7 +120,7 @@ const AddressBlock = forwardRef<AddressBlockRef, AddressBlockParams>(
     const fetchCountry = async (iso: string): Promise<CountryDto | undefined> => {
         try {
             setLoading(true);
-            const response = await countryService.getByISOAsync(iso, keycloak?.token || "");
+            const response = await countryService.getByISOAsync(iso, auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {

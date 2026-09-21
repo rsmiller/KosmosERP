@@ -3,7 +3,7 @@ import { RolePermissionsDto } from "@/models/user-models"
 export const permissionsService = {
     HasPermission(module_start: string, erp_module_permission: string, permissions: string[] | undefined){
         //console.log(permissions);
-        console.log("Checking permission for module:", module_start, "with permission:", erp_module_permission);
+       // console.log("Checking permission for module:", module_start, "with permission:", erp_module_permission);
         if(permissions == undefined)
         {
             return false;

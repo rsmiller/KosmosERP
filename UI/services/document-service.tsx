@@ -79,7 +79,7 @@ export const documentService = {
       });
       
       // Extract content type from response headers
-      const contentType = response.headers['content-type'] || 'application/octet-stream';
+      const contentType = String(response.headers['content-type'] ?? 'application/octet-stream');
       
       // Create a new blob with the correct content type
       return new Blob([response.data], { type: contentType });
@@ -96,7 +96,7 @@ export const documentService = {
       });
       
       // Extract content type from response headers
-      const contentType = response.headers['content-type'] || 'application/octet-stream';
+      const contentType = String(response.headers['content-type'] ?? 'application/octet-stream');
       
       // Create a new blob with the correct content type
       return new Blob([response.data], { type: contentType });

@@ -15,7 +15,7 @@ import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
 import { useForm } from 'react-hook-form';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -35,7 +35,7 @@ function SalesOrdersSelectListComponent({customer_id, onSelect}: SalesOrdersSele
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
 
   const [rowData, setRowData] = useState<OrderHeaderListDto[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -92,7 +92,7 @@ function SalesOrdersSelectListComponent({customer_id, onSelect}: SalesOrdersSele
     //console.log(command)
 
     
-    let response = await orderService.find(command, keycloak?.token || "", pageStart, pageSize);
+    let response = await orderService.find(command, auth.token || "", pageStart, pageSize);
     //console.log(response)
     setLoading(false);
 
@@ -117,11 +117,11 @@ function SalesOrdersSelectListComponent({customer_id, onSelect}: SalesOrdersSele
 
   useEffect(() => {
     
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
     
     fetchData('');
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const onPageEvent = async (page: any) => {
     setPage(page);

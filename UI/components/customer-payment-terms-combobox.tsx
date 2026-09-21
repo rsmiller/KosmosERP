@@ -12,7 +12,7 @@ import { Control, Controller, FieldError } from "react-hook-form";
 import { useAsync } from "react-use";
 import { KeyValueDto } from "@/models/key-value-models";
 import { keyValueService } from "@/services/keyvalue-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class CustomerPaymentTermsComboboxParams
 {
@@ -33,7 +33,7 @@ export interface CustomerPaymentTermsComboboxRef {
 const CustomerPaymentTermsCombobox = forwardRef<CustomerPaymentTermsComboboxRef, CustomerPaymentTermsComboboxParams>(
     ({dbKey, onChange, control, name, error, onValidationChange}, ref) => {
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const { contains } = useFilter({ sensitivity: "base" })
 
@@ -105,7 +105,7 @@ const CustomerPaymentTermsCombobox = forwardRef<CustomerPaymentTermsComboboxRef,
 
 
     const fetchData = useAsync(async () => {
-        await keyValueService.GetDtoByModule("93bf02ec-5578-4aa4-a45b-f82962adf4bd", keycloak?.token || "").then((response) =>
+        await keyValueService.GetDtoByModule("93bf02ec-5578-4aa4-a45b-f82962adf4bd", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
                 set(response.data);

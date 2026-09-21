@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { OrderHeaderListDto, OrderHeaderFindCommand } from '@/models/sales-order-models';
 import { orderService } from '@/services/order-service';
 import SessionStorage from '@/components/session-storage';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { CurrencyFormatter } from '@/components/ag-grid/currency-formatter';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
@@ -31,7 +31,7 @@ function SalesOrdersListComponent({customer_id, onChange}: SalesOrdersListCompon
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
 
   const [rowData, setRowData] = useState<OrderHeaderListDto[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -71,7 +71,7 @@ function SalesOrdersListComponent({customer_id, onChange}: SalesOrdersListCompon
 
       setTotalCount(1);
 
-      let response = await orderService.find(command, keycloak?.token || "", pageStart, pageSize);
+      let response = await orderService.find(command, auth.token || "", pageStart, pageSize);
       //console.log(response)
       setLoading(false);
 
@@ -97,11 +97,11 @@ function SalesOrdersListComponent({customer_id, onChange}: SalesOrdersListCompon
 
   useEffect(() => {
 
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     fetchData();
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const onPageEvent = async (page: any) => {
     setPage(page);

@@ -9,7 +9,7 @@ import { ARInvoiceHeaderFindCommand, ARInvoiceHeaderListDto } from "@/models/ar-
 import { DateOnlyRender } from "./ag-grid/date-only-renderer";
 import { CurrencyFormatter } from "./ag-grid/currency-formatter";
 import { arInvoiceService } from "@/services/ar-invoice-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class ARInvoiceSelectorComponentForm
 {
@@ -33,7 +33,7 @@ export class ARInvoiceSelectorComponentParams
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function ARInvoiceSelectorComponent({customer_id, ar_invoice_number, disabled, onChange}: ARInvoiceSelectorComponentParams) {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
@@ -75,7 +75,7 @@ function ARInvoiceSelectorComponent({customer_id, ar_invoice_number, disabled, o
     
         console.log(command)
     
-        let response = await arInvoiceService.find(command, keycloak?.token || "", pageStart, pageSize);
+        let response = await arInvoiceService.find(command, auth.token || "", pageStart, pageSize);
         //console.log(response)
         setLoading(false);
     
@@ -108,11 +108,11 @@ function ARInvoiceSelectorComponent({customer_id, ar_invoice_number, disabled, o
 
     useEffect(() => {
 
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         fetchData('');
     
-    }, [customer_id, page, pageSize, keycloak.authenticated]);
+    }, [customer_id, page, pageSize, auth.authenticated]);
 
 
     const handleSearchClick = () => {
