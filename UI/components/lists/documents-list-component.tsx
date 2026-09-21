@@ -13,7 +13,7 @@ import { documentService } from '@/services/document-service';
 import SessionStorage from '@/components/session-storage';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdOutlinePageview } from 'react-icons/md';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -24,7 +24,7 @@ function DocumentsListComponent() {
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   
   const [rowData, setRowData] = useState<DocumentUploadDto[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -34,10 +34,10 @@ function DocumentsListComponent() {
 
   useEffect(() => {
     /// FETCH DATA
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
     
     getTableData();
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     router.push("/erp/documents/new");
@@ -67,7 +67,7 @@ function DocumentsListComponent() {
     let command = new DocumentUploadFindCommand();
 
     
-    let response = await documentService.find(command, keycloak?.token || "", pageStart, pageSize);
+    let response = await documentService.find(command, auth.token || "", pageStart, pageSize);
   
     setLoading(false);
 

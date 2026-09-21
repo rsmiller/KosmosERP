@@ -19,7 +19,7 @@ import { format, parse } from 'date-fns';
 import ActivityStatusCombobox, { ActivityStatusComboboxRef } from '../activity-status-combobox';
 import PriorityCombobox, { PriorityComboboxRef } from '../priority-combobox';
 import ActivityTypeCombobox, { ActivityTypeComboboxRef } from '../activity-type-combobox';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -35,7 +35,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   
   const [rowData, setRowData] = useState<ActivityListDto[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -156,7 +156,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
       setTotalCount(1);
 
       
-      let response = await activityService.find(command, keycloak?.token || "", pageStart, pageSize);
+      let response = await activityService.find(command, auth.token || "", pageStart, pageSize);
       //console.log(response)
       setLoading(false);
 
@@ -181,11 +181,11 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
   useEffect(() => {
     /// FETCH DATA
     
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     fetchData();
     
-  }, [page, pageSize, keycloak.authenticated]);
+  }, [page, pageSize, auth.authenticated]);
 
   const onPageEvent = async (page: any) => {
     setPage(page);

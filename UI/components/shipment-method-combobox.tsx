@@ -12,7 +12,7 @@ import {
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 import { Control, FieldError } from "react-hook-form";
 import { useAsync } from "react-use";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class ShipmentMethodComboboxParams
 {
@@ -35,7 +35,7 @@ const ShipmentMethodCombobox = forwardRef<ShipmentMethodComboboxRef, ShipmentMet
     ({dbKey, onChange, control, name, error, disabled, onValidationChange}, ref) => {
 
     const { contains } = useFilter({ sensitivity: "base" })
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const [shipmentMethodOptions, setShipmentMethodOptions] = useState<KeyValueDto[]>([]);
     const [selectedValue, setSelectedValue] = useState<string>();
@@ -104,7 +104,7 @@ const ShipmentMethodCombobox = forwardRef<ShipmentMethodComboboxRef, ShipmentMet
 
 
     const fetchData = useAsync(async () => {
-        await keyValueService.GetDtoByModule("9da95117-2792-44e5-996a-e91a244b0384", keycloak?.token || "").then((response) =>
+        await keyValueService.GetDtoByModule("9da95117-2792-44e5-996a-e91a244b0384", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
                 set(response.data);

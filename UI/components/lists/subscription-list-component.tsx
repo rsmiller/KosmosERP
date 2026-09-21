@@ -14,7 +14,7 @@ import SessionStorage from '@/components/session-storage';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
 import SalesOrderSelectorComponent from '../sales-order-selector';
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -28,7 +28,7 @@ function SubscriptionListComponent({customer_id, onChange}: SubscriptionListComp
   const router = useRouter();
   const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
-  const { keycloak } = useKeycloak();
+  const auth = useAuth();
   
   const [rowData, setRowData] = useState<SubscriptionListDto[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -43,10 +43,10 @@ function SubscriptionListComponent({customer_id, onChange}: SubscriptionListComp
 
   useEffect(() => {
 
-    if(keycloak.authenticated == false) return;
+    if(auth.authenticated == false) return;
 
     getTableData();
-  }, [keycloak.authenticated]);
+  }, [auth.authenticated]);
 
   const handleNewClick = () => {
     setDialogOpen(true);
@@ -74,7 +74,7 @@ function SubscriptionListComponent({customer_id, onChange}: SubscriptionListComp
     let command = new SubscriptionFindCommand();
     command.customer_id = customer_id;
 
-    await subscriptionService.find(command, keycloak?.token || "", pageStart, pageSize).then((response) => {
+    await subscriptionService.find(command, auth.token || "", pageStart, pageSize).then((response) => {
       console.log(response);
 
       setLoading(false);
@@ -162,7 +162,7 @@ function SubscriptionListComponent({customer_id, onChange}: SubscriptionListComp
 
       //console.log(command);
 
-      subscriptionService.create(command, keycloak?.token || "").then( (response) => {
+      subscriptionService.create(command, auth.token || "").then( (response) => {
         //console.log(response);
 
         if(response.success && response.data != undefined)

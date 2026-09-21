@@ -8,7 +8,7 @@ import {
     useFilter,
     useListCollection,
 } from "@chakra-ui/react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 import { Control, FieldError } from "react-hook-form";
@@ -35,7 +35,7 @@ const TransactionTypeCombobox = forwardRef<TransactionTypeComboboxRef, Transacti
     ({dbKey, onChange, control, name, error, onValidationChange}, ref) => {
 
     const { contains } = useFilter({ sensitivity: "base" })
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const [stages, setStages] = useState<KeyValueDto[]>([]);
     const [selectedValue, setSelectedValue] = useState<string>();
@@ -104,14 +104,14 @@ const TransactionTypeCombobox = forwardRef<TransactionTypeComboboxRef, Transacti
 
 
     const fetchData = useAsync(async () => {
-        await keyValueService.GetDtoByModule("416786e0-47b3-440a-90da-b7036d72b1f7", keycloak?.token || "").then((response) =>
+        await keyValueService.GetDtoByModule("416786e0-47b3-440a-90da-b7036d72b1f7", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
                 set(response.data);
                 setStages(response.data);
             }
         });
-    }, [set, keycloak?.token]);
+    }, [set, auth.token]);
 
     const inputValChange = (inputValue: any) =>
     {

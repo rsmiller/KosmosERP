@@ -12,7 +12,7 @@ import {
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 import { Control, FieldError } from "react-hook-form";
 import { useAsync } from "react-use";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class PaymentMethodComboboxParams
 {
@@ -36,7 +36,7 @@ const PaymentMethodCombobox = forwardRef<PaymentMethodComboboxRef, PaymentMethod
 
     const { contains } = useFilter({ sensitivity: "base" })
 
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const [paymentMethodOptions, setPaymentMethodOptions] = useState<KeyValueDto[]>([]);
     const [selectedValue, setSelectedValue] = useState<string>();
@@ -105,7 +105,7 @@ const PaymentMethodCombobox = forwardRef<PaymentMethodComboboxRef, PaymentMethod
 
 
     const fetchData = useAsync(async () => {
-        await keyValueService.GetDtoByModule("83156a35-d140-4442-8fbf-699658bf65e9", keycloak?.token || "").then((response) =>
+        await keyValueService.GetDtoByModule("83156a35-d140-4442-8fbf-699658bf65e9", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
                 set(response.data);

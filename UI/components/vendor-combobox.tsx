@@ -8,7 +8,7 @@ import {
     useListCollection,
 } from "@chakra-ui/react"
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react"
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { Controller, Control, FieldError } from "react-hook-form";
 
 
@@ -32,7 +32,7 @@ export interface VendorComboboxRef {
 
 const VendorCombobox = forwardRef<VendorComboboxRef, VendorComboboxParams>(
     ({dbKey, onChange, control, name, error, disabled, onValidationChange, required}, ref) => {
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [vendors, setVendors] = useState<VendorListDto[]>([]);
         const [loading, setLoading] = useState(false);
@@ -105,7 +105,7 @@ const VendorCombobox = forwardRef<VendorComboboxRef, VendorComboboxParams>(
         const fetchVendor = async (id: number): Promise<VendorDto | undefined> => {
             try {
                 setLoading(true);
-                const response = await vendorService.get(id, keycloak?.token || "");
+                const response = await vendorService.get(id, auth.token || "");
                 
                 if (response.success && response.data !== undefined) 
                 {
@@ -128,7 +128,7 @@ const VendorCombobox = forwardRef<VendorComboboxRef, VendorComboboxParams>(
                 let findCommand = new VendorFindCommand();
                 findCommand.wildcard = searchTerm;
                 
-                const response = await vendorService.find(findCommand, keycloak?.token || "", 1, 20, "vendor_name-asc");
+                const response = await vendorService.find(findCommand, auth.token || "", 1, 20, "vendor_name-asc");
                 
                 if (response.success && response.data !== undefined) {
                     set(response.data);

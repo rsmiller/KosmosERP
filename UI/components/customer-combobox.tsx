@@ -8,7 +8,7 @@ import {
     useListCollection,
 } from "@chakra-ui/react"
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react"
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { Controller, Control, FieldError } from "react-hook-form";
 import SessionStorage from "./session-storage";
 
@@ -33,7 +33,7 @@ const CustomerCombobox = forwardRef<CustomerComboboxRef, CustomerComboboxParams>
     ({dbKey, onChange, control, name, error, disabled, onValidationChange}, ref) => {
         const userId = SessionStorage.getUserId();
         const sessionId = SessionStorage.getSession();
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [customers, setCustomers] = useState<CustomerListDto[]>([]);
         const [loading, setLoading] = useState(false);
@@ -105,7 +105,7 @@ const CustomerCombobox = forwardRef<CustomerComboboxRef, CustomerComboboxParams>
         const fetchCustomer = async (id: number): Promise<CustomerDto | undefined> => {
             try {
                 setLoading(true);
-                const response = await customerService.get(id, keycloak?.token || "");
+                const response = await customerService.get(id, auth.token || "");
                 
                 if (response.success && response.data !== undefined) 
                 {
@@ -128,7 +128,7 @@ const CustomerCombobox = forwardRef<CustomerComboboxRef, CustomerComboboxParams>
                 let findCommand = new CustomerFindCommand();
                 findCommand.wildcard = searchTerm;
                 
-                const response = await customerService.find(findCommand, keycloak?.token || "", 1, 20, "customer_name-asc");
+                const response = await customerService.find(findCommand, auth.token || "", 1, 20, "customer_name-asc");
                 
                 if (response.success && response.data !== undefined) {
                     set(response.data);

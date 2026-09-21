@@ -5,11 +5,11 @@ import SessionStorage from "../session-storage";
 import { useEffect, useState } from "react";
 import { CommentDto, CommentFindCommand, CommentCreateCommand } from "@/models/comment-models";
 import { commentService } from "@/services/comment-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 function CommentsListComponent() {
     const params = useParams();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
@@ -31,7 +31,7 @@ function CommentsListComponent() {
 
         
 
-        commentService.find(find_command, keycloak?.token || "").then( (response) => 
+        commentService.find(find_command, auth.token || "").then( (response) => 
         {
             setLoading(false);
 
@@ -49,10 +49,10 @@ function CommentsListComponent() {
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
 
         loadComments();
-    }, [params.id, keycloak.authenticated]);
+    }, [params.id, auth.authenticated]);
 
     const submitNewComment = async () => {
         if (!newCommentText.trim() || !userId || !sessionId) return;
@@ -65,7 +65,7 @@ function CommentsListComponent() {
             createCommand.object_guid = object_id;
             createCommand.comment_text = newCommentText.trim();
 
-            const response = await commentService.create(createCommand, keycloak?.token || "");
+            const response = await commentService.create(createCommand, auth.token || "");
             
             if (response.success) {
                 setNewCommentText("");

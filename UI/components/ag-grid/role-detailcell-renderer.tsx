@@ -8,11 +8,11 @@ import { MdEditDocument } from "react-icons/md";
 import { ModuleObjectDto } from "@/models/key-value-models";
 import { ModulePermissionDeleteCommand, RoleDeleteCommand, RoleModulePermissionCreateCommand, RoleModulePermissionEditCommand, RolePermissionsDto } from "@/models/user-models";
 import { userService } from "@/services/user-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export function RoleDetailRenderer(params: any)
 {
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isWorking, setIsWorking] = useState(false);
@@ -187,7 +187,7 @@ export function RoleDetailRenderer(params: any)
                     new_command.write = record.write;
                     new_command.delete = record.delete;
                     
-                    userService.createNewRoleModulePermission(new_command, keycloak?.token || "").then( (response) => {
+                    userService.createNewRoleModulePermission(new_command, auth.token || "").then( (response) => {
                         //console.log(response)
                     });
                 }
@@ -201,7 +201,7 @@ export function RoleDetailRenderer(params: any)
                     update_command.write = record.write;
                     update_command.delete = record.delete;
                     
-                    userService.updateRoleModulePermission(update_command, keycloak?.token || "").then( (response) => {
+                    userService.updateRoleModulePermission(update_command, auth.token || "").then( (response) => {
                         //console.log(response)
                     });
                 }
@@ -235,7 +235,7 @@ export function RoleDetailRenderer(params: any)
 
         setIsWorking(true);
 
-        userService.deleteRoleModulePermission(command, keycloak?.token || "").then( (response) =>
+        userService.deleteRoleModulePermission(command, auth.token || "").then( (response) =>
         {
             setRows(prev => prev.filter(line => line.id !== deleteRowId));
             setIsDeleteRolePermissionDialogOpen(false);
@@ -249,7 +249,7 @@ export function RoleDetailRenderer(params: any)
 
         setIsWorking(true);
 
-        userService.deleteRole(command, keycloak?.token || "").then( (response) =>
+        userService.deleteRole(command, auth.token || "").then( (response) =>
         {
             setIsDeleteRoleDialogOpen(false);
             setIsWorking(false);

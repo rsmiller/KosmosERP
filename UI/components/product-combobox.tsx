@@ -7,7 +7,7 @@ import {
     Portal,
     useListCollection,
 } from "@chakra-ui/react"
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react"
 import { Controller, Control, FieldError } from "react-hook-form";
 
@@ -29,7 +29,7 @@ export interface ProductComboboxRef {
 
 const ProductCombobox = forwardRef<ProductComboboxRef, ProductComboboxParams>(
     ({dbKey, onChange, control, name, error, onValidationChange}, ref) => {
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [products, setProducts] = useState<ProductListDto[]>([]);
         const [loading, setLoading] = useState(false);
@@ -102,7 +102,7 @@ const ProductCombobox = forwardRef<ProductComboboxRef, ProductComboboxParams>(
             //console.log("Fetching product with ID:", id);
             try {
                 setLoading(true);
-                const response = await productService.get(id, keycloak?.token || "");
+                const response = await productService.get(id, auth.token || "");
                 
                 if (response.success && response.data !== undefined) 
                 {
@@ -125,7 +125,7 @@ const ProductCombobox = forwardRef<ProductComboboxRef, ProductComboboxParams>(
                 let findCommand = new ProductFindCommand();
                 findCommand.wildcard = searchTerm;
                 
-                const response = await productService.find(findCommand, keycloak?.token || "", 1, 20, "product_name-asc");
+                const response = await productService.find(findCommand, auth.token || "", 1, 20, "product_name-asc");
                 //console.log(response)
                 if (response.success && response.data !== undefined) {
                     set(response.data);

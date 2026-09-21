@@ -6,7 +6,7 @@ import {
     useFilter,
     useListCollection,
 } from "@chakra-ui/react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { Controller, Control, FieldError } from "react-hook-form";
@@ -39,7 +39,7 @@ const ContactCombobox = forwardRef<ContactComboboxRef, ContactComboboxParams>(
 
         const userId = SessionStorage.getUserId();
         const sessionId = SessionStorage.getSession();
-        const { keycloak } = useKeycloak();
+        const auth = useAuth();
 
         const [contacts, setContacts] = useState<ContactListDto[]>([]);
         const [loading, setLoading] = useState(false);
@@ -113,7 +113,7 @@ const ContactCombobox = forwardRef<ContactComboboxRef, ContactComboboxParams>(
         const fetchContact = async (id: number): Promise<ContactDto | undefined> => {
             try {
                 setLoading(true);
-                const response = await contactService.get(id, keycloak?.token || "");
+                const response = await contactService.get(id, auth.token || "");
                 
                 if (response.success && response.data !== undefined) 
                 {
@@ -139,7 +139,7 @@ const ContactCombobox = forwardRef<ContactComboboxRef, ContactComboboxParams>(
                 findCommand.customer_id = Number(customerId);
                 //console.log(findCommand);
 
-                const response = await contactService.find(findCommand, keycloak?.token || "", 1, 20, "first_name-asc");
+                const response = await contactService.find(findCommand, auth.token || "", 1, 20, "first_name-asc");
 
                 if (response.success && response.data !== undefined) {
                     set(response.data);

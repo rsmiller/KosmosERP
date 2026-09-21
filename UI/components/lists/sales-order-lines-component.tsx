@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { CurrencyFormatter } from "../ag-grid/currency-formatter";
 import { OrderLineDto } from "@/models/sales-order-models";
 import { orderService } from "@/services/order-service";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -26,7 +26,7 @@ function SalesOrdersLinesComponent({order_header_id, onSelect}: SalesOrdersLines
     const [error, setError] = useState<string | null>(null);
 
     const [rowData, setRowData] = useState<OrderLineDto[]>([]);
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     
     const [colDefs, setColDefs] = useState<ColDef<OrderLineDto>[]>([
     { field: "product_name", headerName: "Product Name"},
@@ -52,7 +52,7 @@ function SalesOrdersLinesComponent({order_header_id, onSelect}: SalesOrdersLines
     
     const loadSalesOrder = async () => {
         try {
-            const response = await orderService.get(order_header_id, keycloak?.token || "");
+            const response = await orderService.get(order_header_id, auth.token || "");
             //console.log(response)
 
             if (response.success && response.data) {
@@ -72,10 +72,10 @@ function SalesOrdersLinesComponent({order_header_id, onSelect}: SalesOrdersLines
     };
 
     useEffect(() => {
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
     
         loadSalesOrder();
-    }, [order_header_id, keycloak.authenticated]);
+    }, [order_header_id, auth.authenticated]);
 
     return (
         <Grid

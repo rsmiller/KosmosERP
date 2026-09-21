@@ -4,13 +4,13 @@ import { keyValueService } from "@/services/keyvalue-service";
 import { Combobox, Portal, useFilter, useListCollection } from "@chakra-ui/react";
 import { CustomCellEditorProps } from "ag-grid-react";
 import { useEffect, useState } from "react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 const ModuleComboboxEditor = (
     ({ data, value, onValueChange }: CustomCellEditorProps) => {
 
     const { contains } = useFilter({ sensitivity: "base" })
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
     const [moduleData, setModuleData] = useState<ModuleObjectDto[]>([]);
     //console.log(params);
@@ -40,9 +40,9 @@ const ModuleComboboxEditor = (
     useEffect(() => {
         //console.log("useEffect:");
         
-        if(keycloak.authenticated == false) return;
+        if(auth.authenticated == false) return;
         
-        keyValueService.getModuleAndKeyValueTypes(keycloak?.token || "").then( (response) => 
+        keyValueService.getModuleAndKeyValueTypes(auth.token || "").then( (response) => 
         {
             //console.log("getModuleAndKeyValueTypes:", response)
             if(response.success && response.data)
@@ -52,7 +52,7 @@ const ModuleComboboxEditor = (
             }
         });
         
-    }, [keycloak.authenticated]);
+    }, [auth.authenticated]);
 
     useEffect(() => {
         if(value)

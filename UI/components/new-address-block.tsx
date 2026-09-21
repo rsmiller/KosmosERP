@@ -12,7 +12,7 @@ import {
     useFilter,
     useListCollection,
 } from "@chakra-ui/react";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { Control, FieldError, useForm } from "react-hook-form";
 import { addressService } from "@/services/address-service";
@@ -51,7 +51,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
     
     const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
     
 
     const [address, setAddress] = useState<AddressDto | null>(null);
@@ -110,7 +110,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
                     return;
                 }
 
-                const response = await addressService.get(address_id, keycloak?.token || "");
+                const response = await addressService.get(address_id, auth.token || "");
 
                 //console.log(response)
 
@@ -180,7 +180,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
     const fetchCountry = async (iso: string): Promise<CountryDto | undefined> => {
         try {
             setLoading(true);
-            const response = await countryService.getByISOAsync(iso, keycloak?.token || "");
+            const response = await countryService.getByISOAsync(iso, auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {
@@ -204,7 +204,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
             let findCommand = new CountryFindCommand();
             findCommand.wildcard = searchTerm;
             
-            const response = await countryService.find(findCommand, keycloak?.token || "", 1, 20, "country_name-asc");
+            const response = await countryService.find(findCommand, auth.token || "", 1, 20, "country_name-asc");
             
             if (response.success && response.data !== undefined) {
                 set(response.data);
@@ -223,7 +223,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
     const fetchState = async (country_id: number, iso: string): Promise<StateDto | undefined> => {
         try {
             setLoading(true);
-            const response = await stateService.getByISOAsync(country_id, iso, keycloak?.token || "");
+            const response = await stateService.getByISOAsync(country_id, iso, auth.token || "");
             
             if (response.success && response.data !== undefined) 
             {
@@ -256,7 +256,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
             let findCommand = new StateFindCommand();
             findCommand.wildcard = searchTerm;
             
-            const response = await stateService.find(findCommand, keycloak?.token || "", 1, 200, "state_name-asc");
+            const response = await stateService.find(findCommand, auth.token || "", 1, 200, "state_name-asc");
             
             if (response.success && response.data !== undefined) {
                 statesSet(response.data);
@@ -283,7 +283,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
             let findCommand = new StateFindCommand();
             findCommand.country_id = country_id;
             
-            const response = await stateService.find(findCommand, keycloak?.token || "", 1, 100, "state_name-asc");
+            const response = await stateService.find(findCommand, auth.token || "", 1, 100, "state_name-asc");
             
             if (response.success && response.data !== undefined) {
                 statesSet(response.data);

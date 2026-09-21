@@ -12,7 +12,7 @@ import {
 import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 import { Control, FieldError } from "react-hook-form";
 import { useAsync } from "react-use";
-import { useKeycloak } from '@react-keycloak/web';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export class FreightComboboxParams
 {
@@ -34,7 +34,7 @@ export interface FreightComboboxRef {
 const FreightCombobox = forwardRef<FreightComboboxRef, FreightComboboxParams>(
     ({dbKey, onChange, control, name, error, disabled, onValidationChange}, ref) => {
     
-    const { keycloak } = useKeycloak();
+    const auth = useAuth();
 
     const { contains } = useFilter({ sensitivity: "base" })
 
@@ -107,7 +107,7 @@ const FreightCombobox = forwardRef<FreightComboboxRef, FreightComboboxParams>(
 
 
     const fetchData = useAsync(async () => {
-        await keyValueService.GetDtoByModule("2a2d1004-5283-40ef-96fd-8cc30c65cefa", keycloak?.token || "").then((response) =>
+        await keyValueService.GetDtoByModule("2a2d1004-5283-40ef-96fd-8cc30c65cefa", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
                 set(response.data);
