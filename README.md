@@ -3,7 +3,7 @@
 
 # Kosmos ERP
 
-[![.NET Run Unit Tests](https://github.com/rsmiller/KosmosERP/actions/workflows/dotnet_unit_tests.yml/badge.svg?branch=dev)](https://github.com/rsmiller/KosmosERP/actions/workflows/dotnet_unit_tests.yml)
+[![.NET Run Unit Tests](https://github.com/rsmiller/KosmosERP/actions/workflows/dotnet_unit_tests.yml/badge.svg?branch=main)](https://github.com/rsmiller/KosmosERP/actions/workflows/dotnet_unit_tests.yml)
 
 Kosmos ERP is a basic enterprise resource system written in C# and uses a React/NextJs as the programming frameworks for the front-end. 
 
