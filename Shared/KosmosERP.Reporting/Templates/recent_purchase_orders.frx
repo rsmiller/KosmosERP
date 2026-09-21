@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="PeriodText" DataType="System.String"/>
+    <Parameter Name="GrandCount" DataType="System.String"/>
+    <Parameter Name="GrandTotal" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Orders" ReferenceName="Orders" DataType="System.Int32" Enabled="true">
+      <Column Name="PoNumber" DataType="System.Int32"/>
+      <Column Name="PoDate" DataType="System.String"/>
+      <Column Name="Vendor" DataType="System.String"/>
+      <Column Name="PoType" DataType="System.String"/>
+      <Column Name="Total" DataType="System.String"/>
+      <Column Name="Status" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="120">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="RECENT PURCHASE ORDERS" HorzAlign="Right" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="PeriodTextObj" Left="318" Top="28" Width="400.2" Height="16" Text="[PeriodText]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="HdrPo" Left="0" Top="98" Width="80" Height="20" Text="PO #" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrDate" Left="80" Top="98" Width="100" Height="20" Text="Date" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrVendor" Left="180" Top="98" Width="258.2" Height="20" Text="Vendor" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrType" Left="438.2" Top="98" Width="80" Height="20" Text="Type" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrTotal" Left="518.2" Top="98" Width="110" Height="20" Text="Total" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrStatus" Left="628.2" Top="98" Width="90" Height="20" Text="Status" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="124" Width="718.2" Height="16" DataSource="Orders">
+      <TextObject Name="RowPo" Left="0" Top="0" Width="80" Height="16" Text="[Orders.PoNumber]" Font="Arial, 8pt"/>
+      <TextObject Name="RowDate" Left="80" Top="0" Width="100" Height="16" Text="[Orders.PoDate]" Font="Arial, 8pt"/>
+      <TextObject Name="RowVendor" Left="180" Top="0" Width="258.2" Height="16" Text="[Orders.Vendor]" Font="Arial, 8pt"/>
+      <TextObject Name="RowType" Left="438.2" Top="0" Width="80" Height="16" Text="[Orders.PoType]" Font="Arial, 8pt"/>
+      <TextObject Name="RowTotal" Left="518.2" Top="0" Width="110" Height="16" Text="[Orders.Total]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowStatus" Left="628.2" Top="0" Width="90" Height="16" Text="[Orders.Status]" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="144" Width="718.2" Height="24">
+      <TextObject Name="GrandLabel" Left="0" Top="2" Width="518.2" Height="18" Text="[GrandCount] purchase orders" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="GrandTotalText" Left="518.2" Top="2" Width="110" Height="18" Text="[GrandTotal]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="GrandStatusPad" Left="628.2" Top="2" Width="90" Height="18" Text="" Border.Lines="Top"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

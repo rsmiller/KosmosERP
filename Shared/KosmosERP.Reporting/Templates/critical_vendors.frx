@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="GeneratedText" DataType="System.String"/>
+    <Parameter Name="GrandVendors" DataType="System.String"/>
+    <Parameter Name="GrandSpend" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Vendors" ReferenceName="Vendors" DataType="System.Int32" Enabled="true">
+      <Column Name="VendorNumber" DataType="System.Int32"/>
+      <Column Name="Vendor" DataType="System.String"/>
+      <Column Name="Category" DataType="System.String"/>
+      <Column Name="Phone" DataType="System.String"/>
+      <Column Name="Email" DataType="System.String"/>
+      <Column Name="OpenPOs" DataType="System.Int32"/>
+      <Column Name="TotalSpend" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" Landscape="true" PaperWidth="297" PaperHeight="210" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="1047" Height="120">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="520" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="647" Top="0" Width="400" Height="26" Text="CRITICAL VENDORS" HorzAlign="Right" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="GeneratedTextObj" Left="547" Top="28" Width="500" Height="16" Text="[GeneratedText]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="HdrNumber" Left="0" Top="98" Width="80" Height="20" Text="Vendor #" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrVendor" Left="80" Top="98" Width="280" Height="20" Text="Vendor" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrCategory" Left="360" Top="98" Width="130" Height="20" Text="Category" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrPhone" Left="490" Top="98" Width="130" Height="20" Text="Phone" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrEmail" Left="620" Top="98" Width="197" Height="20" Text="Email" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrOpenPOs" Left="817" Top="98" Width="90" Height="20" Text="Open POs" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrSpend" Left="907" Top="98" Width="140" Height="20" Text="Total Spend" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="124" Width="1047" Height="16" DataSource="Vendors">
+      <TextObject Name="RowNumber" Left="0" Top="0" Width="80" Height="16" Text="[Vendors.VendorNumber]" Font="Arial, 8pt"/>
+      <TextObject Name="RowVendor" Left="80" Top="0" Width="280" Height="16" Text="[Vendors.Vendor]" Font="Arial, 8pt"/>
+      <TextObject Name="RowCategory" Left="360" Top="0" Width="130" Height="16" Text="[Vendors.Category]" Font="Arial, 8pt"/>
+      <TextObject Name="RowPhone" Left="490" Top="0" Width="130" Height="16" Text="[Vendors.Phone]" Font="Arial, 8pt"/>
+      <TextObject Name="RowEmail" Left="620" Top="0" Width="197" Height="16" Text="[Vendors.Email]" Font="Arial, 8pt"/>
+      <TextObject Name="RowOpenPOs" Left="817" Top="0" Width="90" Height="16" Text="[Vendors.OpenPOs]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowSpend" Left="907" Top="0" Width="140" Height="16" Text="[Vendors.TotalSpend]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="144" Width="1047" Height="24">
+      <TextObject Name="GrandLabel" Left="0" Top="2" Width="817" Height="18" Text="[GrandVendors] critical vendors" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="GrandOpenPad" Left="817" Top="2" Width="90" Height="18" Text="" Border.Lines="Top"/>
+      <TextObject Name="GrandSpendText" Left="907" Top="2" Width="140" Height="18" Text="[GrandSpend]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

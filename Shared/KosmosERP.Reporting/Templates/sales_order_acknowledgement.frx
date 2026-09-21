@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="OrderNumber" DataType="System.String"/>
+    <Parameter Name="OrderDate" DataType="System.String"/>
+    <Parameter Name="RequiredDate" DataType="System.String"/>
+    <Parameter Name="PoNumber" DataType="System.String"/>
+    <Parameter Name="ShippingMethod" DataType="System.String"/>
+    <Parameter Name="CustomerName" DataType="System.String"/>
+    <Parameter Name="BillToAddress" DataType="System.String"/>
+    <Parameter Name="BillToCityStateZip" DataType="System.String"/>
+    <Parameter Name="ShipToAddress" DataType="System.String"/>
+    <Parameter Name="ShipToCityStateZip" DataType="System.String"/>
+    <Parameter Name="Subtotal" DataType="System.String"/>
+    <Parameter Name="Tax" DataType="System.String"/>
+    <Parameter Name="Shipping" DataType="System.String"/>
+    <Parameter Name="Total" DataType="System.String"/>
+    <BusinessObjectDataSource Name="OrderLines" ReferenceName="OrderLines" DataType="System.Int32" Enabled="true">
+      <Column Name="LineNumber" DataType="System.Int32"/>
+      <Column Name="Description" DataType="System.String"/>
+      <Column Name="Qty" DataType="System.Int32"/>
+      <Column Name="UnitPrice" DataType="System.String"/>
+      <Column Name="Extended" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="205">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="26" Text="[CompanyName]" Font="Arial, 15pt, style=Bold"/>
+      <TextObject Name="CompanyAddressText" Left="0" Top="27" Width="420" Height="16" Text="[CompanyAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyCityText" Left="0" Top="43" Width="420" Height="16" Text="[CompanyCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyPhoneText" Left="0" Top="59" Width="420" Height="16" Text="[CompanyPhone]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyEmailText" Left="0" Top="75" Width="420" Height="16" Text="[CompanyEmail]" Font="Arial, 8pt"/>
+      <TextObject Name="TitleText" Left="418" Top="0" Width="300.2" Height="30" Text="SALES ORDER" HorzAlign="Right" Font="Arial, 18pt, style=Bold"/>
+      <TextObject Name="TitleSubText" Left="418" Top="30" Width="300.2" Height="16" Text="Acknowledgement" HorzAlign="Right" Font="Arial, 10pt"/>
+      <TextObject Name="OrderNumLabel" Left="418" Top="52" Width="150" Height="16" Text="Order #:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="OrderNumText" Left="570" Top="52" Width="148.2" Height="16" Text="[OrderNumber]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="OrderDateLabel" Left="418" Top="70" Width="150" Height="16" Text="Order Date:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="OrderDateText" Left="570" Top="70" Width="148.2" Height="16" Text="[OrderDate]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="ReqDateLabel" Left="418" Top="88" Width="150" Height="16" Text="Required Date:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="ReqDateText" Left="570" Top="88" Width="148.2" Height="16" Text="[RequiredDate]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="PoNumLabel" Left="418" Top="106" Width="150" Height="16" Text="Customer PO:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="PoNumText" Left="570" Top="106" Width="148.2" Height="16" Text="[PoNumber]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="BillToLabel" Left="0" Top="118" Width="350" Height="16" Text="Bill To:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="BillToName" Left="0" Top="134" Width="350" Height="16" Text="[CustomerName]" Font="Arial, 8pt"/>
+      <TextObject Name="BillToAddr" Left="0" Top="150" Width="350" Height="16" Text="[BillToAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="BillToCity" Left="0" Top="166" Width="350" Height="16" Text="[BillToCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToLabel" Left="368" Top="118" Width="350" Height="16" Text="Ship To:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="ShipToName" Left="368" Top="134" Width="350" Height="16" Text="[CustomerName]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToAddr" Left="368" Top="150" Width="350" Height="16" Text="[ShipToAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToCity" Left="368" Top="166" Width="350" Height="16" Text="[ShipToCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipMethodText" Left="368" Top="182" Width="350" Height="16" Text="Ship Via: [ShippingMethod]" Font="Arial, 8pt"/>
+      <TextObject Name="HdrLineNum" Left="0" Top="188" Width="40" Height="17" Text="#" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrDesc" Left="40" Top="188" Width="380" Height="17" Text="Description" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrQty" Left="420" Top="188" Width="80" Height="17" Text="Qty" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrUnit" Left="500" Top="188" Width="100" Height="17" Text="Unit Price" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrExt" Left="600" Top="188" Width="118.2" Height="17" Text="Ext. Price" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="209" Width="718.2" Height="18" DataSource="OrderLines">
+      <TextObject Name="RowLineNum" Left="0" Top="0" Width="40" Height="18" Text="[OrderLines.LineNumber]" Font="Arial, 8pt"/>
+      <TextObject Name="RowDesc" Left="40" Top="0" Width="380" Height="18" Text="[OrderLines.Description]" Font="Arial, 8pt"/>
+      <TextObject Name="RowQty" Left="420" Top="0" Width="80" Height="18" Text="[OrderLines.Qty]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowUnit" Left="500" Top="0" Width="100" Height="18" Text="[OrderLines.UnitPrice]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowExt" Left="600" Top="0" Width="118.2" Height="18" Text="[OrderLines.Extended]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="231" Width="718.2" Height="110">
+      <TextObject Name="SubtotalLabel" Left="500" Top="6" Width="100" Height="16" Text="Subtotal:" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="SubtotalText" Left="600" Top="6" Width="118.2" Height="16" Text="[Subtotal]" HorzAlign="Right" Font="Arial, 8pt" Border.Lines="Top"/>
+      <TextObject Name="TaxLabel" Left="500" Top="24" Width="100" Height="16" Text="Tax:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="TaxText" Left="600" Top="24" Width="118.2" Height="16" Text="[Tax]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="ShipLabel" Left="500" Top="42" Width="100" Height="16" Text="Shipping:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="ShipText" Left="600" Top="42" Width="118.2" Height="16" Text="[Shipping]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="TotalLabel" Left="500" Top="62" Width="100" Height="18" Text="Total:" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="TotalText" Left="600" Top="62" Width="118.2" Height="18" Text="[Total]" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="AckText" Left="0" Top="90" Width="500" Height="16" Text="This acknowledges receipt of your order. Please review and advise of any discrepancies." Font="Arial, 8pt, style=Italic"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

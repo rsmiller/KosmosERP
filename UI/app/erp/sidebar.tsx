@@ -127,7 +127,7 @@ function SidebarComponent({ onNavigate } : any)
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.InventoryModule, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/inventory')}><FaBoxes style={{ marginRight: 6 }} />Inventory</ChakraLink>
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.VendorModule, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/vendors')}><FaCity style={{ marginRight: 6 }} />Vendors</ChakraLink>
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.ProductModule, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/products')}><FaTh style={{ marginRight: 6 }} />Product Catalog</ChakraLink>
-            <ChakraLink href={process.env.NEXT_PUBLIC_REPORTS_URL} target="blank"><FaChartBar style={{ marginRight: 6 }} />Reports</ChakraLink>
+            <ChakraLink onClick={ doRoute('/erp/reports')}><FaChartBar style={{ marginRight: 6 }} />Reports</ChakraLink>
             <ChakraLink hidden={!PermissionsService.HasPermission(ERPModules.Admin, ERPModulePermission.Read, userPermissions)} onClick={ doRoute('/erp/admin')}><FaCogs style={{ marginRight: 6 }} />Administration</ChakraLink>
             
         </VStack>

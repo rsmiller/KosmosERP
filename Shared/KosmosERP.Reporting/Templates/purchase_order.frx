@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="PoNumber" DataType="System.String"/>
+    <Parameter Name="PoDate" DataType="System.String"/>
+    <Parameter Name="VendorName" DataType="System.String"/>
+    <Parameter Name="VendorAddress" DataType="System.String"/>
+    <Parameter Name="VendorCityStateZip" DataType="System.String"/>
+    <Parameter Name="VendorPhone" DataType="System.String"/>
+    <Parameter Name="Subtotal" DataType="System.String"/>
+    <Parameter Name="Tax" DataType="System.String"/>
+    <Parameter Name="Total" DataType="System.String"/>
+    <BusinessObjectDataSource Name="PoLines" ReferenceName="PoLines" DataType="System.Int32" Enabled="true">
+      <Column Name="LineNumber" DataType="System.Int32"/>
+      <Column Name="Description" DataType="System.String"/>
+      <Column Name="Qty" DataType="System.Int32"/>
+      <Column Name="UnitCost" DataType="System.String"/>
+      <Column Name="Extended" DataType="System.String"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="205">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="26" Text="[CompanyName]" Font="Arial, 15pt, style=Bold"/>
+      <TextObject Name="CompanyAddressText" Left="0" Top="27" Width="420" Height="16" Text="[CompanyAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyCityText" Left="0" Top="43" Width="420" Height="16" Text="[CompanyCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyPhoneText" Left="0" Top="59" Width="420" Height="16" Text="[CompanyPhone]" Font="Arial, 8pt"/>
+      <TextObject Name="TitleText" Left="418" Top="0" Width="300.2" Height="30" Text="PURCHASE ORDER" HorzAlign="Right" Font="Arial, 18pt, style=Bold"/>
+      <TextObject Name="PoNumLabel" Left="418" Top="40" Width="150" Height="16" Text="PO #:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="PoNumText" Left="570" Top="40" Width="148.2" Height="16" Text="[PoNumber]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="PoDateLabel" Left="418" Top="58" Width="150" Height="16" Text="Date:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="PoDateText" Left="570" Top="58" Width="148.2" Height="16" Text="[PoDate]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="VendorLabel" Left="0" Top="112" Width="350" Height="16" Text="Vendor:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="VendorName" Left="0" Top="128" Width="350" Height="16" Text="[VendorName]" Font="Arial, 8pt"/>
+      <TextObject Name="VendorAddr" Left="0" Top="144" Width="350" Height="16" Text="[VendorAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="VendorCity" Left="0" Top="160" Width="350" Height="16" Text="[VendorCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="VendorPhone" Left="0" Top="176" Width="350" Height="16" Text="Phone: [VendorPhone]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToLabel" Left="368" Top="112" Width="350" Height="16" Text="Ship To:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="ShipToName" Left="368" Top="128" Width="350" Height="16" Text="[CompanyName]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToAddr" Left="368" Top="144" Width="350" Height="16" Text="[CompanyAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToCity" Left="368" Top="160" Width="350" Height="16" Text="[CompanyCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="HdrLineNum" Left="0" Top="188" Width="40" Height="17" Text="#" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrDesc" Left="40" Top="188" Width="380" Height="17" Text="Description" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrQty" Left="420" Top="188" Width="80" Height="17" Text="Qty" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrUnit" Left="500" Top="188" Width="100" Height="17" Text="Unit Cost" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrExt" Left="600" Top="188" Width="118.2" Height="17" Text="Ext. Cost" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="209" Width="718.2" Height="18" DataSource="PoLines">
+      <TextObject Name="RowLineNum" Left="0" Top="0" Width="40" Height="18" Text="[PoLines.LineNumber]" Font="Arial, 8pt"/>
+      <TextObject Name="RowDesc" Left="40" Top="0" Width="380" Height="18" Text="[PoLines.Description]" Font="Arial, 8pt"/>
+      <TextObject Name="RowQty" Left="420" Top="0" Width="80" Height="18" Text="[PoLines.Qty]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowUnit" Left="500" Top="0" Width="100" Height="18" Text="[PoLines.UnitCost]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowExt" Left="600" Top="0" Width="118.2" Height="18" Text="[PoLines.Extended]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="231" Width="718.2" Height="96">
+      <TextObject Name="SubtotalLabel" Left="500" Top="6" Width="100" Height="16" Text="Subtotal:" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="SubtotalText" Left="600" Top="6" Width="118.2" Height="16" Text="[Subtotal]" HorzAlign="Right" Font="Arial, 8pt" Border.Lines="Top"/>
+      <TextObject Name="TaxLabel" Left="500" Top="24" Width="100" Height="16" Text="Tax:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="TaxText" Left="600" Top="24" Width="118.2" Height="16" Text="[Tax]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="TotalLabel" Left="500" Top="44" Width="100" Height="18" Text="Total:" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="TotalText" Left="600" Top="44" Width="118.2" Height="18" Text="[Total]" HorzAlign="Right" Font="Arial, 10pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="AuthText" Left="0" Top="72" Width="500" Height="16" Text="Authorized by: ____________________________" Font="Arial, 8pt"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

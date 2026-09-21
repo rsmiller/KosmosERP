@@ -35,6 +35,7 @@
 	    <ProjectReference Include="..\Shared\KosmosERP.Database\KosmosERP.Database.csproj" />
 	    <ProjectReference Include="..\Shared\KosmosERP.Models\KosmosERP.Models.csproj" />
       <ProjectReference Include="..\Shared\KosmosERP.Jobs\KosmosERP.Jobs.csproj" />
+      <ProjectReference Include="..\Shared\KosmosERP.Reporting\KosmosERP.Reporting.csproj" />
     </ItemGroup>
 
 </Project>

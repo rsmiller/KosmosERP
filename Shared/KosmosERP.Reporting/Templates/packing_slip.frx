@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="ShipmentNumber" DataType="System.String"/>
+    <Parameter Name="ShipmentDate" DataType="System.String"/>
+    <Parameter Name="OrderNumber" DataType="System.String"/>
+    <Parameter Name="ShipVia" DataType="System.String"/>
+    <Parameter Name="FreightCarrier" DataType="System.String"/>
+    <Parameter Name="ShipAttn" DataType="System.String"/>
+    <Parameter Name="CustomerName" DataType="System.String"/>
+    <Parameter Name="ShipToAddress" DataType="System.String"/>
+    <Parameter Name="ShipToCityStateZip" DataType="System.String"/>
+    <Parameter Name="TotalUnits" DataType="System.String"/>
+    <BusinessObjectDataSource Name="ShipmentLines" ReferenceName="ShipmentLines" DataType="System.Int32" Enabled="true">
+      <Column Name="LineNumber" DataType="System.Int32"/>
+      <Column Name="Description" DataType="System.String"/>
+      <Column Name="QtyShipped" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="205">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="26" Text="[CompanyName]" Font="Arial, 15pt, style=Bold"/>
+      <TextObject Name="CompanyAddressText" Left="0" Top="27" Width="420" Height="16" Text="[CompanyAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyCityText" Left="0" Top="43" Width="420" Height="16" Text="[CompanyCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="CompanyPhoneText" Left="0" Top="59" Width="420" Height="16" Text="[CompanyPhone]" Font="Arial, 8pt"/>
+      <TextObject Name="TitleText" Left="418" Top="0" Width="300.2" Height="30" Text="PACKING SLIP" HorzAlign="Right" Font="Arial, 18pt, style=Bold"/>
+      <TextObject Name="ShipNumLabel" Left="418" Top="40" Width="150" Height="16" Text="Shipment #:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="ShipNumText" Left="570" Top="40" Width="148.2" Height="16" Text="[ShipmentNumber]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="ShipDateLabel" Left="418" Top="58" Width="150" Height="16" Text="Date:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="ShipDateText" Left="570" Top="58" Width="148.2" Height="16" Text="[ShipmentDate]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="OrderNumLabel" Left="418" Top="76" Width="150" Height="16" Text="Order #:" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+      <TextObject Name="OrderNumText" Left="570" Top="76" Width="148.2" Height="16" Text="[OrderNumber]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToLabel" Left="0" Top="112" Width="350" Height="16" Text="Ship To:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="ShipToName" Left="0" Top="128" Width="350" Height="16" Text="[CustomerName]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToAttn" Left="0" Top="144" Width="350" Height="16" Text="Attn: [ShipAttn]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToAddr" Left="0" Top="160" Width="350" Height="16" Text="[ShipToAddress]" Font="Arial, 8pt"/>
+      <TextObject Name="ShipToCity" Left="0" Top="176" Width="350" Height="16" Text="[ShipToCityStateZip]" Font="Arial, 8pt"/>
+      <TextObject Name="CarrierLabel" Left="368" Top="112" Width="350" Height="16" Text="Shipping:" Font="Arial, 9pt, style=Bold"/>
+      <TextObject Name="ShipViaText" Left="368" Top="128" Width="350" Height="16" Text="Ship Via: [ShipVia]" Font="Arial, 8pt"/>
+      <TextObject Name="CarrierText" Left="368" Top="144" Width="350" Height="16" Text="Carrier: [FreightCarrier]" Font="Arial, 8pt"/>
+      <TextObject Name="HdrLineNum" Left="0" Top="188" Width="60" Height="17" Text="#" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrDesc" Left="60" Top="188" Width="518.2" Height="17" Text="Description" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrQty" Left="578.2" Top="188" Width="140" Height="17" Text="Qty Shipped" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="209" Width="718.2" Height="18" DataSource="ShipmentLines">
+      <TextObject Name="RowLineNum" Left="0" Top="0" Width="60" Height="18" Text="[ShipmentLines.LineNumber]" Font="Arial, 8pt"/>
+      <TextObject Name="RowDesc" Left="60" Top="0" Width="518.2" Height="18" Text="[ShipmentLines.Description]" Font="Arial, 8pt"/>
+      <TextObject Name="RowQty" Left="578.2" Top="0" Width="140" Height="18" Text="[ShipmentLines.QtyShipped]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="231" Width="718.2" Height="80">
+      <TextObject Name="TotalLabel" Left="378.2" Top="6" Width="200" Height="16" Text="Total Units Shipped:" HorzAlign="Right" Font="Arial, 9pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="TotalText" Left="578.2" Top="6" Width="140" Height="16" Text="[TotalUnits]" HorzAlign="Right" Font="Arial, 9pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="ReceivedText" Left="0" Top="40" Width="500" Height="16" Text="Received by: ____________________________   Date: ____________" Font="Arial, 8pt"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

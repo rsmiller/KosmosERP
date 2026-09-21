@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="CategoryFilter" DataType="System.String"/>
+    <Parameter Name="ItemCount" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Reorder" ReferenceName="Reorder" DataType="System.Int32" Enabled="true">
+      <Column Name="Category" DataType="System.String"/>
+      <Column Name="Sku" DataType="System.String"/>
+      <Column Name="Description" DataType="System.String"/>
+      <Column Name="OnHand" DataType="System.Int32"/>
+      <Column Name="ReorderPoint" DataType="System.Int32"/>
+      <Column Name="Suggested" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="120">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="REORDER / LOW STOCK" HorzAlign="Right" Font="Arial, 13pt, style=Bold"/>
+      <TextObject Name="FilterText" Left="318" Top="28" Width="400.2" Height="16" Text="[CategoryFilter] — [ItemCount] item(s)" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="HdrCat" Left="0" Top="98" Width="120" Height="20" Text="Category" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrSku" Left="120" Top="98" Width="110" Height="20" Text="SKU" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrDesc" Left="230" Top="98" Width="248.2" Height="20" Text="Description" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrOnHand" Left="478.2" Top="98" Width="80" Height="20" Text="On Hand" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrReorder" Left="558.2" Top="98" Width="80" Height="20" Text="Reorder Pt" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrSuggest" Left="638.2" Top="98" Width="80" Height="20" Text="Order Qty" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="124" Width="718.2" Height="16" DataSource="Reorder">
+      <TextObject Name="RowCat" Left="0" Top="0" Width="120" Height="16" Text="[Reorder.Category]" Font="Arial, 8pt"/>
+      <TextObject Name="RowSku" Left="120" Top="0" Width="110" Height="16" Text="[Reorder.Sku]" Font="Arial, 8pt"/>
+      <TextObject Name="RowDesc" Left="230" Top="0" Width="248.2" Height="16" Text="[Reorder.Description]" Font="Arial, 8pt"/>
+      <TextObject Name="RowOnHand" Left="478.2" Top="0" Width="80" Height="16" Text="[Reorder.OnHand]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowReorder" Left="558.2" Top="0" Width="80" Height="16" Text="[Reorder.ReorderPoint]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowSuggest" Left="638.2" Top="0" Width="80" Height="16" Text="[Reorder.Suggested]" HorzAlign="Right" Font="Arial, 8pt, style=Bold"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="144" Width="718.2" Height="20">
+      <TextObject Name="FooterText" Left="0" Top="2" Width="718.2" Height="16" Text="Items at or below reorder level." Font="Arial, 8pt, style=Italic"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>
