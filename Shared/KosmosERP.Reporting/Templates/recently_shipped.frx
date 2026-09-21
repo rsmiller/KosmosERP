@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/21/2026 00:00:00" ReportInfo.Modified="09/21/2026 00:00:00" ReportInfo.CreatorVersion="2026.2.8.0">
+  <Dictionary>
+    <Parameter Name="CompanyName" DataType="System.String"/>
+    <Parameter Name="CompanyAddress" DataType="System.String"/>
+    <Parameter Name="CompanyCityStateZip" DataType="System.String"/>
+    <Parameter Name="CompanyPhone" DataType="System.String"/>
+    <Parameter Name="CompanyEmail" DataType="System.String"/>
+    <Parameter Name="PeriodText" DataType="System.String"/>
+    <Parameter Name="GrandShipments" DataType="System.String"/>
+    <Parameter Name="GrandUnits" DataType="System.String"/>
+    <BusinessObjectDataSource Name="Shipments" ReferenceName="Shipments" DataType="System.Int32" Enabled="true">
+      <Column Name="ShipmentNumber" DataType="System.Int32"/>
+      <Column Name="CompletedDate" DataType="System.String"/>
+      <Column Name="Customer" DataType="System.String"/>
+      <Column Name="OrderNumber" DataType="System.String"/>
+      <Column Name="Carrier" DataType="System.String"/>
+      <Column Name="UnitsShipped" DataType="System.Int32"/>
+    </BusinessObjectDataSource>
+  </Dictionary>
+  <ReportPage Name="Page1" PaperWidth="210" PaperHeight="297" LeftMargin="10" TopMargin="10" RightMargin="10" BottomMargin="10">
+    <ReportTitleBand Name="ReportTitle1" Width="718.2" Height="120">
+      <TextObject Name="CompanyNameText" Left="0" Top="0" Width="420" Height="24" Text="[CompanyName]" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="TitleText" Left="318" Top="0" Width="400.2" Height="26" Text="RECENTLY SHIPPED" HorzAlign="Right" Font="Arial, 14pt, style=Bold"/>
+      <TextObject Name="PeriodTextObj" Left="318" Top="28" Width="400.2" Height="16" Text="[PeriodText]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="HdrShipment" Left="0" Top="98" Width="90" Height="20" Text="Shipment #" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrCompleted" Left="90" Top="98" Width="100" Height="20" Text="Shipped" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrCustomer" Left="190" Top="98" Width="218.2" Height="20" Text="Customer" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrOrder" Left="408.2" Top="98" Width="90" Height="20" Text="Order #" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrCarrier" Left="498.2" Top="98" Width="130" Height="20" Text="Carrier" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+      <TextObject Name="HdrUnits" Left="628.2" Top="98" Width="90" Height="20" Text="Units" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top, Bottom"/>
+    </ReportTitleBand>
+    <DataBand Name="Data1" Top="124" Width="718.2" Height="16" DataSource="Shipments">
+      <TextObject Name="RowShipment" Left="0" Top="0" Width="90" Height="16" Text="[Shipments.ShipmentNumber]" Font="Arial, 8pt"/>
+      <TextObject Name="RowCompleted" Left="90" Top="0" Width="100" Height="16" Text="[Shipments.CompletedDate]" Font="Arial, 8pt"/>
+      <TextObject Name="RowCustomer" Left="190" Top="0" Width="218.2" Height="16" Text="[Shipments.Customer]" Font="Arial, 8pt"/>
+      <TextObject Name="RowOrder" Left="408.2" Top="0" Width="90" Height="16" Text="[Shipments.OrderNumber]" HorzAlign="Right" Font="Arial, 8pt"/>
+      <TextObject Name="RowCarrier" Left="498.2" Top="0" Width="130" Height="16" Text="[Shipments.Carrier]" Font="Arial, 8pt"/>
+      <TextObject Name="RowUnits" Left="628.2" Top="0" Width="90" Height="16" Text="[Shipments.UnitsShipped]" HorzAlign="Right" Font="Arial, 8pt"/>
+    </DataBand>
+    <ReportSummaryBand Name="ReportSummary1" Top="144" Width="718.2" Height="24">
+      <TextObject Name="GrandLabel" Left="0" Top="2" Width="408.2" Height="18" Text="[GrandShipments] shipments" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="GrandMidPad" Left="408.2" Top="2" Width="220" Height="18" Text="Total Units" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+      <TextObject Name="GrandUnitsText" Left="628.2" Top="2" Width="90" Height="18" Text="[GrandUnits]" HorzAlign="Right" Font="Arial, 8pt, style=Bold" Border.Lines="Top"/>
+    </ReportSummaryBand>
+  </ReportPage>
+</Report>

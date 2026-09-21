@@ -1,5 +1,6 @@
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Models;
+using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Module;
 using KosmosERP.Reporting;
@@ -17,10 +18,14 @@ namespace KosmosERP.Api.Controllers;
 public class ReportsController : ERPApiController
 {
     private readonly IReportService _reports;
+    private readonly IProductModule _products;
 
-    public ReportsController(IReportService reports, IReportingModule module) : base(module)
+    // IReportingModule stays the first IBaseERPModule constructor parameter so the ERPAuthorize
+    // filter keeps resolving this controller's module id from the reporting module.
+    public ReportsController(IReportService reports, IReportingModule module, IProductModule products) : base(module)
     {
         _reports = reports;
+        _products = products;
     }
 
     /// <summary>Lists the report keys this API can generate.</summary>
@@ -30,6 +35,38 @@ public class ReportsController : ERPApiController
     public ActionResult Available()
     {
         return Ok(new Response<List<string>>(_reports.AvailableReportKeys.ToList()));
+    }
+
+    /// <summary>
+    /// Returns the catalog of general reports grouped by category, with the endpoint and
+    /// parameters for each. The UI uses this to build the Reports page sidebar and to know
+    /// how to call each report. Document-style reports that need a specific entity id are
+    /// intentionally excluded (they are served from their own document screens).
+    /// </summary>
+    [HttpGet("Catalog", Name = "GetReportCatalog")]
+    [ProducesResponseType(typeof(Response<List<ReportCategoryDto>>), 200)]
+    public ActionResult Catalog()
+    {
+        return Ok(new Response<List<ReportCategoryDto>>(ReportCatalog.General));
+    }
+
+    /// <summary>
+    /// Options for the Sales by Product report's category dropdown. Returns the configured
+    /// product categories as value/label pairs: <c>value</c> is the stored category key the
+    /// report filters on, <c>label</c> is the display name shown to the user.
+    /// </summary>
+    [HttpGet("ProductCategories", Name = "GetReportProductCategories")]
+    [ProducesResponseType(typeof(Response<List<ReportOptionDto>>), 200)]
+    public async Task<ActionResult> ProductCategories()
+    {
+        var categories = await _products.GetProductCategories();
+
+        var options = categories
+            .OrderBy(c => c.value)
+            .Select(c => new ReportOptionDto { Value = c.key, Label = c.value })
+            .ToList();
+
+        return Ok(new Response<List<ReportOptionDto>>(options));
     }
 
     /// <summary>
@@ -354,6 +391,88 @@ public class ReportsController : ERPApiController
         if (vendor_id.HasValue) request.Parameters["vendor_id"] = vendor_id.Value;
         if (!string.IsNullOrWhiteSpace(date_from)) request.Parameters["date_from"] = date_from;
         if (!string.IsNullOrWhiteSpace(date_to)) request.Parameters["date_to"] = date_to;
+        return await GenerateResponse(request);
+    }
+
+    /// <summary>
+    /// Top Opportunities — open pipeline ranked by weighted value (amount × win %).
+    /// <paramref name="top"/> caps the number of rows (default 25).
+    /// </summary>
+    [ERPAuthorize(new[] { ERPPermission.Read }, "report_top_opportunities")]
+    [HttpGet("TopOpportunities", Name = "GetTopOpportunitiesReport")]
+    [Produces("application/pdf", "text/html")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> TopOpportunities([FromQuery] int? top, [FromQuery] string format = "pdf")
+    {
+        var request = new ReportRequest { ReportKey = "top_opportunities", Format = ParseFormat(format), CallingUserId = ResolveUserId() };
+        if (top.HasValue) request.Parameters["top"] = top.Value;
+        return await GenerateResponse(request);
+    }
+
+    /// <summary>Top Salespeople — order totals per salesperson over [<paramref name="date_from"/>, <paramref name="date_to"/>].</summary>
+    [ERPAuthorize(new[] { ERPPermission.Read }, "report_top_salespeople")]
+    [HttpGet("TopSalespeople", Name = "GetTopSalespeopleReport")]
+    [Produces("application/pdf", "text/html")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> TopSalespeople([FromQuery] string? date_from, [FromQuery] string? date_to, [FromQuery] string format = "pdf")
+    {
+        var request = new ReportRequest { ReportKey = "top_salespeople", Format = ParseFormat(format), CallingUserId = ResolveUserId() };
+        if (!string.IsNullOrWhiteSpace(date_from)) request.Parameters["date_from"] = date_from;
+        if (!string.IsNullOrWhiteSpace(date_to)) request.Parameters["date_to"] = date_to;
+        return await GenerateResponse(request);
+    }
+
+    /// <summary>Products Awaiting Shipment — open order lines with unshipped quantity outstanding.</summary>
+    [ERPAuthorize(new[] { ERPPermission.Read }, "report_products_awaiting_shipment")]
+    [HttpGet("ProductsAwaitingShipment", Name = "GetProductsAwaitingShipmentReport")]
+    [Produces("application/pdf", "text/html")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> ProductsAwaitingShipment([FromQuery] string format = "pdf")
+    {
+        var request = new ReportRequest { ReportKey = "products_awaiting_shipment", Format = ParseFormat(format), CallingUserId = ResolveUserId() };
+        return await GenerateResponse(request);
+    }
+
+    /// <summary>Recently Shipped — completed shipments over [<paramref name="date_from"/>, <paramref name="date_to"/>] (by completed date).</summary>
+    [ERPAuthorize(new[] { ERPPermission.Read }, "report_recently_shipped")]
+    [HttpGet("RecentlyShipped", Name = "GetRecentlyShippedReport")]
+    [Produces("application/pdf", "text/html")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> RecentlyShipped([FromQuery] string? date_from, [FromQuery] string? date_to, [FromQuery] string format = "pdf")
+    {
+        var request = new ReportRequest { ReportKey = "recently_shipped", Format = ParseFormat(format), CallingUserId = ResolveUserId() };
+        if (!string.IsNullOrWhiteSpace(date_from)) request.Parameters["date_from"] = date_from;
+        if (!string.IsNullOrWhiteSpace(date_to)) request.Parameters["date_to"] = date_to;
+        return await GenerateResponse(request);
+    }
+
+    /// <summary>Recent Purchase Orders — POs created over [<paramref name="date_from"/>, <paramref name="date_to"/>], most recent first.</summary>
+    [ERPAuthorize(new[] { ERPPermission.Read }, "report_recent_purchase_orders")]
+    [HttpGet("RecentPurchaseOrders", Name = "GetRecentPurchaseOrdersReport")]
+    [Produces("application/pdf", "text/html")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> RecentPurchaseOrders([FromQuery] string? date_from, [FromQuery] string? date_to, [FromQuery] string format = "pdf")
+    {
+        var request = new ReportRequest { ReportKey = "recent_purchase_orders", Format = ParseFormat(format), CallingUserId = ResolveUserId() };
+        if (!string.IsNullOrWhiteSpace(date_from)) request.Parameters["date_from"] = date_from;
+        if (!string.IsNullOrWhiteSpace(date_to)) request.Parameters["date_to"] = date_to;
+        return await GenerateResponse(request);
+    }
+
+    /// <summary>Critical Vendors — vendors flagged critical, with open-PO count and total spend.</summary>
+    [ERPAuthorize(new[] { ERPPermission.Read }, "report_critical_vendors")]
+    [HttpGet("CriticalVendors", Name = "GetCriticalVendorsReport")]
+    [Produces("application/pdf", "text/html")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<ActionResult> CriticalVendors([FromQuery] string format = "pdf")
+    {
+        var request = new ReportRequest { ReportKey = "critical_vendors", Format = ParseFormat(format), CallingUserId = ResolveUserId() };
         return await GenerateResponse(request);
     }
 

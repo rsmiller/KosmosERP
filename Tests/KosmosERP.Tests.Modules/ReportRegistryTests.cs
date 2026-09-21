@@ -10,7 +10,7 @@ namespace KosmosERP.Tests.Modules;
 
 /// <summary>
 /// Guards that every report is actually wired into DI. Builds the real service collection via
-/// AddReporting() and asserts the resolved IReportService exposes all 16 spec report keys — so a
+/// AddReporting() and asserts the resolved IReportService exposes all spec report keys — so a
 /// generator that was authored but never registered is caught here.
 /// </summary>
 public class ReportRegistryTests
@@ -19,10 +19,13 @@ public class ReportRegistryTests
     {
         // Sales & Shipping
         "sales_order_ack", "packing_slip", "sales_by_customer", "sales_by_product",
+        "top_salespeople", "products_awaiting_shipment", "recently_shipped",
+        // CRM
+        "top_opportunities",
         // Inventory & Manufacturing
         "inventory_stock_status", "inventory_reorder", "bom", "production_order_traveler",
         // Purchasing
-        "purchase_order", "open_po_receiving",
+        "purchase_order", "open_po_receiving", "recent_purchase_orders", "critical_vendors",
         // Accounting / Finance
         "ar_invoice", "ar_aging", "ap_aging", "income_statement", "balance_sheet", "trial_balance",
     };
@@ -46,12 +49,12 @@ public class ReportRegistryTests
     public void TearDown() => _provider.Dispose();
 
     [Test]
-    public void AllSixteenReports_AreRegistered()
+    public void AllReports_AreRegistered()
     {
         using var scope = _provider.CreateScope();
         var reports = scope.ServiceProvider.GetRequiredService<IReportService>();
 
-        Assert.That(reports.AvailableReportKeys, Has.Count.EqualTo(16), "expected exactly 16 registered reports");
+        Assert.That(reports.AvailableReportKeys, Has.Count.EqualTo(ExpectedKeys.Length), $"expected exactly {ExpectedKeys.Length} registered reports");
         Assert.That(reports.AvailableReportKeys, Is.EquivalentTo(ExpectedKeys));
     }
 

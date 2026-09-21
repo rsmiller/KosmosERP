@@ -71,6 +71,19 @@ Base route: `GET /api/v1/Reports/...`. Every report supports `?format=pdf` (defa
 | 14 | Income Statement (P&L) | `IncomeStatement` | `report_income_statement` | `date_from`, `date_to` |
 | 15 | Balance Sheet | `BalanceSheet` | `report_balance_sheet` | `as_of_date?` |
 | 16 | Trial Balance | `TrialBalance` | `report_trial_balance` | `as_of_date?` |
+| 17 | Top Salespeople | `TopSalespeople` | `report_top_salespeople` | `date_from?`, `date_to?` |
+| 18 | Products Awaiting Shipment | `ProductsAwaitingShipment` | `report_products_awaiting_shipment` | _(none)_ |
+| 19 | Recently Shipped | `RecentlyShipped` | `report_recently_shipped` | `date_from?`, `date_to?` |
+| 20 | Top Opportunities | `TopOpportunities` | `report_top_opportunities` | `top?` |
+| 21 | Recent Purchase Orders | `RecentPurchaseOrders` | `report_recent_purchase_orders` | `date_from?`, `date_to?` |
+| 22 | Critical Vendors | `CriticalVendors` | `report_critical_vendors` | _(none)_ |
+
+Reports #17–22 are cross-record "general" reports surfaced on the `/erp/reports` page (grouped by
+the CRM / Sales / Shipping / Purchasing categories in `ReportCatalog`). Top Salespeople attributes
+orders by `created_by`; Products Awaiting Shipment computes ordered − shipped per open order line;
+Recently Shipped uses `completed_on` as the ship date; Top Opportunities ranks open pipeline by
+`amount × win_chance/100`; Critical Vendors filters `is_critial_vendor` and augments with open-PO
+count and total spend.
 
 Financial statements (#14–16) are driven off the `FinancialTransaction` posting ledger joined to
 `ChartOfAccount` (types: Asset/Liability/Equity/Revenue/Expense). Aging (#12/#13) buckets open
