@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kosmos ERP — .NET-native manufacturing software</title>
+<meta name="description" content="An open-source, .NET-native ERP for small manufacturers still running on spreadsheets and paper — implemented and supported by the engineer who built it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF1F5;
+    --panel:#FFFFFF;
+    --panel-2:#F5F8FB;
+    --ink:#16222F;
+    --ink-soft:#556170;
+    --rule:#C7D1DD;
+    --rule-strong:#A7B4C3;
+    --accent:#E4590C;
+    --accent-ink:#FFFFFF;
+    --steel:#245E7C;
+    --grid-line:rgba(22,34,47,.055);
+
+    --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --display:"Archivo",var(--sans);
+    --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+
+    --wrap:1080px;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#10161D;
+      --panel:#161F29;
+      --panel-2:#1B2530;
+      --ink:#E9EEF3;
+      --ink-soft:#93A1AE;
+      --rule:#273542;
+      --rule-strong:#38495B;
+      --accent:#F26A1B;
+      --accent-ink:#12100E;
+      --steel:#6FB9DC;
+      --grid-line:rgba(233,238,243,.05);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#10161D;
+    --panel:#161F29;
+    --panel-2:#1B2530;
+    --ink:#E9EEF3;
+    --ink-soft:#93A1AE;
+    --rule:#273542;
+    --rule-strong:#38495B;
+    --accent:#F26A1B;
+    --accent-ink:#12100E;
+    --steel:#6FB9DC;
+    --grid-line:rgba(233,238,243,.05);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 78px);}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:clamp(1rem,.97rem + .15vw,1.075rem);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:2px;}
+
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 clamp(20px,5vw,44px);}
+
+  .skip{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--paper);padding:10px 16px;z-index:200;}
+  .skip:focus{left:12px;top:12px;}
+
+  /* ---------- top bar ---------- */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:color-mix(in srgb,var(--paper) 86%,transparent);
+    backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid var(--rule);
+    padding-top:env(safe-area-inset-top,0px);
+  }
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:20px;height:64px;}
+  .brand{display:flex;align-items:baseline;gap:9px;text-decoration:none;letter-spacing:-.02em;}
+  .brand b{font-family:var(--display);font-weight:800;font-size:1.28rem;}
+  .brand .tag{
+    font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+    color:var(--accent);border:1px solid var(--accent);border-radius:3px;
+    padding:2px 5px;transform:translateY(-2px);
+  }
+  nav.top{display:flex;align-items:center;gap:26px;}
+  nav.top a.link{text-decoration:none;color:var(--ink-soft);font-weight:500;font-size:.95rem;}
+  nav.top a.link:hover{color:var(--ink);}
+  @media (max-width:720px){nav.top a.link{display:none;}}
+
+  .btn{
+    font-family:var(--sans);font-weight:500;font-size:.95rem;
+    text-decoration:none;display:inline-flex;align-items:center;gap:9px;
+    padding:11px 18px;border-radius:6px;border:1px solid transparent;
+    transition:transform .12s ease,background-color .18s ease,border-color .18s ease;
+    cursor:pointer;
+  }
+  .btn svg{width:16px;height:16px;flex:none;}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-ghost{border-color:var(--rule-strong);color:var(--ink);background:transparent;}
+  .btn-ghost:hover{border-color:var(--ink);}
+  @media (prefers-reduced-motion:reduce){.btn:hover{transform:none;}}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--rule);}
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+    background-size:34px 34px;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 42%,transparent 88%);
+            mask-image:linear-gradient(180deg,#000 0%,#000 42%,transparent 88%);
+  }
+  .hero .wrap{position:relative;z-index:1;padding-top:clamp(56px,9vw,104px);padding-bottom:clamp(52px,8vw,92px);}
+  .kicker{font-family:var(--mono);font-size:.78rem;color:var(--steel);letter-spacing:.02em;margin:0 0 22px;}
+  h1{
+    font-family:var(--display);font-weight:800;
+    font-size:clamp(2.35rem,1.3rem + 4.6vw,4.5rem);
+    line-height:1.02;letter-spacing:-.025em;
+    margin:0;max-width:15ch;text-wrap:balance;
+  }
+  .lede{margin:26px 0 0;max-width:56ch;font-size:clamp(1.06rem,1rem + .3vw,1.24rem);color:var(--ink-soft);line-height:1.55;}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px;}
+
+  .spec{
+    margin-top:clamp(44px,6vw,64px);
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border:1px solid var(--rule);border-radius:8px;overflow:hidden;
+    background:var(--rule);gap:1px;max-width:720px;
+  }
+  .spec > div{background:var(--panel);padding:18px 20px;}
+  .spec dt{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;color:var(--ink-soft);margin:0 0 7px;text-transform:uppercase;}
+  .spec dd{margin:0;font-family:var(--display);font-weight:600;font-size:1.02rem;letter-spacing:-.01em;}
+  .spec dd small{display:block;font-family:var(--sans);font-weight:400;font-size:.82rem;color:var(--ink-soft);margin-top:3px;letter-spacing:0;}
+  @media (max-width:640px){.spec{grid-template-columns:1fr;max-width:none;}}
+
+  /* ---------- section frame ---------- */
+  section{padding:clamp(58px,8vw,96px) 0;border-bottom:1px solid var(--rule);}
+  .s-head{max-width:60ch;margin-bottom:clamp(34px,4vw,48px);}
+  .s-head h2{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,1.2rem + 1.9vw,2.55rem);letter-spacing:-.02em;margin:0;line-height:1.08;}
+  .s-head p{margin:14px 0 0;color:var(--ink-soft);font-size:1.06rem;max-width:54ch;}
+
+  /* ---------- modules ---------- */
+  .modules{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;}
+  .mod{background:var(--panel);padding:26px 24px;display:flex;flex-direction:column;gap:11px;min-height:172px;}
+  .mod .code-row{display:flex;align-items:center;gap:11px;}
+  .mod .code{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:3px 7px;}
+  .mod .ent{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--steel);border:1px solid var(--rule-strong);border-radius:4px;padding:3px 6px;margin-left:auto;}
+  .mod h3{font-family:var(--display);font-weight:600;font-size:1.12rem;letter-spacing:-.01em;margin:0;}
+  .mod p{margin:0;color:var(--ink-soft);font-size:.96rem;line-height:1.52;}
+  @media (max-width:820px){.modules{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.modules{grid-template-columns:1fr;}.mod{min-height:0;}}
+
+  .footnote{margin-top:22px;font-size:.9rem;color:var(--ink-soft);max-width:60ch;}
+
+  /* ---------- support ---------- */
+  .tiers{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:720px){.tiers{grid-template-columns:1fr;}}
+  .tier{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:30px 28px;display:flex;flex-direction:column;}
+  .tier.paid{border-color:var(--rule-strong);}
+  .tier.paid .cap{border-top:3px solid var(--accent);}
+  .tier .cap{position:absolute;}
+  .tier{position:relative;}
+  .tier.paid::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--accent);border-radius:10px 10px 0 0;}
+  .tier .name{font-family:var(--display);font-weight:700;font-size:1.24rem;letter-spacing:-.01em;margin:0;}
+  .tier .price{font-family:var(--mono);font-size:1.02rem;color:var(--ink);margin:8px 0 0;}
+  .tier .price span{color:var(--ink-soft);font-size:.82rem;}
+  .tier .price.free{color:var(--steel);}
+  .tier ul{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px;}
+  .tier li{position:relative;padding-left:26px;color:var(--ink-soft);font-size:.98rem;line-height:1.5;}
+  .tier li::before{content:"";position:absolute;left:0;top:.5em;width:11px;height:11px;border:1.5px solid var(--accent);border-radius:2px;transform:rotate(45deg);}
+  .tier.free li::before{border-color:var(--steel);}
+
+  /* ---------- pricing ladder ---------- */
+  .ladder{border-left:2px solid var(--rule-strong);margin-left:14px;display:flex;flex-direction:column;}
+  .rung{position:relative;padding:26px 0 26px 34px;border-bottom:1px dashed var(--rule);}
+  .rung:last-child{border-bottom:0;padding-bottom:6px;}
+  .rung:first-child{padding-top:6px;}
+  .rung .num{
+    position:absolute;left:-16px;top:26px;width:30px;height:30px;border-radius:50%;
+    background:var(--paper);border:2px solid var(--rule-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);
+  }
+  .rung:first-child .num,.rung:last-child .num{top:6px;}
+  .rung .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 18px;}
+  .rung h3{font-family:var(--display);font-weight:700;font-size:1.2rem;letter-spacing:-.01em;margin:0;}
+  .rung .fig{font-family:var(--mono);font-size:1.02rem;color:var(--accent);margin-left:auto;}
+  .rung .fig.zero{color:var(--steel);}
+  .rung p{margin:9px 0 0;color:var(--ink-soft);max-width:60ch;font-size:.98rem;line-height:1.52;}
+  @media (max-width:520px){.rung .fig{margin-left:0;flex-basis:100%;}}
+
+  .pricing-note{margin-top:30px;padding:18px 20px;background:var(--panel-2);border:1px solid var(--rule);border-radius:8px;font-size:.94rem;color:var(--ink-soft);max-width:64ch;}
+  .pricing-note b{color:var(--ink);font-weight:600;}
+
+  /* ---------- contact ---------- */
+  #contact{border-bottom:0;}
+  .contact-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(30px,5vw,64px);align-items:start;}
+  @media (max-width:760px){.contact-grid{grid-template-columns:1fr;}}
+  #contact h2{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,1.3rem + 2.4vw,3rem);letter-spacing:-.025em;margin:0;line-height:1.05;max-width:14ch;}
+  #contact .lede{margin-top:20px;max-width:50ch;}
+  .contact-card{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:30px 28px;}
+  .contact-card .li-btn{width:100%;justify-content:center;font-size:1rem;padding:14px 18px;}
+  .contact-card .note{margin:20px 0 0;font-size:.9rem;color:var(--ink-soft);line-height:1.55;}
+  .contact-card .note b{color:var(--ink);font-weight:600;}
+
+  /* ---------- footer ---------- */
+  footer{padding:40px 0 calc(40px + env(safe-area-inset-bottom,0px));background:var(--panel-2);border-top:1px solid var(--rule);}
+  .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px;align-items:center;}
+  .foot .brand b{font-size:1.05rem;}
+  .foot .meta{font-family:var(--mono);font-size:.76rem;color:var(--ink-soft);letter-spacing:.02em;}
+  .foot a.flink{color:var(--ink-soft);text-decoration:none;font-size:.9rem;}
+  .foot a.flink:hover{color:var(--ink);text-decoration:underline;}
+  .foot .right{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+
+  /* one orchestrated load reveal */
+  .reveal{opacity:0;transform:translateY(12px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;}
+  .reveal.d1{animation-delay:.06s;} .reveal.d2{animation-delay:.14s;}
+  .reveal.d3{animation-delay:.22s;} .reveal.d4{animation-delay:.3s;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;animation:none;}}
+</style>
+</head>
+<body>
+<a class="skip" href="#modules">Skip to content</a>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="Kosmos ERP home"><b>Kosmos</b><span class="tag">ERP</span></a>
+    <nav class="top" aria-label="Primary">
+      <a class="link" href="#modules">Modules</a>
+      <a class="link" href="#support">Support</a>
+      <a class="link" href="#pricing">Pricing</a>
+      <a class="btn btn-primary" href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+        Connect
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="wrap">
+      <p class="kicker reveal">Open-source manufacturing software · built on .NET 10</p>
+      <h1 class="reveal d1">The .NET-native ERP a manufacturer can actually own.</h1>
+      <p class="lede reveal d2">Kosmos runs the paperwork small shops still push through spreadsheets and paper travelers — orders, production, inventory, shipping. It's open source, and it's implemented and supported by the engineer who built it.</p>
+      <div class="cta-row reveal d3">
+        <a class="btn btn-primary" href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+          Connect on LinkedIn
+        </a>
+        <a class="btn btn-ghost" href="#modules">See what's inside</a>
+      </div>
+
+      <dl class="spec reveal d4">
+        <div><dt>Stack</dt><dd>.NET 10 / Next.js<small>SQL Server–friendly, self-hostable</small></dd></div>
+        <div><dt>License</dt><dd>AGPL-3.0<small>Commercial license available</small></dd></div>
+        <div><dt>Support</dt><dd>One engineer<small>Direct, fixed-price, no call center</small></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <section id="modules">
+    <div class="wrap">
+      <div class="s-head">
+        <h2>What's inside</h2>
+        <p>The core of a manufacturing ERP, in plain modules that map to how a shop already works — from the quote through to the shipment.</p>
+      </div>
+      <div class="modules">
+        <div class="mod">
+          <div class="code-row"><span class="code">SO</span></div>
+          <h3>Sales Orders</h3>
+          <p>Quote to order to invoice. Follow every job from the customer PO through to what actually ships.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">MFG</span></div>
+          <h3>Production</h3>
+          <p>Work orders, routings, and a production schedule your floor can read and follow — not a whiteboard.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">INV</span></div>
+          <h3>Inventory</h3>
+          <p>Live stock counts, lot and serial tracking, and reorder points that finally replace the spreadsheet.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">PUR</span></div>
+          <h3>Purchasing</h3>
+          <p>Purchase orders, supplier records, and receiving tied back to the jobs the parts were bought for.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">SHIP</span></div>
+          <h3>Shipping &amp; Fulfillment</h3>
+          <p>Pick, pack, and ship with the paperwork generated for you instead of retyped every time.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">CRM</span></div>
+          <h3>Customers &amp; Leads</h3>
+          <p>Leads, contacts, and activity history so nothing slips between the first call and the closed job.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">QA</span></div>
+          <h3>Quality &amp; Traceability</h3>
+          <p>Inspections, nonconformance, and full lot traceability for audits, certifications, and recalls.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">RPT</span></div>
+          <h3>Reporting</h3>
+          <p>Dashboards and clean exports for the numbers owners and controllers actually ask for.</p>
+        </div>
+        <div class="mod">
+          <div class="code-row"><span class="code">IAM</span><span class="ent">Enterprise</span></div>
+          <h3>Identity &amp; Access</h3>
+          <p>SAML/OIDC single sign-on, SCIM user provisioning, and real role-based permissions — enterprise auth done right.</p>
+        </div>
+      </div>
+      <p class="footnote">Every module ships in the open-source core. Identity &amp; Access is offered as an enterprise add-on. Not sure a module fits your process? That's what the fit call is for.</p>
+    </div>
+  </section>
+
+  <!-- SUPPORT -->
+  <section id="support">
+    <div class="wrap">
+      <div class="s-head">
+        <h2>Support</h2>
+        <p>The software is free. What most shops actually want is someone who answers the phone when a work order won't post at 4:45 on a Friday. Two ways to get that.</p>
+      </div>
+      <div class="tiers">
+        <div class="tier free">
+          <p class="name">Community</p>
+          <p class="price free">Free</p>
+          <ul>
+            <li>Full source under AGPL-3.0, self-host it anywhere</li>
+            <li>Public issue tracker and roadmap</li>
+            <li>Release notes and documentation</li>
+            <li>Best-effort help from the community and maintainer</li>
+          </ul>
+        </div>
+        <div class="tier paid">
+          <p class="name">Support Retainer</p>
+          <p class="price">$1,500–2,500<span> / month</span></p>
+          <ul>
+            <li>Guaranteed response-time SLA</li>
+            <li>Version updates handled for you</li>
+            <li>Small changes, fixes, and config work included</li>
+            <li>A monthly check-in call, not a ticket queue</li>
+            <li>Auto-renews; cancel anytime</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="s-head">
+        <h2>Pricing</h2>
+        <p>Priced as a ladder, not a mystery quote. Start small, prove it works on your own data, then scale up. Every step is fixed-scope and fixed-price.</p>
+      </div>
+      <div class="ladder">
+        <div class="rung">
+          <span class="num">1</span>
+          <div class="top"><h3>Fit Assessment</h3><span class="fig zero">$0</span></div>
+          <p>A 30-minute call and a one-page, honest read on whether Kosmos fits your shop. If it's a bad fit, I'll tell you.</p>
+        </div>
+        <div class="rung">
+          <span class="num">2</span>
+          <div class="top"><h3>Paid Pilot</h3><span class="fig">$2,500–5,000</span></div>
+          <p>Kosmos stood up in your environment with your real data for one workflow — say, sales order to production to shipment — in 2–3 weeks. De-risks the big decision before you make it.</p>
+        </div>
+        <div class="rung">
+          <span class="num">3</span>
+          <div class="top"><h3>Full Implementation</h3><span class="fig">$10,000–25,000+</span></div>
+          <p>Data migration, configuration, provider setup, training, and go-live. Fixed scope, fixed price — a fraction of a traditional six-figure ERP rollout, with the person who wrote the code doing the work.</p>
+        </div>
+        <div class="rung">
+          <span class="num">4</span>
+          <div class="top"><h3>Support Retainer</h3><span class="fig">$1,500–2,500 / mo</span></div>
+          <p>Ongoing SLA support once you're live — updates, changes, and a standing line to the maintainer.</p>
+        </div>
+        <div class="rung">
+          <span class="num">5</span>
+          <div class="top"><h3>Enterprise Auth &amp; Custom Modules</h3><span class="fig">Per project</span></div>
+          <p>Single sign-on, SCIM provisioning, RBAC, and features built to match how your shop actually runs. Scoped and quoted per project.</p>
+        </div>
+        <div class="rung">
+          <span class="num">6</span>
+          <div class="top"><h3>Commercial License</h3><span class="fig">Let's talk</span></div>
+          <p>For teams that can't take on AGPL-3.0 — modify Kosmos privately or embed it in your own product without the copyleft obligations.</p>
+        </div>
+      </div>
+      <p class="pricing-note"><b>Why fixed price?</b> You get a number before you commit, not a running meter. Land-and-expand is the whole point: most shops start at the pilot and grow into a retainer once they see it working.</p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="wrap contact-grid">
+      <div>
+        <h2>Let's see if it fits.</h2>
+        <p class="lede">No pushy demo, no sales team. A short conversation about how your shop runs today and whether Kosmos would make it run better. Reach me on LinkedIn to start.</p>
+      </div>
+      <div class="contact-card">
+        <a class="btn btn-primary li-btn" href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+          Message me on LinkedIn
+        </a>
+        <p class="note"><b>Why no email or phone here?</b> Public inboxes just collect spam. LinkedIn is the front door — once we're talking, we'll trade whatever details make the work easy.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#top" aria-label="Kosmos ERP home"><b>Kosmos</b><span class="tag">ERP</span></a>
+    <div class="right">
+      <span class="meta">AGPL-3.0 · .NET 10 / Next.js</span>
+      <a class="flink" href="https://github.com/your-org/kosmos-erp" target="_blank" rel="noopener">Source on GitHub</a>
+      <a class="flink" href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:16px;"><span class="meta">© 2026 Kosmos ERP · Built and supported by one engineer.</span></div>
+</footer>
+
+</body>
+</html>
