@@ -5,11 +5,12 @@ import "../../app/styles/page.component.css"
 
 import { AllCommunityModule, ColDef, ModuleRegistry, CsvExportModule } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Grid, GridItem } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
 import { OrderHeaderListDto, OrderHeaderFindCommand } from '@/models/sales-order-models';
 import { orderService } from '@/services/order-service';
+import { reportsService } from '@/services/reports-service';
 import SessionStorage from '@/components/session-storage';
 import { useAuth } from '@/lib/auth/auth-context';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
@@ -46,6 +47,14 @@ function SalesOrdersListComponent({customer_id, onChange}: SalesOrdersListCompon
 
   const handleEditClick = (guid: any) => {
     router.push("/erp/salesorders/edit/" + guid);
+  };
+
+  // colDefs is captured once in state, so its cell renderers read the token through a ref.
+  const tokenRef = useRef<string>("");
+  tokenRef.current = auth.token || "";
+
+  const handlePrintClick = (guid: string) => {
+    reportsService.openInNewTab(() => reportsService.getSalesOrderAcknowledgementReport(guid, "pdf", tokenRef.current));
   };
 
   const fetchData = async () => {
@@ -126,7 +135,7 @@ function SalesOrdersListComponent({customer_id, onChange}: SalesOrdersListCompon
             <div>
               <Button type="button" colorPalette="black" variant="subtle" onClick={() => handleViewClick(props.value)}><MdOutlinePageview /></Button>&nbsp;
               <Button type="button" colorPalette="green" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>&nbsp;
-              <Button type="button" colorPalette="gray" variant="outline" onClick={() => window.open(`/docs/api/?url=${encodeURIComponent('/docs/salesorder/' + props.value)}`, "_blank") }><FaRegFilePdf /></Button>
+              <Button type="button" colorPalette="gray" variant="outline" onClick={() => handlePrintClick(props.value)}><FaRegFilePdf /></Button>
             </div>
           );
       }

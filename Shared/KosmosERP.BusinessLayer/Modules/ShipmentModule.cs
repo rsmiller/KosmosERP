@@ -650,7 +650,42 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
     {
         Response<List<vw_ReadyToShip>> response = new Response<List<vw_ReadyToShip>>();
 
-        response.Data = await _Context.vw_ReadyToShip.ToListAsync();
+        try
+        {
+            // Units produced per order line, counting only production lines that are ready to ship.
+            var produced = _Context.ProductionOrderLines
+                .Where(m => m.status == "production_order_status_ready_to_ship" && !m.is_deleted)
+                .GroupBy(m => m.order_line_id)
+                .Select(g => new { order_line_id = g.Key, produced_quantity = g.Sum(m => m.quantity) });
+
+            response.Data = await (
+                from p in produced
+                join ol in _Context.OrderLines on p.order_line_id equals ol.id
+                join o in _Context.OrderHeaders on ol.order_header_id equals o.id
+                join c in _Context.Customers on o.customer_id equals c.id
+                join pr in _Context.Products on ol.product_id equals pr.id
+                where !ol.is_deleted && !o.is_deleted
+                orderby o.order_number, ol.line_number
+                select new vw_ReadyToShip
+                {
+                    order_number = o.order_number,
+                    order_guid = o.guid,
+                    customer_name = c.customer_name,
+                    product_name = pr.product_name,
+                    sold_quantity = ol.quantity,
+                    produced_quantity = p.produced_quantity,
+                    shipped_quantity = _Context.ShipmentLines
+                        .Where(sl => sl.order_line_id == ol.id && !sl.is_deleted && !sl.is_canceled)
+                        .Sum(sl => (int?)sl.units_shipped) ?? 0
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            await LogError(50, this.GetType().Name, nameof(GetReadyToShip), ex);
+            response.SetException(ex.Message, ResultCode.Error);
+        }
 
         return response;
     }

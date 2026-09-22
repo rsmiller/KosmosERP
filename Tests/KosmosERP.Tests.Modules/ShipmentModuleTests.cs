@@ -583,6 +583,39 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     }
 
 
+    [Test]
+    public async Task GetReadyToShip()
+    {
+        _Context.ProductionOrderLines.AddRange(
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 1, quantity = 3, status = "production_order_status_ready_to_ship" }, 1),
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 2, quantity = 2, status = "production_order_status_ready_to_ship" }, 1),
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 3, quantity = 7, status = "production_order_status_wip" }, 1),
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 4, quantity = 9, status = "production_order_status_ready_to_ship", is_deleted = true }, 1));
+
+        // Multiple shipments against the same order line must sum; canceled and deleted lines must not count.
+        _Context.ShipmentLines.AddRange(
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 1, units_shipped = 1 }, 1),
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 2, units_shipped = 2 }, 1),
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 5, units_shipped = 5, is_canceled = true }, 1),
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 6, units_shipped = 6, is_deleted = true }, 1));
+
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.GetReadyToShip();
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data, Has.Count.EqualTo(1));
+
+        var row = result.Data[0];
+        Assert.That(row.order_number, Is.EqualTo(_SalesOrderHeader.order_number));
+        Assert.That(row.order_guid, Is.EqualTo(_SalesOrderHeader.guid));
+        Assert.That(row.customer_name, Is.EqualTo(_Customer.customer_name));
+        Assert.That(row.product_name, Is.EqualTo(_Product.product_name));
+        Assert.That(row.sold_quantity, Is.EqualTo(_SalesOrderLine.quantity));
+        Assert.That(row.produced_quantity, Is.EqualTo(5));
+        Assert.That(row.shipped_quantity, Is.EqualTo(3));
+    }
+
     private void ValidateMostDtoFields(Response<ShipmentHeaderDto> result)
     {
         Assert.That(result.Success, Is.True);
