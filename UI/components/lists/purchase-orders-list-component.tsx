@@ -6,11 +6,12 @@ import "../../app/styles/page.component.css"
 
 import { AllCommunityModule, ColDef, ModuleRegistry, CsvExportModule, GridReadyEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Grid, GridItem } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
 import { PurchaseOrderHeaderListDto, PurchaseOrderHeaderFindCommand } from '@/models/purchase-order-models';
 import { purchaseOrderService } from '@/services/purchase-order-service';
+import { reportsService } from '@/services/reports-service';
 import SessionStorage from '@/components/session-storage';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import { DateOnlyRender } from '@/components/ag-grid/date-only-renderer';
@@ -39,6 +40,10 @@ function PurchaseOrdersListComponentPage({vendor_id, onChange}: PurchaseOrdersLi
   const [totalCount, setTotalCount] = useState<number>(1);
 
   const [loading, setLoading] = useState(true);
+
+  // colDefs is captured once in state, so its cell renderers read the token through a ref.
+  const tokenRef = useRef<string>("");
+  tokenRef.current = auth.token || "";
 
   const fetchData = async () => {
       let pageStart = (page * pageSize) - pageSize + 1;
@@ -106,6 +111,10 @@ function PurchaseOrdersListComponentPage({vendor_id, onChange}: PurchaseOrdersLi
     router.push("/erp/purchaseorders/edit/" + guid);
   };
 
+  const handlePrintClick = (guid: any) => {
+    reportsService.openInNewTab(() => reportsService.getPurchaseOrderReport(guid, "pdf", tokenRef.current));
+  };
+
 
   const onPageEvent = async (page: any) =>
   {
@@ -132,7 +141,7 @@ function PurchaseOrdersListComponentPage({vendor_id, onChange}: PurchaseOrdersLi
             <div>
               <Button type="button" colorPalette="black" variant="subtle"onClick={() => handleViewClick(props.value)}><MdOutlinePageview /></Button>&nbsp;
               <Button type="button" colorPalette="green" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>&nbsp;
-              <Button type="button" colorPalette="gray" variant="outline" onClick={() => window.open(`/docs/api/?url=${encodeURIComponent('/docs/purchaseorder/' + props.value)}`, "_blank") }><FaRegFilePdf /></Button>
+              <Button type="button" colorPalette="gray" variant="outline" onClick={() => handlePrintClick(props.value)}><FaRegFilePdf /></Button>
             </div>
           );
       }

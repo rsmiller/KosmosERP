@@ -10,6 +10,7 @@ import { Button, Grid, GridItem } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation';
 import { ShipmentHeaderListDto, ShipmentHeaderFindCommand, vw_ReadyToShip } from '@/models/shipments-models';
 import { shipmentService } from '@/services/shipment-service';
+import { reportsService } from '@/services/reports-service';
 import AgGridCustomPagination from '@/components/ag-grid/pagination-control';
 import AddressRenderer from '@/components/ag-grid/address-renderer';
 import ShippingCountsRenderer from '@/components/ag-grid/shipping-counts-renderer';
@@ -86,6 +87,14 @@ function ShipmentsPage() {
     router.push("/erp/shipments/edit/" + guid);
   };
 
+  // colDefs is memoized, so its cell renderers read the token through a ref.
+  const tokenRef = useRef<string>("");
+  tokenRef.current = auth.token || "";
+
+  const handlePrintClick = (shipmentId: number) => {
+    reportsService.openInNewTab(() => reportsService.getPackingSlipReport(shipmentId, "pdf", tokenRef.current));
+  };
+
   const getReadyToShipTableData = async () => {
     let pageStart = (pageReadyToShip * pageSizeReadyToShip) - pageSizeReadyToShip;
 
@@ -158,7 +167,7 @@ function ShipmentsPage() {
             <div>
               <Button type="button" colorPalette="black" variant="subtle" onClick={() => handleViewClick(props.data.guid)}><MdOutlinePageview /></Button>&nbsp;
               <Button hidden={props.data.is_released || !hasEditPermission} type="button" colorPalette="green" onClick={() => handleEditClick(props.data.guid)}><MdEditDocument /></Button>&nbsp;
-              <Button hidden={!props.data.is_released} type="button" colorPalette="gray" variant="outline" onClick={() => window.open(`/docs/api/?url=${encodeURIComponent('/docs/packinglist/' + props.data.guid)}`, "_blank") }><FaRegFilePdf /></Button>
+              <Button hidden={!props.data.is_released} type="button" colorPalette="gray" variant="outline" onClick={() => handlePrintClick(props.data.id)}><FaRegFilePdf /></Button>
             </div>
           );
       }

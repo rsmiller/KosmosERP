@@ -40,4 +40,79 @@ export const reportsService = {
     });
     return response.data as Blob;
   },
+
+  // Renders the Purchase Order document report for a single PO, selected by guid.
+  async getPurchaseOrderReport(
+    purchaseOrderGuid: string,
+    format: ReportFormat,
+    token: string
+  ): Promise<Blob> {
+    const query = new URLSearchParams({ purchase_order_guid: purchaseOrderGuid, format });
+    const response = await axiosInstance(token).get(`/api/v1/Reports/PurchaseOrder?${query.toString()}`, {
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
+
+  // Renders the AR Invoice document report for a single invoice, selected by guid.
+  async getArInvoiceReport(
+    arInvoiceGuid: string,
+    format: ReportFormat,
+    token: string
+  ): Promise<Blob> {
+    const query = new URLSearchParams({ ar_invoice_guid: arInvoiceGuid, format });
+    const response = await axiosInstance(token).get(`/api/v1/Reports/ArInvoice?${query.toString()}`, {
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
+
+  // Renders the Sales Order Acknowledgement document report for a single order, selected by guid.
+  async getSalesOrderAcknowledgementReport(
+    orderGuid: string,
+    format: ReportFormat,
+    token: string
+  ): Promise<Blob> {
+    const query = new URLSearchParams({ order_guid: orderGuid, format });
+    const response = await axiosInstance(token).get(`/api/v1/Reports/SalesOrderAcknowledgement?${query.toString()}`, {
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
+
+  // Renders the Packing Slip document report for a single shipment, selected by id.
+  async getPackingSlipReport(
+    shipmentId: number,
+    format: ReportFormat,
+    token: string
+  ): Promise<Blob> {
+    const query = new URLSearchParams({ shipment_id: String(shipmentId), format });
+    const response = await axiosInstance(token).get(`/api/v1/Reports/PackingSlip?${query.toString()}`, {
+      responseType: "blob",
+    });
+    return response.data as Blob;
+  },
+
+  // Opens a rendered report in a new tab. Must be called directly from a click handler:
+  // the tab is opened synchronously so popup blockers treat it as user-initiated, then
+  // pointed at the report once it has been rendered.
+  async openInNewTab(loadReport: () => Promise<Blob>): Promise<void> {
+    const reportWindow = window.open("", "_blank");
+
+    try {
+      const blob = await loadReport();
+      const url = URL.createObjectURL(blob);
+
+      if (reportWindow) {
+        reportWindow.location.href = url;
+      } else {
+        window.open(url, "_blank");
+      }
+
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      console.error("Error generating report:", error);
+      reportWindow?.close();
+    }
+  },
 };
