@@ -4,6 +4,7 @@ using KosmosERP.Api;
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Filters;
 using KosmosERP.Api.Middleware;
+using KosmosERP.Api.Models;
 using KosmosERP.BusinessLayer;
 using KosmosERP.BusinessLayer.Interfaces;
 using KosmosERP.BusinessLayer.Modules;
@@ -184,6 +185,10 @@ builder.Services.AddModules();
 
 // Reporting module (FastReport-based reports) — service, module identity, and generators.
 builder.Services.AddReporting();
+
+// General reports catalog shown on the Reports page, loaded once from reportscatalog.json.
+var reportCatalogJson = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "reportscatalog.json"));
+builder.Services.AddSingleton<IReportCatalog>(new ReportCatalog(reportCatalogJson));
 
 builder.Services.AddDbContext<IBaseERPContext, ERPDbContext>(options => options.UseMySQL(databaseSettings.DatabaseConnectionString));
 
