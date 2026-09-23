@@ -1,17 +1,18 @@
-﻿using KosmosERP.Database.Models;
-using KosmosERP.Database;
-using KosmosERP.Models.Helpers;
-using KosmosERP.Models.Interfaces;
-using KosmosERP.Models;
-using KosmosERP.Module;
-using Microsoft.EntityFrameworkCore;
+﻿using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.BusinessLayer.Models.Module.Address.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Command.Create;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Command.Delete;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Command.Edit;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Command.Find;
 using KosmosERP.BusinessLayer.Models.Module.Vendor.Dto;
+using KosmosERP.Database;
+using KosmosERP.Database.Models;
+using KosmosERP.Models;
+using KosmosERP.Models.Helpers;
+using KosmosERP.Models.Interfaces;
 using KosmosERP.Models.Permissions;
-using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.Module;
+using Microsoft.EntityFrameworkCore;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -346,8 +347,11 @@ public class VendorModule : BaseERPModule, IVendorModule
 
     public async Task<VendorListDto> MapToListDto(Vendor databaseModel)
     {
-        var address = await _Context.Addresses.SingleAsync(m => m.id == databaseModel.address_id);
-        var address_dto = await _AddressModule.MapToDto(address);
+        var address = await _Context.Addresses.SingleOrDefaultAsync(m => m.id == databaseModel.address_id);
+        AddressDto address_dto = null;
+
+        if (address != null)
+            address_dto = await _AddressModule.MapToDto(address);
 
         return new VendorListDto
         {
@@ -388,8 +392,10 @@ public class VendorModule : BaseERPModule, IVendorModule
 
     public async Task<VendorDto> MapToDto(Vendor databaseModel)
     {
-        var address = await _Context.Addresses.SingleAsync(m => m.id == databaseModel.address_id);
-        var address_dto = await _AddressModule.MapToDto(address);
+        var address = await _Context.Addresses.SingleOrDefaultAsync(m => m.id == databaseModel.address_id);
+        AddressDto address_dto = null;
+        if (address != null)
+            address_dto = await _AddressModule.MapToDto(address);
 
         return new VendorDto
         {
