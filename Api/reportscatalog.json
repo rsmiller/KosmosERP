@@ -1,0 +1,330 @@
+{
+  "reportscatalog":
+    [
+      {
+        "name": "Accounting",
+        "reports": [
+          {
+            "key": "ar_aging",
+            "name": "AR Aging",
+            "category": "Accounting",
+            "description": "Open receivable balances per customer, bucketed by days past due.",
+            "endpoint": "api/v1/Reports/ArAging",
+            "parameters": [
+              {
+                "name": "as_of_date",
+                "label": "As of date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "ap_aging",
+            "name": "AP Aging",
+            "category": "Accounting",
+            "description": "Open payable balances per vendor, bucketed by days past due.",
+            "endpoint": "api/v1/Reports/ApAging",
+            "parameters": [
+              {
+                "name": "as_of_date",
+                "label": "As of date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "income_statement",
+            "name": "Income Statement",
+            "category": "Accounting",
+            "description": "Profit & loss over a date range (defaults to year-to-date).",
+            "endpoint": "api/v1/Reports/IncomeStatement",
+            "parameters": [
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "balance_sheet",
+            "name": "Balance Sheet",
+            "category": "Accounting",
+            "description": "Assets, liabilities, and equity as of a date.",
+            "endpoint": "api/v1/Reports/BalanceSheet",
+            "parameters": [
+              {
+                "name": "as_of_date",
+                "label": "As of date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "trial_balance",
+            "name": "Trial Balance",
+            "category": "Accounting",
+            "description": "Debit/credit balance for every account as of a date.",
+            "endpoint": "api/v1/Reports/TrialBalance",
+            "parameters": [
+              {
+                "name": "as_of_date",
+                "label": "As of date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Sales",
+        "reports": [
+          {
+            "key": "sales_by_customer",
+            "name": "Sales by Customer",
+            "category": "Sales",
+            "description": "Sales totals grouped by customer over a date range.",
+            "endpoint": "api/v1/Reports/SalesByCustomer",
+            "parameters": [
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "customer_id",
+                "label": "Customer ID",
+                "type": "int",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "sales_by_product",
+            "name": "Sales by Product",
+            "category": "Sales",
+            "description": "Sales totals grouped by product over a date range.",
+            "endpoint": "api/v1/Reports/SalesByProduct",
+            "parameters": [
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "product_category",
+                "label": "Product category",
+                "type": "select",
+                "required": false,
+                "optionsEndpoint": "api/v1/Reports/ProductCategories"
+              }
+            ]
+          },
+          {
+            "key": "top_salespeople",
+            "name": "Top Salespeople",
+            "category": "Sales",
+            "description": "Order totals per salesperson over a date range, ranked by sales.",
+            "endpoint": "api/v1/Reports/TopSalespeople",
+            "parameters": [
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "CRM",
+        "reports": [
+          {
+            "key": "top_opportunities",
+            "name": "Top Opportunities",
+            "category": "CRM",
+            "description": "Open pipeline ranked by weighted value (amount × win %).",
+            "endpoint": "api/v1/Reports/TopOpportunities",
+            "parameters": [
+              {
+                "name": "top",
+                "label": "Max rows",
+                "type": "int",
+                "required": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Shipping",
+        "reports": [
+          {
+            "key": "products_awaiting_shipment",
+            "name": "Products Awaiting Shipment",
+            "category": "Shipping",
+            "description": "Open order lines with quantity still unshipped.",
+            "endpoint": "api/v1/Reports/ProductsAwaitingShipment",
+            "parameters": []
+          },
+          {
+            "key": "recently_shipped",
+            "name": "Recently Shipped",
+            "category": "Shipping",
+            "description": "Completed shipments over a date range, most recent first.",
+            "endpoint": "api/v1/Reports/RecentlyShipped",
+            "parameters": [
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Inventory",
+        "reports": [
+          {
+            "key": "inventory_stock_status",
+            "name": "Inventory Stock Status",
+            "category": "Inventory",
+            "description": "On-hand quantities and valuation across the catalog.",
+            "endpoint": "api/v1/Reports/InventoryStockStatus",
+            "parameters": [
+              {
+                "name": "product_category",
+                "label": "Product category",
+                "type": "select",
+                "required": false,
+                "optionsEndpoint": "api/v1/Reports/ProductCategories"
+              },
+              {
+                "name": "as_of_date",
+                "label": "As of date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "inventory_reorder",
+            "name": "Inventory Reorder",
+            "category": "Inventory",
+            "description": "Items at or below their reorder point.",
+            "endpoint": "api/v1/Reports/InventoryReorder",
+            "parameters": [
+              {
+                "name": "product_category",
+                "label": "Product category",
+                "type": "select",
+                "required": false,
+                "optionsEndpoint": "api/v1/Reports/ProductCategories"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Purchasing",
+        "reports": [
+          {
+            "key": "open_po_receiving",
+            "name": "Open PO / Receiving",
+            "category": "Purchasing",
+            "description": "Outstanding purchase-order quantities awaiting receipt.",
+            "endpoint": "api/v1/Reports/OpenPoReceiving",
+            "parameters": [
+              {
+                "name": "vendor_id",
+                "label": "Vendor ID",
+                "type": "int",
+                "required": false
+              },
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "recent_purchase_orders",
+            "name": "Recent Purchase Orders",
+            "category": "Purchasing",
+            "description": "Purchase orders created over a date range, most recent first.",
+            "endpoint": "api/v1/Reports/RecentPurchaseOrders",
+            "parameters": [
+              {
+                "name": "date_from",
+                "label": "From date",
+                "type": "date",
+                "required": false
+              },
+              {
+                "name": "date_to",
+                "label": "To date",
+                "type": "date",
+                "required": false
+              }
+            ]
+          },
+          {
+            "key": "critical_vendors",
+            "name": "Critical Vendors",
+            "category": "Purchasing",
+            "description": "Vendors flagged critical, with open-PO count and total spend.",
+            "endpoint": "api/v1/Reports/CriticalVendors",
+            "parameters": []
+          }
+        ]
+      }
+  ]
+}

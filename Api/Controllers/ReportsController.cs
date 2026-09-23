@@ -1,5 +1,6 @@
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Models;
+using KosmosERP.BusinessLayer.Models.Module.Reports.Dto;
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Module;
@@ -19,13 +20,15 @@ public class ReportsController : ERPApiController
 {
     private readonly IReportService _reports;
     private readonly IProductModule _products;
+    private readonly IReportCatalog _reportCatalog;
 
     // IReportingModule stays the first IBaseERPModule constructor parameter so the ERPAuthorize
     // filter keeps resolving this controller's module id from the reporting module.
-    public ReportsController(IReportService reports, IReportingModule module, IProductModule products) : base(module)
+    public ReportsController(IReportService reports, IReportingModule module, IProductModule products, IReportCatalog reportsCatelog) : base(module)
     {
         _reports = reports;
         _products = products;
+        _reportCatalog = reportsCatelog;
     }
 
     /// <summary>Lists the report keys this API can generate.</summary>
@@ -47,7 +50,7 @@ public class ReportsController : ERPApiController
     [ProducesResponseType(typeof(Response<List<ReportCategoryDto>>), 200)]
     public ActionResult Catalog()
     {
-        return Ok(new Response<List<ReportCategoryDto>>(ReportCatalog.General));
+        return Ok(new Response<List<ReportCategoryDto>>(_reportCatalog.FullCatalog));
     }
 
     /// <summary>
