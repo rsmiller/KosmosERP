@@ -214,7 +214,6 @@ function ShipmentsPage() {
           <h1>Shipments</h1>
         </div>
         <div style={{ width: "49%", display: "inline-block", textAlign: "right" }}>
-          <Button type="submit" colorPalette="blue" onClick={handleNewClick}>New Shipment</Button>
         </div>
       </div>
       <Grid
