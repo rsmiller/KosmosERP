@@ -161,13 +161,24 @@
   .mod{background:var(--panel);padding:26px 24px;display:flex;flex-direction:column;gap:11px;min-height:172px;}
   .mod .code-row{display:flex;align-items:center;gap:11px;}
   .mod .code{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:3px 7px;}
-  .mod .ent{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--steel);border:1px solid var(--rule-strong);border-radius:4px;padding:3px 6px;margin-left:auto;}
   .mod h3{font-family:var(--display);font-weight:600;font-size:1.12rem;letter-spacing:-.01em;margin:0;}
   .mod p{margin:0;color:var(--ink-soft);font-size:.96rem;line-height:1.52;}
   @media (max-width:820px){.modules{grid-template-columns:repeat(2,1fr);}}
   @media (max-width:520px){.modules{grid-template-columns:1fr;}.mod{min-height:0;}}
 
   .footnote{margin-top:22px;font-size:.9rem;color:var(--ink-soft);max-width:60ch;}
+
+  /* ---------- integrations ---------- */
+  .intg{border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--rule);display:grid;gap:1px;}
+  .intg-row{background:var(--panel);display:grid;grid-template-columns:minmax(180px,220px) 1fr;gap:20px 28px;padding:24px 26px;align-items:center;}
+  .intg-row .cat{display:flex;align-items:center;gap:11px;}
+  .intg-row .code{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--steel);border:1px solid var(--steel);border-radius:4px;padding:3px 7px;}
+  .intg-row .cat h3{font-family:var(--display);font-weight:600;font-size:1.06rem;letter-spacing:-.01em;margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;}
+  .chip{font-size:.9rem;font-weight:500;color:var(--ink);background:var(--panel-2);border:1px solid var(--rule-strong);border-radius:6px;padding:7px 13px;line-height:1;}
+  .chip.soon{display:inline-flex;align-items:center;gap:9px;color:var(--ink-soft);background:transparent;border-style:dashed;}
+  .chip.soon em{font-family:var(--mono);font-style:normal;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);border:1px solid var(--rule-strong);border-radius:3px;padding:2px 5px;}
+  @media (max-width:600px){.intg-row{grid-template-columns:1fr;gap:14px;}}
 
   /* ---------- support ---------- */
   .tiers{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
@@ -245,9 +256,10 @@
     <a class="brand" href="#top" aria-label="Kosmos ERP home"><b>Kosmos</b><span class="tag">ERP</span></a>
     <nav class="top" aria-label="Primary">
       <a class="link" href="#modules">Modules</a>
+      <a class="link" href="#integrations">Integrations</a>
       <a class="link" href="#support">Support</a>
       <a class="link" href="#pricing">Pricing</a>
-      <a class="btn btn-primary" href="https://www.linkedin.com/in/more_guids" target="_blank" rel="noopener">
+      <a class="btn btn-primary" href="https://www.linkedin.com/in/more-guids/" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
         Connect
       </a>
@@ -264,7 +276,7 @@
       <h1 class="reveal d1">The .NET-native ERP a manufacturer can actually own.</h1>
       <p class="lede reveal d2">Kosmos runs the paperwork small shops still push through spreadsheets and paper travelers — orders, production, inventory, shipping. It's open source, and it's implemented and supported by the engineer who built it.</p>
       <div class="cta-row reveal d3">
-        <a class="btn btn-primary" href="https://www.linkedin.com/in/more_guids" target="_blank" rel="noopener">
+        <a class="btn btn-primary" href="https://www.linkedin.com/in/more-guids/" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
           Connect on LinkedIn
         </a>
@@ -328,12 +340,64 @@
           <p>Dashboards and clean exports for the numbers owners and controllers actually ask for.</p>
         </div>
         <div class="mod">
-          <div class="code-row"><span class="code">IAM</span><span class="ent">Enterprise</span></div>
+          <div class="code-row"><span class="code">IAM</span></div>
           <h3>Identity &amp; Access</h3>
-          <p>SAML/OIDC single sign-on, SCIM user provisioning, and real role-based permissions — enterprise auth done right.</p>
+          <p>SAML/OIDC single sign-on, SCIM user provisioning, and real role-based permissions — with custom identity integrations available.</p>
         </div>
       </div>
-      <p class="footnote">Every module ships in the open-source core. Identity &amp; Access is offered as an enterprise add-on. Not sure a module fits your process? That's what the fit call is for.</p>
+      <p class="footnote">Every module ships in the open-source core. Custom identity integrations, or a feature Kosmos doesn't have yet, can be built for a fixed price. Not sure a module fits your process? That's what the fit call is for.</p>
+    </div>
+  </section>
+
+  <!-- INTEGRATIONS -->
+  <section id="integrations">
+    <div class="wrap">
+      <div class="s-head">
+        <h2>Bring your own vendors</h2>
+        <p>Kosmos doesn't lock you into anyone's ecosystem. Payments, file storage, logging, and messaging each run through a pluggable provider — connect the services you already pay for, or swap them later without touching the rest of the system.</p>
+      </div>
+      <div class="intg">
+        <div class="intg-row">
+          <div class="cat"><span class="code">PAY</span><h3>Payments</h3></div>
+          <div class="chips">
+            <span class="chip">Stripe</span>
+            <span class="chip">PayPal</span>
+            <span class="chip">Square</span>
+          </div>
+        </div>
+        <div class="intg-row">
+          <div class="cat"><span class="code">SHIP</span><h3>Shipping</h3></div>
+          <div class="chips">
+            <span class="chip soon">ShipStation <em>Coming soon</em></span>
+          </div>
+        </div>
+        <div class="intg-row">
+          <div class="cat"><span class="code">STORE</span><h3>File storage</h3></div>
+          <div class="chips">
+            <span class="chip">Amazon S3</span>
+            <span class="chip">Azure Blob</span>
+            <span class="chip">Google Cloud</span>
+            <span class="chip">Local disk</span>
+          </div>
+        </div>
+        <div class="intg-row">
+          <div class="cat"><span class="code">LOG</span><h3>Logging &amp; monitoring</h3></div>
+          <div class="chips">
+            <span class="chip">Datadog</span>
+            <span class="chip">Azure Application Insights</span>
+          </div>
+        </div>
+        <div class="intg-row">
+          <div class="cat"><span class="code">MSG</span><h3>Messaging &amp; queues</h3></div>
+          <div class="chips">
+            <span class="chip">RabbitMQ</span>
+            <span class="chip">Azure</span>
+            <span class="chip">Amazon</span>
+            <span class="chip">Google</span>
+          </div>
+        </div>
+      </div>
+      <p class="footnote">Every category also ships with built-in local and database options, so Kosmos runs with no external services on day one — plus mock providers for testing. Need a vendor that isn't here? A new provider drops into the same interface as a fixed-price add-on.</p>
     </div>
   </section>
 
@@ -400,8 +464,8 @@
         </div>
         <div class="rung">
           <span class="num">5</span>
-          <div class="top"><h3>Enterprise Auth &amp; Custom Modules</h3><span class="fig">Per project</span></div>
-          <p>Single sign-on, SCIM provisioning, RBAC, and features built to match how your shop actually runs. Scoped and quoted per project.</p>
+          <div class="top"><h3>Custom Integrations &amp; Modules</h3><span class="fig">Per project</span></div>
+          <p>Single sign-on and identity integrations, a payment, storage, or messaging vendor that isn't on the list, or features built to match how your shop actually runs. Scoped and quoted per project.</p>
         </div>
         <div class="rung">
           <span class="num">6</span>
@@ -421,7 +485,7 @@
         <p class="lede">No pushy demo, no sales team. A short conversation about how your shop runs today and whether Kosmos would make it run better. Reach me on LinkedIn to start.</p>
       </div>
       <div class="contact-card">
-        <a class="btn btn-primary li-btn" href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener">
+        <a class="btn btn-primary li-btn" href="https://www.linkedin.com/in/more-guids/" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
           Message me on LinkedIn
         </a>
@@ -438,7 +502,7 @@
     <div class="right">
       <span class="meta">AGPL-3.0 · .NET 10 / Next.js</span>
       <a class="flink" href="https://github.com/your-org/kosmos-erp" target="_blank" rel="noopener">Source on GitHub</a>
-      <a class="flink" href="https://www.linkedin.com/in/your-profile" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="flink" href="https://www.linkedin.com/in/more-guids/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </div>
   <div class="wrap" style="margin-top:16px;"><span class="meta">© 2026 Kosmos ERP · Built and supported by one engineer.</span></div>
