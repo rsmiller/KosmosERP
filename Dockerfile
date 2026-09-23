@@ -35,6 +35,10 @@ RUN dotnet build "./KosmosERP.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./KosmosERP.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Strip appsettings*.json from the published output. When a "Settings" section exists in configuration,
+# GetSettingValue (Api/DependancyInjection.cs) reads only from it and ignores environment variables, so the
+# container must not ship these files. All settings are supplied via environment variables instead.
+RUN rm -f /app/publish/appsettings*.json
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
