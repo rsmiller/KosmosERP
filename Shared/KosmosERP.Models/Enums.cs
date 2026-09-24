@@ -90,6 +90,14 @@ public class PaymentProviderType
     public static string MOCK { get { return "mock"; } }
 }
 
+public class ShippingProviderType
+{
+    public static string Database { get { return "database"; } }
+    public static string ShipStation { get { return "ship_station"; } }
+    public static string MOCK { get { return "mock"; } }
+}
+
+
 public class LogProviderType
 {
     public static string Azure { get { return "azure"; } }

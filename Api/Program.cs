@@ -28,13 +28,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure settings from environment variables or from appsettings.json
 
 var settingsConfigurations = builder.Services.ConfigureSettings(builder.Configuration);
-var authenticationSettings = settingsConfigurations.Item1;
-var storageAccountSettings = settingsConfigurations.Item2;
-var messagePublisherSettings = settingsConfigurations.Item3;
-var paymentProviderSettings = settingsConfigurations.Item4;
-var logProviderSettings = settingsConfigurations.Item5;
-var hangfireSettings = settingsConfigurations.Item6;
-var databaseSettings = settingsConfigurations.Item7;
+var authenticationSettings = settingsConfigurations.authSettings;
+var storageAccountSettings = settingsConfigurations.fileStorageSettings;
+var messagePublisherSettings = settingsConfigurations.messagePublisherSettings;
+var paymentProviderSettings = settingsConfigurations.paymentProviderSettings;
+var logProviderSettings = settingsConfigurations.logProviderSettings;
+var hangfireSettings = settingsConfigurations.hangfireSettings;
+var shippingSettings = settingsConfigurations.shippingSettings;
+var databaseSettings = settingsConfigurations.databaseSettings;
 
 
 // Add detailed problem details for better error responses
@@ -133,6 +134,12 @@ if (paymentProviderSettings.payment_provider.ToLower() == PaymentProviderType.St
 {
     Stripe.StripeConfiguration.ApiKey = paymentProviderSettings.stripe_api_key;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// Shipping Provider
+
+
+builder.Services.AddScoped<IShippingProviderFactory, ShippingProviderFactory>();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Log Provider

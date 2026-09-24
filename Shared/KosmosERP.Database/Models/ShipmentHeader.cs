@@ -20,6 +20,8 @@ public class ShipmentHeader : BaseDatabaseModel
     [Required]
     public int revision_number { get; set; } = 1;
 
+    public string external_id { get; set; }
+
     [Required]
     public int units_to_ship { get; set; } = 0;
 

@@ -8,6 +8,7 @@ public class ShipmentHeaderDto : BaseDto
     public int order_header_id { get; set; }
     public int shipment_number { get; set; }
     public int address_id { get; set; }
+    public string external_id { get; set; }
     public int units_to_ship { get; set; }
     public int units_shipped { get; set; }
     public bool is_complete { get; set; }

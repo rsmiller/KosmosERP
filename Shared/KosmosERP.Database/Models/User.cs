@@ -43,8 +43,7 @@ public partial class User : BaseDatabaseModel
     [Required]
     public bool is_external_user { get; set; } = false;
 
-    public string external_id { get; set; 
-    }
+    public string external_id { get; set; }
     [Required]
     public bool is_admin { get; set; } = false;
 

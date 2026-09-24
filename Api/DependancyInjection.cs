@@ -2,6 +2,7 @@
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Metrics;
@@ -15,13 +16,7 @@ namespace KosmosERP.Api
 {
     public static class DependancyInjection
     {
-        public static Tuple<AuthenticationSettings, 
-                        FileStorageSettings, 
-                        MessagePublisherSettings, 
-                        PaymentProviderSettings, 
-                        LogProviderSettings,
-                        HangfireSettings,
-                        DatabaseSettings> 
+        public static ConfigurationSettings
                         ConfigureSettings(this IServiceCollection services, ConfigurationManager configManager)
         {
             var authenticationSettings = new AuthenticationSettings()
@@ -97,6 +92,11 @@ namespace KosmosERP.Api
                 DatabaseConnectionString = GetSettingValue(configManager, "DatabaseConnectionString", "DatabaseSettings")
             };
 
+            var shippingSetings = new ShippingSettings()
+            {
+                shipping_provider = GetSettingValue(configManager, "ShippingProvider", "ShippingSettings"),
+                ship_station_api_key = GetSettingValue(configManager, "ShipStationApiKey", "ShippingSettings"),
+            };
 
             services.AddSingleton<IAuthenticationSettings>(authenticationSettings);
             services.AddSingleton<IFileStorageSettings>(storageAccountSettings);
@@ -105,20 +105,16 @@ namespace KosmosERP.Api
             services.AddSingleton<ILogProviderSettings>(logProviderSettings);
             services.AddSingleton<IHangfireSettings>(hangFireSettings);
             services.AddSingleton<IDatabaseSettings>(databaseSettings);
+            services.AddSingleton<IShippingSettings>(shippingSetings);
 
-            return new Tuple<AuthenticationSettings, 
-                            FileStorageSettings, 
-                            MessagePublisherSettings, 
-                            PaymentProviderSettings, 
-                            LogProviderSettings,
-                            HangfireSettings,
-                            DatabaseSettings>(
+            return new ConfigurationSettings(
                 authenticationSettings,
                 storageAccountSettings,
                 messagePublisherSettings,
                 paymentProviderSettings,
                 logProviderSettings,
                 hangFireSettings,
+                shippingSetings,
                 databaseSettings
             );
         }
@@ -199,7 +195,7 @@ namespace KosmosERP.Api
                 };
             });
         }
-        public static void AddDataDogLogging(this IServiceCollection services, LogProviderSettings logProviderSettings)
+        public static void AddDataDogLogging(this IServiceCollection services, ILogProviderSettings logProviderSettings)
         {
             var datadogConfig = new Serilog.Sinks.Datadog.Logs.DatadogConfiguration
             {
@@ -250,7 +246,7 @@ namespace KosmosERP.Api
                 .CreateLogger();
         }
 
-        public static void AddOpenTelemetryLogging(this IServiceCollection services, LogProviderSettings logProviderSettings)
+        public static void AddOpenTelemetryLogging(this IServiceCollection services, ILogProviderSettings logProviderSettings)
         {
             services.AddOpenTelemetry()
             .UseAzureMonitor(options =>
