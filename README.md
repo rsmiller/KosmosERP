@@ -23,6 +23,9 @@ The last point is development. Many manufacturers will pay salaries to people wh
 ## Use Cases
 The use cases for Kosmos are typical of a manufacturer of some kind. The company may or may not have cloud infrastructure, which is why these so many provider categories that allow the use of local or database connections. 
 
+## Target End-User
+Most open-source ERP systems are created in Python, this one is created in C#. The end user in this case is someone in IT at a manufacturer who has the C# skill set; instead of learning or leveraging Python, they can utilize their knowledge of C# instead. In addition, many integrations are performed through the appsettings.json file; it's plug-and-play: put in the right provider type and its associated data and it just works. Many manufacturers use a variety of tech stacks or almost none at all, which is why the integrations are so broad.
+
 ## Installation
 Check the docs section of this project for helpful guides on how to implement and run Kosmos. You can compile the API project and run it in IIS, or run it through Rancher or Kubernetes. The front-end compiles as static pages and likewise can be run in IIS, or run it through Rancher or Kubernetes.
 
