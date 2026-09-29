@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KosmosERP.BusinessLayer.ShipmentProviders.Models
+namespace KosmosERP.BusinessLayer.ShipmentProviders.Models.ShipStation
 {
     public class ShipStationInsuredValue
     {
-        public string currency { get; set; }
+        public string? currency { get; set; }
         public decimal amount { get; set; }
     }
 }
