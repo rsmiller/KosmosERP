@@ -30,7 +30,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-016](#bug-016) | Combobox options inside modal dialogs are hidden from assistive tech | UI / accessibility | Medium | Open |
 | [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Open, needs decision |
 | [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Open |
-| [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Open |
+| [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Fixed (uncommitted) |
 | [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Open |
 | [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Open |
 | [BUG-022](#bug-022) | BOM item dialog is titled "Add Address" | UI | Low | Open |
@@ -362,12 +362,14 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 - **Symptom:** for a customer with `is_taxable: false`, every invoice line starts with Tax checked and is sent with `is_taxable: true`. Tax is only calculated when `tax_rate > 0`, so a non-taxable customer with a rate on file gets taxed.
 - **Root cause:** the ternary falls back to `true` whenever the value is falsy, and `false` is falsy.
-- **Evidence:** pinned by `UI/e2e/tests/known-bugs.spec.ts` › "BUG-018 …". With the marker off, it fails with "Expected: false, Received: true".
+- **Evidence:** pinned by `UI/e2e/tests/known-bugs.spec.ts` › "BUG-018 …". With the marker off, it fails with "Expected: false, Received: true". Same page as BUG-019 (fixed), so the test needs no workaround any more.
 - **Suggested fix:** `command.is_taxable = customerResponse.data?.is_taxable ?? true;`, or default to `false`. Check the same pattern for `tax_rate` on the line above.
 - **Done when:** the BUG-018 test passes without `knownBug`.
 
 <a id="bug-019"></a>
 ## BUG-019: Invoicing crashes unless payment terms are named "NETxx"
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** High. Against seeded data (terms named "Net 30"), creating an AR invoice from an order throws, and nothing is saved.
 - **Where:** `UI/app/erp/ar/new/[id]/page.tsx` (~lines 85–97 and 225–233).
@@ -494,6 +496,17 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-019: AR invoice due dates come from the payment term's days.**
+  - **Days live in `int_value`:** a payment term's `int_value` is its length in days (NET30 → 30). `UI/app/erp/ar/new/[id]/page.tsx` looks up the customer's term by key (`GetKeyValuesByModule`) and uses `int_value`. A term without one (e.g. "Due on Receipt") is due on the invoice date. The display name no longer matters.
+  - **Dates:** the page now keeps them as `Date` objects, and formats `yyyy-MM-dd` only when saving. They used to round-trip through `toLocaleDateString()`, which also broke saving for non-US browser locales.
+  - **API defaults** (`ARInvoiceModule.SeedPermissions`): Net 15/30/45/60 now store 15/30/45/60 (they stored a sort order, 1–4). A copy-paste bug is also fixed: Net 30 was only created when Net 15 was missing.
+  - **Data migration `SetPaymentTermDays`:** sets `int_value` on the four default terms in existing databases (only those keys in the payment-terms module; custom terms are untouched). Verified on MySQL 8.0.44 against old API-style (1–4) and seeder-style (`NULL`) rows.
+  - **Seeder:** its Net terms now carry their days.
+  - **Admin → Lists:** new optional **Number** field when adding an entry, and an editable **Number** column, so admins can set days on new terms. Editing a cell used to send the edited value as the label whatever the column; it now updates the right field.
+  - **Tests:**
+    - .NET: `ARInvoiceModuleTests.SeedPermissions_PaymentTermsCarryTheirDays` and `…_CreatesNet30_WhenNet15AlreadyExists`.
+    - e2e: `ar-invoices.spec.ts` › "invoice due date" (a term named "Sixty days net" gets 60 days; a term without days is due the same day). The "NET30" workaround is removed.
+    - New `admin/lists.spec.ts`. The BUG-019 known-bug test is retired.
 - **BUG-002: sales orders can be created; order ↔ payment relationship fixed.**
   - **Real root cause:** `PaymentConfiguration` declared `Payment.HasMany(order_headers).HasForeignKey(OrderHeader.id).HasPrincipalKey(Payment.order_header_id)`. That made `order_headers.id` a *foreign key* (so EF gave it no AUTO_INCREMENT) and added a unique constraint `AK_payments_order_header_id`, which allowed only **one payment per order**. `order_number`'s `ValueGeneratedOnAdd` was not the cause: `payments.payment_number` uses the same pattern and `payments.id` kept its identity. The app assigns order numbers itself.
   - **Model:** a payment now belongs to one order (`payments.order_header_id → order_headers.id`, `ON DELETE RESTRICT` so payments can't vanish with an order). The unused `Payment.order_headers` navigation is removed.

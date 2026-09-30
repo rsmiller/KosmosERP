@@ -10,10 +10,22 @@ import { expect, type Locator, type Page } from '@playwright/test';
  * Opens with ArrowDown instead of typing: most lookup comboboxes filter on the
  * hidden key, not the label (BUG-007 in bugs.md).
  */
-export async function chooseOption(page: Page, combobox: Locator, option: string): Promise<void> {
+export async function chooseOption(
+  page: Page,
+  combobox: Locator,
+  option: string,
+  { inModal = false }: { inModal?: boolean } = {},
+): Promise<void> {
   await combobox.click();
   await combobox.press('ArrowDown');
-  await page.getByRole('option', { name: option, exact: true }).click();
+  await optionLocator(page, option, inModal).click();
+}
+
+/** See `inModal` on searchAndChoose: options portaled out of a modal have no accessible name (BUG-016). */
+function optionLocator(page: Page, option: string, inModal: boolean): Locator {
+  return inModal
+    ? page.locator('[role="option"]').filter({ hasText: new RegExp(`^\\s*${escapeRegExp(option)}\\s*$`) })
+    : page.getByRole('option', { name: option, exact: true });
 }
 
 /**
@@ -38,10 +50,7 @@ export async function searchAndChoose(
   const searched = page.waitForResponse((r) => /\/api\/v1\/[^/]+\/Find[^/?]*/i.test(r.url()));
   await combobox.fill(search);
   await searched;
-  const target = inModal
-    ? page.locator('[role="option"]').filter({ hasText: new RegExp(`^\\s*${escapeRegExp(option)}\\s*$`) })
-    : page.getByRole('option', { name: option, exact: true });
-  await target.click();
+  await optionLocator(page, option, inModal).click();
   // Synchronization, not a test assertion: wait until the pick has landed.
   await expect(combobox).toHaveValue(option);
 }

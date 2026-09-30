@@ -36,26 +36,11 @@ test('BUG-006: new-record forms have no Delete Record button', async ({ page, ap
   await expect(page.getByRole('button', { name: 'Delete Record' })).toBeHidden();
 });
 
-test('BUG-019: an order can be invoiced when its payment terms are named "Net 30"', async ({ page, api }) => {
-  knownBug('BUG-019: due-date days come from payment_terms_name.replace("NET", ""), so "Net 30" gives NaN and saving throws');
-
-  const world = mockWorld(api, buildWorld()); // customer terms named "Net 30", as the seeder names them
-  const line = world.orders[0].order_lines![0];
-  await page.context().route('**/docs/api/**', (route) => route.fulfill({ status: 200, body: 'pdf' }));
-  await page.goto(`/erp/ar/new/${world.orders[0].guid}`);
-
-  await editGridCell(page.getByRole('row').filter({ hasText: line.line_description }), 'invoice_qty', 1);
-  await page.getByRole('button', { name: 'Save and Print Invoice' }).click();
-
-  await api.waitForRequest('POST', '/ARInvoice/CreateARInvoice');
-});
-
 test('BUG-018: a non-taxable customer\'s invoice lines are not taxable', async ({ page, api }) => {
   knownBug('BUG-018: is_taxable uses `customer.is_taxable ? customer.is_taxable : true`, so false becomes true');
 
   const world = buildWorld();
   world.customers[0].is_taxable = false;
-  world.customers[0].payment_terms_name = 'NET30'; // sidestep BUG-019
   mockWorld(api, world);
   const line = world.orders[0].order_lines![0];
   await page.context().route('**/docs/api/**', (route) => route.fulfill({ status: 200, body: 'pdf' }));

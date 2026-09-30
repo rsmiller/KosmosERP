@@ -93,7 +93,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         var gl_account_sales = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.GLAccounts && m.key == "gl_account_sales").SingleOrDefault();
         var gl_account_general_expenses = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.GLAccounts && m.key == "gl_account_general_expenses").SingleOrDefault();
 
-
+        // Payment terms store their length in days in int_value (NET 30 -> 30).
         if (payment_terms_net_15 == null)
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
@@ -101,20 +101,20 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "payment_terms_net_15",
                 value = "NET 15",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 1
+                int_value = 15
             }, 1));
 
             _Context.SaveChanges();
         }
 
-        if (payment_terms_net_15 == null)
+        if (payment_terms_net_30 == null)
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
                 key = "payment_terms_net_30",
                 value = "NET 30",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 2
+                int_value = 30
             }, 1));
 
             _Context.SaveChanges();
@@ -127,7 +127,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "payment_terms_net_45",
                 value = "NET 45",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 3
+                int_value = 45
             }, 1));
 
             _Context.SaveChanges();
@@ -140,7 +140,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "payment_terms_net_60",
                 value = "NET 60",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 4
+                int_value = 60
             }, 1));
 
             _Context.SaveChanges();

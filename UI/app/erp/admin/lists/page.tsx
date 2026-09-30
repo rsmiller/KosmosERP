@@ -144,7 +144,10 @@ function AdminListsPage() {
 
         let command = new KeyValueEditCommand();
         command.id = event.data.id;
-        command.value = event.value;
+        command.value = event.data.value;
+        // The number column (int_value) carries e.g. a payment term's length in days.
+        if (event.colDef?.field === 'int_value' && event.newValue !== null && event.newValue !== undefined && event.newValue !== '')
+            command.int_value = Number(event.newValue);
 
         keyValueService.update(command, auth.token || "").then( (response) => {
             //console.log(response);
@@ -190,6 +193,8 @@ function AdminListsPage() {
         command.module_id = watch("module_id");
         command.key = watch("key");
         command.value = watch("value");
+        const intValue = watch("int_value");
+        command.int_value = intValue !== undefined && intValue !== null && String(intValue) !== '' ? Number(intValue) : undefined;
 
         keyValueService.create(command, auth.token || "").then( (response) => {
             //console.log(response);
@@ -242,6 +247,7 @@ function AdminListsPage() {
             { field: "module_id", headerName: "Module", cellRenderer: ModuleNameRenderer, cellRendererParams: { moduleData: moduleData } },
             { field: "key", headerName: "Key", editable: false },
             { field: "value", headerName: "Value", editable: true },
+            { field: "int_value", headerName: "Number", editable: true, cellEditor: 'agNumberCellEditor' },
             {
                 field: "guid",
                 headerName: "Actions",
@@ -364,6 +370,13 @@ function AdminListsPage() {
                                                 {...register('value')}
                                             />
                                             <Field.ErrorText>This field is required</Field.ErrorText>
+                                        </Field.Root>
+                                    </GridItem>
+                                    <GridItem colSpan={2}>
+                                        <Field.Root>
+                                            <Field.Label>Number</Field.Label>
+                                            <Input type="number" {...register('int_value')} />
+                                            <Field.HelperText>Optional. For payment terms, the number of days (NET30 = 30).</Field.HelperText>
                                         </Field.Root>
                                     </GridItem>
                             </Grid>

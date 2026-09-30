@@ -56,11 +56,11 @@ public partial class DatabaseSeeder
 
     private async Task SeedLookupsAsync()
     {
-        void AddKv(string key, string value, string moduleId)
+        void AddKv(string key, string value, string moduleId, int? intValue = null)
         {
             if (_context.KeyValueStores.Any(k => k.module_id == moduleId && k.key == key))
                 return;
-            _context.KeyValueStores.Add(Stamp(new KeyValueStore { key = key, value = value, module_id = moduleId }));
+            _context.KeyValueStores.Add(Stamp(new KeyValueStore { key = key, value = value, module_id = moduleId, int_value = intValue }));
         }
 
         AddKv(Kv.ShipPickup, "Customer Pickup", KeyValueIds.ShippingMethods);
@@ -72,10 +72,11 @@ public partial class DatabaseSeeder
         AddKv(Kv.PayCheck, "Check", KeyValueIds.PayMethods);
         AddKv(Kv.PayWire, "Wire Transfer", KeyValueIds.PayMethods);
 
-        AddKv(Kv.TermsNet15, "Net 15", KeyValueIds.PaymentTerms);
-        AddKv(Kv.TermsNet30, "Net 30", KeyValueIds.PaymentTerms);
-        AddKv(Kv.TermsNet45, "Net 45", KeyValueIds.PaymentTerms);
-        AddKv(Kv.TermsNet60, "Net 60", KeyValueIds.PaymentTerms);
+        // Payment terms carry their length in days in int_value (the AR invoice page uses it).
+        AddKv(Kv.TermsNet15, "Net 15", KeyValueIds.PaymentTerms, 15);
+        AddKv(Kv.TermsNet30, "Net 30", KeyValueIds.PaymentTerms, 30);
+        AddKv(Kv.TermsNet45, "Net 45", KeyValueIds.PaymentTerms, 45);
+        AddKv(Kv.TermsNet60, "Net 60", KeyValueIds.PaymentTerms, 60);
 
         AddKv(Kv.ProdSubmitted, "Submitted", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdPulled, "Parts Pulled", KeyValueIds.ProductionStatuses);

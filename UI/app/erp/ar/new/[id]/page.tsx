@@ -25,6 +25,7 @@ import ARInvoiceQuantityEditor from '@/components/ag-grid/ar-invoice-quantity-ed
 import { addressService } from '@/services/address-service';
 import { AddressDto, AddressFindCommand } from '@/models/address-models';
 import { arInvoiceService } from '@/services/ar-invoice-service';
+import { keyValueService, KeyValueModuleIds } from '@/services/keyvalue-service';
 import { useAuth } from '@/lib/auth/auth-context';
 
 import { format, parse } from 'date-fns';
@@ -49,8 +50,8 @@ function NewARFromCustomerPage() {
   const [canSave, setCanSave] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [invoiceDate, setInvoiceDate] = useState<string>();
-  const [invoiceDueDate, setInvoiceDueDate] = useState<string>();
+  const [invoiceDate, setInvoiceDate] = useState<Date>();
+  const [invoiceDueDate, setInvoiceDueDate] = useState<Date>();
 
   const [billingAddress, setBillingAddress] = useState<AddressDto | undefined>();
   
@@ -82,19 +83,22 @@ function NewARFromCustomerPage() {
                 console.log(customerResponse)
                 setCustomerModel(customerResponse.data);
                 
+                // A payment term's int_value is its length in days (NET30 -> 30). A term
+                // without one (e.g. "Due on Receipt") is due on the invoice date.
                 let days = 0;
-                if(customerResponse.data.payment_terms_name)
+                if (customerResponse.data.payment_terms)
                 {
-                  // TODO: If the user changes the name of the payment terms this will break
-                  days = Number(customerResponse.data.payment_terms_name.replace("NET", ""));
+                  const termsResponse = await keyValueService.GetDtoByModule(KeyValueModuleIds.PaymentTerms, auth.token || "");
+                  const term = termsResponse.data?.find(t => t.key === customerResponse.data?.payment_terms);
+                  days = term?.int_value ?? 0;
                 }
 
                 const invoice_date = new Date();
                 const due_date = new Date(invoice_date);
                 due_date.setDate(due_date.getDate() + days);
-                
-                setInvoiceDueDate(due_date.toLocaleDateString());
-                setInvoiceDate(new Date().toLocaleDateString());
+
+                setInvoiceDueDate(due_date);
+                setInvoiceDate(invoice_date);
                 
                 // Populate grid with order lines if available
                 if (response.data.order_lines && response.data.order_lines.length > 0) {
@@ -485,13 +489,13 @@ function NewARFromCustomerPage() {
               <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                 <DataList.Item>
                   <DataList.ItemLabel>Invoice Date</DataList.ItemLabel>
-                  <DataList.ItemValue>{invoiceDate}</DataList.ItemValue>
+                  <DataList.ItemValue>{invoiceDate?.toLocaleDateString()}</DataList.ItemValue>
                 </DataList.Item>
               </DataList.Root>
               <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                 <DataList.Item>
                   <DataList.ItemLabel>Due Date</DataList.ItemLabel>
-                  <DataList.ItemValue>{invoiceDueDate}</DataList.ItemValue>
+                  <DataList.ItemValue>{invoiceDueDate?.toLocaleDateString()}</DataList.ItemValue>
                 </DataList.Item>
               </DataList.Root>
               <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">

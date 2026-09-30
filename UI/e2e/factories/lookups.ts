@@ -34,20 +34,23 @@ export const PaymentTermKeys = {
   DueOnReceipt: 'payment_terms_due_on_receipt',
 } as const;
 
-export function buildKeyValue(key: string, value: string, moduleId: string, id = 1): KeyValueDto {
-  return { id, key, value, module_id: moduleId };
+export function buildKeyValue(key: string, value: string, moduleId: string, id = 1, intValue?: number): KeyValueDto {
+  return { id, key, value, module_id: moduleId, int_value: intValue };
 }
 
 function list(module: KeyValueModule, entries: [key: string, value: string][]): KeyValueDto[] {
   return entries.map(([key, value], index) => buildKeyValue(key, value, KeyValueModules[module], index + 1));
 }
 
+/** Payment terms store their length in days in int_value (ARInvoiceModule, seeder). */
 export function paymentTerms(): KeyValueDto[] {
-  return list('PaymentTerm', [
-    [PaymentTermKeys.Net30, 'Net 30'],
-    [PaymentTermKeys.Net60, 'Net 60'],
-    [PaymentTermKeys.DueOnReceipt, 'Due on Receipt'],
-  ]);
+  const module = KeyValueModules.PaymentTerm;
+  return [
+    buildKeyValue(PaymentTermKeys.Net30, 'Net 30', module, 1, 30),
+    buildKeyValue(PaymentTermKeys.Net60, 'Net 60', module, 2, 60),
+    // A custom term with no days set: due on the invoice date.
+    buildKeyValue(PaymentTermKeys.DueOnReceipt, 'Due on Receipt', module, 3),
+  ];
 }
 
 /** Module id the ProductCategoryCombobox loads (components/product-category-combobox.tsx). */

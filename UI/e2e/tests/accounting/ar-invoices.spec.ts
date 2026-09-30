@@ -1,22 +1,14 @@
 import type { Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test';
+import type { MockApi } from '../../mocks/mock-api';
 import { fail, ok } from '../../mocks/envelope';
 import { buildWorld, type World } from '../../factories/world';
+import { PaymentTermKeys } from '../../factories/lookups';
 import { mockWorld } from '../../mocks/kits/world';
 import { ARInvoiceFromOrderPage, ARListPage } from '../../pages/ar-pages';
 
 /** The invoice and due dates come from the browser clock. */
 const TODAY = new Date('2026-03-10T10:00:00');
-
-/**
- * The page derives due-date days from the payment terms *name* with
- * `name.replace("NET", "")`, so only names like "NET30" work (BUG-019).
- */
-function worldWithNet30Naming(): World {
-  const world = buildWorld();
-  world.customers[0].payment_terms_name = 'NET30';
-  return world;
-}
 
 /** Saving opens the printable invoice (server-rendered PDF) in a popup; stub it. */
 async function stubPrintPopup(page: Page) {
@@ -41,7 +33,7 @@ test.describe('invoice an order', () => {
 
   test.beforeEach(async ({ page, api }) => {
     await page.clock.setFixedTime(TODAY);
-    world = mockWorld(api, worldWithNet30Naming());
+    world = mockWorld(api, buildWorld());
     form = new ARInvoiceFromOrderPage(page);
     await page.goto(`/erp/ar/new/${world.orders[0].guid}`);
     await expect(form.line(world.orders[0].order_lines![0].line_description)).toBeVisible();
@@ -92,5 +84,43 @@ test.describe('invoice an order', () => {
 
     await api.waitForRequest('POST', '/ARInvoice/CreateARInvoice');
     await expect(page).toHaveURL(`/erp/ar/new/${world.orders[0].guid}`);
+  });
+});
+
+test.describe('invoice due date', () => {
+  /** Invoice the first order line and return the create request's body. */
+  async function invoiceFirstLine(page: Page, api: MockApi, world: World) {
+    await page.clock.setFixedTime(TODAY);
+    mockWorld(api, world);
+    await stubPrintPopup(page);
+    api.on('POST', '/ARInvoice/CreateARInvoice', (req) => ok({ ...world.arInvoices[0], ...(req.body as object) }));
+    const form = new ARInvoiceFromOrderPage(page);
+    const line = world.orders[0].order_lines![0];
+
+    await page.goto(`/erp/ar/new/${world.orders[0].guid}`);
+    await form.setUnitsToInvoice(line.line_description, 1);
+    await form.save.click();
+    return (await api.waitForRequest('POST', '/ARInvoice/CreateARInvoice')).body as { invoice_date: string; invoice_due_date: string };
+  }
+
+  test('uses the payment term\'s days, whatever the term is called', async ({ page, api }) => {
+    // Regression for BUG-019: the page used to parse days from the name ("NET30").
+    const world = buildWorld();
+    world.customers[0].payment_terms = PaymentTermKeys.Net60;
+    world.customers[0].payment_terms_name = 'Sixty days net';
+
+    const body = await invoiceFirstLine(page, api, world);
+
+    expect(body).toMatchObject({ invoice_date: '2026-03-10', invoice_due_date: '2026-05-09' });
+  });
+
+  test('a term without days is due on the invoice date', async ({ page, api }) => {
+    const world = buildWorld();
+    world.customers[0].payment_terms = PaymentTermKeys.DueOnReceipt;
+    world.customers[0].payment_terms_name = 'Due on Receipt';
+
+    const body = await invoiceFirstLine(page, api, world);
+
+    expect(body).toMatchObject({ invoice_date: '2026-03-10', invoice_due_date: '2026-03-10' });
   });
 });

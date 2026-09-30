@@ -297,6 +297,33 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     }
 
     [Test]
+    public async Task SeedPermissions_PaymentTermsCarryTheirDays()
+    {
+        // SetupModule already ran SeedPermissions; the AR invoice page reads int_value as days.
+        var terms = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.PaymentTerms)
+            .OrderBy(m => m.int_value)
+            .ToListAsync();
+
+        Assert.That(terms.Select(m => m.key), Is.EqualTo(new[] { "payment_terms_net_15", "payment_terms_net_30", "payment_terms_net_45", "payment_terms_net_60" }));
+        Assert.That(terms.Select(m => m.int_value), Is.EqualTo(new int?[] { 15, 30, 45, 60 }));
+    }
+
+    [Test]
+    public async Task SeedPermissions_CreatesNet30_WhenNet15AlreadyExists()
+    {
+        // Regression: the Net 30 term used to be guarded by the Net 15 check.
+        var net30 = await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.PaymentTerms && m.key == "payment_terms_net_30");
+        _Context.KeyValueStores.Remove(net30);
+        await _Context.SaveChangesAsync();
+
+        _Module.SeedPermissions();
+
+        var recreated = await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.PaymentTerms && m.key == "payment_terms_net_30");
+        Assert.That(recreated.int_value, Is.EqualTo(30));
+    }
+
+    [Test]
     public async Task Get()
     {
         var new_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()

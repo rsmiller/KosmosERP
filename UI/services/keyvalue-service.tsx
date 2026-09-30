@@ -2,6 +2,11 @@ import { KeyValueCreateCommand, KeyValueDeleteCommand, KeyValueDto, KeyValueEdit
 import axiosInstance from "./axios-instance";
 import { ApiResponse, PagedApiResponse } from "@/models/base-models";
 
+/** Lookup module ids (Shared/KosmosERP.Models/KeyValueIds.cs). */
+export const KeyValueModuleIds = {
+  PaymentTerms: "93bf02ec-5578-4aa4-a45b-f82962adf4bd",
+} as const;
+
 export const keyValueService = {
   async GetDtoByModule(module_id: string, token: string): Promise<ApiResponse<KeyValueDto[]>> {
     const response = await axiosInstance(token).get<ApiResponse<KeyValueDto[]>>(`/api/v1/KeyValue/GetKeyValuesByModule?module_id=${module_id}`);
