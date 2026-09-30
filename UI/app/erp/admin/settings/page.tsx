@@ -19,7 +19,7 @@ import StatesCombobox, { StatesComboboxRef } from '@/components/states-combobox'
 import { countryService } from '@/services/country-service';
 import { CountryFindCommand } from '@/models/country-models';
 import { useAuth } from '@/lib/auth/auth-context';
-import { permissionsService, ERPModules } from '@/services/permissions-service';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 
 function AdminSettingsPage() {
@@ -57,7 +57,7 @@ function AdminSettingsPage() {
         const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.Admin,
-          '',
+          ERPModulePermission.Read,
           realmRoles
         );
         if (!hasPermission) {
@@ -65,7 +65,11 @@ function AdminSettingsPage() {
           router.push('/erp');
           return;
         }
-        setHasEditPermission(true);
+        setHasEditPermission(permissionsService.HasPermission(
+          ERPModules.Admin,
+          ERPModulePermission.Edit,
+          realmRoles
+        ));
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;

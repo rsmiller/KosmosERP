@@ -19,7 +19,7 @@ import TransactionTypeCombobox, { TransactionTypeComboboxRef } from '@/component
 import ProductCombobox, { ProductComboboxRef } from '@/components/product-combobox';
 import PageActionsComponent from '@/components/page-actions';
 import { useRouter } from 'next/navigation';
-import { permissionsService, ERPModules } from '@/services/permissions-service';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useEffect } from 'react';
 
 
@@ -54,7 +54,7 @@ function AdminAdjustmentsPage() {
         const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.Admin,
-          '',
+          ERPModulePermission.Read,
           realmRoles
         );
         if (!hasPermission) {
@@ -62,7 +62,11 @@ function AdminAdjustmentsPage() {
           router.push('/erp');
           return;
         }
-        setHasEditPermission(true);
+        setHasEditPermission(permissionsService.HasPermission(
+          ERPModules.TransactionModule,
+          ERPModulePermission.Write,
+          realmRoles
+        ));
     }, [auth.authenticated, router]);
 
     const [rowSalesData, setRowSalesData] = useState<TransactionListDto[]>([]);

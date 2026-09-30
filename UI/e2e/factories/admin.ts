@@ -75,7 +75,8 @@ export function buildSettings(overrides: Partial<SettingsDto> = {}): SettingsDto
     company_general_email: 'hello@kosmos.example.test',
     company_website: 'https://kosmos.example.test',
     tax_id: '12-3456789',
-    fiscal_year_start: 1,
+    // A yyyy-MM-dd string, like SettingsModule's default (`${year}-01-01`).
+    fiscal_year_start: '2026-01-01',
     ...overrides,
   } as unknown as SettingsDto;
 }

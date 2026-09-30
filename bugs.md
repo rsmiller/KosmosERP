@@ -12,7 +12,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 
 | ID | Title | Area | Severity | Status |
 | --- | --- | --- | --- | --- |
-| [BUG-001](#bug-001) | Admin → Settings and Adjustments redirect every user away | UI / permissions | High | Open |
+| [BUG-001](#bug-001) | Admin → Settings and Adjustments redirect every user away | UI / permissions | High | Fixed (uncommitted) |
 | [BUG-002](#bug-002) | Sales orders can't be created: `order_headers` schema defects | DB / EF migrations | High | Open |
 | [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Open, needs decision |
 | [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
@@ -37,6 +37,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Open |
 | [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Open |
 | [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Open |
+| [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Open, needs decisions |
 
 Also see [Needs verification](#needs-verification) for suspected issues that haven't been confirmed.
 
@@ -46,6 +47,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-001"></a>
 ## BUG-001: Admin → Settings and Adjustments redirect every user away
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** High. Nobody, including admins, can reach company settings or inventory adjustments.
 - **Where:**
@@ -438,6 +441,29 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 - **Suggested fix:** use `useMemo(() => colDefs, [completedOrDisabled])`, or `editable: (p) => !p.context.completedOrDisabled` with grid `context`, as the shipment edit page does for its buttons.
 - **Done when:** the BUG-025 test passes without `knownBug`.
 
+<a id="bug-026"></a>
+## BUG-026: API endpoints with no authorization (Settings writable anonymously)
+
+- **Severity:** High. Some write endpoints can be called by anyone who can reach the API, **without signing in**.
+- **Where:** `Api/Controllers/*.cs`. There's no global authorization filter (`Api/Program.cs` only adds logging filters, and `ERPApiController` has no `[Authorize]`), so an action is protected only if it has `[ERPAuthorize(...)]`. Found while fixing BUG-001:
+
+  | Controller | Actions without `ERPAuthorize` | Notes |
+  | --- | --- | --- |
+  | `SettingsController` | 7 of 7 | Includes `UpdateSettings`, `CreateSettings` and `DeleteSettings`; `[Authorize]` is commented out |
+  | `CountryController`, `StateController` | 7 of 7 each | Includes Create, Update and Delete |
+  | `UserController` | 8 of 19 | `AuthenticateUser` and token refresh must stay open. Check the rest |
+  | `OpportunityController` | 2 of 9 | Check which |
+  | `ReportsController` | 2 of 26 | Check which |
+  | `NotificationController` | 3 of 3 | |
+  | `DocsController` | 5 of 5 | Possibly intentional: server-side PDF rendering (`UI/app/docs/api`) may call these without a user token |
+  | `DiagnosticsController`, `SAMLController` | all | SAML login must stay open. Diagnostics: decide |
+
+  (Counts compare `[Http*]` attributes with `[ERPAuthorize` per file. `GlobalSearchController` has a class-level attribute.)
+- **Symptom:** e.g. `PUT /api/v1/Settings/UpdateSettings` with no `Authorization` header changes the company settings.
+- **Decisions needed:** which endpoints are meant to be public (login, SAML, maybe docs rendering, maybe country/state reads), and what the rest should require. The UI treats settings as admin-only (`admin_edit`), and the `UserController` endpoints use `ERPAuthorize(..., "admin")`.
+- **Suggested fix:** add `[ERPAuthorize(...)]` to every non-public action (for Settings, match the admin rule the UI uses). Consider a global default-deny with explicit `[AllowAnonymous]` on the public ones, so a new controller can't be left open by accident. Add API tests that call each protected endpoint unauthenticated and expect 401 or 403.
+- **Done when:** every action is either authorized or explicitly marked anonymous with a comment saying why, and there are tests for it.
+
 ---
 
 <a id="needs-verification"></a>
@@ -461,6 +487,12 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-001: admin pages are gated on the admin permission.**
+  - `admin/settings` and `admin/adjustments` checked `HasPermission(Admin, "")` (`"admin_"`, never granted). They now require `admin_read`.
+  - Their Save buttons were enabled for everyone who got in. They now require `admin_edit` (Settings) and `transaction_write` (Adjustments), mirroring the API's `/Transaction/*` rules.
+  - `admin/users`, `admin/roles`, `admin/lists` and `admin/document-types` had **no** check. They now require `admin_read` too, matching the admin landing page. The API already enforced admin on the user and role endpoints, so this was a UI consistency gap, not a security hole. The Settings API gap is BUG-026.
+  - Tests: the catalog's `admin/settings` and `admin/adjustments` entries run again with content checks. `auth/guard.spec.ts` checks a non-admin is redirected from all 7 admin pages. New `e2e/tests/admin/settings.spec.ts` covers saving settings and a failed save.
+  - The settings factory now sends `fiscal_year_start` as a `yyyy-MM-dd` string, as the API does.
 - **BUG-004: freight carriers are their own lookup.** Carriers now live only under `KeyValueIds.FreightCarriers` (`2a2d1004…`), the id the UI already requested.
   - `ShipmentModule.SeedPermissions` creates UPS, FedEx and DHL when the API starts (from commit 62c6e02). Their keys are now spelled `freight_carrier_ups/fedex/dhl`, fixed from "frieght" before any data used them.
   - The dev seeder no longer adds carriers under shipping methods. Its `Kv.Carrier*` constants, which are stamped on seeded shipments, now use the new keys.

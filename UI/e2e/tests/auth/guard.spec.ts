@@ -3,6 +3,8 @@ import { ok, paged } from '../../mocks/envelope';
 import { users } from '../../fixtures/users';
 import { buildCustomerListItem } from '../../factories/customer';
 import { paymentTerms } from '../../factories/lookups';
+import { buildWorld } from '../../factories/world';
+import { mockWorld } from '../../mocks/kits/world';
 import { AppShell } from '../../pages/app-shell';
 import { CustomersListPage } from '../../pages/customers-pages';
 
@@ -44,6 +46,19 @@ test.describe('read-only user', () => {
     await expect(list.viewButton('Read Only Industries')).toBeVisible();
     await expect(list.editButton('Read Only Industries')).toBeHidden();
   });
+
+  // Administration is admin-only: `admin_*` permissions come only from is_admin (BUG-001).
+  for (const path of ['/erp/admin', '/erp/admin/users', '/erp/admin/roles', '/erp/admin/lists',
+    '/erp/admin/settings', '/erp/admin/document-types', '/erp/admin/adjustments']) {
+    test(`is redirected away from ${path}`, async ({ page, api }) => {
+      // Some admin pages start loading data before the redirect.
+      mockWorld(api, buildWorld());
+
+      await page.goto(path);
+
+      await expect(page).toHaveURL(/\/erp\/?$/);
+    });
+  }
 
   test('is redirected away from the new customer form', async ({ page, api }) => {
     // The payment terms combobox starts loading before the permission redirect.

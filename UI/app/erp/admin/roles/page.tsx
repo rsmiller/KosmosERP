@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from 'next/navigation';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import SessionStorage from "@/components/session-storage";
 import { userService } from "@/services/user-service";
 import { useAuth } from '@/lib/auth/auth-context';
@@ -17,6 +19,24 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminRolesPage() {
     const auth = useAuth();
+    const router = useRouter();
+    const [hasAccess, setHasAccess] = useState(true);
+
+    // Administration pages are for admins only (the API enforces the same rule).
+    useEffect(() => {
+        if (auth.authenticated == false) return;
+
+        const hasPermission = permissionsService.HasPermission(
+            ERPModules.Admin,
+            ERPModulePermission.Read,
+            auth.roles || []
+        );
+
+        if (!hasPermission) {
+            setHasAccess(false);
+            router.push('/erp');
+        }
+    }, [auth.authenticated]);
     const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
 
@@ -166,6 +186,10 @@ function AdminRolesPage() {
         sortable: true
     };
     
+    if (!hasAccess) {
+        return <div>Redirecting...</div>;
+    }
+
     return (
         <div style={{ width: "100%", height: "500px" }}>
             <div style={{ width: "100%" }}>

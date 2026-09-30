@@ -443,14 +443,15 @@ export const catalog: CatalogPage[] = [
   },
   {
     id: 'admin/settings', kind: 'admin', path: () => '/erp/admin/settings', ready: heading('Settings'),
-    fixme: 'Page checks HasPermission(Admin, "") — "admin_" is never granted, so everyone is redirected (BUG-001 in bugs.md)',
+    checks: [field('Company Name', (w) => w.settings.company_name), field('AR Email', (w) => w.settings.company_ar_email)],
   },
   {
     id: 'admin/document-types', kind: 'admin', path: () => '/erp/admin/document-types', ready: (page) => page.getByRole('button', { name: 'Add New Entry' }),
     checks: [row((w) => w.uploadObjects[0].friendly_name)],
   },
   {
-    id: 'admin/adjustments', kind: 'admin', path: () => '/erp/admin/adjustments', ready: heading(/Adjustment/),
-    fixme: 'Page checks HasPermission(Admin, "") — "admin_" is never granted, so everyone is redirected (BUG-001 in bugs.md)',
+    id: 'admin/adjustments', kind: 'admin', path: () => '/erp/admin/adjustments',
+    ready: (page) => page.getByRole('tab', { name: 'Add Adjustment' }),
+    checks: [async (page) => { await expect(page.getByRole('tab', { name: 'Sales Orders' })).toBeVisible(); }],
   },
 ];

@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from 'next/navigation';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import '../../../styles/page.component.css'
 
@@ -16,6 +18,24 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminDocumentTypePage() {
     const auth = useAuth();
+    const router = useRouter();
+    const [hasAccess, setHasAccess] = useState(true);
+
+    // Administration pages are for admins only (the API enforces the same rule).
+    useEffect(() => {
+        if (auth.authenticated == false) return;
+
+        const hasPermission = permissionsService.HasPermission(
+            ERPModules.Admin,
+            ERPModulePermission.Read,
+            auth.roles || []
+        );
+
+        if (!hasPermission) {
+            setHasAccess(false);
+            router.push('/erp');
+        }
+    }, [auth.authenticated]);
 
 
     const [rowData, setRowData] = useState<DocumentUploadObjectDto[]>([]);
@@ -306,6 +326,10 @@ function AdminDocumentTypePage() {
                 doTagDialogOpen(selectedLineId);
             }
         });
+    }
+
+    if (!hasAccess) {
+        return <div>Redirecting...</div>;
     }
 
     return (
