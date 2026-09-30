@@ -33,7 +33,7 @@ function AdminSettingsPage() {
     const [settings, setSetting] = useState<SettingsDto | null>(null);
 
     const [loading, setLoading] = useState(true);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -145,7 +145,7 @@ function AdminSettingsPage() {
         //console.log("PAGE addressBlock", addressBlockValid)
         //console.log("PAGE allValid: ", allValid);
 
-        canSave(hasRequiredFields)
+        setFormValid(hasRequiredFields)
     };
 
 
@@ -379,7 +379,7 @@ function AdminSettingsPage() {
 
                         <GridItem colSpan={4}>
                             <PageActionsComponent 
-                                canSave={!saveable || !hasEditPermission} 
+                                saveDisabled={!formValid || !hasEditPermission} 
                                 deleteable={false}
                                 onSave={handleSaveClick} 
                                 successSaved={successSaved}

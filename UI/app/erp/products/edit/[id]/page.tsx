@@ -50,7 +50,7 @@ function EditProductPage() {
     const [product, setProduct] = useState<ProductDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [rowBOMData, setRowBOMData] = useState<BaseBOMData[]>([]);
@@ -312,11 +312,11 @@ function EditProductPage() {
             //console.log('hasRequiredFields: ', hasRequiredFields);
             //console.log('allValid: ', allValid);
 
-            canSave(!allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
 
 
@@ -784,7 +784,7 @@ function EditProductPage() {
 
                         <GridItem colSpan={6}>
                             <PageActionsComponent 
-                                canSave={!saveable || !hasEditPermission} 
+                                saveDisabled={!formValid || !hasEditPermission} 
                                 canDelete={hasDeletePermission}
                                 onSave={handleSaveClick} 
                                 onDelete={handleDeleteClick} 

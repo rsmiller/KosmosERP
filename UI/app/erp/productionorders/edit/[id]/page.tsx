@@ -33,7 +33,7 @@ function EditProductionOrderPage() {
     const [productionOrder, setProductionOrder] = useState<ProductionOrderHeaderDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
@@ -75,7 +75,7 @@ function EditProductionOrderPage() {
                 // If this is completed we can't edit this
                 if(response.data.is_complete) {
                 setCompletedOrDisabled(true);
-                canSave(false);
+                setFormValid(false);
                 } else {
                 CheckFormValidity();
                 }
@@ -208,7 +208,7 @@ function EditProductionOrderPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 canDelete={false}
-                canSave={!saveable || !hasEditPermission}
+                saveDisabled={!formValid || !hasEditPermission}
                 successSaved={successSaved}
                 failedSaved={failedSaved}
               />

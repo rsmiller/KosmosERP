@@ -46,7 +46,7 @@ function NewAPPage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, setSaveable] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -199,7 +199,7 @@ function NewAPPage() {
 
         const allValid = vendorValid && hasRequiredFields;
 
-        setSaveable(allValid);
+        setFormValid(allValid);
     }
 
     const IsDirty = (formName: any) => {
@@ -480,7 +480,7 @@ function NewAPPage() {
     
                 <GridItem colSpan={5} >
                   <PageActionsComponent 
-                    canSave={!saveable} 
+                    saveDisabled={!formValid} 
                     canDelete={false}
                     onSave={handleSaveClick} 
                     onDelete={() => {}} 

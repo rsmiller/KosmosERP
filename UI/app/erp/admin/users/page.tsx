@@ -46,7 +46,7 @@ function AdminUserPage() {
     const [selectedRoleValue, setSelectedRoleValue] = useState<string>();
     const hasInitialized = useRef(false);
 
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [saveableAssociation, canSaveAssociation] = useState(false);
     
     const [successSaved, setSuccessSaved] = useState(false);
@@ -313,7 +313,7 @@ function AdminUserPage() {
 
         const valid = isSelected && hasRequiredFields;
 
-        canSave(valid);
+        setFormValid(valid);
     }
     
     const IsDirty = (formName: any) => {
@@ -582,7 +582,7 @@ function AdminUserPage() {
                     <GridItem colSpan={5}>
                         <hr style={{ width: "100%", marginBottom: "25px", marginTop: "35px"}}/>
                         <div style={{width: "100%", textAlign: "center"}}>
-                            <Button type="button" colorPalette="blue" disabled={!saveable} onClick={handleSaveClick}>Save User</Button>
+                            <Button type="button" colorPalette="blue" disabled={!formValid} onClick={handleSaveClick}>Save User</Button>
                         </div>
                     </GridItem>
                 </Grid>

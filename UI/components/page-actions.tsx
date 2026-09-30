@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 
-function PageActionsComponent({canSave=true, canDelete=true, onSave, onDelete, saveText="Save Record", successSaved, failedSaved, deleteText="Delete Record", hidden=false}: any) {
+function PageActionsComponent({saveDisabled=false, canDelete=true, onSave, onDelete, saveText="Save Record", successSaved, failedSaved, deleteText="Delete Record", hidden=false}: any) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isWorking, setIsWorking] = useState(false);
 
@@ -44,7 +44,7 @@ function PageActionsComponent({canSave=true, canDelete=true, onSave, onDelete, s
                 </Alert.Root>
             </GridItem>
             <hr style={{ width: "100%", marginBottom: "25px"}}/>
-            <Button type="button" colorPalette="blue" onClick={() => onSave()} disabled={canSave}>{saveText}</Button>
+            <Button type="button" colorPalette="blue" onClick={() => onSave()} disabled={saveDisabled}>{saveText}</Button>
             {canDelete && (
                <Button type="button" colorPalette="red" onClick={() => setIsDeleteDialogOpen(true)} className={"page-action-dlt-btn"}>{deleteText}</Button>
             )}

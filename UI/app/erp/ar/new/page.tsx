@@ -130,7 +130,7 @@ customerModel
             </GridItem>
 
             <GridItem colSpan={5} >
-              <PageActionsComponent saveText={"Save and Print Invoice"} canDelete={false} onSave={() => handleSaveClick} onDelete={() => handleDeleteClick}/>
+              <PageActionsComponent saveDisabled saveText={"Save and Print Invoice"} canDelete={false} onSave={() => handleSaveClick} onDelete={() => handleDeleteClick}/>
             </GridItem>
         </Grid>
       </form>

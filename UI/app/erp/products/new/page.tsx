@@ -36,7 +36,7 @@ function NewProductPage() {
     const [product, setProduct] = useState<ProductDto | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     
@@ -187,11 +187,11 @@ function NewProductPage() {
             //console.log('hasRequiredFields: ', hasRequiredFields);
             //console.log('allValid: ', allValid);
 
-            canSave(!allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
 
 
@@ -509,7 +509,7 @@ function NewProductPage() {
 
                 <GridItem colSpan={6}>
                     <PageActionsComponent 
-                        canSave={saveable || !hasWritePermission} 
+                        saveDisabled={!formValid || !hasWritePermission} 
                         onSave={handleSaveClick} 
                         onDelete={handleDeleteClick} 
                         successSaved={successSaved}

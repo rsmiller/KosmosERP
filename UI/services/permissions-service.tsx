@@ -74,9 +74,17 @@ export const ERPModulesId = {
     PurchaseOrderModule: "78c4861d-1252-4cac-9461-0e1e0399cd83",
     PurchaseOrderReceiveModule: "bdaa14c4-64d8-44f3-b1ad-d272c408832f",
     ShippingModule: "9d624ee2-6433-49f0-bc6c-3e6978e2ac9c",
+    SubscriptionModule: "218d357d-5a1d-5b09-91ca-11baf6bb23f7",
     TransactionModule: "416786e0-47b3-440a-90da-b7036d72b1f7",
     UserModule: "b8b0d255-3901-4007-b9c7-b0678f89c955",
     VendorModule: "dae2593c-678b-4f6d-9c84-f4f74e066428",
+    // The API's ChartOfAccountModule reuses CommentModule's GUID, so a permission
+    // row for that GUID grants both "comment" and "chart_of_account".
+    ChartOfAccountModule: "1d55c713-146a-4c4c-8ae9-bda223cfd20e",
+    JournalEntryModule: "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+    FinancialTransactionModule: "c3d4e5f6-a7b8-9012-cdef-345678901234",
+    // GeneralLedgerModule and Admin have no API module; they are granted via
+    // UserDto.is_admin (see lib/auth/role-mapping.ts).
 }
 
 export const ERPModulePermission = {

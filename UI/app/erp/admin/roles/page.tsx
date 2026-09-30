@@ -23,7 +23,7 @@ function AdminRolesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isWorking, setIsWorking] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
 
     const [modules, setModules] = useState<Module[]>();
     const [roles, setRoles] = useState<RoleDto[]>([]);
@@ -140,7 +140,7 @@ function AdminRolesPage() {
     const FormChange = () => {
         const isValid = Boolean(watch("role_name"));
 
-        canSave(isValid);
+        setFormValid(isValid);
     };
 
     const IsDirty = (formName: any) => {
@@ -201,7 +201,7 @@ function AdminRolesPage() {
                         <Dialog.ActionTrigger asChild>
                             <Button variant="outline">Cancel</Button>
                         </Dialog.ActionTrigger>
-                        <Button colorPalette="blue" onClick={() => doSave()} disabled={!saveable}><Spinner hidden={!isWorking} /> Save</Button>
+                        <Button colorPalette="blue" onClick={() => doSave()} disabled={!formValid}><Spinner hidden={!isWorking} /> Save</Button>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton size="sm" />

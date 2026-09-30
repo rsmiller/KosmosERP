@@ -45,7 +45,7 @@ function NewSalesOrderPage() {
   const [hasWritePermission, setHasWritePermission] = useState(false);
 
 
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -93,7 +93,7 @@ function NewSalesOrderPage() {
     //console.log("order_type: ", watch('order_type'))
     //console.log("required_date: ", watch('required_date'))
     //console.log("allValid: ", allValid)
-    canSave(allValid);
+    setFormValid(allValid);
   };
 
   const handleSaveClick = async () => {
@@ -385,7 +385,7 @@ function NewSalesOrderPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 onDelete={() => {}} // No delete for new orders
-                canSave={!saveable || !hasWritePermission}
+                saveDisabled={!formValid || !hasWritePermission}
                 canDelete={false}
                 successSaved={successSaved}
                 failedSaved={failedSaved}

@@ -1,0 +1,22 @@
+# Runs the Playwright e2e suite inside the official Playwright image, so
+# browsers, fonts and rendering match CI exactly (.github/workflows/ui_e2e_tests.yml).
+#
+#   npm run test:e2e:docker
+#   docker compose -f docker-compose.e2e.yml run --rm e2e npx playwright test customers
+#
+# Keep the image tag in sync with the exact @playwright/test version in package.json.
+services:
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    working_dir: /app
+    ipc: host
+    init: true
+    environment:
+      CI: ${CI:-}
+    volumes:
+      - ./:/app
+      # Linux node_modules and builds live in container volumes, never mixing
+      # with the host's (Windows/macOS) copies in the bind mount.
+      - /app/node_modules
+      - /app/.next-e2e
+    command: sh -c "npm ci && npx playwright test"

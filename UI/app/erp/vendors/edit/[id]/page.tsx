@@ -44,7 +44,7 @@ function EditVendorsPage() {
   const [vendor, setVendor] = useState<VendorDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [addressResponse, setAddressResponse] = useState<NewAddressBlockResponse | null>(null);
@@ -111,7 +111,7 @@ function EditVendorsPage() {
     //console.log("PAGE addressBlock", addressBlockValid)
     //console.log("PAGE allValid: ", allValid);
 
-    canSave(allValid)
+    setFormValid(allValid)
   };
 
   useEffect(() => {
@@ -472,7 +472,7 @@ function EditVendorsPage() {
 
         <GridItem colSpan={5}>
           <PageActionsComponent 
-            canSave={!saveable || !hasEditPermission} 
+            saveDisabled={!formValid || !hasEditPermission} 
             canDelete={hasDeletePermission}
             onSave={handleSaveClick} 
             onDelete={handleDeleteClick} 

@@ -30,7 +30,7 @@ function ViewProductionOrderPage() {
     const [loading, setLoading] = useState(true);
 
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
 
     const [productionOrder, setProductionOrder] = useState<ProductionOrderHeaderDto | null>(null);
@@ -65,7 +65,7 @@ function ViewProductionOrderPage() {
 
                 if(response.data.is_complete) {
                     setCompletedOrDisabled(true);
-                    canSave(false);
+                    setFormValid(false);
                 } else {
                     CheckFormValidity();
                 }
@@ -209,7 +209,7 @@ function ViewProductionOrderPage() {
 
                 <GridItem colSpan={8}>
                     <PageActionsComponent 
-                        canSave={false}
+                        saveDisabled={false}
                         saveText="Print Production Order"
                         canDelete={false}
                         onSave={Print} 

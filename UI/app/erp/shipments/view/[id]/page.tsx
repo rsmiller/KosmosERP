@@ -186,8 +186,8 @@ function ViewShipmentsPage() {
             </GridItem>
 
             <GridItem colSpan={6} >
-                <PageActionsComponent hidden={!shipment?.is_released} canSave={false} saveText={"Print Packing List"} canDelete={false} onSave={() => printInvoice() } onDelete={() => {}}/>
-                <PageActionsComponent hidden={shipment?.is_released} canSave={false} saveText={"Release Shipment"} canDelete={false} onSave={() => releaseShipment() } onDelete={() => {}}/>
+                <PageActionsComponent hidden={!shipment?.is_released} saveDisabled={false} saveText={"Print Packing List"} canDelete={false} onSave={() => printInvoice() } onDelete={() => {}}/>
+                <PageActionsComponent hidden={shipment?.is_released} saveDisabled={false} saveText={"Release Shipment"} canDelete={false} onSave={() => releaseShipment() } onDelete={() => {}}/>
             </GridItem>
         </Grid>
     );

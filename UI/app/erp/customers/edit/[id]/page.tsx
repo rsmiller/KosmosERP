@@ -46,7 +46,7 @@ function EditCustomerPage() {
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -206,12 +206,11 @@ function EditCustomerPage() {
       const hasRequiredFields = Boolean(watch('customer_name') && watch('general_email') && watch('phone'));
       const allValid = hasRequiredFields && paymentTermsValid && categoryValid;
 
-      canSave(!allValid);
+      setFormValid(Boolean(allValid));
     }
     else
     {
-      console.log("WTF")
-      canSave(false);
+      setFormValid(false);
     }
   };
 
@@ -393,7 +392,7 @@ function EditCustomerPage() {
         <GridItem colSpan={6}></GridItem>
         <GridItem colSpan={6}>
             <PageActionsComponent 
-                canSave={!saveable || !hasEditPermission} 
+                saveDisabled={!formValid || !hasEditPermission} 
                 canDelete={hasDeletePermission}
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick} 

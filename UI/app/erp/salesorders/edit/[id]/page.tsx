@@ -54,7 +54,7 @@ function EditSalesOrderPage() {
   const [salesOrder, setSalesOrder] = useState<OrderHeaderDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
@@ -149,7 +149,7 @@ function EditSalesOrderPage() {
           // If this is completed we can't edit this
           if(response.data.is_complete || response.data.is_canceled) {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           } else {
             CheckFormValidity();
           }
@@ -157,7 +157,7 @@ function EditSalesOrderPage() {
           if(response.data.order_type == 'R')
           {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           }
 
         } else {
@@ -210,7 +210,7 @@ function EditSalesOrderPage() {
 
     if(completedOrDisabled == false)
     {
-      canSave(allValid);
+      setFormValid(allValid);
     }
   };
 
@@ -570,7 +570,7 @@ function EditSalesOrderPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick}
-                canSave={!saveable || !hasEditPermission}
+                saveDisabled={!formValid || !hasEditPermission}
                 canDelete={hasDeletePermission}
                 successSaved={successSaved}
                 failedSaved={failedSaved}

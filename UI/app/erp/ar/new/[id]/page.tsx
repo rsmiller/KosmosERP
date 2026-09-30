@@ -523,7 +523,7 @@ function NewARFromCustomerPage() {
             
 
             <GridItem colSpan={8} >
-              <PageActionsComponent canSave={!canSave} saveText={"Save and Print Invoice"} canDelete={false} onSave={() => handleSaveClick() } onDelete={() => {}}/>
+              <PageActionsComponent saveDisabled={!canSave} saveText={"Save and Print Invoice"} canDelete={false} onSave={() => handleSaveClick() } onDelete={() => {}}/>
             </GridItem>
         </Grid>
       </form>

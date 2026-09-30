@@ -38,7 +38,7 @@ function NewVendorsPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [addressResponse, setAddressResponse] = useState<NewAddressBlockResponse | null>(null);
@@ -89,7 +89,7 @@ function NewVendorsPage() {
     //console.log("PAGE addressBlock", addressBlockValid)
     //console.log("PAGE allValid: ", allValid);
 
-    canSave(allValid)
+    setFormValid(allValid)
   };
 
   useEffect(() => {
@@ -346,7 +346,7 @@ function NewVendorsPage() {
 
         <GridItem colSpan={5}>
           <PageActionsComponent 
-            canSave={!saveable || !hasWritePermission} 
+            saveDisabled={!formValid || !hasWritePermission} 
             onSave={handleSaveClick} 
             onDelete={undefined} 
             successSaved={successSaved}

@@ -71,7 +71,7 @@ function AdminAdjustmentsPage() {
     const [page, setPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(50);
 
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -213,7 +213,7 @@ function AdminAdjustmentsPage() {
         //console.log(" - isTypeValid:", isTypeValid);
         //console.log(" - isProductValid:", isProductValid);
 
-        canSave(allValid);
+        setFormValid(allValid);
 
     }
 
@@ -396,7 +396,7 @@ function AdminAdjustmentsPage() {
                         </GridItem>
                         <GridItem colSpan={6}>
                             <PageActionsComponent 
-                                canSave={!saveable || !hasEditPermission}
+                                saveDisabled={!formValid || !hasEditPermission}
                                 canDelete={false}
                                 onSave={handleSaveClick} 
                                 successSaved={successSaved}

@@ -43,7 +43,7 @@ function EditContactPage() {
     const [contact, setContact] = useState<ContactDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -212,7 +212,7 @@ function EditContactPage() {
 
       const allValid = isValid && customerValid && hasRequiredFields;
 
-      canSave(allValid);
+      setFormValid(allValid);
     };
 
     const IsDirty = (formName: any) => {
@@ -329,7 +329,7 @@ function EditContactPage() {
                 </GridItem>
                 <GridItem colSpan={5}>
                     <PageActionsComponent 
-                        canSave={!saveable || !hasEditPermission} 
+                        saveDisabled={!formValid || !hasEditPermission} 
                         canDelete={hasDeletePermission}
                         onSave={handleSaveClick} 
                         onDelete={handleDeleteClick} 

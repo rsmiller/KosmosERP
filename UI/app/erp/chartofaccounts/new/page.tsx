@@ -31,7 +31,7 @@ function NewChartOfAccountPage() {
     const [hasWritePermission, setHasWritePermission] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     
@@ -107,7 +107,7 @@ function NewChartOfAccountPage() {
 
     const CheckFormValidity = () => {
         const hasRequiredFields = Boolean(watch('account_number') && watch('account_name'));
-        canSave(!hasRequiredFields);
+        setFormValid(hasRequiredFields);
     };
 
     if (!hasAccess) {
@@ -119,7 +119,7 @@ function NewChartOfAccountPage() {
             <PageActionsComponent 
                 showDelete={false}
                 showSave={hasWritePermission} 
-                canSave={saveable}
+                saveDisabled={!formValid}
                 showSaveSuccess={successSaved}
                 showSaveFailed={failedSaved}
                 onDelete={handleDeleteClick} 

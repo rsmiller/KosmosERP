@@ -41,7 +41,7 @@ function NewCreditMemoPage() {
   const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
 
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -149,7 +149,7 @@ function NewCreditMemoPage() {
     // Check lines
     if(rowData.length == 0)
     {
-      canSave(false);
+      setFormValid(false);
       return;
     }
 
@@ -160,13 +160,13 @@ function NewCreditMemoPage() {
             || !line.gl_account_id || line.gl_account_id.trim() === ''
             || !line.line_total || line.line_total <= 0)
       {
-        canSave(false);
+        setFormValid(false);
         return;
       }
     }
 
 
-    canSave(hasBaseRequiredFields);
+    setFormValid(hasBaseRequiredFields);
   };
 
   const handleSaveClick = async () => {
@@ -341,7 +341,7 @@ function NewCreditMemoPage() {
           </GridItem>
 
           <GridItem colSpan={5}>
-            <PageActionsComponent onSave={handleSaveClick} onDelete={() => {}} canSave={!saveable} canDelete={false} successSaved={successSaved} failedSaved={failedSaved} />
+            <PageActionsComponent onSave={handleSaveClick} onDelete={() => {}} saveDisabled={!formValid} canDelete={false} successSaved={successSaved} failedSaved={failedSaved} />
           </GridItem>
         </Grid>
       </form>

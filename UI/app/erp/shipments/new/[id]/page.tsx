@@ -35,7 +35,7 @@ function NewShipmentPage() {
     const [hasWritePermission, setHasWritePermission] = useState(false);
     const hasInitialized = useRef(false);
 
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -184,7 +184,7 @@ function NewShipmentPage() {
 
         //console.log("hasRequiredFields: ", hasRequiredFields);
         
-        canSave(hasRequiredFields);
+        setFormValid(hasRequiredFields);
     };
 
     const handleSaveClick = async () => {
@@ -366,7 +366,7 @@ function NewShipmentPage() {
 
                 <GridItem colSpan={6} >
                     <PageActionsComponent 
-                        canSave={!saveable || !hasWritePermission} 
+                        saveDisabled={!formValid || !hasWritePermission} 
                         onSave={handleSaveClick} 
                         successSaved={successSaved}
                         failedSaved={failedSaved}

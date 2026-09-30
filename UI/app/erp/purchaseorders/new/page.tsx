@@ -40,7 +40,7 @@ function NewPurchaseOrdersPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -87,7 +87,7 @@ function NewPurchaseOrdersPage() {
     //console.log("allValid: ", allValid);
     //console.log("hasLines: ", hasLines);
 
-    canSave(allValid);
+    setFormValid(allValid);
   };
 
   const handleVendorSelect = (value: any) => {
@@ -273,7 +273,7 @@ function NewPurchaseOrdersPage() {
 
             <GridItem colSpan={5} >
               <PageActionsComponent 
-                canSave={!saveable || !hasWritePermission} 
+                saveDisabled={!formValid || !hasWritePermission} 
                 onSave={handleSaveClick} 
                 onDelete={undefined}
                 successSaved={successSaved}

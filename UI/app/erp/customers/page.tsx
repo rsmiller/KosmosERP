@@ -145,8 +145,8 @@ function CustomersPage() {
       cellRenderer: (props: any) => {
           return ( 
             <div>
-              <Button type="button" colorPalette="black" variant="subtle"onClick={() => handleViewClick(props.value)}><MdOutlinePageview /></Button>&nbsp;
-              <Button hidden={!hasEditPermission} type="button" colorPalette="green" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>
+              <Button type="button" colorPalette="black" variant="subtle" aria-label={`View ${props.data?.customer_name}`} onClick={() => handleViewClick(props.value)}><MdOutlinePageview /></Button>&nbsp;
+              <Button hidden={!hasEditPermission} type="button" colorPalette="green" aria-label={`Edit ${props.data?.customer_name}`} onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>
             </div>
           );
       }

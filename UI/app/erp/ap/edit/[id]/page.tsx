@@ -62,7 +62,7 @@ function EditAPPage() {
   const [headerModel, setHeaderModel] = useState<APInvoiceHeaderDto>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, setSaveable] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -271,7 +271,7 @@ function EditAPPage() {
                 setRowAPData(edits);
               }
               
-              setSaveable(true);
+              setFormValid(true);
             } else {
               setError('Failed to load AP invoice');
             }
@@ -548,7 +548,7 @@ function EditAPPage() {
     const hasRequiredFields = Boolean(watch('invoice_number') && watch('vendor_id'));
     const allValid = vendorValid && hasRequiredFields;
 
-    setSaveable(allValid);
+    setFormValid(allValid);
   }
 
 
@@ -789,7 +789,7 @@ function EditAPPage() {
 
             <GridItem colSpan={5} >
               <PageActionsComponent 
-                canSave={!saveable || !hasEditPermission} 
+                saveDisabled={!formValid || !hasEditPermission} 
                 canDelete={hasDeletePermission}
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick} 

@@ -23,7 +23,7 @@ public interface IChartOfAccountModule : IERPModule<ChartOfAccount, ChartOfAccou
 
 public class ChartOfAccountModule : BaseERPModule, IChartOfAccountModule
 {
-    public override Guid ModuleIdentifier => Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+    public override Guid ModuleIdentifier => Guid.Parse("1d55c713-146a-4c4c-8ae9-bda223cfd20e");
     public override string ModuleName => "Chart of Accounts";
 
     private IBaseERPContext _Context;

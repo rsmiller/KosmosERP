@@ -40,7 +40,7 @@ function EditPurchaseOrdersPage() {
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderHeaderDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -99,7 +99,7 @@ function EditPurchaseOrdersPage() {
           if(response.data.po_type == 'R')
           {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           }
 
         } else {
@@ -180,7 +180,7 @@ function EditPurchaseOrdersPage() {
 
     if(completedOrDisabled == false)
     {
-      canSave(allValid);
+      setFormValid(allValid);
     }
     
   };
@@ -463,7 +463,7 @@ function EditPurchaseOrdersPage() {
 
             <GridItem colSpan={5} >
               <PageActionsComponent 
-                canSave={!saveable || !hasEditPermission} 
+                saveDisabled={!formValid || !hasEditPermission} 
                 canDelete={hasDeletePermission}
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick}

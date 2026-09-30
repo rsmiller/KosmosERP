@@ -52,7 +52,7 @@ function EditJournalEntryPage() {
     const [entry, setEntry] = useState<JournalEntryHeaderDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [entryDate, setEntryDate] = useState<Date | null>(null);
@@ -286,7 +286,7 @@ function EditJournalEntryPage() {
         const hasLines = lines.length >= 2;
         const allLinesHaveAccounts = lines.every(line => line.chart_of_account_id);
         const hasAmounts = lines.every(line => (line.debit_amount || 0) > 0 || (line.credit_amount || 0) > 0);
-        canSave(!(hasLines && allLinesHaveAccounts && hasAmounts && isBalanced()));
+        setFormValid(hasLines && allLinesHaveAccounts && hasAmounts && isBalanced());
     };
 
     const formatCurrency = (value: number | undefined) => {
@@ -371,7 +371,7 @@ function EditJournalEntryPage() {
             <PageActionsComponent 
                 showDelete={hasDeletePermission && !entry.is_posted}
                 showSave={hasEditPermission && !entry.is_posted} 
-                canSave={saveable}
+                saveDisabled={!formValid}
                 showSaveSuccess={successSaved}
                 showSaveFailed={failedSaved}
                 onDelete={handleDeleteClick} 

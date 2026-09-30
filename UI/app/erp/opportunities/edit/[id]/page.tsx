@@ -60,7 +60,7 @@ function EditOpportunityPage() {
     const [isWorking, setIsWorking] = useState(false);
     
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -315,11 +315,11 @@ function EditOpportunityPage() {
             //console.log('winChanceValid: ', winChanceValid);
             //console.log('allValid: ', allValid);
 
-            canSave(!allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
     };
 
@@ -586,7 +586,7 @@ function EditOpportunityPage() {
                         </Tabs.Root>
                     </GridItem>
                     <GridItem colSpan={5}>
-                        <PageActionsComponent canSave={saveable && hasEditPermission} 
+                        <PageActionsComponent saveDisabled={!formValid || !hasEditPermission} 
                                                 canDelete={hasDeletePermission}
                                                 onSave={handleSaveClick} 
                                                 onDelete={handleDeleteClick} 

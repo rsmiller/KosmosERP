@@ -41,7 +41,7 @@ function NewLeadPage() {
     const leadStageComboboxRef = useRef<LeadStageComboboxRef>(null);
 
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [countryId, setCountryId] = useState<number | null>(null);
@@ -159,11 +159,11 @@ function NewLeadPage() {
             //console.log("isStateValid: ", isStateValid);
             //console.log("allValid: ", allValid);
 
-            canSave(allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
     };
 
@@ -340,7 +340,7 @@ function NewLeadPage() {
                 </GridItem>
                 <GridItem colSpan={5}>
                     <PageActionsComponent 
-                        canSave={!saveable || !hasWritePermission} 
+                        saveDisabled={!formValid || !hasWritePermission} 
                         onSave={handleSaveClick} 
                         onDelete={undefined} 
                         successSaved={successSaved}

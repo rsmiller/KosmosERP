@@ -44,7 +44,7 @@ function NewARFromCustomerPage() {
   const [shipment, setShipment] = useState<ShipmentHeaderDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
@@ -139,7 +139,7 @@ function NewARFromCustomerPage() {
           // If this is completed we can't edit this
           if (response.data.is_complete || response.data.is_released) {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           }
           else
           {
@@ -199,11 +199,11 @@ function NewARFromCustomerPage() {
     //console.log("allValid: ", allValid);
     
     if (completedOrDisabled == false) {
-      canSave(allValid);
+      setFormValid(allValid);
     }
     else
     {
-      canSave(false);
+      setFormValid(false);
     }
   };
 
@@ -500,7 +500,7 @@ function NewARFromCustomerPage() {
 
         <GridItem colSpan={5}>
           <PageActionsComponent 
-            canSave={!saveable || !hasEditPermission} 
+            saveDisabled={!formValid || !hasEditPermission} 
             canDelete={hasDeletePermission}
             onSave={handleSaveClick} 
             onDelete={handleDeleteClick}

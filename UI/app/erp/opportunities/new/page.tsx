@@ -50,7 +50,7 @@ function NewOpportunityPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -209,11 +209,11 @@ function NewOpportunityPage() {
             //console.log('winChanceValid: ', winChanceValid);
             //console.log('allValid: ', allValid);
 
-            canSave(!allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
     };
 
@@ -446,7 +446,7 @@ function NewOpportunityPage() {
                     </GridItem>
                     <GridItem colSpan={5}></GridItem>
                     <GridItem colSpan={5}>
-                        <PageActionsComponent canSave={saveable && hasWritePermission} 
+                        <PageActionsComponent saveDisabled={!formValid || !hasWritePermission} 
                                                 onSave={handleSaveClick} 
                                                 onDelete={undefined} 
                                                 successSaved={successSaved}
