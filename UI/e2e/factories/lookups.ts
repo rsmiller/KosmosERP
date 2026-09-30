@@ -5,9 +5,12 @@ import type { KeyValueDto } from '@/models/key-value-models';
  * comboboxes in components/ and a few pages. Keys and labels follow the seeder
  * (Tools/KosmosERP.Seeder/DatabaseSeeder.Sales.cs).
  *
- * Note: the UI asks for production statuses and freight carriers under ids the
- * seeder does not populate (it uses 97dd4b13… and the shipping-method id), so
- * those dropdowns are empty against seeded data. The mocks follow the UI.
+ * Freight carriers come from ShipmentModule (KeyValueIds.FreightCarriers), which
+ * creates them when the API starts.
+ *
+ * Note: the UI asks for production statuses under an id the backend doesn't
+ * populate (it uses 97dd4b13…), so that dropdown is empty against real data
+ * (BUG-003 in bugs.md). The mocks follow the UI.
  */
 export const KeyValueModules = {
   PaymentTerm: '93bf02ec-5578-4aa4-a45b-f82962adf4bd',
@@ -64,7 +67,8 @@ export function productCategories(): KeyValueDto[] {
 
 export const PaymentMethodKeys = { NetTerms: 'pay_method_net_terms', CreditCard: 'pay_method_credit_card' } as const;
 export const ShipmentMethodKeys = { Carrier: 'shipping_method_carrier', Pickup: 'shipping_method_pickup' } as const;
-export const FreightCarrierKeys = { Ups: 'carrier_ups', FedEx: 'carrier_fedex' } as const;
+/** Keys created by ShipmentModule.SeedPermissions (Shared/KosmosERP.BusinessLayer/Modules/ShipmentModule.cs). */
+export const FreightCarrierKeys = { Ups: 'freight_carrier_ups', FedEx: 'freight_carrier_fedex', Dhl: 'freight_carrier_dhl' } as const;
 export const ProductionStatusKeys = {
   Submitted: 'production_order_status_submitted',
   Wip: 'production_order_status_wip',
@@ -90,6 +94,7 @@ export function allLookups(): Record<string, KeyValueDto[]> {
     [KeyValueModules.FreightCarrier]: list('FreightCarrier', [
       [FreightCarrierKeys.Ups, 'UPS'],
       [FreightCarrierKeys.FedEx, 'FedEx'],
+      [FreightCarrierKeys.Dhl, 'DHL'],
     ]),
     [KeyValueModules.ProductionStatus]: list('ProductionStatus', [
       [ProductionStatusKeys.Submitted, 'Submitted'],

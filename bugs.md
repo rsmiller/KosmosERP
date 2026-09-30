@@ -15,7 +15,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-001](#bug-001) | Admin → Settings and Adjustments redirect every user away | UI / permissions | High | Open |
 | [BUG-002](#bug-002) | Sales orders can't be created: `order_headers` schema defects | DB / EF migrations | High | Open |
 | [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Open, needs decision |
-| [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Open, needs decision |
+| [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
 | [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Open |
 | [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Open |
 | [BUG-007](#bug-007) | Lookup comboboxes filter on the hidden key, not the visible label | UI / components | Low | Open |
@@ -114,6 +114,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-004"></a>
 ## BUG-004: Freight carrier dropdown uses a lookup id the seeder never populates
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted) for what changed. The original report follows for reference.
 
 - **Severity:** Medium. The shipment freight carrier dropdown is probably empty against seeded data.
 - **Where:**
@@ -459,4 +461,10 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-004: freight carriers are their own lookup.** Carriers now live only under `KeyValueIds.FreightCarriers` (`2a2d1004…`), the id the UI already requested.
+  - `ShipmentModule.SeedPermissions` creates UPS, FedEx and DHL when the API starts (from commit 62c6e02). Their keys are now spelled `freight_carrier_ups/fedex/dhl`, fixed from "frieght" before any data used them.
+  - The dev seeder no longer adds carriers under shipping methods. Its `Kv.Carrier*` constants, which are stamped on seeded shipments, now use the new keys.
+  - The admin Lists module label is fixed: "Frieght Company" → "Freight Carrier" (`UI/services/keyvalue-service.tsx`).
+  - New regression test: `ShipmentModuleTests.SeedPermissions_CreatesFreightCarriers_Once`. The e2e fixtures (`UI/e2e/factories/lookups.ts`) use the new keys.
+  - **Existing databases seeded before this change** still have `carrier_ups/fedex/dhl` rows under shipping methods, and shipments pointing at those keys. Re-seed them (`dotnet run --project Tools/KosmosERP.Seeder -- --reset` with the API stopped, then start the API) or clean them up by hand.
 - **Icon-only AR invoice search button.** It had no accessible name (part of BUG-014). It now has `aria-label="Search AR invoices"` in `UI/components/ar-invoice-selector.tsx`.

@@ -396,6 +396,28 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     }
 
     [Test]
+    public async Task SeedPermissions_CreatesFreightCarriers_Once()
+    {
+        // SetupModule already ran SeedPermissions once; running it again must not duplicate.
+        _Module.SeedPermissions();
+
+        var carriers = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.FreightCarriers)
+            .OrderBy(m => m.int_value)
+            .ToListAsync();
+
+        Assert.That(carriers.Select(m => m.key), Is.EqualTo(new[] { "freight_carrier_ups", "freight_carrier_fedex", "freight_carrier_dhl" }));
+        Assert.That(carriers.Select(m => m.value), Is.EqualTo(new[] { "UPS", "FedEx", "DHL" }));
+
+        // Carriers are their own lookup, not shipping methods.
+        var shippingMethodKeys = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.ShippingMethods)
+            .Select(m => m.key)
+            .ToListAsync();
+        Assert.That(shippingMethodKeys, Has.None.StartsWith("freight_carrier_"));
+    }
+
+    [Test]
     public async Task Find()
     {
         var new_result = await _Module.Create(new ShipmentHeaderCreateCommand()

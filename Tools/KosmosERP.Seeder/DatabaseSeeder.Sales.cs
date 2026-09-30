@@ -36,9 +36,11 @@ public partial class DatabaseSeeder
         public const string ProdComplete = "production_order_status_complete";
         public const string ProdReadyToShip = "production_order_status_ready_to_ship";
 
-        public const string CarrierUps = "carrier_ups";
-        public const string CarrierFedex = "carrier_fedex";
-        public const string CarrierDhl = "carrier_dhl";
+        // Freight carrier keys. The rows themselves are created by ShipmentModule
+        // (KeyValueIds.FreightCarriers) when the API starts, not by this seeder.
+        public const string CarrierUps = "freight_carrier_ups";
+        public const string CarrierFedex = "freight_carrier_fedex";
+        public const string CarrierDhl = "freight_carrier_dhl";
 
         // Opportunity stage keys keep the repo's original spelling ("opporunity").
         public const string StageProspecting = "opporunity_stage_prospecting";
@@ -81,11 +83,6 @@ public partial class DatabaseSeeder
         AddKv(Kv.ProdQc, "Quality Check", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdComplete, "Complete", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdReadyToShip, "Ready To Ship", KeyValueIds.ProductionStatuses);
-
-        // Freight carriers — resolved by key regardless of group.
-        AddKv(Kv.CarrierUps, "UPS", KeyValueIds.ShippingMethods);
-        AddKv(Kv.CarrierFedex, "FedEx", KeyValueIds.ShippingMethods);
-        AddKv(Kv.CarrierDhl, "DHL", KeyValueIds.ShippingMethods);
 
         // Opportunity stages (display names shown on the Top Opportunities report).
         AddKv(Kv.StageProspecting, "Prospecting", OpportunityModuleId);

@@ -90,9 +90,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var carrier_shipping_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.key == "shipping_method_carrier").SingleOrDefault();
         var dispatch_shipping_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.key == "shipping_method_dispatch").SingleOrDefault();
 
-        var ups_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "frieght_carrier_ups").SingleOrDefault();
-        var fedex_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "frieght_carrier_fedex").SingleOrDefault();
-        var dhl_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "frieght_carrier_dhl").SingleOrDefault();
+        var ups_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "freight_carrier_ups").SingleOrDefault();
+        var fedex_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "freight_carrier_fedex").SingleOrDefault();
+        var dhl_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "freight_carrier_dhl").SingleOrDefault();
 
         if (pickup_shipping_method == null)
         {
@@ -137,7 +137,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
-                key = "frieght_carrier_ups",
+                key = "freight_carrier_ups",
                 value = "UPS",
                 module_id = KeyValueIds.FreightCarriers.ToString(),
                 int_value = 1
@@ -150,7 +150,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
-                key = "frieght_carrier_fedex",
+                key = "freight_carrier_fedex",
                 value = "FedEx",
                 module_id = KeyValueIds.FreightCarriers.ToString(),
                 int_value = 2
@@ -163,7 +163,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
-                key = "frieght_carrier_dhl",
+                key = "freight_carrier_dhl",
                 value = "DHL",
                 module_id = KeyValueIds.FreightCarriers.ToString(),
                 int_value = 3

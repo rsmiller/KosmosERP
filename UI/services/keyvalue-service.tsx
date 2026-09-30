@@ -46,7 +46,7 @@ export const keyValueService = {
         },
         {
           module_id: "2a2d1004-5283-40ef-96fd-8cc30c65cefa",
-          module_name: "Frieght Company"
+          module_name: "Freight Carrier"
         },
         {
           module_id: "eea9df53-1b36-41ea-94fa-31420315ff60",
