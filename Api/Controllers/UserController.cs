@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ public class UserController : ERPApiController
         _Module = userModule;
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUser", Name = "GetUser")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,6 +41,7 @@ public class UserController : ERPApiController
 
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUserByGuid", Name = "GetUserByGuid")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,6 +56,7 @@ public class UserController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUserBySessionId", Name = "GetUserBySessionId")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -93,6 +97,7 @@ public class UserController : ERPApiController
 
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetRolePermissions", Name = "GetRolePermissions")]
     [ProducesResponseType(typeof(Response<List<RolePermissionsDto>>), 200)]
     [ProducesResponseType(400)]
@@ -107,6 +112,7 @@ public class UserController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetPermissionSet", Name = "GetPermissionSet")]
     [ProducesResponseType(typeof(Response<List<UserPermissionsSet>>), 200)]
     [ProducesResponseType(400)]
@@ -120,6 +126,8 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
+    // Public: this is the database-auth login endpoint.
+    [AllowAnonymous]
     [HttpPost("AuthenticateUser", Name = "AuthenticateUser")]
     [ProducesResponseType(typeof(Response<AuthenticatedUserDto>), 200)]
     [ProducesResponseType(400)]
@@ -134,6 +142,7 @@ public class UserController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("FindUser", Name = "FindUser")]
     [ProducesResponseType(typeof(PagingResult<UserListDto>), 200)]
     [ProducesResponseType(500)]
@@ -244,6 +253,7 @@ public class UserController : ERPApiController
 
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUsersByDepartment", Name = "GetUsersByDepartment")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]

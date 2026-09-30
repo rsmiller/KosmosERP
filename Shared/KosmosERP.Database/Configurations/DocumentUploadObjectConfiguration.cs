@@ -16,7 +16,9 @@ public class DocumentUploadObjectConfiguration : IEntityTypeConfiguration<Docume
 
         builder.HasMany<DocumentUploadObjectTagTemplate>(x => x.object_tags).WithOne().HasForeignKey(x => x.document_object_id).HasPrincipalKey(c => c.id);
 
-        var now = DateTime.UtcNow;
+        // Seed data must be deterministic: a changing timestamp makes every new
+        // migration rewrite these rows.
+        var now = new DateTime(2026, 9, 18, 15, 20, 26, DateTimeKind.Utc);
 
         builder.HasData(
                 new DocumentUploadObject()

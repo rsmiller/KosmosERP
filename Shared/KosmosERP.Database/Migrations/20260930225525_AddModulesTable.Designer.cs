@@ -3,6 +3,7 @@ using System;
 using KosmosERP.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KosmosERP.Database.Migrations
 {
     [DbContext(typeof(ERPDbContext))]
-    partial class ERPDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930225525_AddModulesTable")]
+    partial class AddModulesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -6681,6 +6684,13 @@ namespace KosmosERP.Database.Migrations
 
             modelBuilder.Entity("KosmosERP.Database.Models.OrderHeader", b =>
                 {
+                    b.HasOne("KosmosERP.Database.Models.Payment", null)
+                        .WithMany("order_headers")
+                        .HasForeignKey("id")
+                        .HasPrincipalKey("order_header_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("KosmosERP.Database.Models.Address", "ship_to_address")
                         .WithMany()
                         .HasForeignKey("ship_to_address_id")
@@ -6705,15 +6715,6 @@ namespace KosmosERP.Database.Migrations
                         .WithMany("attributes")
                         .HasForeignKey("order_line_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("KosmosERP.Database.Models.Payment", b =>
-                {
-                    b.HasOne("KosmosERP.Database.Models.OrderHeader", null)
-                        .WithMany()
-                        .HasForeignKey("order_header_id")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -6997,6 +6998,11 @@ namespace KosmosERP.Database.Migrations
             modelBuilder.Entity("KosmosERP.Database.Models.OrderLine", b =>
                 {
                     b.Navigation("attributes");
+                });
+
+            modelBuilder.Entity("KosmosERP.Database.Models.Payment", b =>
+                {
+                    b.Navigation("order_headers");
                 });
 
             modelBuilder.Entity("KosmosERP.Database.Models.Product", b =>

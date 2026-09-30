@@ -16,6 +16,9 @@ public class PaymentConfiguration : BaseConfiguration<Payment>
         builder.HasIndex(m => m.order_header_id);
         builder.HasIndex(m => m.guid);
 
-        builder.HasMany<OrderHeader>(x => x.order_headers).WithOne().HasForeignKey(x => x.id).HasPrincipalKey(c => c.order_header_id);
+        // A payment belongs to one order; an order can have many payments.
+        // Restrict: payments are financial records and must not disappear with an order.
+        builder.HasOne<OrderHeader>().WithMany().HasForeignKey(x => x.order_header_id).HasPrincipalKey(o => o.id)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

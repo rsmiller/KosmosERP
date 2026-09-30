@@ -13,7 +13,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | ID | Title | Area | Severity | Status |
 | --- | --- | --- | --- | --- |
 | [BUG-001](#bug-001) | Admin → Settings and Adjustments redirect every user away | UI / permissions | High | Fixed (uncommitted) |
-| [BUG-002](#bug-002) | Sales orders can't be created: `order_headers` schema defects | DB / EF migrations | High | Open |
+| [BUG-002](#bug-002) | Sales orders can't be created: `order_headers` schema defects | DB / EF migrations | High | Fixed (uncommitted) |
 | [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Open, needs decision |
 | [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
 | [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Open |
@@ -37,7 +37,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Open |
 | [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Open |
 | [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Open |
-| [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Open, needs decisions |
+| [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Fixed (uncommitted) |
 
 Also see [Needs verification](#needs-verification) for suspected issues that haven't been confirmed.
 
@@ -70,6 +70,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-002"></a>
 ## BUG-002: Sales orders can't be created: `order_headers` schema defects
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference; its first root cause turned out to be wrong (`order_number` wasn't the culprit).
 
 - **Severity:** High. The live app can't insert a sales order against a database built from the migrations.
 - **Where:**
@@ -444,6 +446,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-026"></a>
 ## BUG-026: API endpoints with no authorization (Settings writable anonymously)
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference. While fixing it, the permission handler behind `[ERPAuthorize]` also turned out to be broken for every non-admin user; that is fixed too.
+
 - **Severity:** High. Some write endpoints can be called by anyone who can reach the API, **without signing in**.
 - **Where:** `Api/Controllers/*.cs`. There's no global authorization filter (`Api/Program.cs` only adds logging filters, and `ERPApiController` has no `[Authorize]`), so an action is protected only if it has `[ERPAuthorize(...)]`. Found while fixing BUG-001:
 
@@ -476,6 +480,9 @@ These were seen in the mocked e2e pages but not confirmed as app bugs. They migh
 - **Validation errors show before the user types.** On `vendors/new` and others, required fields are marked invalid on first load, so the form opens covered in red. This may be intended.
 - **Shipments can probably be over-shipped.** In `UI/components/ag-grid/numeric-for-orders-shipped.tsx` the "Units To Ship" editor caps at `units_ordered - units_shipped`, where `units_shipped` is this new shipment's own count (0). It ignores `units_already_shipped`, so a fully shipped line can be shipped again. Check whether the API rejects it.
 - **Shipment "Freight Charge" is marked required, but 0 passes.** `shipments/new/[id]` checks `Boolean(watch('freight_charge_amount'))`, and the field defaults to the *string* `"0"`, which is truthy. Decide whether $0 freight is allowed. If not, compare numerically. The shipments spec asserts current behavior and points here.
+- **Global search ignores module permissions.** `POST /GlobalSearch/Search` (`Shared/.../Modules/GlobalSearchModule.cs`) returns customers, sales and purchase orders, vendors, contacts, opportunities, leads and documents to any signed-in user, even one without read access to those modules. Decide whether results should be filtered by the caller's module permissions.
+- **SignalR hub now requires sign-in.** `/notification_hub` falls under the new default-deny policy. The UI doesn't use it today. A future client must send its token, and JWT bearer auth has to be set up to read it from the `access_token` query string (`JwtBearerEvents.OnMessageReceived`), which isn't configured.
+- **Deleting an address cascades to orders.** `FK_order_headers_addresses_ship_to_address_id` is `ON DELETE CASCADE`, so hard-deleting an address deletes the orders shipped to it (and, through them, more). Seen while verifying BUG-002. Check other financial and transactional foreign keys for the same default and decide which should be `Restrict`.
 - **Releasing a shipment sends a near-empty update.** After a successful save, `shipments/edit/[id]` sends a second `PUT /Shipment/UpdateShipmentHeader` with only `{ id, is_released: true }`. If the API treats missing fields as null (not "unchanged"), releasing would wipe ship-via, carrier and charges. Check the API's update semantics.
 
 ---
@@ -487,6 +494,37 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-002: sales orders can be created; order ↔ payment relationship fixed.**
+  - **Real root cause:** `PaymentConfiguration` declared `Payment.HasMany(order_headers).HasForeignKey(OrderHeader.id).HasPrincipalKey(Payment.order_header_id)`. That made `order_headers.id` a *foreign key* (so EF gave it no AUTO_INCREMENT) and added a unique constraint `AK_payments_order_header_id`, which allowed only **one payment per order**. `order_number`'s `ValueGeneratedOnAdd` was not the cause: `payments.payment_number` uses the same pattern and `payments.id` kept its identity. The app assigns order numbers itself.
+  - **Model:** a payment now belongs to one order (`payments.order_header_id → order_headers.id`, `ON DELETE RESTRICT` so payments can't vanish with an order). The unused `Payment.order_headers` navigation is removed.
+  - **Migrations** (`Shared/KosmosERP.Database/Migrations`):
+    - `AddModulesTable`: the `modules` table (`Module` entity, read and written by `BaseERPModule` at API startup) was added in 5a47a22 without a migration, so a database built from migrations lacked it. This migration also pins the seed data's timestamps (they used `DateTime.UtcNow`, which rewrote those rows in every new migration).
+    - `FixOrderHeaderPaymentRelationship`: drops the inverted FK and the unique constraint, makes `order_headers.id` AUTO_INCREMENT (with FK checks off around that one statement, because other tables reference the column), and adds the corrected FK.
+  - **EF tooling:** new `ERPDbContextDesignTimeFactory` (connection from `KOSMOS_MIGRATIONS_CONNECTION`), so `dotnet ef` works without uncommenting code. See `Shared/KosmosERP.Database/Readme.md`.
+  - **Seeder:** the `ALTER order_headers.id` workaround is gone, and seeding now runs with FK checks **on**. They're off only during `--reset`'s bulk delete.
+  - **Verified on MySQL 8.0.44 (Docker), starting from an empty database:**
+    - all three migrations apply
+    - `order_headers.id` is `auto_increment`; the new FK is `RESTRICT`; the old FK and unique constraint are gone
+    - the full seeder runs with FK checks on (25 orders, 15 payments, …), and so does `--reset` followed by a re-seed
+    - a second payment on one order is accepted
+    - a payment for a non-existent order is rejected
+  - **Existing databases:** apply the migrations with `dotnet ef database update`. They don't touch data, apart from the seeded document-type timestamps.
+- **BUG-026: API authorization.**
+  - **The permission handler was broken for non-admin users** (`Api/Authorization/ErpCustomAuthorizationHandler.cs`):
+    - its query read *every* user's role permissions, not the caller's
+    - its logic was inverted: users who held a permission were denied, and missing permissions were allowed
+    - users not in the database were denied instead of falling back to role claims
+
+    Now: admins are allowed everything; `ERPAuthorize(..., "admin")` is admin-only; no required permissions means any signed-in user; otherwise every required permission must come from one of the caller's own (non-deleted) roles for the controller's module; unknown users (e.g. Keycloak) fall back to the attribute's role-claim check. **Behavior change:** non-admin users now get exactly their role permissions, so some requests that wrongly succeeded before will now fail.
+  - **Status codes:** `[ERPAuthorize]` now returns **403** when a signed-in user is refused (it returned 401), and 401 only when there's no valid sign-in.
+  - **Default-deny:** `Api/Program.cs` sets a fallback policy requiring a signed-in user on every endpoint without `[AllowAnonymous]`. The OpenAPI document (`MapOpenApi().AllowAnonymous()`) stays public so Swagger UI can load it.
+  - **Endpoint rules:**
+    - **Public, each with a comment saying why:** `User/AuthenticateUser` (login), SAML (SSO), Diagnostics `health` (probes), all Docs endpoints (printable documents render headless with no session; GUID-addressed), and `Settings/GetBaseSettings` (the company header on those documents).
+    - **Admin-only:** Settings, Country and State create/update/delete; the User reads that were open (`GetUser`, `GetUserByGuid`, `GetUserBySessionId`, `GetRolePermissions`, `GetPermissionSet`, `FindUser`, `GetUsersByDepartment`; the UI doesn't call them); Diagnostics `test-binding` and `test-simple`.
+    - **Any signed-in user:** Settings, Country and State reads; Notification reads; Reports `Catalog` and `ProductCategories`; GlobalSearch (switched from `[Authorize]` to the same convention).
+    - **Module rules:** Opportunity `Find` (`crm_read`) and `Create` (`crm_create`), matching the controller's other actions.
+  - **Tests:** `Tests/KosmosERP.Tests.Shared/AuthorizationTests.cs` (18 tests) covers the handler (including another user's role granting access, requiring every permission, deleted role assignments, admin-only, and the unknown-user fallback), the attribute's 401 and 403, and a **guard** that every controller action has `[ERPAuthorize]` or `[AllowAnonymous]` and that the public endpoints are exactly the intended list.
+  - **Not verified against a running API:** there was no MySQL instance, so this is unit-tested only. Smoke-test sign-in, a non-admin user, and printing a document on a real deployment.
 - **BUG-001: admin pages are gated on the admin permission.**
   - `admin/settings` and `admin/adjustments` checked `HasPermission(Admin, "")` (`"admin_"`, never granted). They now require `admin_read`.
   - Their Save buttons were enabled for everyone who got in. They now require `admin_edit` (Settings) and `transaction_write` (Adjustments), mirroring the API's `/Transaction/*` rules.

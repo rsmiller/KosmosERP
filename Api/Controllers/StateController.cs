@@ -1,3 +1,5 @@
+using KosmosERP.Api.Models;
+using KosmosERP.Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.State.Dto;
@@ -25,6 +27,7 @@ public class StateController : ERPApiController
     }
 
     
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetState", Name = "GetState")]
     [ProducesResponseType(typeof(Response<StateDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,6 +41,7 @@ public class StateController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetStateByGuid", Name = "GetStateByGuid")]
     [ProducesResponseType(typeof(Response<StateDto>), 200)]
     [ProducesResponseType(400)]
@@ -51,6 +55,7 @@ public class StateController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetStateByISOAsync", Name = "GetStateByISOAsync")]
     [ProducesResponseType(typeof(Response<StateDto>), 200)]
     [ProducesResponseType(400)]
@@ -64,6 +69,7 @@ public class StateController : ERPApiController
         return Ok(result);
     }
     
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpPost("FindState", Name = "FindState")]
     [ProducesResponseType(typeof(PagingResult<StateListDto>), 200)]
     [ProducesResponseType(500)]
@@ -91,6 +97,7 @@ public class StateController : ERPApiController
         }
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("CreateState", Name = "CreateState")]
     [ProducesResponseType(typeof(Response<StateDto>), 200)]
     [ProducesResponseType(400)]
@@ -105,6 +112,7 @@ public class StateController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPut("UpdateState", Name = "UpdateState")]
     [ProducesResponseType(typeof(Response<StateDto>), 200)]
     [ProducesResponseType(400)]
@@ -119,6 +127,7 @@ public class StateController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("DeleteState", Name = "DeleteState")]
     [ProducesResponseType(typeof(Response<StateDto>), 200)]
     [ProducesResponseType(400)]

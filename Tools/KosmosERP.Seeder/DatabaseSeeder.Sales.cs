@@ -99,7 +99,7 @@ public partial class DatabaseSeeder
         AddKv("gl_account_purchases", "5010", KeyValueIds.GLAccounts);
 
         await _context.SaveChangesAsync();
-        Console.WriteLine("  Lookups seeded (shipping/pay/terms/production/carriers/stages/GL).");
+        Console.WriteLine("  Lookups seeded (shipping/pay/terms/production/stages/GL).");
     }
 
     private async Task SeedUsersAndRolesAsync()
@@ -338,32 +338,8 @@ public partial class DatabaseSeeder
         Console.WriteLine("  CRM seeded (8 leads, 10 opportunities, 15 activities).");
     }
 
-    /// <summary>
-    /// Works around an app schema bug: order_headers.id was created without AUTO_INCREMENT
-    /// (order_number is also ValueGeneratedOnAdd, and MySQL allows one auto-increment column per
-    /// table, so the migration dropped identity from id). Without this, inserting an order fails
-    /// with "Field 'id' doesn't have a default value". Idempotent — a no-op if id is already
-    /// AUTO_INCREMENT. The proper fix is in OrderHeaderConfiguration + a new migration.
-    /// </summary>
-    private async Task EnsureOrderHeaderIdentityAsync()
-    {
-        // The column is referenced by FKs, so this MODIFY is only permitted with FK checks off —
-        // which the seeder already holds off for the whole session (see Program.Main).
-        try
-        {
-            await _context.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE order_headers MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("  WARNING: could not ensure order_headers.id AUTO_INCREMENT: " + ex.Message);
-        }
-    }
-
     private async Task SeedSalesOrdersAsync()
     {
-        await EnsureOrderHeaderIdentityAsync();
-
         var customers = AddressableCustomers();
         var finished = _productById.Values.Where(p => p.product_class == Cls.Finished).ToList();
         var shipMethods = new[] { Kv.ShipCarrier, Kv.ShipDispatch, Kv.ShipPickup };

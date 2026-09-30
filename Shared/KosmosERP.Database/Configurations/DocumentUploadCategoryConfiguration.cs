@@ -13,7 +13,9 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
 
         builder.HasIndex(x => new { x.guid });
 
-        var now = DateTime.UtcNow;
+        // Seed data must be deterministic: a changing timestamp makes every new
+        // migration rewrite these rows.
+        var now = new DateTime(2026, 9, 18, 15, 20, 26, DateTimeKind.Utc);
 
         builder.HasData(
                 new DocumentUploadCategory()

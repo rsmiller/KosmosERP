@@ -26,6 +26,4 @@ public partial class Payment : BaseDatabaseModel
     public string? payment_processor { get; set; }
     [Required]
     public string guid { get; set; }
-
-    public List<OrderHeader> order_headers { get; set; } = new List<OrderHeader>();
 }

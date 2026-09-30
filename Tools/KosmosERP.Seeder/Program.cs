@@ -38,24 +38,31 @@ public static class Program
         {
             using var context = new ERPDbContext(options);
 
-            // Hold one connection open for the whole run with FK checks off. The app schema has a
-            // few misconfigured foreign keys (e.g. FK_order_headers_payments_id points the wrong
-            // way), which would otherwise make it impossible to insert perfectly valid rows. Our
-            // insert order already satisfies the legitimate relationships, so this only bypasses
-            // the broken constraints. The SET is session-scoped, so the connection must stay open.
+            // --reset deletes every table in one pass, so FK checks are off for that step only
+            // (SET is session-scoped, so the connection stays open). Seeding runs with FK checks
+            // on: the schema's foreign keys are correct since the FixOrderHeaderPaymentRelationship
+            // migration, and the insert order satisfies them.
             var conn = context.Database.GetDbConnection();
             await conn.OpenAsync();
-            await ExecAsync(conn, "SET FOREIGN_KEY_CHECKS=0");
             try
             {
                 var seeder = new DatabaseSeeder(context);
                 if (reset)
-                    await seeder.ResetAsync();
+                {
+                    await ExecAsync(conn, "SET FOREIGN_KEY_CHECKS=0");
+                    try
+                    {
+                        await seeder.ResetAsync();
+                    }
+                    finally
+                    {
+                        await ExecAsync(conn, "SET FOREIGN_KEY_CHECKS=1");
+                    }
+                }
                 await seeder.SeedAsync();
             }
             finally
             {
-                try { await ExecAsync(conn, "SET FOREIGN_KEY_CHECKS=1"); } catch { /* best effort */ }
                 await conn.CloseAsync();
             }
             return 0;

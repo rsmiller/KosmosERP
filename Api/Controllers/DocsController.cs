@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using KosmosERP.BusinessLayer.Models.Module.ARInvoice.Dto;
 using KosmosERP.BusinessLayer.Models.Module.Order.Dto;
 using KosmosERP.BusinessLayer.Models.Module.ProductionOrder.Dto;
@@ -7,6 +8,9 @@ using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using Microsoft.AspNetCore.Mvc;
 
+// Public: the printable documents (UI/app/docs) render in a headless browser with no user
+// session. Each endpoint only returns the one record whose GUID is in the URL.
+[AllowAnonymous]
 [ApiController]
 [Route("api/v1/[controller]")]
 public class DocsController : ControllerBase

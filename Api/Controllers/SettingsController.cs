@@ -1,3 +1,5 @@
+using KosmosERP.Api.Models;
+using KosmosERP.Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
@@ -12,7 +14,6 @@ using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
 
 namespace KosmosERP.Api.Controllers;
 
-//[Authorize]
 [ApiController]
 [Route("api/v1/[controller]")]
 public class SettingsController : ERPApiController
@@ -24,6 +25,9 @@ public class SettingsController : ERPApiController
         _Module = module;
     }
 
+    // Public: the printable documents (UI/app/docs) render in a headless browser with no
+    // user session and read the company header from here. Read-only.
+    [AllowAnonymous]
     [HttpGet("GetBaseSettings", Name = "GetBaseSettings")]
     [ProducesResponseType(typeof(Response<SettingsDto>), 200)]
     [ProducesResponseType(400)]
@@ -34,6 +38,7 @@ public class SettingsController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetSettings", Name = "GetSettings")]
     [ProducesResponseType(typeof(Response<SettingsDto>), 200)]
     [ProducesResponseType(400)]
@@ -47,6 +52,7 @@ public class SettingsController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetSettingsByGuid", Name = "GetSettingsByGuid")]
     [ProducesResponseType(typeof(Response<SettingsDto>), 200)]
     [ProducesResponseType(400)]
@@ -60,6 +66,7 @@ public class SettingsController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpPost("FindSettings", Name = "FindSettings")]
     [ProducesResponseType(typeof(PagingResult<SettingsListDto>), 200)]
     [ProducesResponseType(500)]
@@ -86,6 +93,7 @@ public class SettingsController : ERPApiController
         }
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("CreateSettings", Name = "CreateSettings")]
     [ProducesResponseType(typeof(Response<SettingsDto>), 200)]
     [ProducesResponseType(400)]
@@ -99,6 +107,7 @@ public class SettingsController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPut("UpdateSettings", Name = "UpdateSettings")]
     [ProducesResponseType(typeof(Response<SettingsDto>), 200)]
     [ProducesResponseType(400)]
@@ -112,6 +121,7 @@ public class SettingsController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("DeleteSettings", Name = "DeleteSettings")]
     [ProducesResponseType(typeof(Response<SettingsDto>), 200)]
     [ProducesResponseType(400)]

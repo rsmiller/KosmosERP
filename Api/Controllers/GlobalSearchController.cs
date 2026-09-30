@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Authorization;
+using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.Models;
 using KosmosERP.BusinessLayer.Models.Module.GlobalSearch.Dto;
 
 namespace KosmosERP.Api.Controllers;
 
-[Authorize]
+[ERPAuthorize(new ERPPermission[] { })]
 [ApiController]
 [Route("api/v1/[controller]")]
 public class GlobalSearchController : ControllerBase

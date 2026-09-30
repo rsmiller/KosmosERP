@@ -19,5 +19,8 @@ namespace KosmosERP.Api.Authorization;
 /// </summary>
 public interface IERPAuthorizationHandler
 {
-    Task<bool?> AuthorizeAsync(HttpContext context, IIdentity user, Guid? moduleId, IBaseERPContext dbContext, IReadOnlyList<ERPPermission> permissions);
+    /// <param name="permissions">Module permissions the action requires (all of them).</param>
+    /// <param name="roles">Roles named on the attribute; "admin" means admin-only.</param>
+    Task<bool?> AuthorizeAsync(HttpContext context, IIdentity user, Guid? moduleId, IBaseERPContext dbContext,
+                               IReadOnlyList<ERPPermission> permissions, IReadOnlyList<string> roles);
 }

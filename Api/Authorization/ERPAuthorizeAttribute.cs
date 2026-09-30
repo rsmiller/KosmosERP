@@ -51,11 +51,12 @@ public sealed class ERPAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
         {
             var moduleId = ResolveModuleId(context);
 
-            var decision = await handler.AuthorizeAsync(context.HttpContext, user.Identity, moduleId, dbContext, Permissions);
+            var decision = await handler.AuthorizeAsync(context.HttpContext, user.Identity, moduleId, dbContext, Permissions, Roles);
             if (decision.HasValue)
             {
+                // Signed in but not permitted: 403, not 401.
                 if (!decision.Value)
-                    context.Result = new UnauthorizedResult();
+                    context.Result = new ForbidResult();
 
                 return;
             }
@@ -63,7 +64,7 @@ public sealed class ERPAuthorizeAttribute : Attribute, IAsyncAuthorizationFilter
 
         // Path 2 — default: the user must hold one of the required roles as a claim.
         if (!HasAnyRole(user, Roles))
-            context.Result = new UnauthorizedResult();
+            context.Result = new ForbidResult();
     }
 
     /// <summary>

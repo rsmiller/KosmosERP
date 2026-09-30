@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +54,8 @@ public class OpportunityController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new[] { ERPPermission.Read }, "crm_read")]
+
     [HttpPost("FindOpportunity", Name = "FindOpportunity")]
     [ProducesResponseType(typeof(PagingResult<OpportunityListDto>), 200)]
     [ProducesResponseType(500)]
@@ -80,6 +83,8 @@ public class OpportunityController : ERPApiController
             return StatusCode(500, e.Message);
         }
     }
+
+    [ERPAuthorize(new[] { ERPPermission.Write }, "crm_create")]
 
     [HttpPost("CreateOpportunity", Name = "CreateOpportunity")]
     [ProducesResponseType(typeof(Response<OpportunityDto>), 200)]
