@@ -88,8 +88,7 @@ test.describe('bill of materials', () => {
 
     await openBomTab(page);
     await page.getByRole('button', { name: 'New BOM Item' }).click();
-    // The dialog is titled "Add Address" (BUG-022).
-    const dialog = page.getByRole('dialog').filter({ has: page.getByRole('combobox', { name: 'Product' }) });
+    const dialog = page.getByRole('dialog', { name: 'Add BOM Item' });
     await searchAndChoose(page, dialog.getByRole('combobox', { name: 'Product' }), 'DDR5', component.product_name!);
     await dialog.getByRole('textbox', { name: 'Description' }).fill('Two sticks per build');
     await dialog.getByRole('spinbutton', { name: 'Quantity' }).fill('2');

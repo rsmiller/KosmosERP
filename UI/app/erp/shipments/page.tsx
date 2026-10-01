@@ -155,7 +155,8 @@ function ShipmentsPage() {
   const colDefs = useMemo<ColDef<ShipmentHeaderListDto>[]>(() => [
     { field: "shipment_number", headerName: "Shipment #" },
     { field: "is_released", headerName: "Released" },
-    { field: "ship_via", headerName: "Ship Via" },
+    // The label ("Common Carrier"), not the stored key (BUG-012).
+    { field: "ship_via_name", headerName: "Ship Via", valueGetter: (p) => p.data?.ship_via_name || p.data?.ship_via },
     { field: "freight_carrier_name", headerName: "Carrier" },
     { field: "units_to_ship", headerName: "Ship/Shipped", cellRenderer: ShippingCountsRenderer },
     { field: "address", headerName: "Address", cellRenderer: AddressRenderer },

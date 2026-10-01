@@ -33,8 +33,7 @@ test.describe('line Delete', () => {
     const world = mockWorld(api, buildWorld());
     const memo = world.creditMemos[0];
     const line = memo.credit_memo_lines![0];
-    // CreditMemoHeaderDto doesn't declare the guid it carries (BUG-010).
-    await page.goto(`/erp/creditmemos/edit/${(memo as { guid?: string }).guid}`);
+    await page.goto(`/erp/creditmemos/edit/${memo.guid}`);
 
     await row(page, line.description!).getByRole('button', { name: 'Delete' }).click();
 

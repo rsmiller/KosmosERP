@@ -14,6 +14,8 @@ import { Controller, Control, FieldError } from "react-hook-form";
 
 export class VendorComboboxParams
 {
+    /** Id of a visible label element that names the input (for pages without a Field.Label). */
+    ariaLabelledBy?: string;
     dbKey: any;
     onChange: any;
     control?: Control<any>;
@@ -31,7 +33,7 @@ export interface VendorComboboxRef {
 }
 
 const VendorCombobox = forwardRef<VendorComboboxRef, VendorComboboxParams>(
-    ({dbKey, onChange, control, name, error, disabled, onValidationChange, required}, ref) => {
+    ({dbKey, onChange, control, name, error, disabled, onValidationChange, required, ariaLabelledBy}, ref) => {
         const auth = useAuth();
 
         const [vendors, setVendors] = useState<VendorListDto[]>([]);
@@ -205,7 +207,7 @@ const VendorCombobox = forwardRef<VendorComboboxRef, VendorComboboxParams>(
                 invalid={!isValid}
             >
                 <Combobox.Control>
-                <Combobox.Input placeholder="Type to search" />
+                <Combobox.Input placeholder="Type to search" aria-labelledby={ariaLabelledBy} />
                 <Combobox.IndicatorGroup>
                     <Combobox.ClearTrigger />
                     <Combobox.Trigger />

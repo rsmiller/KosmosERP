@@ -75,6 +75,18 @@ public class PasswordTests
     }
 
     [Test]
+    public async Task Authenticate_UsernameIsCaseInsensitive()
+    {
+        // Only the stored username was lowercased, so "Admin" failed while "admin" worked.
+        var (hash, salt) = PasswordHasher.Create("Kosmos-Dev-1");
+        AddUser("admin", hash, salt);
+
+        var result = await _Provider.Authenticate("Admin", "Kosmos-Dev-1");
+
+        Assert.That(result.Success, Is.True, result.Exception?.ToString());
+    }
+
+    [Test]
     public async Task Authenticate_OldSeededSalt_IsRejectedCleanly()
     {
         // Regression for BUG-009: this used to throw FormatException (a server error).

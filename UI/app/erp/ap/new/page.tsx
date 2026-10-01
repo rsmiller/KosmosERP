@@ -324,19 +324,20 @@ function NewAPPage() {
                     <div><h3>Invoice</h3></div>
                     <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                       <DataList.Item>
-                        <DataList.ItemLabel>Invoice Number</DataList.ItemLabel>
+                        <DataList.ItemLabel id="ap-invoice-number-label">Invoice Number</DataList.ItemLabel>
                         <DataList.ItemValue>
                           <Field.Root required={true} invalid={IsDirty('invoice_number')}>
-                            <Input  {...register('invoice_number')} />
+                            <Input aria-labelledby="ap-invoice-number-label" {...register('invoice_number')} />
                           </Field.Root>
                         </DataList.ItemValue>
                       </DataList.Item>
                     </DataList.Root>
                     <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                       <DataList.Item>
-                        <DataList.ItemLabel>Vendor Name</DataList.ItemLabel>
+                        <DataList.ItemLabel id="ap-vendor-label">Vendor Name</DataList.ItemLabel>
                         <DataList.ItemValue>
                           <VendorCombobox 
+                              ariaLabelledBy="ap-vendor-label"
                               ref={vendorComboboxRef}
                               dbKey={watch('vendor_id') || 0}
                               control={control}
@@ -351,9 +352,9 @@ function NewAPPage() {
                     </DataList.Root>
                     <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                       <DataList.Item>
-                        <DataList.ItemLabel>Invoice Date</DataList.ItemLabel>
+                        <DataList.ItemLabel id="ap-invoice-date-label">Invoice Date</DataList.ItemLabel>
                         <DataList.ItemValue>
-                          <DatePicker 
+                          <DatePicker ariaLabelledBy="ap-invoice-date-label" 
                               selected={getInvoiceDate()}
                               onChange={handleInvoiceDateChange}
                               dateFormat="MM/dd/yyyy"
@@ -365,9 +366,9 @@ function NewAPPage() {
                     </DataList.Root>
                     <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                       <DataList.Item>
-                        <DataList.ItemLabel>Received Date</DataList.ItemLabel>
+                        <DataList.ItemLabel id="ap-received-date-label">Received Date</DataList.ItemLabel>
                         <DataList.ItemValue>
-                           <DatePicker 
+                           <DatePicker ariaLabelledBy="ap-received-date-label" 
                               selected={getReceivedDate()}
                               onChange={handleReceivedDateChange}
                               dateFormat="MM/dd/yyyy"
@@ -379,9 +380,9 @@ function NewAPPage() {
                     </DataList.Root>
                     <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                       <DataList.Item>
-                        <DataList.ItemLabel>Due Date</DataList.ItemLabel>
+                        <DataList.ItemLabel id="ap-due-date-label">Due Date</DataList.ItemLabel>
                         <DataList.ItemValue>
-                          <DatePicker 
+                          <DatePicker ariaLabelledBy="ap-due-date-label" 
                               selected={getDueDate()}
                               onChange={handleDueDateChange}
                               dateFormat="MM/dd/yyyy"
@@ -398,7 +399,7 @@ function NewAPPage() {
                     <div><h3>Associated Object</h3></div>
                     <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                       <DataList.Item>
-                        <DataList.ItemLabel>Object Type</DataList.ItemLabel>
+                        <DataList.ItemLabel id="ap-object-type-label">Object Type</DataList.ItemLabel>
                         <DataList.ItemValue>
                             <Combobox.Root
                                 collection={objectTypeCollection}
@@ -410,7 +411,7 @@ function NewAPPage() {
                                 invalid={!(selectedObjectTypeValue && selectedObjectTypeValue.length > 0)}
                             >
                                 <Combobox.Control>
-                                <Combobox.Input/>
+                                <Combobox.Input aria-labelledby="ap-object-type-label" />
                                 <Combobox.IndicatorGroup>
                                     <Combobox.ClearTrigger />
                                     <Combobox.Trigger />

@@ -46,7 +46,8 @@ const FreightCombobox = forwardRef<FreightComboboxRef, FreightComboboxParams>(
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: freightOptions,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 

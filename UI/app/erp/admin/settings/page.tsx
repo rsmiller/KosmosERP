@@ -246,8 +246,8 @@ function AdminSettingsPage() {
                         <GridItem colSpan={1}>
                             <Stack gap="4" align="flex-start" maxW="md">
                                 <Field.Root invalid={IsDirty('vendor_description')} required={true}>
-                                    <Field.Label><Field.RequiredIndicator />Fiscal Year Start</Field.Label>
-                                    <DatePicker 
+                                    <Field.Label id="settings-fiscal-year-start-label"><Field.RequiredIndicator />Fiscal Year Start</Field.Label>
+                                    <DatePicker ariaLabelledBy="settings-fiscal-year-start-label" 
                                         selected={getStartDate()}
                                         onChange={handleStartDateChange}
                                         dateFormat="MM/dd/yyyy"

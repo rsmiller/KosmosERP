@@ -417,7 +417,7 @@ function EditCreditMemoPage() {
     return (
         <div>
         <form onChange={CheckFormValidity}>
-            <h1>New Credit Memo</h1>
+            <h1>Edit Credit Memo - {creditMemo?.credit_memo_number}</h1>
             <Grid templateColumns="repeat(5, 2fr)" 
             gap={6} 
             display="grid" 
@@ -445,15 +445,15 @@ function EditCreditMemoPage() {
 
             <GridItem colSpan={1}>
                 <Field.Root invalid={!!errors.credit_memo_date} required={true}>
-                <Field.Label><Field.RequiredIndicator />Credit Memo Date</Field.Label>
-                <DatePicker selected={getDate('credit_memo_date')} onChange={(v) => requiredDaySelected(v, 'credit_memo_date')} dateFormat="MM/dd/yyyy" />
+                <Field.Label id="edit-credit-memo-date-label"><Field.RequiredIndicator />Credit Memo Date</Field.Label>
+                <DatePicker ariaLabelledBy="edit-credit-memo-date-label" selected={getDate('credit_memo_date')} onChange={(v) => requiredDaySelected(v, 'credit_memo_date')} dateFormat="MM/dd/yyyy" />
                 </Field.Root>
             </GridItem>
 
             <GridItem colSpan={1}>
                 <Field.Root invalid={!!errors.customer_id} required={true}>
-                <Field.Label><Field.RequiredIndicator />Due Date</Field.Label>
-                <DatePicker selected={getDate('credit_memo_due_date')} onChange={(v) => requiredDaySelected(v, 'credit_memo_due_date')} dateFormat="MM/dd/yyyy" />
+                <Field.Label id="edit-due-date-label"><Field.RequiredIndicator />Due Date</Field.Label>
+                <DatePicker ariaLabelledBy="edit-due-date-label" selected={getDate('credit_memo_due_date')} onChange={(v) => requiredDaySelected(v, 'credit_memo_due_date')} dateFormat="MM/dd/yyyy" />
                 </Field.Root>
             </GridItem>
 

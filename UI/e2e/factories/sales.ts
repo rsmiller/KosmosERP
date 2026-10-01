@@ -84,6 +84,7 @@ export function buildShipment(overrides: Partial<ShipmentHeaderDto> = {}): Shipm
     is_canceled: false,
     is_released: false,
     ship_via: ShipmentMethodKeys.Carrier,
+    ship_via_name: 'Common Carrier',
     ship_attn: 'Receiving',
     freight_carrier: FreightCarrierKeys.Ups,
     freight_charge_amount: 45,

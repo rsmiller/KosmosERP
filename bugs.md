@@ -18,25 +18,25 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
 | [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Fixed (uncommitted) |
 | [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Fixed (uncommitted) |
-| [BUG-007](#bug-007) | Lookup comboboxes filter on the hidden key, not the visible label | UI / components | Low | Open |
-| [BUG-008](#bug-008) | Login reports "incorrect password" when the API is unreachable | UI / auth | Low | Open |
+| [BUG-007](#bug-007) | Lookup comboboxes filter on the hidden key, not the visible label | UI / components | Low | Fixed (uncommitted) |
+| [BUG-008](#bug-008) | Login reports "incorrect password" when the API is unreachable | UI / auth | Low | Fixed (uncommitted) |
 | [BUG-009](#bug-009) | Seeded users can't log in (unhashable seed password) | Dev tooling / seeder | Medium | Fixed (uncommitted) |
-| [BUG-010](#bug-010) | `CreditMemoHeaderDto` doesn't declare the `guid` it carries | UI models | Low | Open |
+| [BUG-010](#bug-010) | `CreditMemoHeaderDto` doesn't declare the `guid` it carries | UI models | Low | Fixed (uncommitted) |
 | [BUG-011](#bug-011) | Date-only values show one day early in US time zones | UI | Medium | Fixed (uncommitted) |
-| [BUG-012](#bug-012) | Shipment pages show the raw shipping-method key | UI | Low | Open |
-| [BUG-013](#bug-013) | `/erp/ar/new` is a stub with hard-coded sample data | UI | Low | Open, needs decision |
-| [BUG-014](#bug-014) | Form controls with no accessible name | UI / accessibility | Low | Open |
-| [BUG-015](#bug-015) | Credit memo edit page is titled "New Credit Memo" | UI | Low | Open |
+| [BUG-012](#bug-012) | Shipment pages show the raw shipping-method key | UI | Low | Fixed (uncommitted) |
+| [BUG-013](#bug-013) | `/erp/ar/new` is a stub with hard-coded sample data | UI | Low | Fixed (uncommitted) |
+| [BUG-014](#bug-014) | Form controls with no accessible name | UI / accessibility | Low | Fixed (uncommitted) |
+| [BUG-015](#bug-015) | Credit memo edit page is titled "New Credit Memo" | UI | Low | Fixed (uncommitted) |
 | [BUG-016](#bug-016) | Combobox options inside modal dialogs are hidden from assistive tech | UI / accessibility | Medium | Fixed (uncommitted) |
 | [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Fixed (uncommitted) |
 | [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Fixed (uncommitted) |
 | [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Fixed (uncommitted) |
 | [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Fixed (uncommitted) |
 | [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Fixed (uncommitted) |
-| [BUG-022](#bug-022) | BOM item dialog is titled "Add Address" | UI | Low | Open |
+| [BUG-022](#bug-022) | BOM item dialog is titled "Add Address" | UI | Low | Fixed (uncommitted) |
 | [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Fixed (uncommitted) |
 | [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Fixed (uncommitted) |
-| [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Open |
+| [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Fixed (uncommitted) |
 | [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Fixed (uncommitted) |
 | [BUG-027](#bug-027) | Grid buttons send an empty token after a direct load | UI | Medium | Fixed (uncommitted) |
 
@@ -198,6 +198,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-007"></a>
 ## BUG-007: Lookup comboboxes filter on the hidden key, not the visible label
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Low. Typing to search in these dropdowns finds nothing, and users have to scroll instead.
 - **Where:** nine comboboxes in `UI/components/`, all using `useListCollection({ itemToString: (item) => item.key, itemToValue: (item) => item.value, … })`:
   - `customer-payment-terms-combobox.tsx`
@@ -222,6 +224,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-008"></a>
 ## BUG-008: Login reports "incorrect password" when the API is unreachable
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Low. The message is misleading and sends users chasing the wrong problem.
 - **Where:**
@@ -252,6 +256,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-010"></a>
 ## BUG-010: `CreditMemoHeaderDto` doesn't declare the `guid` it carries
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Low. It's a typing gap only.
 - **Where:** `UI/models/credit-memo-models.tsx`. `CreditMemoHeaderDto implements BaseDto` but redeclares only some fields, and `guid` isn't one of them.
@@ -290,6 +296,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-012"></a>
 ## BUG-012: Shipment pages show the raw shipping-method key
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Low. Users see `shipping_method_carrier` instead of "Common Carrier".
 - **Where:**
   - `UI/app/erp/shipments/page.tsx` (the "Recently Shipped" grid)
@@ -302,6 +310,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-013"></a>
 ## BUG-013: `/erp/ar/new` is a stub with hard-coded sample data
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Low, but confusing if anyone reaches it.
 - **Where:** `UI/app/erp/ar/new/page.tsx`
 - **Symptom:** the page renders fixed welding-equipment rows ("Miller Model 203 Welder", …) and makes no API calls. The real invoice-from-order flow is `/erp/ar/new/[id]`, reached from "Create Invoice" on the AR list.
@@ -311,6 +321,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-014"></a>
 ## BUG-014: Form controls with no accessible name
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Low. Screen readers can't identify these controls, and tests have to find them by placeholder text.
 - **Where** (from the Phase 2 accessibility dumps):
@@ -333,6 +345,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-015"></a>
 ## BUG-015: Credit memo edit page is titled "New Credit Memo"
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Low. It's a wrong heading, though users might think they're creating a duplicate.
 - **Where:** `UI/app/erp/creditmemos/edit/[id]/page.tsx` renders `<h1>New Credit Memo</h1>`. It looks copied from `creditmemos/new`.
@@ -431,6 +445,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-022"></a>
 ## BUG-022: BOM item dialog is titled "Add Address"
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Low.
 - **Where:** `UI/components/dialogs/add-bom-item.tsx` (`<Dialog.Title>Add Address</Dialog.Title>`). It looks copied from the address dialog.
 - **Suggested fix:** "Add BOM Item".
@@ -466,6 +482,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-025"></a>
 ## BUG-025: Completed production orders stay editable
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Low, but it will matter once BUG-024 is fixed.
 - **Where:** `UI/app/erp/productionorders/edit/[id]/page.tsx`: `const [colDefs] = useState([... { field: 'status', editable: !completedOrDisabled, ... }])`.
@@ -542,6 +560,33 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **Low bugs (BUG-007, 008, 010, 012, 013, 014, 015, 022, 025), plus case-insensitive login.** Full e2e suite: 181 passed. .NET: 42 shared + 213 module tests passed.
+  - **BUG-007 (type-to-search):**
+    - The nine lookup comboboxes, plus the production status cell editor, now filter on the label users see (`itemToString: item.value`). Selection and the stored key are unchanged.
+    - `CustomerFormPage.choose()` now types the label, then picks.
+    - Not done: merging the nine near-identical components into one `KeyValueCombobox`.
+  - **BUG-008 (login message):** `userService.authenticateUser` rethrows when there's no HTTP response, so the login page shows "Unable to reach the authentication service." API rejections still come back as results. `auth/login.spec.ts` asserts the message.
+  - **BUG-010 (`guid` typing):** `CreditMemoHeaderDto` declares `guid`. It was the only `implements BaseDto` class missing it. The catalog's loose `guid()` helper and the cast in `grid-actions.spec.ts` are gone.
+  - **BUG-012 (Ship Via label):**
+    - The API now returns `ship_via_name` on both shipment DTOs (from the lookup cache, like `freight_carrier_name`).
+    - The shipments list and the edit page's read-only Ship Via show it ("Common Carrier"); the form still saves the key.
+    - Catalog checks on both pages.
+  - **BUG-013 (`/erp/ar/new` stub), decided while you were away:** redirect to `/erp/ar`. The real flow is "Create Invoice" on the AR list (`/erp/ar/new/[orderGuid]`), and nothing linked to the stub; the unused `handleNewClick` is removed. Easy to undo if you'd rather build a "pick an order" screen there. Its catalog entry is replaced by a redirect test.
+  - **BUG-014 (accessible names):**
+    - AP new/edit fields are named by their DataList labels (`aria-labelledby`): Invoice Number, Vendor Name, the three dates, Object Type.
+    - `VendorCombobox`/`CustomerCombobox` take `ariaLabelledBy`.
+    - Contacts edit got a visible "Customer" label.
+    - The Users page's "+" button is named "New User".
+    - **Every react-datepicker in the app (31) is named by its field label**, not "Select date". 23 were linked by script to the label right before them (none skipped).
+    - Tests now find controls by these names. The catalog checks `combo('Vendor Name', …)`, the contact's Customer, the credit memo dates, and "New User".
+    - Not changed: grid row buttons are still named only by their text ("Delete"); tests scope them to the row.
+  - **BUG-015:** the credit memo edit page is titled "Edit Credit Memo - {number}".
+  - **BUG-022:** the BOM dialog is titled "Add BOM Item". `product-flows.spec.ts` finds it by that name.
+  - **BUG-025 (completed orders editable):**
+    - Production order edit's Status column reads `editable` from the grid context when a cell is edited.
+    - The same fix is applied to sales order edit's three editable columns, which had the same pattern.
+    - The known-bug test moved to `production-orders.spec.ts`. `known-bugs.spec.ts` now holds no open bugs, just the `knownBug()` helper.
+  - **Login usernames are case-insensitive** (seen during BUG-009): `DatabaseAuthenticationProvider` lowercases the typed username too. Test: `PasswordTests.Authenticate_UsernameIsCaseInsensitive`.
 - **BUG-009: seeded users can sign in.**
   - **One password implementation:** new `Shared/KosmosERP.BusinessLayer/Helpers/PasswordHasher.cs` (`Create`, `Verify`) with the existing settings: PBKDF2 HMAC-SHA1, 10,000 iterations, 32-byte hash, random 16-byte salt.
     - `UserModule` (create, password change) and `DatabaseAuthenticationProvider` (login) now use it instead of two private copies. Existing stored passwords still verify.

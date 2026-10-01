@@ -45,6 +45,7 @@ export class ShipmentHeaderDto extends BaseDto {
     is_canceled?: boolean;
     is_released?: boolean;
     ship_via?: string;
+    ship_via_name?: string | null;
     ship_attn?: string | null;
     freight_carrier?: string | null;
     freight_charge_amount?: number;
@@ -74,6 +75,7 @@ export class ShipmentHeaderListDto extends BaseDto {
     is_canceled?: boolean;
     is_released?: boolean;
     ship_via?: string;
+    ship_via_name?: string | null;
     ship_attn?: string | null;
     freight_carrier?: string | null;
     freight_charge_amount?: number;

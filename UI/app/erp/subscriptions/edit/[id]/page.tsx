@@ -326,10 +326,10 @@ function EditSubscriptionsPage() {
                 </DataList.Root>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md" className="chunky">
                     <DataList.Item>
-                        <DataList.ItemLabel>Start Date</DataList.ItemLabel>
+                        <DataList.ItemLabel id="edit-start-date-label">Start Date</DataList.ItemLabel>
                         <DataList.ItemValue>
                             <Field.Root invalid={IsDirty('start_date')} required={true}>
-                                <DatePicker 
+                                <DatePicker ariaLabelledBy="edit-start-date-label" 
                                     selected={getStartDate()}
                                     onChange={handleStartDateChange}
                                     dateFormat="MM/dd/yyyy"

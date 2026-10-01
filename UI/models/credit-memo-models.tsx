@@ -52,6 +52,7 @@ export class CreditMemoLineCreateCommand extends DataCommand {
 
 export class CreditMemoHeaderDto implements BaseDto {
   id: number = 0;
+  guid?: string | null;
   customer_id?: number;
   credit_memo_number?: string;
   credit_memo_date?: string;

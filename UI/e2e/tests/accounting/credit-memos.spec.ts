@@ -18,11 +18,10 @@ async function fillHeader(page: Page, world: World) {
   await picker.getByRole('row').filter({ hasText: String(invoice.invoice_number) }).getByRole('button', { name: 'Select' }).click();
   await expect(picker).toBeHidden();
 
-  // The date inputs have no accessible name (BUG-014); find them by their field group.
-  const dateInput = (label: string) => page.getByRole('group').filter({ hasText: label }).getByRole('textbox');
+  const dateInput = (label: string) => page.getByRole('textbox', { name: new RegExp(label) });
   await setDate(dateInput('Credit Memo Date'), '03/10/2026');
   await setDate(dateInput('Due Date'), '04/09/2026');
-  await page.getByRole('textbox', { name: 'Memo' }).fill('RMA 5521');
+  await page.getByRole('textbox', { name: 'Memo', exact: true }).fill('RMA 5521');
   // Validity is re-checked on keydown, which fill() doesn't send: type it.
   await page.getByRole('textbox', { name: 'Credit Reason' }).pressSequentially('Damaged in transit');
 }

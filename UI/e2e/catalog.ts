@@ -40,11 +40,11 @@ const row = (value: Value): Check => async (page, world) => {
 };
 
 /** A form control, found by its accessible name, holding the value. */
-const field = (name: string, value: Value, role: 'textbox' | 'combobox' | 'spinbutton' = 'textbox'): Check =>
+const field = (name: string | RegExp, value: Value, role: 'textbox' | 'combobox' | 'spinbutton' = 'textbox'): Check =>
   async (page, world) => {
     await expect(page.getByRole(role, { name, exact: true }).first()).toHaveValue(resolve(value, world));
   };
-const combo = (name: string, value: Value) => field(name, value, 'combobox');
+const combo = (name: string | RegExp, value: Value) => field(name, value, 'combobox');
 
 const text = (value: Value): Check => async (page, world) => {
   await expect(page.getByText(resolve(value, world), { exact: false }).first()).toBeVisible();
@@ -76,8 +76,7 @@ const buttonDisabled = (name: string): Check => async (page) => {
 /** New-record forms start invalid, so Save starts disabled. */
 const saveDisabled = buttonDisabled('Save Record');
 
-// Some DTO classes (e.g. CreditMemoHeaderDto) don't declare the guid they carry (BUG-010).
-const guid = (record: object) => (record as { guid?: string | null }).guid ?? '';
+const guid = (record: { guid?: string | null }) => record.guid ?? '';
 
 // ---- The catalog -------------------------------------------------------------
 
@@ -140,7 +139,7 @@ export const catalog: CatalogPage[] = [
   },
   {
     id: 'contacts/edit', kind: 'edit', deletable: true, path: (w) => `/erp/contacts/edit/${guid(w.contacts[0])}`, ready: heading('Edit Contact'),
-    checks: [field('First Name', (w) => w.contacts[0].first_name), field('Last Name', (w) => w.contacts[0].last_name)],
+    checks: [field('First Name', (w) => w.contacts[0].first_name), field('Last Name', (w) => w.contacts[0].last_name), combo('Customer', (w) => w.contacts[0].customer_name)],
   },
 
   { id: 'leads', kind: 'list', path: () => '/erp/leads', ready: heading('Leads'), checks: [row((w) => w.leads[0].company_name)] },
@@ -172,7 +171,7 @@ export const catalog: CatalogPage[] = [
     id: 'opportunities/view', kind: 'view', path: (w) => `/erp/opportunities/view/${guid(w.opportunities[0])}`, ready: heading('View Opportunity'),
     checks: [
       field('Opportunity Name', (w) => w.opportunities[0].opportunity_name),
-      field('Select date', dateOnly((w) => w.opportunities[0].expected_close)),
+      field(/Expected Close/, dateOnly((w) => w.opportunities[0].expected_close)),
       combo('Customer', (w) => w.opportunities[0].customer_name),
       combo('Contact', (w) => w.opportunities[0].contact_name),
       row((w) => w.products[0].product_name),
@@ -200,7 +199,7 @@ export const catalog: CatalogPage[] = [
     checks: [
       text((w) => `View Sales Order - ${w.orders[0].order_number}`),
       combo('Customer', (w) => w.orders[0].customer_name),
-      field('Select date', dateOnly((w) => w.orders[0].required_date)),
+      field(/Required Date/, dateOnly((w) => w.orders[0].required_date)),
       field('PO Number', (w) => w.orders[0].po_number),
       combo('Payment Method', (w) => w.orders[0].pay_method_name),
       row((w) => w.orders[0].order_lines?.[0].line_description),
@@ -218,7 +217,8 @@ export const catalog: CatalogPage[] = [
 
   {
     id: 'shipments', kind: 'list', path: () => '/erp/shipments', ready: heading('Shipments'),
-    checks: [row((w) => w.readyToShip[0].order_number), row((w) => w.shipments[0].shipment_number)],
+    // Ship Via shows the label, not the stored key (BUG-012).
+    checks: [row((w) => w.readyToShip[0].order_number), row((w) => w.shipments[0].shipment_number), row((w) => w.shipments[0].ship_via_name)],
   },
   {
     id: 'shipments/new', kind: 'new', path: (w) => `/erp/shipments/new/${guid(w.orders[0])}`,
@@ -233,6 +233,7 @@ export const catalog: CatalogPage[] = [
     id: 'shipments/edit', kind: 'edit', deletable: true, path: (w) => `/erp/shipments/edit/${guid(w.shipments[0])}`, ready: heading(/Edit Shipment/),
     checks: [
       combo('Freight Carrier', 'UPS'),
+      field('Ship Via', 'Common Carrier'),
       field('Ship Attention', (w) => w.shipments[0].ship_attn),
       row((w) => w.shipments[0].shipment_lines?.[0].line_description),
     ],
@@ -343,10 +344,6 @@ export const catalog: CatalogPage[] = [
     checks: [row((w) => w.readyForInvoicing[0].order_number), row((w) => w.arInvoices[0].invoice_number)],
   },
   {
-    // Renders hard-coded sample rows and makes no API calls (BUG-013 in bugs.md): load check only.
-    id: 'ar/new', kind: 'new', path: () => '/erp/ar/new', ready: heading('Customer'),
-  },
-  {
     id: 'ar/new-from-order', kind: 'new', path: (w) => `/erp/ar/new/${guid(w.orders[0])}`, ready: heading('Customer'),
     checks: [row((w) => w.orders[0].order_lines?.[0].line_description), buttonDisabled('Save and Print Invoice')],
   },
@@ -367,15 +364,23 @@ export const catalog: CatalogPage[] = [
   },
   {
     id: 'ap/edit', kind: 'edit', deletable: true, path: (w) => `/erp/ap/edit/${guid(w.apInvoices[0])}`, ready: heading('Invoice'),
-    // The vendor combobox has no label (BUG-014), so it's found by its placeholder name.
-    checks: [combo('Type to search', (w) => w.apInvoices[0].vendor_name)],
+    checks: [combo('Vendor Name', (w) => w.apInvoices[0].vendor_name)],
   },
 
   {
     id: 'creditmemos', kind: 'list', path: () => '/erp/creditmemos', ready: heading('Credit Memos'),
     checks: [row((w) => w.creditMemos[0].credit_memo_number)],
   },
-  { id: 'creditmemos/new', kind: 'new', path: () => '/erp/creditmemos/new', ready: heading('New Credit Memo'), checks: [saveDisabled] },
+  {
+    id: 'creditmemos/new', kind: 'new', path: () => '/erp/creditmemos/new', ready: heading('New Credit Memo'),
+    checks: [
+      saveDisabled,
+      async (page) => {
+        await expect(page.getByRole('textbox', { name: /Credit Memo Date/ })).toBeVisible();
+        await expect(page.getByRole('textbox', { name: /Due Date/ })).toBeVisible();
+      },
+    ],
+  },
   {
     id: 'creditmemos/view', kind: 'view', path: (w) => `/erp/creditmemos/view/${guid(w.creditMemos[0])}`, ready: heading(/Credit Memo/),
     checks: [
@@ -386,7 +391,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'creditmemos/edit', kind: 'edit', deletable: true, path: (w) => `/erp/creditmemos/edit/${guid(w.creditMemos[0])}`, ready: heading(/Credit Memo/),
+    id: 'creditmemos/edit', kind: 'edit', deletable: true, path: (w) => `/erp/creditmemos/edit/${guid(w.creditMemos[0])}`, ready: heading(/^Edit Credit Memo - /),
     checks: [
       field('Memo', (w) => w.creditMemos[0].memo),
       field('Credit Reason', (w) => w.creditMemos[0].credit_reason),
@@ -458,6 +463,7 @@ export const catalog: CatalogPage[] = [
   {
     id: 'admin/users', kind: 'admin', path: () => '/erp/admin/users', ready: heading('Users'),
     checks: [
+      async (page) => { await expect(page.getByRole('button', { name: 'New User' })).toBeVisible(); },
       async (page, w) => {
         const user = w.users[0];
         await expect(page.getByRole('treeitem', { name: `${user.first_name} ${user.last_name}` })).toBeVisible();

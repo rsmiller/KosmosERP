@@ -252,8 +252,8 @@ function ViewOpportunityPage() {
 
             <Stack gap="4" align="flex-start" maxW="md">
                 <Field.Root>
-                    <Field.Label>Expected Close</Field.Label>
-                    <DatePicker 
+                    <Field.Label id="view-expected-close-label">Expected Close</Field.Label>
+                    <DatePicker ariaLabelledBy="view-expected-close-label" 
                         selected={getExpirationDate()}
                         onChange={() => {}}
                         dateFormat="MM/dd/yyyy"

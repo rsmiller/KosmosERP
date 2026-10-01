@@ -17,6 +17,15 @@ async function stubPrintPopup(page: Page) {
   );
 }
 
+test('/erp/ar/new redirects to the AR list', async ({ page, api }) => {
+  // BUG-013: it was a stub with hard-coded sample rows. Invoices start from an order.
+  mockWorld(api, buildWorld());
+
+  await page.goto('/erp/ar/new');
+
+  await expect(page).toHaveURL(/\/erp\/ar\/?$/);
+});
+
 test('Create Invoice on the AR list opens the invoice form for that order', async ({ page, api }) => {
   const world = mockWorld(api, buildWorld());
   const order = world.orders[0];

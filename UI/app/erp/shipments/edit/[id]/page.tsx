@@ -434,8 +434,10 @@ function NewARFromCustomerPage() {
         <Stack gap="1" align="flex-start" maxW="md">
           <Field.Root invalid={!!errors.ship_via} disabled={true}>
             <Field.Label>Ship Via</Field.Label>
+            {/* Shows the label (BUG-012); the form keeps the key in ship_via for saving. */}
             <Input 
-              {...register('ship_via')}
+              value={shipment.ship_via_name || shipment.ship_via || ''}
+              readOnly
               disabled={true}
             />
           </Field.Root>

@@ -386,14 +386,14 @@ function EditSalesOrderPage() {
   const [colDefs, setColDefs] = useState<ColDef<OrderLineDto>[]>([
     { field: "product_name", headerName: "Product Name"},
     { field: "line_description", headerName: "Description",
-      editable: !completedOrDisabled,
+      editable: (params: any) => !params.context?.completedOrDisabled, // BUG-025: read at edit time
      },
     { field: "quantity", headerName: "Quantity",
-      editable: !completedOrDisabled,
+      editable: (params: any) => !params.context?.completedOrDisabled, // BUG-025: read at edit time
       cellEditor: 'agNumberCellEditor',
      },
     { field: "unit_price", headerName: "Unit Price", 
-      editable: !completedOrDisabled,
+      editable: (params: any) => !params.context?.completedOrDisabled, // BUG-025: read at edit time
       cellEditor: 'agNumberCellEditor',
       cellRenderer: CurrencyFormatter 
     },
@@ -489,8 +489,8 @@ function EditSalesOrderPage() {
             </Stack>
             <Stack gap="4" align="flex-start" maxW="md">
               <Field.Root invalid={!!errors.required_date}>
-                <Field.Label>Required Date</Field.Label>
-                <DatePicker
+                <Field.Label id="edit-required-date-label">Required Date</Field.Label>
+                <DatePicker ariaLabelledBy="edit-required-date-label"
                   selected={getRequiredDate()}
                   onChange={requiredDaySelected}
                   disabled={completedOrDisabled}

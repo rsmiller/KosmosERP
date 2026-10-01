@@ -251,6 +251,7 @@ function EditContactPage() {
                 </GridItem>
                 <Stack gap="4" align="flex-start" maxW="md">
                     <Field.Root invalid={!!errors.customer_id}>
+                        <Field.Label>Customer</Field.Label>
                         <CustomerCombobox 
                             ref={customerComboboxRef}
                             dbKey={watch('customer_id')}

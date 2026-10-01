@@ -19,8 +19,7 @@ export class SalesOrderFormPage {
   constructor(private readonly page: Page) {
     this.orderType = page.getByRole('combobox', { name: 'Order Type' });
     this.customer = page.getByRole('combobox', { name: 'Customer' });
-    // react-datepicker's input is only named "Select date" (BUG-014); it's the only one on this form.
-    this.requiredDate = page.getByRole('textbox', { name: 'Select date' });
+    this.requiredDate = page.getByRole('textbox', { name: /Required Date/ });
     this.poNumber = page.getByRole('textbox', { name: 'PO Number' });
     this.paymentMethod = page.getByRole('combobox', { name: 'Payment Method' });
     this.shippingMethod = page.getByRole('combobox', { name: 'Shipping Method' });

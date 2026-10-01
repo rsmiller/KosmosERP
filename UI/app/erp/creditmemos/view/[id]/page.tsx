@@ -197,15 +197,15 @@ function ViewCreditMemoPage() {
 
             <GridItem colSpan={1}>
                 <Field.Root>
-                <Field.Label><Field.RequiredIndicator />Credit Memo Date</Field.Label>
-                <DatePicker selected={getDate('credit_memo_date')} disabled={true} dateFormat="MM/dd/yyyy" />
+                <Field.Label id="view-credit-memo-date-label"><Field.RequiredIndicator />Credit Memo Date</Field.Label>
+                <DatePicker ariaLabelledBy="view-credit-memo-date-label" selected={getDate('credit_memo_date')} disabled={true} dateFormat="MM/dd/yyyy" />
                 </Field.Root>
             </GridItem>
 
             <GridItem colSpan={1}>
                 <Field.Root>
-                <Field.Label><Field.RequiredIndicator />Due Date</Field.Label>
-                <DatePicker selected={getDate('credit_memo_due_date')} dateFormat="MM/dd/yyyy" disabled={true}/>
+                <Field.Label id="view-due-date-label"><Field.RequiredIndicator />Due Date</Field.Label>
+                <DatePicker ariaLabelledBy="view-due-date-label" selected={getDate('credit_memo_due_date')} dateFormat="MM/dd/yyyy" disabled={true}/>
                 </Field.Root>
             </GridItem>
 

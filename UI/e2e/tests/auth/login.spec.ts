@@ -52,10 +52,9 @@ test.describe('database login', () => {
     await login.goto();
     await login.login(auth.user.username, password);
 
-    // userService.authenticateUser swallows network errors and returns success:false,
-    // so the page reports bad credentials rather than "Unable to reach the
-    // authentication service". Assert only the stable part until that is fixed.
-    await expect(page.getByText('Sign in failed')).toBeVisible();
+    // Regression for BUG-008: this used to say the password was wrong.
+    await expect(page.getByText('Unable to reach the authentication service.')).toBeVisible();
+    await expect(page.getByText('The username or password is incorrect.')).toBeHidden();
     await expect(page).toHaveURL(/\/login\/database$/);
   });
 

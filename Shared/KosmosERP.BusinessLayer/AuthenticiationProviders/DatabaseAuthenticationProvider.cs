@@ -30,7 +30,9 @@ public class DatabaseAuthenticationProvider : IAuthenticationProvider
 
     public async Task<Response<AuthenticatedUserDto>> Authenticate(string username, string password)
     {
-        var result = await _Context.Users.SingleOrDefaultAsync(m => m.username.ToLower() == username);
+        // Usernames are case-insensitive: lowercase both sides (only the stored one was).
+        var lowered = (username ?? "").ToLower();
+        var result = await _Context.Users.SingleOrDefaultAsync(m => m.username.ToLower() == lowered);
 
         if (result != null && result.is_deleted)
             return new Response<AuthenticatedUserDto>("Could not find user", ResultCode.InvalidPermission);

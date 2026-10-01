@@ -198,8 +198,8 @@ function SalesOrderSelectorComponent({customer_id, order_header_id, onChange, po
 
                 <GridItem colSpan={1}>
                     <Field.Root invalid={IsDirty('start_date')} required={true}>
-                        <Field.Label><Field.RequiredIndicator /> Start Date</Field.Label>
-                        <DatePicker 
+                        <Field.Label id="components-start-date-label"><Field.RequiredIndicator /> Start Date</Field.Label>
+                        <DatePicker ariaLabelledBy="components-start-date-label" 
                             selected={getStartDate()}
                             onChange={handleStartDateChange}
                             dateFormat="MM/dd/yyyy"

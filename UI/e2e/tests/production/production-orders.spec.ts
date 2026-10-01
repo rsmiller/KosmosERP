@@ -93,5 +93,23 @@ test.describe('production order', () => {
       await expect(page.getByRole('row').filter({ hasText: world.products[0].product_name! })).toBeVisible();
       await expect(save(page)).toBeDisabled();
     });
+
+    test("a completed order's line status can't be edited", async ({ page, api }) => {
+      // Regression for BUG-025: `editable` was computed once, before the order loaded.
+      const world = buildWorld();
+      world.productionOrders[0].is_complete = true;
+      mockWorld(api, world);
+      const row = page.getByRole('row').filter({ hasText: world.products[0].product_name! });
+      await page.goto(`/erp/productionorders/edit/${world.productionOrders[0].guid}`);
+      await expect(row).toContainText('Submitted');
+
+      const statusCell = row.locator('[col-id="status"]');
+      await statusCell.dblclick();
+
+      // ag-grid marks focus and (if editable) inline editing in the same event, so
+      // once the cell is focused its editing state is settled.
+      await expect(statusCell).toHaveClass(/ag-cell-focus/);
+      await expect(statusCell).not.toHaveClass(/ag-cell-inline-editing/);
+    });
   });
 });

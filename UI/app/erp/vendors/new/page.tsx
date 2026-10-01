@@ -299,8 +299,8 @@ function NewVendorsPage() {
         </Stack>
         <Stack gap="4" align="flex-start" maxW="md">
           <Field.Root invalid={IsDirty('approved_on')}>
-            <Field.Label>Approved Date</Field.Label>
-            <DatePicker 
+            <Field.Label id="new-approved-date-label">Approved Date</Field.Label>
+            <DatePicker ariaLabelledBy="new-approved-date-label" 
               selected={getApprovedDate()}
               onChange={handleApprovedDateChange}
               dateFormat="MM/dd/yyyy"
@@ -310,8 +310,8 @@ function NewVendorsPage() {
         </Stack>
         <Stack gap="4" align="flex-start" maxW="md">
           <Field.Root invalid={IsDirty('audit_on')}>
-            <Field.Label>Audit Date</Field.Label>
-            <DatePicker 
+            <Field.Label id="new-audit-date-label">Audit Date</Field.Label>
+            <DatePicker ariaLabelledBy="new-audit-date-label" 
               selected={getAuditDate()}
               onChange={handleAuditDateChange}
               dateFormat="MM/dd/yyyy"
@@ -321,8 +321,8 @@ function NewVendorsPage() {
         </Stack>
         <Stack gap="4" align="flex-start" maxW="md">
           <Field.Root>
-            <Field.Label>Retired Date</Field.Label>
-            <DatePicker 
+            <Field.Label id="new-retired-date-label">Retired Date</Field.Label>
+            <DatePicker ariaLabelledBy="new-retired-date-label" 
               selected={getRetiredDate()}
               onChange={handleRetiredDateChange}
               dateFormat="MM/dd/yyyy"

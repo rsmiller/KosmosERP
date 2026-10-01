@@ -539,8 +539,8 @@ function EditOpportunityPage() {
 
                     <Stack gap="4" align="flex-start" maxW="md">
                         <Field.Root invalid={IsDirty('expected_close')} required={true}>
-                            <Field.Label><Field.RequiredIndicator /> Expected Close</Field.Label>
-                            <DatePicker 
+                            <Field.Label id="edit-expected-close-label"><Field.RequiredIndicator /> Expected Close</Field.Label>
+                            <DatePicker ariaLabelledBy="edit-expected-close-label" 
                                 selected={getExpirationDate()}
                                 onChange={handleExpectedCloseChange}
                                 dateFormat="MM/dd/yyyy"

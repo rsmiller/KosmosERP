@@ -803,6 +803,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (freight_carrier_val != null)
             dto.freight_carrier_name = freight_carrier_val.value;
 
+        var ship_via_val = await _KVMemoryService.GetKeyValue(databaseModel.ship_via);
+        if (ship_via_val != null)
+            dto.ship_via_name = ship_via_val.value;
+
         var address_result = await _AddressModule!.GetDto(databaseModel.address_id);
         if (address_result.Success && address_result.Data != null)
             dto.address = address_result.Data;
@@ -858,6 +862,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var lines = await _Context.ShipmentLines.Include("order_line").Where(m => m.shipment_header_id == databaseModel.id && m.is_deleted == false).ToListAsync();
         foreach(var line in lines)
             dto.shipment_lines.Add(await this.MapToLineDto(line));
+
+        var ship_via_val = await _KVMemoryService.GetKeyValue(databaseModel.ship_via);
+        if (ship_via_val != null)
+            dto.ship_via_name = ship_via_val.value;
 
 
         var address_result = await _AddressModule!.GetDto(databaseModel.address_id);

@@ -128,7 +128,9 @@ function EditProductionOrderPage() {
         { 
             field: "status", 
             headerName: "Status",
-            editable: !completedOrDisabled,
+            // Read from the grid context at edit time: colDefs are built once, before the
+            // order loads, so a plain boolean stayed false (BUG-025).
+            editable: (params) => !params.context?.completedOrDisabled,
             cellEditor: ProductionStatusCellEditor,
             cellRenderer: ProductionStatusCellRenderer
         },

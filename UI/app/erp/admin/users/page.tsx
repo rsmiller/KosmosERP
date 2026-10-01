@@ -451,7 +451,7 @@ function AdminUserPage() {
                                 <h3>Users</h3>
                             </GridItem>
                             <GridItem colSpan={1} style={{textAlign: "right"}}>
-                                <Button colorPalette="blue" onClick={() => openNewUserDialog()}><MdAddCircle /></Button>
+                                <Button colorPalette="blue" aria-label="New User" onClick={() => openNewUserDialog()}><MdAddCircle /></Button>
                             </GridItem>
                         </Grid>
                         <TreeView.Root collection={collection} maxW="md" size="md" colorPalette="blue" onSelectionChange={treeItemClick}>

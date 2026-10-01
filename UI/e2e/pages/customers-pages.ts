@@ -60,13 +60,12 @@ export class CustomerFormPage {
   }
 
   /**
-   * Open a Chakra combobox's list and pick an option by its visible label.
-   * Opens with ArrowDown rather than typing, because some comboboxes filter on
-   * the stored key instead of the label (e.g. payment terms).
+   * Type a combobox option's visible label, the way a user searches, then pick it.
+   * (Lookup comboboxes used to filter on the stored key, so typing found nothing: BUG-007.)
    */
   async choose(combobox: Locator, option: string): Promise<void> {
     await combobox.click();
-    await combobox.press('ArrowDown');
+    await combobox.fill(option);
     await this.page.getByRole('option', { name: option, exact: true }).click();
   }
 }

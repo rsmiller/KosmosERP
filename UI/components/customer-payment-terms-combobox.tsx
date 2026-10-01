@@ -45,7 +45,8 @@ const CustomerPaymentTermsCombobox = forwardRef<CustomerPaymentTermsComboboxRef,
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: paymentTerms,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 

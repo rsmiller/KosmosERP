@@ -241,8 +241,8 @@ function NewJournalEntryPage() {
                 
                 <Stack gap="4" align="flex-start" maxW="md">
                     <Field.Root required>
-                        <Field.Label>Entry Date</Field.Label>
-                        <DatePicker 
+                        <Field.Label id="new-entry-date-label">Entry Date</Field.Label>
+                        <DatePicker ariaLabelledBy="new-entry-date-label" 
                             selected={entryDate}
                             onChange={(date) => { setEntryDate(date); CheckFormValidity(); }}
                             className="chakra-input"

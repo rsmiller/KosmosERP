@@ -196,8 +196,8 @@ function ViewSalesOrderPage() {
       </Stack>
       <Stack gap="4" align="flex-start" maxW="md">
         <Field.Root>
-          <Field.Label>Required Date</Field.Label>
-          <DatePicker
+          <Field.Label id="view-required-date-label">Required Date</Field.Label>
+          <DatePicker ariaLabelledBy="view-required-date-label"
             selected={getRequiredDate()}
             onChange={() => {}}
             disabled={true}
