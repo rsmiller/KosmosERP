@@ -340,6 +340,14 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         if(customer == null)
             return new Response<ARInvoiceHeaderDto>("Customer not found", ResultCode.DataValidationError);
 
+        // A tax-exempt customer is never taxed, whatever the client sent.
+        if (!customer.is_taxable)
+        {
+            commandModel.is_taxable = false;
+            foreach (var line in commandModel.ar_invoice_lines)
+                line.is_taxable = false;
+        }
+
         try
         {
             var item = await MapToDatabaseModel(commandModel);
@@ -963,7 +971,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         // Order qty
         line.order_qty = order_line.quantity;
 
-        // Tax
+        // Tax. A tax-exempt customer's lines are never taxable.
+        line.is_taxable = line.is_taxable && customer_tax.is_taxable;
         if (line.is_taxable)
             line.line_tax = Math.Floor(((order_line.unit_price * customer_tax.tax_rate) * 100) * createCommand.invoice_qty) / 100;
         else

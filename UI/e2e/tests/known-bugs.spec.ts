@@ -2,7 +2,7 @@ import { test, expect } from '../fixtures/test';
 import { fail } from '../mocks/envelope';
 import { buildWorld } from '../factories/world';
 import { mockWorld } from '../mocks/kits/world';
-import { chooseOption, editGridCell, searchAndChoose } from '../pages/controls';
+import { chooseOption, searchAndChoose } from '../pages/controls';
 
 /**
  * Open app bugs pinned as tests (details in bugs.md at the repo root). Each
@@ -34,23 +34,6 @@ test('BUG-006: new-record forms have no Delete Record button', async ({ page, ap
   await expect(page.getByRole('heading', { name: 'New Customer' })).toBeVisible();
 
   await expect(page.getByRole('button', { name: 'Delete Record' })).toBeHidden();
-});
-
-test('BUG-018: a non-taxable customer\'s invoice lines are not taxable', async ({ page, api }) => {
-  knownBug('BUG-018: is_taxable uses `customer.is_taxable ? customer.is_taxable : true`, so false becomes true');
-
-  const world = buildWorld();
-  world.customers[0].is_taxable = false;
-  mockWorld(api, world);
-  const line = world.orders[0].order_lines![0];
-  await page.context().route('**/docs/api/**', (route) => route.fulfill({ status: 200, body: 'pdf' }));
-  await page.goto(`/erp/ar/new/${world.orders[0].guid}`);
-
-  await editGridCell(page.getByRole('row').filter({ hasText: line.line_description }), 'invoice_qty', 1);
-  await page.getByRole('button', { name: 'Save and Print Invoice' }).click();
-
-  const request = await api.waitForRequest('POST', '/ARInvoice/CreateARInvoice');
-  expect((request.body as { ar_invoice_lines: { is_taxable: boolean }[] }).ar_invoice_lines[0].is_taxable).toBe(false);
 });
 
 test('BUG-020: a failed journal entry post shows an error', async ({ page, api }) => {

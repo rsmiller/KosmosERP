@@ -29,7 +29,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-015](#bug-015) | Credit memo edit page is titled "New Credit Memo" | UI | Low | Open |
 | [BUG-016](#bug-016) | Combobox options inside modal dialogs are hidden from assistive tech | UI / accessibility | Medium | Open |
 | [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Open, needs decision |
-| [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Open |
+| [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Fixed (uncommitted) |
 | [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Fixed (uncommitted) |
 | [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Open |
 | [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Open |
@@ -353,6 +353,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-018"></a>
 ## BUG-018: Non-taxable customers' invoice lines default to taxable
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** High. Tax-exempt customers can be taxed on invoices.
 - **Where:** `UI/app/erp/ar/new/[id]/page.tsx` (~line 116):
 
@@ -496,6 +498,13 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-018: tax-exempt customers are no longer taxed on invoices.**
+  - **UI** (`UI/app/erp/ar/new/[id]/page.tsx`): lines default to `customer.is_taxable ?? true`, so a customer's `false` sticks. `tax_rate` uses `?? 0` to match.
+  - **API** (`ARInvoiceModule`): the API no longer trusts the client. `Create` clears `is_taxable` on the header and every line when the customer is tax-exempt, so the invoice total has no tax either. `MapToLineDatabaseModel` (used by `Create` and `CreateLine`) only taxes a line when the customer is taxable. So ticking Tax on a line by hand can't tax an exempt customer.
+  - **Not changed:** `EditLine` still doesn't recalculate `line_tax` when `is_taxable` or the quantity changes. That's a separate issue, not a regression.
+  - **Tests:**
+    - .NET: `ARInvoiceModuleTests.Create_TaxesTaxableCustomer`, `Create_NeverTaxesTaxExemptCustomer`, `CreateLine_NeverTaxesTaxExemptCustomer`.
+    - e2e: `ar-invoices.spec.ts` › "invoice tax" (taxable and tax-exempt customers). The exempt test fails with the old code ("Expected: false, Received: true"). The BUG-018 known-bug test is retired.
 - **BUG-019: AR invoice due dates come from the payment term's days.**
   - **Days live in `int_value`:** a payment term's `int_value` is its length in days (NET30 → 30). `UI/app/erp/ar/new/[id]/page.tsx` looks up the customer's term by key (`GetKeyValuesByModule`) and uses `int_value`. A term without one (e.g. "Due on Receipt") is due on the invoice date. The display name no longer matters.
   - **Dates:** the page now keeps them as `Date` objects, and formats `yyyy-MM-dd` only when saving. They used to round-trip through `toLocaleDateString()`, which also broke saving for non-US browser locales.

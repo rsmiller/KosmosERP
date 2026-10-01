@@ -87,22 +87,52 @@ test.describe('invoice an order', () => {
   });
 });
 
+type CreateInvoiceBody = {
+  invoice_date: string;
+  invoice_due_date: string;
+  is_taxable: boolean;
+  ar_invoice_lines: { is_taxable: boolean }[];
+};
+
+/** Invoice one unit of the first order line and return the create request's body. */
+async function invoiceFirstLine(page: Page, api: MockApi, world: World): Promise<CreateInvoiceBody> {
+  await page.clock.setFixedTime(TODAY);
+  mockWorld(api, world);
+  await stubPrintPopup(page);
+  api.on('POST', '/ARInvoice/CreateARInvoice', (req) => ok({ ...world.arInvoices[0], ...(req.body as object) }));
+  const form = new ARInvoiceFromOrderPage(page);
+  const line = world.orders[0].order_lines![0];
+
+  await page.goto(`/erp/ar/new/${world.orders[0].guid}`);
+  await form.setUnitsToInvoice(line.line_description, 1);
+  await form.save.click();
+  return (await api.waitForRequest('POST', '/ARInvoice/CreateARInvoice')).body as CreateInvoiceBody;
+}
+
+test.describe('invoice tax', () => {
+  test('a taxable customer\'s lines are taxable', async ({ page, api }) => {
+    const world = buildWorld();
+    world.customers[0].is_taxable = true;
+
+    const body = await invoiceFirstLine(page, api, world);
+
+    expect(body.is_taxable).toBe(true);
+    expect(body.ar_invoice_lines[0].is_taxable).toBe(true);
+  });
+
+  test('a tax-exempt customer\'s lines are not taxable', async ({ page, api }) => {
+    // Regression for BUG-018: `is_taxable ? is_taxable : true` turned false into true.
+    const world = buildWorld();
+    world.customers[0].is_taxable = false;
+
+    const body = await invoiceFirstLine(page, api, world);
+
+    expect(body.is_taxable).toBe(false);
+    expect(body.ar_invoice_lines[0].is_taxable).toBe(false);
+  });
+});
+
 test.describe('invoice due date', () => {
-  /** Invoice the first order line and return the create request's body. */
-  async function invoiceFirstLine(page: Page, api: MockApi, world: World) {
-    await page.clock.setFixedTime(TODAY);
-    mockWorld(api, world);
-    await stubPrintPopup(page);
-    api.on('POST', '/ARInvoice/CreateARInvoice', (req) => ok({ ...world.arInvoices[0], ...(req.body as object) }));
-    const form = new ARInvoiceFromOrderPage(page);
-    const line = world.orders[0].order_lines![0];
-
-    await page.goto(`/erp/ar/new/${world.orders[0].guid}`);
-    await form.setUnitsToInvoice(line.line_description, 1);
-    await form.save.click();
-    return (await api.waitForRequest('POST', '/ARInvoice/CreateARInvoice')).body as { invoice_date: string; invoice_due_date: string };
-  }
-
   test('uses the payment term\'s days, whatever the term is called', async ({ page, api }) => {
     // Regression for BUG-019: the page used to parse days from the name ("NET30").
     const world = buildWorld();

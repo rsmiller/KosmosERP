@@ -116,8 +116,9 @@ function NewARFromCustomerPage() {
                     command.product_id = line.product_id;
                     command.units_ordered = line.quantity;
                     command.unit_price = line.unit_price;
-                    command.tax_rate = customerResponse.data?.tax_rate ? customerResponse.data?.tax_rate : 0;
-                    command.is_taxable = customerResponse.data?.is_taxable ? customerResponse.data?.is_taxable : true;
+                    command.tax_rate = customerResponse.data?.tax_rate ?? 0;
+                    // `??`, not a truthiness check: a tax-exempt customer's false must stick.
+                    command.is_taxable = customerResponse.data?.is_taxable ?? true;
                     command.shipped_qty = line.shipped_qty;
 
                     //console.log(command)

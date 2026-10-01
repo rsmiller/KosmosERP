@@ -324,6 +324,87 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     }
 
     [Test]
+    public async Task Create_TaxesTaxableCustomer()
+    {
+        _Customer.tax_rate = 0.08m;
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.Create(TaxedInvoiceCommand());
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.is_taxable, Is.True);
+        Assert.That(result.Data.invoice_total, Is.EqualTo(108));
+        Assert.That(result.Data.ar_invoice_lines.Single().is_taxable, Is.True);
+        Assert.That(result.Data.ar_invoice_lines.Single().line_tax, Is.EqualTo(8));
+    }
+
+    [Test]
+    public async Task Create_NeverTaxesTaxExemptCustomer()
+    {
+        // Regression for BUG-018: the AR page sent taxable lines for tax-exempt customers, and the API taxed them.
+        _Customer.is_taxable = false;
+        _Customer.tax_rate = 0.08m;
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.Create(TaxedInvoiceCommand());
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.is_taxable, Is.False);
+        Assert.That(result.Data.invoice_total, Is.EqualTo(100));
+        Assert.That(result.Data.ar_invoice_lines.Single().is_taxable, Is.False);
+        Assert.That(result.Data.ar_invoice_lines.Single().line_tax, Is.Zero);
+    }
+
+    [Test]
+    public async Task CreateLine_NeverTaxesTaxExemptCustomer()
+    {
+        _Customer.is_taxable = false;
+        _Customer.tax_rate = 0.08m;
+        await _Context.SaveChangesAsync();
+
+        var line = await _Module.CreateLine(new ARInvoiceLineCreateCommand()
+        {
+            calling_user_id = _User.external_id,
+            ar_invoice_header_id = _ARInvoiceHeader.id,
+            order_line_id = _SalesOrderLine.id,
+            line_number = 2,
+            invoice_qty = 1,
+            line_description = _SalesOrderLine.line_description,
+            is_taxable = true,
+            product_id = _SalesOrderLine.product_id,
+        });
+
+        Assert.That(line.Success, Is.True);
+        Assert.That(line.Data.is_taxable, Is.False);
+        Assert.That(line.Data.line_tax, Is.Zero);
+    }
+
+    /// <summary>One unit of the $100 order line, with the header and line both marked taxable at 8%.</summary>
+    private ARInvoiceHeaderCreateCommand TaxedInvoiceCommand() => new ARInvoiceHeaderCreateCommand()
+    {
+        calling_user_id = _User.external_id,
+        invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
+        invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
+        customer_id = _Customer.id,
+        order_header_id = _SalesOrderHeader.id,
+        payment_terms = "payment_terms_net_15",
+        is_taxable = true,
+        tax_percentage = 0.08m,
+        ar_invoice_lines = new List<ARInvoiceLineCreateCommand>() {
+            new ARInvoiceLineCreateCommand()
+            {
+                order_line_id = _SalesOrderLine.id,
+                line_number = 1,
+                invoice_qty = 1,
+                line_description = _SalesOrderLine.line_description,
+                is_taxable = true,
+                product_id = _SalesOrderLine.product_id,
+                calling_user_id = _User.external_id
+            }
+        }
+    };
+
+    [Test]
     public async Task Get()
     {
         var new_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
