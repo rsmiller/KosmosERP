@@ -6,11 +6,10 @@ import '../../../../styles/page.component.css';
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from 'next/navigation';
 import SessionStorage from '@/components/session-storage';
-import { ProductionOrderHeaderDto, ProductionOrderHeaderEditCommand, ProductionOrderLineDto } from '@/models/production-orders-models';
+import { ProductionOrderHeaderDto, ProductionOrderHeaderEditCommand, ProductionOrderLineDto, ProductionOrderLineEditCommand } from '@/models/production-orders-models';
 import { useForm } from 'react-hook-form';
 import { productionOrderService } from '@/services/production-order-service';
-import { PurchaseOrderLineDto } from '@/models/purchase-order-models';
-import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
+import { AllCommunityModule, CellValueChangedEvent, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { Grid, GridItem } from '@chakra-ui/react';
 import { AgGridReact } from 'ag-grid-react';
 import PageActionsComponent from '@/components/page-actions';
@@ -33,7 +32,7 @@ function EditProductionOrderPage() {
     const [productionOrder, setProductionOrder] = useState<ProductionOrderHeaderDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [formValid, setFormValid] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
@@ -43,7 +42,9 @@ function EditProductionOrderPage() {
         setValue,
     } = useForm<ProductionOrderHeaderEditCommand>();
 
-    const [rowData, setRowData] = useState<PurchaseOrderLineDto[]>([]);
+    const [rowData, setRowData] = useState<ProductionOrderLineDto[]>([]);
+    // Ids of lines edited since the last save. Save sends only these.
+    const [changedLineIds, setChangedLineIds] = useState<Set<number>>(new Set());
     const hasInitialized = useRef(false);
 
     const loadSalesOrder = async () => {
@@ -75,9 +76,6 @@ function EditProductionOrderPage() {
                 // If this is completed we can't edit this
                 if(response.data.is_complete) {
                 setCompletedOrDisabled(true);
-                setFormValid(false);
-                } else {
-                CheckFormValidity();
                 }
 
             } else {
@@ -121,10 +119,6 @@ function EditProductionOrderPage() {
     }, [params.id, setValue, auth.authenticated]);
 
 
-    const CheckFormValidity = () => {
-
-    }
-
     const [colDefs, setColDefs] = useState<ColDef<ProductionOrderLineDto>[]>([
         { field: "order_line.product_name", headerName: "Product Name"},
         { field: "quantity", headerName: "Quantity" },
@@ -163,22 +157,50 @@ function EditProductionOrderPage() {
     }
 
     const handleSaveClick = async () => {
+        setSaving(true);
         setSuccessSaved(false);
+        setFailedSaved(false);
+
+        // Lines that fail stay marked as changed so Save can retry them.
+        const failed = new Set<number>();
+        for (const line of rowData.filter(l => l.id !== undefined && changedLineIds.has(l.id))) {
+            const command = new ProductionOrderLineEditCommand();
+            command.id = line.id;
+            command.status = line.status;
+
+            try {
+                const response = await productionOrderService.updateLine(command, auth.token || "");
+                if (!response.success) {
+                    console.error(response);
+                    failed.add(line.id!);
+                }
+            } catch (err) {
+                console.error('Error saving production order line:', err);
+                failed.add(line.id!);
+            }
+        }
+
+        setChangedLineIds(failed);
+        setSuccessSaved(failed.size === 0);
+        setFailedSaved(failed.size > 0);
+        setSaving(false);
     }
 
-    const onCellValueChanged = (event: any) => {
-        // Update the rowData state to reflect changes
-        const updatedRowData = [...rowData];
-        const rowIndex = event.rowIndex;
-        if (rowIndex >= 0 && rowIndex < updatedRowData.length) {
-            updatedRowData[rowIndex] = { ...updatedRowData[rowIndex], [event.colDef.field]: event.newValue };
-            setRowData(updatedRowData);
-        }
+    const onCellValueChanged = (event: CellValueChangedEvent<ProductionOrderLineDto>) => {
+        // ag-grid has already written the new value into the row object (which
+        // is the one in rowData), so only the change needs recording.
+        const lineId = event.data?.id;
+        if (lineId === undefined || event.oldValue === event.newValue) return;
+
+        setChangedLineIds(prev => new Set(prev).add(lineId));
+        setSuccessSaved(false);
     };
+
+    const canSave = hasEditPermission && !completedOrDisabled && !saving && changedLineIds.size > 0;
 
 
     return (
-    <form onChange={CheckFormValidity}>
+    <form>
       <Grid
             templateColumns="repeat(5, 2fr)"
             gap={6}
@@ -208,7 +230,7 @@ function EditProductionOrderPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 canDelete={false}
-                saveDisabled={!formValid || !hasEditPermission}
+                saveDisabled={!canSave}
                 successSaved={successSaved}
                 failedSaved={failedSaved}
               />

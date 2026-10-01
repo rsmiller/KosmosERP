@@ -35,7 +35,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Open |
 | [BUG-022](#bug-022) | BOM item dialog is titled "Add Address" | UI | Low | Open |
 | [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Open |
-| [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Open |
+| [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Fixed (uncommitted) |
 | [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Open |
 | [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Fixed (uncommitted) |
 
@@ -426,6 +426,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-024"></a>
 ## BUG-024: Production order edits are never saved
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** High. Changing a production line's status on the edit page looks like it works, but nothing is persisted.
 - **Where:** `UI/app/erp/productionorders/edit/[id]/page.tsx`
   - `handleSaveClick` only calls `setSuccessSaved(false)`.
@@ -498,6 +500,23 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-024: production order line status changes are saved.**
+  - **UI** (`UI/app/erp/productionorders/edit/[id]/page.tsx`):
+    - Changing a line's status marks that line as unsaved, and Save turns on.
+    - Save sends `UpdateProductionOrderLine` with `{ id, status }` for each changed line, then shows "Record saved!" or "Record could not be saved!".
+    - Lines that fail stay unsaved, so Save can retry them.
+    - Save stays disabled for completed orders and for users without edit permission.
+    - Removed the empty `CheckFormValidity` stub and the unused `formValid` state.
+    - The change handler used to copy by `rowIndex`, which points at the wrong row once the grid is sorted. It now keys on the line id.
+    - `rowData` was typed as purchase-order lines; it's now production-order lines.
+  - **API** (`ProductionOrderModule.Edit` / `EditLine`):
+    - The status guard checked the *existing* status, so an edit that didn't send a status (quantity only, say) set it to null. It now updates the status only when one is sent.
+    - `EditLine` compared `line_number` against the quantity; it now compares against `line_number`.
+  - **Still blocked by BUG-003 against real data:** the status editor loads its options from the wrong lookup id, so with seeded data the dropdown may be empty. Saving works once a status can be picked.
+  - **BUG-025** (same page, completed orders' grid still editable) is still open. Save is disabled for completed orders, so edits there are not persisted.
+  - **Tests:**
+    - .NET: `ProductionOrdersModuleTests.EditLine_StatusOnly_ChangesJustTheStatus`, `EditLine_WithoutStatus_KeepsStatus`, `Edit_WithoutStatus_KeepsStatus`.
+    - e2e: `production/production-orders.spec.ts` › "edit" (saves the change and asserts the payload; a failed save shows an error and retries; a completed order can't be saved). The save test fails on the old page. The BUG-024 known-bug test is retired.
 - **BUG-018: tax-exempt customers are no longer taxed on invoices.**
   - **UI** (`UI/app/erp/ar/new/[id]/page.tsx`): lines default to `customer.is_taxable ?? true`, so a customer's `false` sticks. `tax_rate` uses `?? 0` to match.
   - **API** (`ARInvoiceModule`): the API no longer trusts the client. `Create` clears `is_taxable` on the header and every line when the customer is tax-exempt, so the invoice total has no tax either. `MapToLineDatabaseModel` (used by `Create` and `CreateLine`) only taxes a line when the customer is taxable. So ticking Tax on a line by hand can't tax an exempt customer.

@@ -298,7 +298,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             return new Response<ProductionOrderHeaderDto>("Production Order Header not found", ResultCode.NotFound);
 
 
-        if (!String.IsNullOrEmpty(existingEntity.status) && existingEntity.status != commandModel.status)
+        if (!String.IsNullOrEmpty(commandModel.status) && existingEntity.status != commandModel.status)
             existingEntity.status = commandModel.status;
 
         if (existingEntity.priority_id != commandModel.priority_id && commandModel.priority_id.HasValue)
@@ -341,13 +341,13 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             return new Response<ProductionOrderLineDto>("Production Order Line not found", ResultCode.NotFound);
 
 
-        if (existingEntity.line_number != commandModel.quantity && commandModel.line_number.HasValue)
+        if (existingEntity.line_number != commandModel.line_number && commandModel.line_number.HasValue)
             existingEntity.line_number = commandModel.line_number.Value;
 
         if (existingEntity.quantity != commandModel.quantity && commandModel.quantity.HasValue)
             existingEntity.quantity = commandModel.quantity.Value;
 
-        if (!String.IsNullOrEmpty(existingEntity.status) && existingEntity.status != commandModel.status)
+        if (!String.IsNullOrEmpty(commandModel.status) && existingEntity.status != commandModel.status)
             existingEntity.status = commandModel.status;
 
         if (commandModel.started_on.HasValue && existingEntity.started_on != commandModel.started_on)

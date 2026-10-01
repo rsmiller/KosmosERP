@@ -66,22 +66,6 @@ test('BUG-023: a product can be created after loading /erp/products/new directly
   await expect(page.getByRole('button', { name: 'Save Record' })).toBeEnabled();
 });
 
-test('BUG-024: a production order status change is saved', async ({ page, api }) => {
-  knownBug('BUG-024: the production order edit page never calls the API; handleSaveClick and CheckFormValidity are empty stubs');
-
-  const world = mockWorld(api, buildWorld());
-  const row = page.getByRole('row').filter({ hasText: world.products[0].product_name! });
-  await page.goto(`/erp/productionorders/edit/${world.productionOrders[0].guid}`);
-
-  await row.locator('[col-id="status"]').dblclick();
-  await chooseOption(page, row.getByRole('combobox'), 'Work In Progress');
-  await row.getByRole('combobox').press('Enter');
-  const save = page.getByRole('button', { name: 'Save Record' });
-  if (await save.isEnabled()) await save.click();
-
-  await expect.poll(() => api.requests.filter((r) => r.method === 'PUT' && /ProductionOrder/.test(r.path)).length).toBeGreaterThan(0);
-});
-
 test('BUG-025: a completed production order\'s lines are read-only', async ({ page, api }) => {
   knownBug('BUG-025: colDefs live in useState, so editable: !completedOrDisabled is fixed at mount (before the order loads)');
 

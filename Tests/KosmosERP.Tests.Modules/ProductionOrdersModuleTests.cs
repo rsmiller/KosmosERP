@@ -491,6 +491,86 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
         Assert.That(edit_line_response.Data.started_on == edit_command.started_on);
     }
 
+    [Test]
+    public async Task EditLine_StatusOnly_ChangesJustTheStatus()
+    {
+        // What the production order edit page sends (BUG-024).
+        var line = (await CreateOrderWithLineStatus("production_status_new")).production_order_lines[0];
+
+        var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
+        {
+            calling_user_id = _User.external_id,
+            id = line.id,
+            status = "production_status_picking",
+        });
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.status, Is.EqualTo("production_status_picking"));
+        Assert.That(result.Data.quantity, Is.EqualTo(line.quantity));
+    }
+
+    [Test]
+    public async Task EditLine_WithoutStatus_KeepsStatus()
+    {
+        // Regression: an edit that didn't send a status wiped it.
+        var line = (await CreateOrderWithLineStatus("production_status_new")).production_order_lines[0];
+
+        var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
+        {
+            calling_user_id = _User.external_id,
+            id = line.id,
+            quantity = 5,
+        });
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.quantity, Is.EqualTo(5));
+        Assert.That(result.Data.status, Is.EqualTo("production_status_new"));
+    }
+
+    [Test]
+    public async Task Edit_WithoutStatus_KeepsStatus()
+    {
+        var order = await CreateOrderWithLineStatus("production_status_new");
+
+        var result = await _Module.Edit(new ProductionOrderHeaderEditCommand()
+        {
+            calling_user_id = _User.external_id,
+            id = order.id,
+            priority_id = 2,
+        });
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.priority_id, Is.EqualTo(2));
+        Assert.That(result.Data.status, Is.EqualTo("production_status_new"));
+    }
+
+    private async Task<ProductionOrderHeaderDto> CreateOrderWithLineStatus(string lineStatus)
+    {
+        var result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
+        {
+            calling_user_id = _User.external_id,
+            order_header_id = _SalesOrderHeader.id,
+            planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
+            planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
+            priority_id = 1,
+            status = "production_status_new",
+            production_order_lines = new List<ProductionOrderLineCreateCommand>()
+            {
+                new ProductionOrderLineCreateCommand()
+                {
+                    line_number = _SalesOrderLine.line_number,
+                    quantity = _SalesOrderLine.quantity,
+                    order_line_id = _SalesOrderLine.id,
+                    status = lineStatus,
+                    calling_user_id = _User.external_id
+                }
+            }
+        });
+
+        Assert.That(result.Success, Is.True);
+        return result.Data;
+    }
+
 
     [Test]
     public async Task DeleteLine()
