@@ -227,6 +227,47 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     }
 
     [Test]
+    public async Task Create_ManufacturedProduct_CreatesSubmittedProductionOrder()
+    {
+        // Regression for BUG-003: these used to start on the retired production_status_new key.
+        _Product.is_manufactured = true;
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.Create(new OrderHeaderCreateCommand()
+        {
+            calling_user_id = _User.external_id,
+            order_date = DateOnly.FromDateTime(DateTime.Now),
+            required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
+            customer_id = _Customer.id,
+            po_number = "556645",
+            ship_to_address_id = _Address.id,
+            // Released ("R") orders are the ones that create production orders.
+            order_type = "R",
+            shipping_method = "shipping_method_pickup",
+            pay_method = "payment_method_cash",
+            shipping_cost = 12,
+            order_lines = new List<OrderLineCreateCommand>() {
+                new OrderLineCreateCommand()
+                {
+                    quantity = 2,
+                    unit_price = 10,
+                    line_number = 1,
+                    line_description = "Built to order",
+                    product_id = _Product.id,
+                    attributes = new List<OrderLineAttributeCreateCommand>(),
+                }
+            }
+        });
+
+        Assert.That(result.Success, Is.True);
+        var production_order = await _Context.ProductionOrderHeaders.SingleAsync(m => m.order_header_id == result.Data!.id);
+        Assert.That(production_order.status, Is.EqualTo(ProductionOrderStatus.Submitted));
+        var lines = await _Context.ProductionOrderLines.Where(m => m.production_order_header_id == production_order.id).ToListAsync();
+        Assert.That(lines, Is.Not.Empty);
+        Assert.That(lines.Select(m => m.status), Is.All.EqualTo(ProductionOrderStatus.Submitted));
+    }
+
+    [Test]
     public async Task Edit()
     {
         var old_result = await _Module.Create(new OrderHeaderCreateCommand()

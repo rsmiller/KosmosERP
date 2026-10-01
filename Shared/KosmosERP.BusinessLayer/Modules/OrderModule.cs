@@ -403,7 +403,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                         {
                             order_line_id = db_line.id,
                             quantity = db_line.quantity,
-                            status = ProductionOrderStatus.New,
+                            status = ProductionOrderStatus.Submitted,
                             production_lead_minutes = manufactured_product.manufacture_time_minutes,
                             calling_user_id = "1"
                         });
@@ -418,7 +418,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 var production_order_response = await _ProductionOrderModule.Create(new ProductionOrderHeaderCreateCommand()
                 {
                     order_header_id = item.id,
-                    status = ProductionOrderStatus.New,
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = commandModel.calling_user_id,
                     production_order_lines = production_lines,
                 });
@@ -632,7 +632,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                             {
                                 order_line_id = add_line.id,
                                 quantity = add_line.quantity,
-                                status = ProductionOrderStatus.New,
+                                status = ProductionOrderStatus.Submitted,
                                 production_lead_minutes = manufactured_product.manufacture_time_minutes,
                                 calling_user_id = "1"
                             });
@@ -677,7 +677,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                             {
                                 order_line_id = edit_response.Data.id,
                                 quantity = edit_response.Data.quantity,
-                                status = ProductionOrderStatus.New,
+                                status = ProductionOrderStatus.Submitted,
                                 production_lead_minutes = manufactured_product.manufacture_time_minutes,
                                 calling_user_id = "1",
                             });
@@ -708,7 +708,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 var production_order_response = await _ProductionOrderModule.Create(new ProductionOrderHeaderCreateCommand()
                 {
                     order_header_id = existingEntity.id,
-                    status = ProductionOrderStatus.New,
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = commandModel.calling_user_id,
                     production_order_lines = production_lines,
                 });

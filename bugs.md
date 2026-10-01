@@ -14,7 +14,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | --- | --- | --- | --- | --- |
 | [BUG-001](#bug-001) | Admin → Settings and Adjustments redirect every user away | UI / permissions | High | Fixed (uncommitted) |
 | [BUG-002](#bug-002) | Sales orders can't be created: `order_headers` schema defects | DB / EF migrations | High | Fixed (uncommitted) |
-| [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Open, needs decision |
+| [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Fixed (uncommitted) |
 | [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
 | [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Fixed (uncommitted) |
 | [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Fixed (uncommitted) |
@@ -98,6 +98,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-003"></a>
 ## BUG-003: Production status dropdowns use a lookup id the backend never populates
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Medium. Against real data, production status dropdowns and cell editors are probably empty.
 - **Where:**
@@ -530,6 +532,36 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-003: one production status list, `97dd4b13…`.**
+  - **What was really wrong:** two lists were in use, and not only in the UI.
+    - The old list, `f157469e…` with `production_status_*` keys, was used by the UI dropdowns and label, and by production orders that sales orders create (they started as `production_status_new`).
+    - The new list, `97dd4b13…` with `production_order_status_*` keys, was used by the API seed, the seeder, and Shipments' "Ready To Ship" (`GetReadyToShip` filters on `production_order_status_ready_to_ship`).
+    - Against real data, nobody could set Ready To Ship, so the shipping list stayed empty.
+  - **Decisions (owner):** the new list is canonical. Existing orders are converted by stage. Canceled is added to the new list.
+  - **API:**
+    - `ProductionOrderStatus` (`Shared/KosmosERP.Models/Enums.cs`) now holds the new keys, plus `production_order_status_canceled`.
+    - `ProductionOrderModule.SeedPermissions` creates the seven statuses from it, only adding missing ones, so renames in Lists survive.
+    - `OrderModule` starts auto-created production orders and lines as Submitted.
+    - `ShipmentModule.GetReadyToShip` uses the constant.
+  - **Data migration `RetireOldProductionStatuses`:**
+    - Production order headers and lines move to the new keys: New, Released and Scheduled → Submitted; Picking → Parts Pulled; Production → Work In Progress; QC → Quality Check; Completed → Complete; Canceled → Canceled.
+    - The old list's entries are soft-deleted, so they drop out of Admin → Lists.
+    - `Down` restores those entries but not order statuses (three old stages became Submitted).
+    - Verified on MySQL 8.0.44: all 8 old statuses mapped on headers and lines. Untouched: an order already on the new list, an unknown status, the new list's entries, and a same-key row in another module. `Down` restored the old list.
+  - **Seeder:** adds Canceled.
+  - **UI:**
+    - The status combobox, cell editor and cell renderer use `KeyValueModuleIds.ProductionStatuses`.
+    - The duplicate "Production Status" (`f157469e…`) entry is removed from the Lists module menu.
+  - **Tests:**
+    - .NET:
+      - `ProductionOrdersModuleTests.SeedPermissions_CreatesTheProductionStatuses` and `…_AddsOnlyMissingStatuses`.
+      - `OrderModuleTests.Create_ManufacturedProduct_CreatesSubmittedProductionOrder`.
+      - The module tests moved off the old keys, and the unused "Planned" lookup on the old id is dropped.
+    - e2e:
+      - `KeyValueModules.ProductionStatus` is the canonical id (the mocks followed the UI's wrong id before, which is why tests passed), and the mock list mirrors the API's seven statuses.
+      - `production-orders.spec.ts` › "a line can be marked Ready To Ship…" saves `production_order_status_ready_to_ship` and checks the page only asks for the canonical list. It fails on the old UI.
+  - **Not changed:** `SQL/KeyValues.sql`, an unreferenced script from the initial import, still inserts the old list. It's out of date in other ways too (payment terms numbered 1–4, a different lead-stage id). Delete it or regenerate it from the seeder rather than run it.
+  - **Deploy:** run `dotnet ef database update`, then start the API so `SeedPermissions` adds Ready To Ship and Canceled where they're missing.
 - **BUG-016: dropdowns inside dialogs render their options inside the dialog.**
   - **Cause:** the comboboxes portaled their option lists to `<body>`, outside the modal. The modal hid them from assistive tech, so they had no accessible name, and clicking one sometimes counted as a click outside, which closed the dialog.
   - **Fix:** Chakra's guidance is not to portal dropdowns inside a Dialog. Each affected component takes a `portalled` prop (default `true`, so nothing changes elsewhere) and renders `<Portal disabled={!portalled}>`. The dialogs pass `portalled={false}`:

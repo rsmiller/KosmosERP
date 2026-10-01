@@ -1,7 +1,7 @@
 "use client"
 
 import { KeyValueDto } from "@/models/key-value-models";
-import { keyValueService } from "@/services/keyvalue-service";
+import { keyValueService, KeyValueModuleIds } from "@/services/keyvalue-service";
 import {
     Combobox,
     Portal,
@@ -105,7 +105,7 @@ const ProductionStatusCombobox = forwardRef<ProductionStatusComboboxRef, Product
     const fetchData = useAsync(async () => {
         // Wait for auth: on a direct load the token isn't there on the first run.
         if (!auth.token) return;
-        await keyValueService.GetDtoByModule("f157469e-5e5c-4a5b-b071-89a28b2a0310", auth.token || "").then((response) =>
+        await keyValueService.GetDtoByModule(KeyValueModuleIds.ProductionStatuses, auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
                 set(response.data);

@@ -115,16 +115,21 @@ public class DatabaseStartNumbers
     public static int CreditMemos { get { return 30000; } }
 }
 
+/// <summary>
+/// Production order status keys, stored on production order headers and lines.
+/// Their display names live in key_value_stores under KeyValueIds.ProductionStatuses,
+/// created by ProductionOrderModule.SeedPermissions. The older production_status_*
+/// keys (module f157469e-...) were retired; see migration RetireOldProductionStatuses.
+/// </summary>
 public class ProductionOrderStatus
 {
-    public static string Canceled { get { return "production_status_canceled"; } }
-    public static string New { get { return "production_status_new"; } }
-    public static string Released { get { return "production_status_released"; } }
-    public static string Scheduled { get { return "production_status_scheduled"; } }
-    public static string Picking { get { return "production_status_picking"; } }
-    public static string Production { get { return "production_status_production"; } }
-    public static string QC { get { return "production_status_qc"; } }
-    public static string Completed { get { return "production_status_completed"; } }
+    public static string Submitted { get { return "production_order_status_submitted"; } }
+    public static string PartsPulled { get { return "production_order_status_pulled"; } }
+    public static string WorkInProgress { get { return "production_order_status_wip"; } }
+    public static string QualityCheck { get { return "production_order_status_qc"; } }
+    public static string Complete { get { return "production_order_status_complete"; } }
+    public static string ReadyToShip { get { return "production_order_status_ready_to_ship"; } }
+    public static string Canceled { get { return "production_order_status_canceled"; } }
 }
 
 

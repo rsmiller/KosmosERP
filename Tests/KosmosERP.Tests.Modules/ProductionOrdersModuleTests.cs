@@ -181,17 +181,38 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
         _Context.OrderLineAttributes.Add(line_attribute_2);
         _Context.SaveChanges();
 
+    }
 
-        var status = CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+    [Test]
+    public async Task SeedPermissions_CreatesTheProductionStatuses()
+    {
+        // SetupModule already ran SeedPermissions. BUG-003: one list, under KeyValueIds.ProductionStatuses.
+        var keys = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.ProductionStatuses)
+            .Select(m => m.key)
+            .ToListAsync();
+
+        Assert.That(keys, Is.EquivalentTo(new[]
         {
-            module_id = "f157469e-5e5c-4a5b-b071-89a28b2a0310",
-            key = "Planned",
-            value = "Planned",
-            int_value = 1
-        }, 1);
+            ProductionOrderStatus.Submitted, ProductionOrderStatus.PartsPulled, ProductionOrderStatus.WorkInProgress,
+            ProductionOrderStatus.QualityCheck, ProductionOrderStatus.Complete, ProductionOrderStatus.ReadyToShip,
+            ProductionOrderStatus.Canceled,
+        }));
+    }
 
-        _Context.KeyValueStores.Add(status);
-        _Context.SaveChanges();
+    [Test]
+    public async Task SeedPermissions_AddsOnlyMissingStatuses()
+    {
+        // An admin's rename is kept; a missing status (Canceled, on databases seeded before it existed) is added.
+        var submitted = await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == ProductionOrderStatus.Submitted);
+        submitted.value = "Queued";
+        _Context.KeyValueStores.Remove(await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == ProductionOrderStatus.Canceled));
+        await _Context.SaveChangesAsync();
+
+        _Module.SeedPermissions();
+
+        Assert.That((await _Context.KeyValueStores.SingleAsync(m => m.key == ProductionOrderStatus.Submitted)).value, Is.EqualTo("Queued"));
+        Assert.That(await _Context.KeyValueStores.CountAsync(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == ProductionOrderStatus.Canceled), Is.EqualTo(1));
     }
 
     [Test]
@@ -204,7 +225,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -212,7 +233,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -236,7 +257,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -244,7 +265,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -263,7 +284,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -271,7 +292,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -284,7 +305,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(9)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(14)),
             priority_id = 2,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
             actual_completed_on = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
             is_complete = true,
         };
@@ -311,7 +332,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -319,7 +340,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -353,7 +374,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -361,7 +382,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -396,7 +417,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -404,7 +425,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -423,7 +444,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             quantity = 12323,
             line_number = 2,
             order_line_id = _SalesOrderLine.id,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
             started_on = DateTime.Now,
         };
 
@@ -449,7 +470,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -457,7 +478,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }
@@ -475,7 +496,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             id = create_result.Data.production_order_lines[0].id,
             quantity = 111,
             line_number = 2,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
             started_on = DateTime.Now,
         };
 
@@ -495,17 +516,17 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     public async Task EditLine_StatusOnly_ChangesJustTheStatus()
     {
         // What the production order edit page sends (BUG-024).
-        var line = (await CreateOrderWithLineStatus("production_status_new")).production_order_lines[0];
+        var line = (await CreateOrderWithLineStatus(ProductionOrderStatus.Submitted)).production_order_lines[0];
 
         var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
         {
             calling_user_id = _User.external_id,
             id = line.id,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
         });
 
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data.status, Is.EqualTo("production_status_picking"));
+        Assert.That(result.Data.status, Is.EqualTo(ProductionOrderStatus.PartsPulled));
         Assert.That(result.Data.quantity, Is.EqualTo(line.quantity));
     }
 
@@ -513,7 +534,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     public async Task EditLine_WithoutStatus_KeepsStatus()
     {
         // Regression: an edit that didn't send a status wiped it.
-        var line = (await CreateOrderWithLineStatus("production_status_new")).production_order_lines[0];
+        var line = (await CreateOrderWithLineStatus(ProductionOrderStatus.Submitted)).production_order_lines[0];
 
         var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
         {
@@ -524,13 +545,13 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data.quantity, Is.EqualTo(5));
-        Assert.That(result.Data.status, Is.EqualTo("production_status_new"));
+        Assert.That(result.Data.status, Is.EqualTo(ProductionOrderStatus.Submitted));
     }
 
     [Test]
     public async Task Edit_WithoutStatus_KeepsStatus()
     {
-        var order = await CreateOrderWithLineStatus("production_status_new");
+        var order = await CreateOrderWithLineStatus(ProductionOrderStatus.Submitted);
 
         var result = await _Module.Edit(new ProductionOrderHeaderEditCommand()
         {
@@ -541,7 +562,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data.priority_id, Is.EqualTo(2));
-        Assert.That(result.Data.status, Is.EqualTo("production_status_new"));
+        Assert.That(result.Data.status, Is.EqualTo(ProductionOrderStatus.Submitted));
     }
 
     private async Task<ProductionOrderHeaderDto> CreateOrderWithLineStatus(string lineStatus)
@@ -553,7 +574,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -581,7 +602,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             order_header_id = _SalesOrderHeader.id,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
@@ -590,7 +611,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
+                    status = ProductionOrderStatus.Submitted,
                     calling_user_id = _User.external_id
                 }
             }

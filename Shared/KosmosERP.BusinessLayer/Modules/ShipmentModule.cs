@@ -701,7 +701,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             // Units produced per order line, counting only production lines that are ready to ship.
             var produced = _Context.ProductionOrderLines
-                .Where(m => m.status == "production_order_status_ready_to_ship" && !m.is_deleted)
+                .Where(m => m.status == ProductionOrderStatus.ReadyToShip && !m.is_deleted)
                 .GroupBy(m => m.order_line_id)
                 .Select(g => new { order_line_id = g.Key, produced_quantity = g.Sum(m => m.quantity) });
 

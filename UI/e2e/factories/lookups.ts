@@ -18,7 +18,7 @@ export const KeyValueModules = {
   ShipmentMethod: '9da95117-2792-44e5-996a-e91a244b0384',
   FreightCarrier: '2a2d1004-5283-40ef-96fd-8cc30c65cefa',
   ProductCategory: 'f6e28b05-265d-4416-b5fd-48399036493a',
-  ProductionStatus: 'f157469e-5e5c-4a5b-b071-89a28b2a0310',
+  ProductionStatus: '97dd4b13-ff15-47ff-955d-5e957644cffd',
   OpportunityStage: '0c3959c3-15dc-44ab-8e2c-9b9e2773e65f',
   LeadStage: '9d624ee2-6433-49f0-bc6c-3e6978e2ac9c',
   TransactionType: '416786e0-47b3-440a-90da-b7036d72b1f7',
@@ -72,10 +72,15 @@ export const PaymentMethodKeys = { NetTerms: 'pay_method_net_terms', CreditCard:
 export const ShipmentMethodKeys = { Carrier: 'shipping_method_carrier', Pickup: 'shipping_method_pickup' } as const;
 /** Keys created by ShipmentModule.SeedPermissions (Shared/KosmosERP.BusinessLayer/Modules/ShipmentModule.cs). */
 export const FreightCarrierKeys = { Ups: 'freight_carrier_ups', FedEx: 'freight_carrier_fedex', Dhl: 'freight_carrier_dhl' } as const;
+/** ProductionOrderStatus in Shared/KosmosERP.Models/Enums.cs. */
 export const ProductionStatusKeys = {
   Submitted: 'production_order_status_submitted',
+  PartsPulled: 'production_order_status_pulled',
   Wip: 'production_order_status_wip',
+  QualityCheck: 'production_order_status_qc',
   Complete: 'production_order_status_complete',
+  ReadyToShip: 'production_order_status_ready_to_ship',
+  Canceled: 'production_order_status_canceled',
 } as const;
 export const OpportunityStageKeys = { Proposal: 'opporunity_stage_proposal', ClosedWon: 'opporunity_stage_closed_won' } as const;
 export const LeadStageKeys = { New: 'lead_stage_new', Qualified: 'lead_stage_qualified' } as const;
@@ -101,8 +106,12 @@ export function allLookups(): Record<string, KeyValueDto[]> {
     ]),
     [KeyValueModules.ProductionStatus]: list('ProductionStatus', [
       [ProductionStatusKeys.Submitted, 'Submitted'],
+      [ProductionStatusKeys.PartsPulled, 'Parts Pulled'],
       [ProductionStatusKeys.Wip, 'Work In Progress'],
+      [ProductionStatusKeys.QualityCheck, 'Quality Check'],
       [ProductionStatusKeys.Complete, 'Complete'],
+      [ProductionStatusKeys.ReadyToShip, 'Ready To Ship'],
+      [ProductionStatusKeys.Canceled, 'Canceled'],
     ]),
     [KeyValueModules.OpportunityStage]: list('OpportunityStage', [
       [OpportunityStageKeys.Proposal, 'Proposal'],

@@ -35,6 +35,7 @@ public partial class DatabaseSeeder
         public const string ProdQc = "production_order_status_qc";
         public const string ProdComplete = "production_order_status_complete";
         public const string ProdReadyToShip = "production_order_status_ready_to_ship";
+        public const string ProdCanceled = "production_order_status_canceled";
 
         // Freight carrier keys. The rows themselves are created by ShipmentModule
         // (KeyValueIds.FreightCarriers) when the API starts, not by this seeder.
@@ -84,6 +85,7 @@ public partial class DatabaseSeeder
         AddKv(Kv.ProdQc, "Quality Check", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdComplete, "Complete", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdReadyToShip, "Ready To Ship", KeyValueIds.ProductionStatuses);
+        AddKv(Kv.ProdCanceled, "Canceled", KeyValueIds.ProductionStatuses);
 
         // Opportunity stages (display names shown on the Top Opportunities report).
         AddKv(Kv.StageProspecting, "Prospecting", OpportunityModuleId);

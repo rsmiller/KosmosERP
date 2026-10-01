@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test';
 import { buildWorld } from '../../factories/world';
-import { ProductionStatusKeys } from '../../factories/lookups';
+import { KeyValueModules, ProductionStatusKeys } from '../../factories/lookups';
 import { mockWorld } from '../../mocks/kits/world';
 import { fail, ok } from '../../mocks/envelope';
 import { chooseOption } from '../../pages/controls';
@@ -43,6 +43,22 @@ test.describe('production order', () => {
       await expect(page.getByText('Record saved!')).toBeVisible();
       // Nothing left to save.
       await expect(save(page)).toBeDisabled();
+    });
+
+    test('a line can be marked Ready To Ship, which the shipments list needs', async ({ page, api }) => {
+      // Regression for BUG-003: the status editor read a retired lookup list, so
+      // "Ready To Ship" (the status GetReadyToShip filters on) was never offered.
+      const world = mockWorld(api, buildWorld());
+      const order = world.productionOrders[0];
+      await page.goto(`/erp/productionorders/edit/${order.guid}`);
+
+      await changeStatus(page, world.products[0].product_name!, 'Ready To Ship');
+      await save(page).click();
+
+      const request = await api.waitForRequest('PUT', '/ProductionOrder/UpdateProductionOrderLine');
+      expect(request.body).toEqual({ id: order.production_order_lines![0].id, status: ProductionStatusKeys.ReadyToShip });
+      const lookup = api.requestsTo('GET', '/KeyValue/GetKeyValuesByModule').map((r) => r.url.searchParams.get('module_id'));
+      expect(new Set(lookup)).toEqual(new Set([KeyValueModules.ProductionStatus]));
     });
 
     test('a failed save says so and can be retried', async ({ page, api }) => {

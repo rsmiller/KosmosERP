@@ -72,87 +72,29 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
         }
 
 
-        var submitted_status = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_submitted").SingleOrDefault();
-        var pulled_status = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_pulled").SingleOrDefault();
-        var pulled_wip = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_wip").SingleOrDefault();
-        var pulled_qc = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_qc").SingleOrDefault();
-        var pulled_complete = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_complete").SingleOrDefault();
-
-        var ready_to_ship = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_ready_to_ship").SingleOrDefault();
-
-        if (submitted_status == null)
+        // Production order statuses, in workflow order (keys: ProductionOrderStatus).
+        // Only missing ones are added, so admins can rename them in Lists.
+        var statuses = new (string key, string value)[]
         {
+            (ProductionOrderStatus.Submitted, "Submitted"),
+            (ProductionOrderStatus.PartsPulled, "Parts Pulled"),
+            (ProductionOrderStatus.WorkInProgress, "Work In Progress"),
+            (ProductionOrderStatus.QualityCheck, "Quality Check"),
+            (ProductionOrderStatus.Complete, "Complete"),
+            (ProductionOrderStatus.ReadyToShip, "Ready To Ship"),
+            (ProductionOrderStatus.Canceled, "Canceled"),
+        };
+
+        foreach (var (key, value) in statuses)
+        {
+            if (_Context.KeyValueStores.Any(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == key))
+                continue;
+
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
-                key = "production_order_status_submitted",
-                value = "Submitted",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_status == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_pulled",
-                value = "Parts Pulled",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_wip == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_wip",
-                value = "Work In Progress",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_qc == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_qc",
-                value = "Quality Check",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_complete == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_complete",
-                value = "Complete",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (ready_to_ship == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_ready_to_ship",
-                value = "Ready To Ship",
-                module_id = this.ModuleIdentifier.ToString(),
+                key = key,
+                value = value,
+                module_id = KeyValueIds.ProductionStatuses,
             }, 1));
 
             _Context.SaveChanges();

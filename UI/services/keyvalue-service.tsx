@@ -5,6 +5,8 @@ import { ApiResponse, PagedApiResponse } from "@/models/base-models";
 /** Lookup module ids (Shared/KosmosERP.Models/KeyValueIds.cs). */
 export const KeyValueModuleIds = {
   PaymentTerms: "93bf02ec-5578-4aa4-a45b-f82962adf4bd",
+  /** Production order statuses (KeyValueIds.ProductionStatuses; also the production order module id). */
+  ProductionStatuses: "97dd4b13-ff15-47ff-955d-5e957644cffd",
 } as const;
 
 export const keyValueService = {
@@ -40,10 +42,6 @@ export const keyValueService = {
         {
           module_id: "f6e28b05-265d-4416-b5fd-48399036493a",
           module_name: "Product Category"
-        },
-        {
-          module_id: "f157469e-5e5c-4a5b-b071-89a28b2a0310",
-          module_name: "Production Status"
         },
         {
           module_id: "0c3959c3-15dc-44ab-8e2c-9b9e2773e65f",
