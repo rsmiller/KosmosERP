@@ -279,7 +279,6 @@ function NewCustomerPage() {
             <PageActionsComponent 
                 saveDisabled={!formValid || !hasWritePermission} 
                 onSave={handleSaveClick} 
-                onDelete={undefined} 
                 successSaved={successSaved}
                 failedSaved={failedSaved}
             />

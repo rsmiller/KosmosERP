@@ -167,6 +167,30 @@ test.describe('edit customer', () => {
     await form.phone.fill('555-0142');
     await expect(form.save).toBeEnabled();
   });
+
+  test('a refused delete closes the confirmation and shows the error', async ({ page, api }) => {
+    // The confirmation used to stay open with its buttons disabled behind a
+    // spinner whenever the delete didn't navigate away (seen with BUG-006).
+    const customer = buildCustomer({ customer_name: 'Acme Components' });
+    mockCustomerRecord(api, customer);
+    api.on('POST', '/Customer/DeleteCustomer', fail(-6, 'Customer has open orders'));
+    const form = new CustomerFormPage(page);
+    const confirm = page.getByRole('alertdialog', { name: 'Are you sure?' });
+
+    await page.goto(`/erp/customers/edit/${customer.guid}`);
+    await page.getByRole('button', { name: 'Delete Record' }).click();
+    await confirm.getByRole('button', { name: 'Delete', exact: true }).click();
+
+    await api.waitForRequest('POST', '/Customer/DeleteCustomer');
+    await expect(confirm).toBeHidden();
+    await expect(form.failedAlert).toBeVisible();
+    await expect(page).toHaveURL(`/erp/customers/edit/${customer.guid}`);
+
+    // The dialog works again: nothing is stuck disabled.
+    await page.getByRole('button', { name: 'Delete Record' }).click();
+    await expect(confirm.getByRole('button', { name: 'Cancel' })).toBeEnabled();
+    await expect(confirm.getByRole('button', { name: 'Delete', exact: true })).toBeEnabled();
+  });
 });
 
 test.describe('view customer', () => {

@@ -108,11 +108,6 @@ function NewProductPage() {
         // so the effect must run again once it is.
     }, [setValue, auth.authenticated]);
 
-    const handleDeleteClick = async () => {
-        // For new product, delete is not applicable
-        router.push("/erp/products/");
-    };
-
     const handleSaveClick = async () => {
         setSuccessSaved(false);
 
@@ -513,7 +508,6 @@ function NewProductPage() {
                     <PageActionsComponent 
                         saveDisabled={!formValid || !hasWritePermission} 
                         onSave={handleSaveClick} 
-                        onDelete={handleDeleteClick} 
                         successSaved={successSaved}
                         failedSaved={failedSaved}
                     />

@@ -342,7 +342,6 @@ function NewLeadPage() {
                     <PageActionsComponent 
                         saveDisabled={!formValid || !hasWritePermission} 
                         onSave={handleSaveClick} 
-                        onDelete={undefined} 
                         successSaved={successSaved}
                         failedSaved={failedSaved}
                     />

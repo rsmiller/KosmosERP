@@ -358,7 +358,7 @@ function AccountsReceivableViewPage() {
                 </GridItem>
 
                 <GridItem colSpan={8} >
-                <PageActionsComponent saveDisabled={false} saveText={"Print Invoice"} canDelete={true} onSave={() => { printInvoice() }} onDelete={() => {}}/>
+                <PageActionsComponent saveDisabled={false} saveText={"Print Invoice"} onSave={() => { printInvoice() }}/>
                 </GridItem>
             </Grid>
         </form>

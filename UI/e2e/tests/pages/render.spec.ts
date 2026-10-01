@@ -28,6 +28,14 @@ test.describe('every page renders with realistic data', () => {
       for (const check of entry.checks ?? []) {
         await check(page, world);
       }
+
+      // Only pages with a record to delete offer Delete Record (BUG-006).
+      if (entry.deletable) {
+        const label = entry.deletable === true ? 'Delete Record' : entry.deletable;
+        await expect(page.getByRole('button', { name: label, exact: true })).toBeVisible();
+      } else {
+        await expect(page.getByRole('button', { name: 'Delete Record' })).toHaveCount(0);
+      }
     });
   }
 });

@@ -89,10 +89,6 @@ function NewJournalEntryPage() {
         setHasWritePermission(true);
     }, [auth.authenticated]);
 
-    const handleDeleteClick = async () => {
-        router.push("/erp/journalentries/");
-    };
-
     const handleSaveClick = async () => {
         setSuccessSaved(false);
 
@@ -226,7 +222,6 @@ function NewJournalEntryPage() {
                 saveDisabled={!formValid}
                 showSaveSuccess={successSaved}
                 showSaveFailed={failedSaved}
-                onDelete={handleDeleteClick} 
                 onSave={handleSaveClick} 
             />
             <Grid

@@ -25,16 +25,6 @@ test('BUG-011: date-only values display on the right day', async ({ page, api })
   await expect(page.getByRole('textbox', { name: 'Select date' })).toHaveValue('04/01/2026');
 });
 
-test('BUG-006: new-record forms have no Delete Record button', async ({ page, api }) => {
-  knownBug('BUG-006: PageActionsComponent shows Delete on create pages that pass no onDelete');
-
-  mockWorld(api, buildWorld());
-  await page.goto('/erp/customers/new');
-  await expect(page.getByRole('heading', { name: 'New Customer' })).toBeVisible();
-
-  await expect(page.getByRole('button', { name: 'Delete Record' })).toBeHidden();
-});
-
 test('BUG-020: a failed journal entry post shows an error', async ({ page, api }) => {
   knownBug('BUG-020: journal entry and chart of accounts pages pass showSaveFailed/showDelete/... props PageActionsComponent ignores');
 

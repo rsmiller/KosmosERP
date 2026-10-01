@@ -72,10 +72,6 @@ function NewChartOfAccountPage() {
         setValue('normal_balance', NormalBalance.Debit);
     }, [setValue, auth.authenticated]);
 
-    const handleDeleteClick = async () => {
-        router.push("/erp/chartofaccounts/");
-    };
-
     const handleSaveClick = async () => {
         setSuccessSaved(false);
 
@@ -122,7 +118,6 @@ function NewChartOfAccountPage() {
                 saveDisabled={!formValid}
                 showSaveSuccess={successSaved}
                 showSaveFailed={failedSaved}
-                onDelete={handleDeleteClick} 
                 onSave={handleSaveClick} 
             />
             <Grid

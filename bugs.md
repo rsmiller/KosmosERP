@@ -17,7 +17,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Open, needs decision |
 | [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
 | [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Open |
-| [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Open |
+| [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Fixed (uncommitted) |
 | [BUG-007](#bug-007) | Lookup comboboxes filter on the hidden key, not the visible label | UI / components | Low | Open |
 | [BUG-008](#bug-008) | Login reports "incorrect password" when the API is unreachable | UI / auth | Low | Open |
 | [BUG-009](#bug-009) | Seeded users can't log in (unhashable seed password) | Dev tooling / seeder | Medium | Open |
@@ -160,6 +160,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-006"></a>
 ## BUG-006: "Delete Record" on new-record forms crashes (no handler)
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Medium. A visible button that throws. The user is left with a stuck confirm dialog showing a spinner.
 - **Where:** `UI/components/page-actions.tsx` defaults `canDelete=true`. The Phase 2 page dumps show "Delete Record" on **10** create pages, the `new` page of each of these modules under `UI/app/erp/`:
@@ -520,6 +522,20 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-006: Delete Record only appears where there's something to delete.**
+  - **`UI/components/page-actions.tsx`:**
+    - `canDelete` now defaults to `Boolean(onDelete)`, so a page without a delete handler shows no Delete button.
+    - The confirm dialog no longer gets stuck. It awaits the handler, then resets its spinner and closes, so a failed delete shows the page's error instead of a dialog with disabled buttons.
+  - **Create pages:** removed `onDelete={undefined}` from contacts, customers, leads, opportunities, purchaseorders and vendors, and the fake "delete" handlers (which just navigated back to the list) from chartofaccounts, journalentries and products. `shipments/new/[id]` is fixed by the default.
+  - **Found while fixing, same problem:**
+    - `admin/settings` showed a crashing Delete Record too; the default fixes it.
+    - `ar/view/[id]` forced `canDelete={true}` with an empty handler, so confirming did nothing and the dialog stuck. It's removed. The API has `DeleteARInvoice`, but whether invoices can be deleted from that page is a separate decision.
+  - **Not changed:** `chartofaccounts/edit` and `journalentries/edit` show Delete without checking the delete permission (no `canDelete` prop). The API still enforces it.
+  - **Tests:**
+    - Catalog rule: entries can be marked `deletable` (or given the button's label, e.g. subscriptions' "Cancel Subscription"). Those must show the button to an admin, and every other page must not show Delete Record. That covers all 82 pages, including the 14 deletable edit pages.
+    - `customers.spec.ts` › "a refused delete closes the confirmation and shows the error".
+    - With the old code, the rule fails on all 12 affected pages and the delete test fails too.
+    - The BUG-006 known-bug test is retired.
 - **BUG-023: pages work after a direct load or refresh.**
   - **The bug:** `products/new` ran its permission check once, before auth was ready, so Save never enabled. Its deps now include `auth.authenticated`, so it re-runs once auth is ready.
   - **Same pattern fixed elsewhere:**

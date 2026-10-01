@@ -17,6 +17,12 @@ export interface CatalogPage {
   ready: (page: Page, world: World) => Locator;
   /** What the page must show once loaded: rows, field values, button states. */
   checks?: Check[];
+  /**
+   * The record can be deleted from this page: an admin sees Delete Record (or
+   * this label, when the page renames it). Every other page must not show
+   * Delete Record (BUG-006: create pages showed one that crashed).
+   */
+  deletable?: true | string;
   /** Pages known to be broken: skipped with this reason until fixed (see bugs.md). */
   fixme?: string;
 }
@@ -91,7 +97,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'customers/edit', kind: 'edit', path: (w) => `/erp/customers/edit/${guid(w.customers[0])}`, ready: heading('Edit Customer'),
+    id: 'customers/edit', kind: 'edit', deletable: true, path: (w) => `/erp/customers/edit/${guid(w.customers[0])}`, ready: heading('Edit Customer'),
     checks: [
       field('Customer Name', (w) => w.customers[0].customer_name),
       combo('Category', (w) => w.customers[0].category),
@@ -114,7 +120,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'contacts/edit', kind: 'edit', path: (w) => `/erp/contacts/edit/${guid(w.contacts[0])}`, ready: heading('Edit Contact'),
+    id: 'contacts/edit', kind: 'edit', deletable: true, path: (w) => `/erp/contacts/edit/${guid(w.contacts[0])}`, ready: heading('Edit Contact'),
     checks: [field('First Name', (w) => w.contacts[0].first_name), field('Last Name', (w) => w.contacts[0].last_name)],
   },
 
@@ -129,7 +135,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'leads/edit', kind: 'edit', path: (w) => `/erp/leads/edit/${guid(w.leads[0])}`, ready: heading('Edit Lead'),
+    id: 'leads/edit', kind: 'edit', deletable: true, path: (w) => `/erp/leads/edit/${guid(w.leads[0])}`, ready: heading('Edit Lead'),
     checks: [
       field('Company Name', (w) => w.leads[0].company_name),
       combo('Lead Stage', (w) => w.leads[0].stage_name),
@@ -153,7 +159,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'opportunities/edit', kind: 'edit', path: (w) => `/erp/opportunities/edit/${guid(w.opportunities[0])}`, ready: heading('Edit Opportunity'),
+    id: 'opportunities/edit', kind: 'edit', deletable: true, path: (w) => `/erp/opportunities/edit/${guid(w.opportunities[0])}`, ready: heading('Edit Opportunity'),
     checks: [
       field('Opportunity Name', (w) => w.opportunities[0].opportunity_name),
       combo('Opportunity Stage', (w) => w.opportunities[0].stage_name),
@@ -180,7 +186,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'salesorders/edit', kind: 'edit', path: (w) => `/erp/salesorders/edit/${guid(w.orders[0])}`, ready: heading(/Edit Sales Order/),
+    id: 'salesorders/edit', kind: 'edit', deletable: true, path: (w) => `/erp/salesorders/edit/${guid(w.orders[0])}`, ready: heading(/Edit Sales Order/),
     checks: [
       combo('Customer', (w) => w.orders[0].customer_name),
       field('PO Number', (w) => w.orders[0].po_number),
@@ -203,7 +209,7 @@ export const catalog: CatalogPage[] = [
     checks: [text((w) => `View Shipment - ${w.shipments[0].shipment_number}`), row((w) => w.shipments[0].shipment_lines?.[0].line_description)],
   },
   {
-    id: 'shipments/edit', kind: 'edit', path: (w) => `/erp/shipments/edit/${guid(w.shipments[0])}`, ready: heading(/Edit Shipment/),
+    id: 'shipments/edit', kind: 'edit', deletable: true, path: (w) => `/erp/shipments/edit/${guid(w.shipments[0])}`, ready: heading(/Edit Shipment/),
     checks: [
       combo('Freight Carrier', 'UPS'),
       field('Ship Attention', (w) => w.shipments[0].ship_attn),
@@ -220,7 +226,7 @@ export const catalog: CatalogPage[] = [
     checks: [row((w) => w.products[0].product_name)],
   },
   {
-    id: 'subscriptions/edit', kind: 'edit', path: (w) => `/erp/subscriptions/edit/${guid(w.subscriptions[0])}`, ready: heading('Subscription Information'),
+    id: 'subscriptions/edit', kind: 'edit', deletable: 'Cancel Subscription', path: (w) => `/erp/subscriptions/edit/${guid(w.subscriptions[0])}`, ready: heading('Subscription Information'),
     checks: [combo('Choose Type', '30 Days'), row((w) => w.products[0].product_name)],
   },
 
@@ -239,7 +245,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'vendors/edit', kind: 'edit', path: (w) => `/erp/vendors/edit/${guid(w.vendors[0])}`, ready: heading('Edit Vendor'),
+    id: 'vendors/edit', kind: 'edit', deletable: true, path: (w) => `/erp/vendors/edit/${guid(w.vendors[0])}`, ready: heading('Edit Vendor'),
     checks: [field('Vendor Name', (w) => w.vendors[0].vendor_name), combo('Category', (w) => w.vendors[0].category)],
   },
 
@@ -258,7 +264,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'products/edit', kind: 'edit', path: (w) => `/erp/products/edit/${guid(w.products[0])}`, ready: heading('Edit Product'),
+    id: 'products/edit', kind: 'edit', deletable: true, path: (w) => `/erp/products/edit/${guid(w.products[0])}`, ready: heading('Edit Product'),
     checks: [
       field('Product Name', (w) => w.products[0].product_name),
       combo('Vendor', (w) => w.vendors[0].vendor_name),
@@ -276,7 +282,7 @@ export const catalog: CatalogPage[] = [
     checks: [combo('Vendor', (w) => w.purchaseOrders[0].vendor_name), row((w) => w.products[1].product_name)],
   },
   {
-    id: 'purchaseorders/edit', kind: 'edit', path: (w) => `/erp/purchaseorders/edit/${guid(w.purchaseOrders[0])}`, ready: heading('Edit Purchase Order'),
+    id: 'purchaseorders/edit', kind: 'edit', deletable: true, path: (w) => `/erp/purchaseorders/edit/${guid(w.purchaseOrders[0])}`, ready: heading('Edit Purchase Order'),
     checks: [combo('Vendor', (w) => w.purchaseOrders[0].vendor_name), row((w) => w.products[1].product_name)],
   },
 
@@ -335,7 +341,7 @@ export const catalog: CatalogPage[] = [
     checks: [text((w) => `AP Invoice - ${w.apInvoices[0].invoice_number}`), row((w) => w.apInvoices[0].ap_invoice_lines?.[0].description)],
   },
   {
-    id: 'ap/edit', kind: 'edit', path: (w) => `/erp/ap/edit/${guid(w.apInvoices[0])}`, ready: heading('Invoice'),
+    id: 'ap/edit', kind: 'edit', deletable: true, path: (w) => `/erp/ap/edit/${guid(w.apInvoices[0])}`, ready: heading('Invoice'),
     // The vendor combobox has no label (BUG-014), so it's found by its placeholder name.
     checks: [combo('Type to search', (w) => w.apInvoices[0].vendor_name)],
   },
@@ -355,7 +361,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'creditmemos/edit', kind: 'edit', path: (w) => `/erp/creditmemos/edit/${guid(w.creditMemos[0])}`, ready: heading(/Credit Memo/),
+    id: 'creditmemos/edit', kind: 'edit', deletable: true, path: (w) => `/erp/creditmemos/edit/${guid(w.creditMemos[0])}`, ready: heading(/Credit Memo/),
     checks: [
       field('Memo', (w) => w.creditMemos[0].memo),
       field('Credit Reason', (w) => w.creditMemos[0].credit_reason),
@@ -377,7 +383,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'chartofaccounts/edit', kind: 'edit', path: (w) => `/erp/chartofaccounts/edit/${guid(w.chartOfAccounts[0])}`, ready: heading('Edit Account'),
+    id: 'chartofaccounts/edit', kind: 'edit', deletable: true, path: (w) => `/erp/chartofaccounts/edit/${guid(w.chartOfAccounts[0])}`, ready: heading('Edit Account'),
     checks: [
       field('Account Name', (w) => w.chartOfAccounts[0].account_name),
       // Native selects: the value is the enum number (AccountType.Revenue = 4, NormalBalance.Credit = 2).
@@ -401,7 +407,7 @@ export const catalog: CatalogPage[] = [
     ],
   },
   {
-    id: 'journalentries/edit', kind: 'edit', path: (w) => `/erp/journalentries/edit/${guid(w.journalEntries[0])}`, ready: heading(/Edit Journal Entry/),
+    id: 'journalentries/edit', kind: 'edit', deletable: true, path: (w) => `/erp/journalentries/edit/${guid(w.journalEntries[0])}`, ready: heading(/Edit Journal Entry/),
     checks: [field('Description', (w) => w.journalEntries[0].description), row('Operating Cash')],
   },
 

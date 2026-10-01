@@ -448,7 +448,6 @@ function NewOpportunityPage() {
                     <GridItem colSpan={5}>
                         <PageActionsComponent saveDisabled={!formValid || !hasWritePermission} 
                                                 onSave={handleSaveClick} 
-                                                onDelete={undefined} 
                                                 successSaved={successSaved}
                                                 failedSaved={failedSaved}/>
                     </GridItem>

@@ -348,7 +348,6 @@ function NewVendorsPage() {
           <PageActionsComponent 
             saveDisabled={!formValid || !hasWritePermission} 
             onSave={handleSaveClick} 
-            onDelete={undefined} 
             successSaved={successSaved}
             failedSaved={failedSaved}
           />
