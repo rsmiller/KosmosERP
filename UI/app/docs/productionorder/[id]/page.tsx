@@ -11,6 +11,7 @@ import { SettingsDto } from '@/models/settings-models';
 import { docsService } from '@/services/docs-service';
 import { OrderHeaderDto } from '@/models/sales-order-models';
 import { BOMListDto } from '@/models/bom-models';
+import { formatDateOnly } from '@/lib/date-only';
 
 class RowDisplayDto
 {
@@ -65,7 +66,7 @@ function DocProductionOrder() {
     {
         if(date)
         {
-            return format(date, 'MM-dd-yyyy');
+            return formatDateOnly(date, 'MM-dd-yyyy');
         }
         else
         {

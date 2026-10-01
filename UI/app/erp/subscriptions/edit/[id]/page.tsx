@@ -19,6 +19,7 @@ import { CurrencyHelper } from '@/helpers/CurrencyHelper';
 import PageActionsComponent from '@/components/page-actions';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
+import { formatDateOnly } from '@/lib/date-only';
 
 function EditSubscriptionsPage() {
     const auth = useAuth();
@@ -150,7 +151,7 @@ function EditSubscriptionsPage() {
     {
         if(date)
         {
-            return format(date, 'MM-dd-yyyy');
+            return formatDateOnly(date, 'MM-dd-yyyy');
         }
         else
         {

@@ -5,6 +5,7 @@ import { FaSearch } from "react-icons/fa";
 import SalesOrdersSelectListComponent from "./lists/sales-orders-select-list-component";
 import DatePicker from "react-datepicker";
 import { format } from 'date-fns';
+import { parseDateOnly } from '@/lib/date-only';
 
 export class SalesOrderSelectorForm
 {
@@ -96,7 +97,7 @@ function SalesOrderSelectorComponent({customer_id, order_header_id, onChange, po
 
     const getStartDate = () => {
         const startDate = watch('start_date');
-        return startDate ? new Date(startDate) : undefined;
+        return parseDateOnly(startDate);
     };
 
     const handleStartDateChange = (date: Date | null) => {

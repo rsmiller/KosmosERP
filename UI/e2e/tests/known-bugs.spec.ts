@@ -14,17 +14,6 @@ import { mockWorld } from '../mocks/kits/world';
  */
 const knownBug = (reason: string) => test.fail(!process.env.E2E_SHOW_KNOWN_BUGS, reason);
 
-test('BUG-011: date-only values display on the right day', async ({ page, api }) => {
-  knownBug('BUG-011: DateOnly strings are parsed as UTC midnight, so US time zones show the previous day');
-
-  const world = mockWorld(api, buildWorld());
-  const opportunity = world.opportunities[0]; // expected_close: '2026-04-01'
-
-  await page.goto(`/erp/opportunities/view/${opportunity.guid}`);
-
-  await expect(page.getByRole('textbox', { name: 'Select date' })).toHaveValue('04/01/2026');
-});
-
 test('BUG-020: a failed journal entry post shows an error', async ({ page, api }) => {
   knownBug('BUG-020: journal entry and chart of accounts pages pass showSaveFailed/showDelete/... props PageActionsComponent ignores');
 

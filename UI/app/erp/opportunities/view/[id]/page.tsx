@@ -31,6 +31,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
+import { parseDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -126,7 +127,7 @@ function ViewOpportunityPage() {
     const getExpirationDate = () => {
         const expectedClose = watch('expected_close');
         if(expectedClose != undefined && expectedClose != null) {
-            return expectedClose;
+            return parseDateOnly(expectedClose);
         }
 
         return new Date();

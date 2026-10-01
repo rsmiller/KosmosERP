@@ -22,7 +22,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-008](#bug-008) | Login reports "incorrect password" when the API is unreachable | UI / auth | Low | Open |
 | [BUG-009](#bug-009) | Seeded users can't log in (unhashable seed password) | Dev tooling / seeder | Medium | Open |
 | [BUG-010](#bug-010) | `CreditMemoHeaderDto` doesn't declare the `guid` it carries | UI models | Low | Open |
-| [BUG-011](#bug-011) | Date-only values show one day early in US time zones | UI | Medium | Open |
+| [BUG-011](#bug-011) | Date-only values show one day early in US time zones | UI | Medium | Fixed (uncommitted) |
 | [BUG-012](#bug-012) | Shipment pages show the raw shipping-method key | UI | Low | Open |
 | [BUG-013](#bug-013) | `/erp/ar/new` is a stub with hard-coded sample data | UI | Low | Open, needs decision |
 | [BUG-014](#bug-014) | Form controls with no accessible name | UI / accessibility | Low | Open |
@@ -262,6 +262,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-011"></a>
 ## BUG-011: Date-only values show one day early in US time zones
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Medium. Required dates, close dates and schedule dates display wrong for every user west of UTC.
 - **Where:** pages that turn a C# `DateOnly` string (`"2026-04-01"`) into a `Date` with `new Date(value)`. Confirmed:
@@ -532,6 +534,24 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-011: date-only values show the stored day.**
+  - **Cause, wider than reported:** both `new Date("2026-04-01")` **and** date-fns 4's `format("2026-04-01", …)` read a bare date as UTC midnight, which is the previous day in US time zones. So the pages' own `format(dateString)` helpers had the bug too, not just `new Date`. Strings with a time part (`…T00:00:00`) and the grid's `DateOnlyRender` were already right.
+  - **Fix:** new `UI/lib/date-only.ts` with `parseDateOnly` and `formatDateOnly`, which read `yyyy-MM-dd` as a local calendar day. Each page keeps its existing display format. Used for every `DateOnly` field (the 12 in the API DTOs) that was read through a UTC-parsing path:
+    - `salesorders/view` (required date picker)
+    - `opportunities/view` (expected close picker, which was given the raw string)
+    - `productionorders` list (planned start and complete)
+    - `productionorders/view` (order date)
+    - `subscriptions` list (next date)
+    - `subscriptions/edit` (next date, order date)
+    - `ar/view` (order, invoice, due and paid dates)
+    - the printable docs for AR invoices, sales orders and production orders
+    - `sales-order-selector` (subscription start date). After picking April 1, the picker showed March 31.
+  - **Not changed:** fields that are timestamps in the API (`created_on`, vendor approved/audit/retired, credit memo dates, journal entry dates). Their strings include a time, so they're read as local time. Pages that print the raw `yyyy-MM-dd` string show the right day, just unformatted.
+  - **Tests:**
+    - `UI/e2e/catalog.ts` now asserts DateOnly values on the 7 affected app pages with a `dateOnly()` helper. It builds the expected text from the string, never through `Date`.
+    - With the fix reverted, all 7 fail; the date pickers show `03/31/2026` instead of `04/01/2026`.
+    - The BUG-011 known-bug test is retired. Full suite: 170 passed.
+  - **Not covered by e2e:** the printable docs pages and the subscription sales-order selector.
 - **BUG-003: one production status list, `97dd4b13…`.**
   - **What was really wrong:** two lists were in use, and not only in the UI.
     - The old list, `f157469e…` with `production_status_*` keys, was used by the UI dropdowns and label, and by production orders that sales orders create (they started as `production_status_new`).

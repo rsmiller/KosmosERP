@@ -50,6 +50,26 @@ const text = (value: Value): Check => async (page, world) => {
   await expect(page.getByText(resolve(value, world), { exact: false }).first()).toBeVisible();
 };
 
+/**
+ * A DateOnly value ("yyyy-MM-dd") as a page shows it: 'MM/dd/yyyy', 'MM-dd-yyyy',
+ * or 'locale' (toLocaleDateString in en-US, e.g. 4/1/2026). Built from the string
+ * itself, not through Date, so it can't share the off-by-one-day bug it checks for
+ * (BUG-011; the browser runs in America/Chicago, see playwright.config.ts).
+ */
+const dateOnly = (
+  // Some UI models type these fields as Date, but the API (and the factories) send strings.
+  get: (world: World) => string | Date | null | undefined,
+  style: 'MM/dd/yyyy' | 'MM-dd-yyyy' | 'locale' = 'MM/dd/yyyy',
+) =>
+  (world: World) => {
+    const value = get(world);
+    if (value instanceof Date) throw new Error('dateOnly expects the API\'s "yyyy-MM-dd" string, got a Date');
+    const [y, m, d] = (value ?? '').slice(0, 10).split('-');
+    if (style === 'locale') return `${Number(m)}/${Number(d)}/${y}`;
+    const sep = style === 'MM-dd-yyyy' ? '-' : '/';
+    return [m, d, y].join(sep);
+  };
+
 const buttonDisabled = (name: string): Check => async (page) => {
   await expect(page.getByRole('button', { name, exact: true })).toBeDisabled();
 };
@@ -67,8 +87,7 @@ const guid = (record: object) => (record as { guid?: string | null }).guid ?? ''
  * stubbed) and documents/download/[id] (triggers a file download).
  *
  * Checks read expected values from the World, so they follow the factories.
- * Avoid asserting dates here: several pages show DateOnly values a day early
- * (BUG-011 in bugs.md).
+ * Assert DateOnly values with `dateOnly(...)`, never by parsing them with Date.
  */
 export const catalog: CatalogPage[] = [
   {
@@ -153,6 +172,7 @@ export const catalog: CatalogPage[] = [
     id: 'opportunities/view', kind: 'view', path: (w) => `/erp/opportunities/view/${guid(w.opportunities[0])}`, ready: heading('View Opportunity'),
     checks: [
       field('Opportunity Name', (w) => w.opportunities[0].opportunity_name),
+      field('Select date', dateOnly((w) => w.opportunities[0].expected_close)),
       combo('Customer', (w) => w.opportunities[0].customer_name),
       combo('Contact', (w) => w.opportunities[0].contact_name),
       row((w) => w.products[0].product_name),
@@ -180,6 +200,7 @@ export const catalog: CatalogPage[] = [
     checks: [
       text((w) => `View Sales Order - ${w.orders[0].order_number}`),
       combo('Customer', (w) => w.orders[0].customer_name),
+      field('Select date', dateOnly((w) => w.orders[0].required_date)),
       field('PO Number', (w) => w.orders[0].po_number),
       combo('Payment Method', (w) => w.orders[0].pay_method_name),
       row((w) => w.orders[0].order_lines?.[0].line_description),
@@ -219,7 +240,7 @@ export const catalog: CatalogPage[] = [
 
   {
     id: 'subscriptions', kind: 'list', path: () => '/erp/subscriptions', ready: heading('Subscriptions'),
-    checks: [row((w) => w.subscriptions[0].subscription_number)],
+    checks: [row((w) => w.subscriptions[0].subscription_number), row(dateOnly((w) => w.subscriptions[0].next_date))],
   },
   {
     id: 'subscriptions/view', kind: 'view', path: (w) => `/erp/subscriptions/view/${guid(w.subscriptions[0])}`, ready: heading('Subscription Information'),
@@ -227,7 +248,7 @@ export const catalog: CatalogPage[] = [
   },
   {
     id: 'subscriptions/edit', kind: 'edit', deletable: 'Cancel Subscription', path: (w) => `/erp/subscriptions/edit/${guid(w.subscriptions[0])}`, ready: heading('Subscription Information'),
-    checks: [combo('Choose Type', '30 Days'), row((w) => w.products[0].product_name)],
+    checks: [combo('Choose Type', '30 Days'), row((w) => w.products[0].product_name), text(dateOnly((w) => w.subscriptions[0].next_date, 'MM-dd-yyyy'))],
   },
 
   // ---- Purchasing, products & production
@@ -299,11 +320,11 @@ export const catalog: CatalogPage[] = [
 
   {
     id: 'productionorders', kind: 'list', path: () => '/erp/productionorders', ready: heading('Production Orders'),
-    checks: [row((w) => w.productionOrders[0].order_number)],
+    checks: [row((w) => w.productionOrders[0].order_number), row(dateOnly((w) => w.productionOrders[0].planned_start_date, 'locale'))],
   },
   {
     id: 'productionorders/view', kind: 'view', path: (w) => `/erp/productionorders/view/${guid(w.productionOrders[0])}`, ready: heading('Order'),
-    checks: [row((w) => w.products[0].product_name)],
+    checks: [row((w) => w.products[0].product_name), text(dateOnly((w) => w.productionOrders[0].order_header?.order_date, 'MM-dd-yyyy'))],
   },
   {
     id: 'productionorders/edit', kind: 'edit', path: (w) => `/erp/productionorders/edit/${guid(w.productionOrders[0])}`, ready: heading(/Production Order/),
@@ -331,7 +352,11 @@ export const catalog: CatalogPage[] = [
   },
   {
     id: 'ar/view', kind: 'view', path: (w) => `/erp/ar/view/${guid(w.arInvoices[0])}`, ready: heading(/Invoice/),
-    checks: [text((w) => `Invoice - ${w.arInvoices[0].invoice_number}`), row((w) => w.arInvoices[0].ar_invoice_lines?.[0].line_description)],
+    checks: [
+      text((w) => `Invoice - ${w.arInvoices[0].invoice_number}`),
+      row((w) => w.arInvoices[0].ar_invoice_lines?.[0].line_description),
+      text(dateOnly((w) => w.arInvoices[0].invoice_date, 'MM-dd-yyyy')),
+    ],
   },
 
   { id: 'ap', kind: 'list', path: () => '/erp/ap', ready: heading('Accounts Payable'), checks: [row((w) => w.apInvoices[0].invoice_number)] },

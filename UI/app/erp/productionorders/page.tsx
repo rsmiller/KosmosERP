@@ -26,6 +26,7 @@ import { FaRegFilePdf } from 'react-icons/fa6';
 import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
+import { parseDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -180,7 +181,7 @@ function ProductionOrdersPage() {
       headerName: "Planned Start",
       valueFormatter: (params) => {
         if (params.value) {
-          return new Date(params.value).toLocaleDateString();
+          return parseDateOnly(params.value)?.toLocaleDateString() ?? '';
         }
         return '';
       }
@@ -190,7 +191,7 @@ function ProductionOrdersPage() {
       headerName: "Planned Complete",
       valueFormatter: (params) => {
         if (params.value) {
-          return new Date(params.value).toLocaleDateString();
+          return parseDateOnly(params.value)?.toLocaleDateString() ?? '';
         }
         return '';
       }

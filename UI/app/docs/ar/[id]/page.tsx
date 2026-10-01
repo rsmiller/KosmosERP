@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ARInvoiceHeaderDto, ARInvoiceLineDto } from '@/models/ar-models';
 import { settingsService } from '@/services/settings-service';
 import { SettingsDto } from '@/models/settings-models';
+import { formatDateOnly } from '@/lib/date-only';
 
 
 function DocAR() {
@@ -68,7 +69,7 @@ function DocAR() {
     {
         if(date)
         {
-            return format(date, 'MM-dd-yyyy');
+            return formatDateOnly(date, 'MM-dd-yyyy');
         }
         else
         {

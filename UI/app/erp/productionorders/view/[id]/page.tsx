@@ -18,6 +18,7 @@ import { PurchaseOrderLineDto } from '@/models/purchase-order-models';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import PageActionsComponent from '@/components/page-actions';
+import { formatDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -112,7 +113,7 @@ function ViewProductionOrderPage() {
             return "";
         }
 
-        return format(dateString || "", 'MM-dd-yyyy');
+        return formatDateOnly(dateString, 'MM-dd-yyyy');
     }
 
     const CheckFormValidity = () => {

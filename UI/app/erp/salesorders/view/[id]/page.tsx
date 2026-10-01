@@ -30,6 +30,7 @@ import { orderService } from '@/services/order-service';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useRouter } from 'next/navigation';
+import { parseDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -111,7 +112,7 @@ function ViewSalesOrderPage() {
 
   const getRequiredDate = () => {
     if (!salesOrder?.required_date) return undefined;
-    return new Date(salesOrder.required_date);
+    return parseDateOnly(salesOrder.required_date);
   };
 
   const [rowData, setRowData] = useState<OrderLineDto[]>([]);
