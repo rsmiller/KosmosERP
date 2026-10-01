@@ -14,6 +14,10 @@ namespace KosmosERP.Seeder;
 /// Connection string resolution order: --connection arg > SEED_CONNECTION env var > appsettings.json.
 /// The database SCHEMA must already exist (run `dotnet ef database update --project Shared/KosmosERP.Database`).
 /// The seeder is idempotent: if the seed dataset is already present it exits without changes.
+///
+/// Seeded users (admin, ext-jordan, ext-riley, ext-morgan) sign in at /login/database with the
+/// password "Kosmos-Dev-1" (DatabaseSeeder.DefaultUserPassword). Override it with
+/// --user-password "<pw>" or the SEED_USER_PASSWORD env var. The password is printed when seeding ends.
 /// </summary>
 public static class Program
 {
@@ -46,7 +50,7 @@ public static class Program
             await conn.OpenAsync();
             try
             {
-                var seeder = new DatabaseSeeder(context);
+                var seeder = new DatabaseSeeder(context, ResolveUserPassword(args));
                 if (reset)
                 {
                     await ExecAsync(conn, "SET FOREIGN_KEY_CHECKS=0");
@@ -73,6 +77,16 @@ public static class Program
             Console.Error.WriteLine(ex);
             return 1;
         }
+    }
+
+    /// <summary>--user-password arg > SEED_USER_PASSWORD env var > DatabaseSeeder.DefaultUserPassword.</summary>
+    private static string? ResolveUserPassword(string[] args)
+    {
+        var index = Array.FindIndex(args, a => string.Equals(a, "--user-password", StringComparison.OrdinalIgnoreCase));
+        if (index >= 0 && index + 1 < args.Length)
+            return args[index + 1];
+
+        return Environment.GetEnvironmentVariable("SEED_USER_PASSWORD");
     }
 
     private static async Task ExecAsync(System.Data.Common.DbConnection conn, string sql)

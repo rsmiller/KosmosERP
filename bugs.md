@@ -20,7 +20,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Fixed (uncommitted) |
 | [BUG-007](#bug-007) | Lookup comboboxes filter on the hidden key, not the visible label | UI / components | Low | Open |
 | [BUG-008](#bug-008) | Login reports "incorrect password" when the API is unreachable | UI / auth | Low | Open |
-| [BUG-009](#bug-009) | Seeded users can't log in (unhashable seed password) | Dev tooling / seeder | Medium | Open |
+| [BUG-009](#bug-009) | Seeded users can't log in (unhashable seed password) | Dev tooling / seeder | Medium | Fixed (uncommitted) |
 | [BUG-010](#bug-010) | `CreditMemoHeaderDto` doesn't declare the `guid` it carries | UI models | Low | Open |
 | [BUG-011](#bug-011) | Date-only values show one day early in US time zones | UI | Medium | Fixed (uncommitted) |
 | [BUG-012](#bug-012) | Shipment pages show the raw shipping-method key | UI | Low | Open |
@@ -237,6 +237,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-009"></a>
 ## BUG-009: Seeded users can't log in (unhashable seed password)
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Medium for development. The seeded dataset can't be used through the UI, and a future full-stack e2e suite would need a working login.
 - **Where:**
@@ -540,6 +542,27 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-009: seeded users can sign in.**
+  - **One password implementation:** new `Shared/KosmosERP.BusinessLayer/Helpers/PasswordHasher.cs` (`Create`, `Verify`) with the existing settings: PBKDF2 HMAC-SHA1, 10,000 iterations, 32-byte hash, random 16-byte salt.
+    - `UserModule` (create, password change) and `DatabaseAuthenticationProvider` (login) now use it instead of two private copies. Existing stored passwords still verify.
+    - `Verify` compares in constant time.
+    - A salt or hash that isn't Base64 is a wrong password, not an exception. That's why the seeded users got a server error instead of a rejection.
+  - **Seeder:**
+    - Each seeded user (`admin`, `ext-jordan`, `ext-riley`, `ext-morgan`) gets a real hash and salt from `PasswordHasher`.
+    - The dev password is **`Kosmos-Dev-1`** (`DatabaseSeeder.DefaultUserPassword`). Override it with `--user-password "<pw>"` or `SEED_USER_PASSWORD`.
+    - Documented in `Tools/KosmosERP.Seeder/Program.cs` and printed at the end of seeding.
+  - **Verified end to end** on MySQL 8.0.44 (throwaway container, since removed):
+    - Migrate, then `dotnet run --project Tools/KosmosERP.Seeder -- --reset`, then the real API.
+    - `POST /api/v1/User/AuthenticateUser` as `admin` and as `ext-jordan` with `Kosmos-Dev-1` returns `authenticated: true`.
+    - A wrong password returns a clean 400 "Credentials could not be authenticated".
+    - Checked at the API, not by signing in through the browser UI.
+  - **Tests:** `Tests/KosmosERP.Tests.Shared/PasswordTests.cs` (5):
+    - hash/verify round trip
+    - a new salt each time
+    - a non-Base64 salt or hash is a mismatch
+    - a seeder-style user signs in through `DatabaseAuthenticationProvider`
+    - the old `"seeded"` salt is rejected cleanly
+  - **Seen, not changed:** `DatabaseAuthenticationProvider.Authenticate` lowercases the stored username but not the typed one. So `Admin` fails while `admin` works. The seeded usernames are lowercase, so it doesn't block this fix.
 - **BUG-020: journal entry and chart of accounts pages give save feedback, and posted entries can't be edited or deleted.**
   - The four pages (`chartofaccounts/new`, `chartofaccounts/edit/[id]`, `journalentries/new`, `journalentries/edit/[id]`) now pass the button bar's real props: `successSaved`, `failedSaved`, `canDelete`, and the new `canSave`.
   - **`canSave` (new, default `true`)** in `UI/components/page-actions.tsx` hides Save but keeps the saved/failed alerts. `hidden` would have hidden the alerts too.

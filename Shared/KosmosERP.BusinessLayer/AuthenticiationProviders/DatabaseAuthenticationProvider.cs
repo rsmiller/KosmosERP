@@ -7,7 +7,7 @@ using KosmosERP.Database;
 using KosmosERP.Database.Models;
 using KosmosERP.Models;
 using KosmosERP.Models.Interfaces;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using KosmosERP.BusinessLayer.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace KosmosERP.BusinessLayer.AuthenticationProviders;
@@ -41,9 +41,7 @@ public class DatabaseAuthenticationProvider : IAuthenticationProvider
 
         if (result != null)
         {
-            var hashedPassword = HashPassword(password, result.password_salt);
-
-            if (hashedPassword == result.password)
+            if (PasswordHasher.Verify(password, result.password, result.password_salt))
             {
                 var sessionState = await this.FindCreateOrUpdateUserSession(result.id);
 
@@ -116,17 +114,5 @@ public class DatabaseAuthenticationProvider : IAuthenticationProvider
         return new Response<AuthProviderUserDto>();
     }
 
-    private string HashPassword(string password, string salt)
-    {
-        var saltBytes = Convert.FromBase64String(salt);
-        var hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-        password: password,
-        salt: saltBytes,
-        prf: KeyDerivationPrf.HMACSHA1,
-        iterationCount: 10000,
-        numBytesRequested: 256 / 8));
-
-        return hashedPassword;
-    }
 
 }

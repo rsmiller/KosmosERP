@@ -1,3 +1,4 @@
+using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database.Models;
 using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
@@ -120,13 +121,16 @@ public partial class DatabaseSeeder
         var addedUsers = new List<User>();
         foreach (var u in users)
         {
+            // A real hash and salt, made the way the API makes them, so these users can sign in
+            // at /login/database (BUG-009: "seeded"/"seeded" made login throw).
+            var (passwordHash, passwordSalt) = PasswordHasher.Create(_userPassword);
             var user = Stamp(new User
             {
                 first_name = u.First,
                 last_name = u.Last,
                 username = u.ExternalId,
-                password = "seeded",
-                password_salt = "seeded",
+                password = passwordHash,
+                password_salt = passwordSalt,
                 employee_number = $"E{100 + index++}",
                 external_id = u.ExternalId,
                 is_admin = u.ExternalId == "admin",

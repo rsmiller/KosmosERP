@@ -13,9 +13,7 @@ using KosmosERP.Models;
 using KosmosERP.Models.Helpers;
 using KosmosERP.Models.Interfaces;
 using KosmosERP.Module;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
 
 namespace KosmosERP.BusinessLayer.Modules;
 
@@ -1044,27 +1042,13 @@ public partial class UserModule : BaseERPModule, IUserModule
 
     private UserPassword GeneratePasword(string password)
     {
-        var newSalt = GenerateSalt();
-        var hashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-        password: password,
-        salt: newSalt,
-        prf: KeyDerivationPrf.HMACSHA1,
-        iterationCount: 10000,
-        numBytesRequested: 256 / 8));
+        var (hash, salt) = PasswordHasher.Create(password);
 
         return new UserPassword()
         {
-            Salt = Convert.ToBase64String(newSalt),
-            HashedPassword = hashedPassword
+            Salt = salt,
+            HashedPassword = hash
         };
-    }
-
-    private byte[] GenerateSalt()
-    {
-        var bytes = new byte[128 / 8];
-        RandomNumberGenerator.Fill(bytes);
-
-        return bytes;
     }
 
     public KosmosERP.Database.Models.User? Get(int object_id)

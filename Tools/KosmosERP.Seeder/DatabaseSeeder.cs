@@ -16,6 +16,10 @@ public partial class DatabaseSeeder
 {
     private readonly ERPDbContext _context;
 
+    /// <summary>Password for every seeded user (dev data only). Override with --user-password.</summary>
+    public const string DefaultUserPassword = "Kosmos-Dev-1";
+    private readonly string _userPassword;
+
     // The Settings.company_name that marks this dataset as already seeded.
     private const string SeedCompanyName = "Kosmos Computer Works";
 
@@ -38,9 +42,10 @@ public partial class DatabaseSeeder
     private readonly List<SeededOrder> _orders = new();
     private readonly List<SeededPO> _purchaseOrders = new();
 
-    public DatabaseSeeder(ERPDbContext context)
+    public DatabaseSeeder(ERPDbContext context, string? userPassword = null)
     {
         _context = context;
+        _userPassword = string.IsNullOrEmpty(userPassword) ? DefaultUserPassword : userPassword;
     }
 
     public async Task SeedAsync()
@@ -88,6 +93,7 @@ public partial class DatabaseSeeder
         Console.WriteLine($"  AP invoices:    {_context.APInvoiceHeaders.Count()}");
         Console.WriteLine($"  Inventory rows: {_context.InventoryCounts.Count()}");
         Console.WriteLine($"  GL postings:    {_context.FinancialTransactions.Count()}");
+        Console.WriteLine($"  Users:          {string.Join(", ", _userIdByExternalId.Keys)} (password: {_userPassword})");
     }
 
     /// <summary>Stamps audit fields (created/updated by + timestamps) on a row before insert.</summary>
