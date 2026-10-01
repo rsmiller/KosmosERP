@@ -16,7 +16,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-002](#bug-002) | Sales orders can't be created: `order_headers` schema defects | DB / EF migrations | High | Fixed (uncommitted) |
 | [BUG-003](#bug-003) | Production status dropdowns use a lookup id the backend never populates | UI ↔ API data | Medium | Open, needs decision |
 | [BUG-004](#bug-004) | Freight carrier dropdown uses a lookup id the seeder never populates | UI ↔ seeder data | Medium | Fixed (uncommitted) |
-| [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Open |
+| [BUG-005](#bug-005) | React hydration error #418 on most production page loads | UI / SSR styling | Medium | Fixed (uncommitted) |
 | [BUG-006](#bug-006) | "Delete Record" on new-record forms crashes (no handler) | UI | Medium | Fixed (uncommitted) |
 | [BUG-007](#bug-007) | Lookup comboboxes filter on the hidden key, not the visible label | UI / components | Low | Open |
 | [BUG-008](#bug-008) | Login reports "incorrect password" when the API is unreachable | UI / auth | Low | Open |
@@ -143,6 +143,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-005"></a>
 ## BUG-005: React hydration error #418 on most production page loads
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Medium. React throws away the server-rendered markup and re-renders on the client. The cost is slower first paint and console errors; nothing breaks visibly.
 - **Where:**
@@ -338,11 +340,15 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 - **Where:**
   - `UI/components/product-combobox.tsx`, when used inside `UI/components/dialogs/add-sales-order-line.tsx` and `UI/components/dialogs/add-bom-item.tsx`.
   - Likely any Chakra combobox that wraps its list in `<Portal>` inside a modal `Dialog`.
-- **Symptom:** the options are visible and clickable, but they have no accessible name, so `getByRole('option', { name })` can't find them.
+- **Symptom:**
+  - The options are visible and clickable, but they have no accessible name, so `getByRole('option', { name })` can't find them.
+  - **Clicking an option can close the dialog.** On Admin → Lists › Add New Entry, picking the module with the mouse closes the whole dialog about 1 time in 10, a moment after the pick. Picking with the keyboard (ArrowDown/Enter) never did (0 of 10). The dialog treats the click on the portaled option as a click outside itself. Users can hit this too.
 - **Root cause:** the combobox portals its listbox to `<body>`, outside the modal dialog. A modal dialog hides everything outside itself from assistive tech (`aria-hidden`), including the portaled options. (`product-combobox` also sets `zIndex: 9999` on the content, which looks like an earlier workaround for the same layering.)
-- **Evidence:** `searchAndChoose(..., { inModal: true })` in `UI/e2e/pages/controls.ts` falls back to matching `[role="option"]` by text, with a comment pointing here.
+- **Evidence:**
+  - `searchAndChoose(..., { inModal: true })` in `UI/e2e/pages/controls.ts` falls back to matching `[role="option"]` by text, with a comment pointing here.
+  - `UI/e2e/tests/admin/lists.spec.ts` › "adds a payment term with its number of days" is flaky for this reason: it failed 1 in 12 runs before the BUG-005 fix, and between 0 and 5 in 12 after it. CI retries twice, so it rarely fails there; local runs (no retries) can.
 - **Suggested fix:** don't portal the combobox content when it's inside a dialog. Render `Combobox.Positioner` inline, or give it a portal container inside the dialog.
-- **Done when:** the `inModal` fallback can be removed, and the sales order and product BOM specs still pass.
+- **Done when:** the `inModal` fallback can be removed, the sales order and product BOM specs still pass, and `lists.spec.ts` passes `--repeat-each=20 --retries=0`.
 
 <a id="bug-017"></a>
 ## BUG-017: Shipment line "Delete" button marks the line shipped
@@ -522,6 +528,17 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-005: no more hydration errors on production page loads.**
+  - **Cause:** with no Emotion cache registry for the App Router, server rendering wrote every Chakra style as an inline `<style data-emotion>` tag in `<body>`. Emotion's client moved them into `<head>` while React was hydrating, so React found markup that didn't match (`#418`).
+  - **Fix:**
+    - New `UI/components/ui/emotion-registry.tsx`: an Emotion cache (`compat` mode) that collects the styles inserted during server rendering and writes them into `<head>` through `useServerInsertedHTML`. Same approach as MUI's `AppRouterCacheProvider`.
+    - `UI/app/layout.tsx` wraps `<Provider>` in it. It's only in the root layout: `app/docs/layout.tsx` nests a second `Provider` inside the root one, and a second registry would fight over the same styles.
+    - `@emotion/cache` added as a direct dependency (it was already installed by Emotion).
+  - **Verified on a production build:**
+    - Server HTML for `/`, `/login/database` and `/erp` now has 3 Emotion style tags in `<head>` (two global, one combined) and none in `<body>`; before, there were 11 to 24 inline tags in `<body>`.
+    - With the allowlist removed, the old code fails the login setup on `#418`.
+    - `npx playwright test --repeat-each=3 --retries=0`: 505 of 506 passed with no hydration errors. The one failure was the Lists dialog flake, which predates this fix (see BUG-016).
+  - **Tests:** the `KNOWN_PAGE_ERRORS` hydration entry in `UI/e2e/fixtures/test.ts` is deleted, so any hydration error now fails the test that hit it.
 - **BUG-006: Delete Record only appears where there's something to delete.**
   - **`UI/components/page-actions.tsx`:**
     - `canDelete` now defaults to `Boolean(onDelete)`, so a page without a delete handler shows no Delete button.
