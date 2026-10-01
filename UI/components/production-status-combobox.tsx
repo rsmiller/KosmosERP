@@ -103,6 +103,8 @@ const ProductionStatusCombobox = forwardRef<ProductionStatusComboboxRef, Product
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("f157469e-5e5c-4a5b-b071-89a28b2a0310", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
@@ -110,7 +112,7 @@ const ProductionStatusCombobox = forwardRef<ProductionStatusComboboxRef, Product
                 setStages(response.data);
             }
         });
-    }, [set]);
+    }, [set, auth.token]);
 
     const inputValChange = (inputValue: any) =>
     {

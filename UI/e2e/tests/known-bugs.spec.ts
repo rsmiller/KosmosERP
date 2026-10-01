@@ -2,7 +2,6 @@ import { test, expect } from '../fixtures/test';
 import { fail } from '../mocks/envelope';
 import { buildWorld } from '../factories/world';
 import { mockWorld } from '../mocks/kits/world';
-import { chooseOption, searchAndChoose } from '../pages/controls';
 
 /**
  * Open app bugs pinned as tests (details in bugs.md at the repo root). Each
@@ -46,24 +45,6 @@ test('BUG-020: a failed journal entry post shows an error', async ({ page, api }
   await page.getByRole('button', { name: 'Post Entry' }).click();
 
   await expect(page.getByText('Record could not be saved!')).toBeVisible();
-});
-
-test('BUG-023: a product can be created after loading /erp/products/new directly', async ({ page, api }) => {
-  knownBug('BUG-023: the permission effect has deps [setValue], runs before auth is ready and never re-runs, so hasWritePermission stays false');
-
-  const world = mockWorld(api, buildWorld());
-  await page.goto('/erp/products/new');
-  await page.getByRole('textbox', { name: 'Product Name' }).fill('DDR5 64GB Kit');
-  await searchAndChoose(page, page.getByRole('combobox', { name: 'Vendor' }), 'Cont', world.vendors[1].vendor_name!);
-  await page.getByRole('textbox', { name: 'Product Class' }).fill('Component');
-  await chooseOption(page, page.getByRole('combobox', { name: 'Category' }), 'Memory');
-  await page.getByRole('textbox', { name: 'Identifier 1' }).fill('MEM-64G');
-  await page.getByRole('textbox', { name: 'Internal Description' }).fill('64GB kit');
-  for (const [name, value] of [['Required Stock Level', '20'], ['Our Cost', '150'], ['Unit Cost', '160'], ['Sales Price', '210']] as const) {
-    await page.getByRole('spinbutton', { name }).fill(value);
-  }
-
-  await expect(page.getByRole('button', { name: 'Save Record' })).toBeEnabled();
 });
 
 test('BUG-025: a completed production order\'s lines are read-only', async ({ page, api }) => {

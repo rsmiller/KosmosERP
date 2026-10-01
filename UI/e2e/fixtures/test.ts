@@ -61,6 +61,10 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
         api.describeUnhandled(),
         'The page called API endpoints that have no e2e mock. Register them with api.on(...)',
       ).toEqual([]);
+      expect(
+        api.describeUnauthenticated(),
+        'The page called protected API endpoints without a token (the real API answers 401). Does an effect run before auth is ready?',
+      ).toEqual([]);
     },
     { auto: true },
   ],

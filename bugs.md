@@ -34,10 +34,11 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Open |
 | [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Open |
 | [BUG-022](#bug-022) | BOM item dialog is titled "Add Address" | UI | Low | Open |
-| [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Open |
+| [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Fixed (uncommitted) |
 | [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Fixed (uncommitted) |
 | [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Open |
 | [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Fixed (uncommitted) |
+| [BUG-027](#bug-027) | Grid buttons send an empty token after a direct load | UI | Medium | Open |
 
 Also see [Needs verification](#needs-verification) for suspected issues that haven't been confirmed.
 
@@ -418,6 +419,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-023"></a>
 ## BUG-023: New Product can't be saved after a direct load or refresh
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** High. Opening `/erp/products/new` by URL, bookmark or refresh leaves Save permanently disabled. Arriving through Products → New Product works.
 - **Where:** `UI/app/erp/products/new/page.tsx`. The permission and initialization `useEffect` has deps `[setValue]`.
 - **Root cause:** the effect runs once on mount. On a direct load, auth isn't ready yet (`auth.authenticated` is false), so it returns early and never runs again. `hasWritePermission` stays false, and Save is `disabled={!formValid || !hasWritePermission}`. Confirmed by reading the component's React state in a dev build: `formValid` true, `hasWritePermission` false.
@@ -476,6 +479,21 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 - **Suggested fix:** add `[ERPAuthorize(...)]` to every non-public action (for Settings, match the admin rule the UI uses). Consider a global default-deny with explicit `[AllowAnonymous]` on the public ones, so a new controller can't be left open by accident. Add API tests that call each protected endpoint unauthenticated and expect 401 or 403.
 - **Done when:** every action is either authorized or explicitly marked anonymous with a comment saying why, and there are tests for it.
 
+<a id="bug-027"></a>
+## BUG-027: Grid buttons send an empty token after a direct load
+
+- **Severity:** Medium. After loading one of these pages by URL, bookmark or refresh, its grid's Delete (or tag) button calls the API with no token. The real API answers 401 and nothing happens. Arriving through the app works, because auth is already ready on the first render.
+- **Where:** each page keeps its grid `colDefs` in `useState`, so the cell renderers keep the handler from the **first** render. On a direct load that render runs before auth is ready, so `auth.token` is `""`:
+  - `UI/app/erp/admin/document-types/page.tsx`: `handleDeleteClick`, `handleTagDelete`, `doTagDialogOpen`
+  - `UI/app/erp/admin/lists/page.tsx`: `handleDeleteClick`
+  - `UI/app/erp/creditmemos/edit/[id]/page.tsx`: `handleDeleteLineClick`
+  - `UI/app/erp/opportunities/edit/[id]/page.tsx`: `handleDeleteLineClick`
+  - `UI/app/erp/purchaseorders/edit/[id]/page.tsx`: `handleDeleteLineClick`
+- **Same root cause, check too:** renderers that read state from the first render, such as `hidden={!hasEditPermission}` on `productionorders/page.tsx`, `shipments/page.tsx` and `vendors/page.tsx`. These may hide Edit buttons for admins after a direct load. BUG-025 is the same pattern for `editable`.
+- **Found by:** the BUG-023 audit. The e2e API fixture now fails any test whose page calls a protected endpoint without a token, but no test clicks these buttons after a direct load yet.
+- **Suggested fix:** the fix used for the sales order line Delete in BUG-023 (`salesorders/edit/[id]`): call the handler through a ref that's updated every render (`const deleteLineRef = useRef(handler); deleteLineRef.current = handler;` then `onClick={() => deleteLineRef.current(id)}`). Alternatively, have the renderer only call a state setter (as `shipments/edit/[id]` does for its Remove dialog), or build `colDefs` with `useMemo` on the values they read.
+- **Done when:** a test per page loads it directly, clicks the button, and the API call carries a token. The fixture's token check enforces that automatically once the click is covered.
+
 ---
 
 <a id="needs-verification"></a>
@@ -502,6 +520,17 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-023: pages work after a direct load or refresh.**
+  - **The bug:** `products/new` ran its permission check once, before auth was ready, so Save never enabled. Its deps now include `auth.authenticated`, so it re-runs once auth is ready.
+  - **Same pattern fixed elsewhere:**
+    - `admin/users` loaded users and roles with an empty token (deps `[]`). It now waits for auth.
+    - The nine lookup comboboxes (`customer-payment-terms`, `freight`, `lead-stage`, `opportunity-stage`, `payment-method`, `product-category`, `production-status`, `shipment-method`, `transaction-type`) and `address-selector` fetched once with an empty token. They now skip until there's a token, and re-fetch when it arrives. Before this, every new-record page's dropdowns were empty after a refresh against the real API.
+    - Sales order line Delete (`salesorders/edit/[id]`) used the first render's handler, so it sent an empty token after a direct load. It now calls through a ref. The other grid buttons with this problem are logged as [BUG-027](#bug-027).
+  - **Guard:** the e2e `api` fixture now fails any test whose page calls a protected endpoint without a bearer token. The anonymous endpoints mirror `PublicEndpoints` in `AuthorizationTests.cs`. `MockApi` records request headers for this.
+  - **Tests:**
+    - `product-flows.spec.ts` › "new product" runs the full create flow both from the list and after a direct load. The direct-load test fails on the old page.
+    - The token guard makes the render test for `admin/users` fail on the old page (`GET /User/GetUsers`, `GET /User/GetRoles`).
+    - The BUG-023 known-bug test is retired.
 - **BUG-017: the shipment line "Delete" button deletes the line.**
   - **Decision:** Delete. The old "ship" handler only set `units_shipped` and `is_complete`; inventory moves when the shipment is released, which skips deleted lines.
   - **UI** (`UI/app/erp/shipments/edit/[id]/page.tsx`):

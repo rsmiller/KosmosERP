@@ -10,6 +10,8 @@ export interface RecordedRequest {
   url: URL;
   /** Parsed JSON body (or raw text when it isn't JSON). */
   body: unknown;
+  /** Request headers, lower-cased names (e.g. authorization). */
+  headers: Record<string, string>;
 }
 
 type ReplyFn = (req: RecordedRequest) => unknown;
@@ -40,6 +42,17 @@ function normalizePath(path: string): string {
 
 function label(req: { method: string; path: string }): string {
   return `${req.method} ${req.path}`;
+}
+
+/**
+ * Endpoints the real API serves without a token. Mirrors PublicEndpoints in
+ * Tests/KosmosERP.Tests.Shared/AuthorizationTests.cs; paths are normalized.
+ */
+const ANONYMOUS_PATHS = [/^\/diagnostics\/health$/, /^\/docs\//, /^\/saml\//, /^\/settings\/getbasesettings$/, /^\/user\/authenticateuser$/];
+
+/** "Bearer <token>", not "Bearer", "Bearer undefined" or "Bearer null". */
+function hasBearerToken(req: RecordedRequest): boolean {
+  return /^Bearer (?!undefined$|null$)\S+/.test(req.headers.authorization ?? '');
 }
 
 /**
@@ -120,6 +133,16 @@ export class MockApi {
     return this.unhandled.map(label);
   }
 
+  /**
+   * Calls to protected endpoints sent without a token. The mocks answer them,
+   * but the real API returns 401, so the page would show nothing (BUG-023).
+   * Usually an effect that ran before auth was ready and never re-ran.
+   */
+  describeUnauthenticated(): string[] {
+    const found = this.requests.filter((r) => !ANONYMOUS_PATHS.some((p) => p.test(normalizePath(r.path))) && !hasBearerToken(r));
+    return [...new Set(found.map(label))];
+  }
+
   private async handle(route: Route, request: Request): Promise<void> {
     const url = new URL(request.url());
     const recorded: RecordedRequest = {
@@ -127,6 +150,7 @@ export class MockApi {
       path: url.pathname.slice(API_PREFIX.length) || '/',
       url,
       body: parseBody(request),
+      headers: request.headers(),
     };
     this.requests.push(recorded);
     this.notifyWaiters(recorded);

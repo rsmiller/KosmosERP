@@ -304,6 +304,12 @@ function EditSalesOrderPage() {
     }
   };
 
+  // colDefs below are created on the first render, which on a direct load is
+  // before auth is ready. The Delete button calls through this ref so it always
+  // uses the current handler (and token), not the first render's.
+  const deleteLineRef = useRef(handleDeleteLineClick);
+  deleteLineRef.current = handleDeleteLineClick;
+
   const handleEditLineClick = (lineId: number) => {
     // TODO: Implement line editing dialog
     console.log('Edit line:', lineId);
@@ -405,7 +411,7 @@ function EditSalesOrderPage() {
         const { completedOrDisabled } = props.context;
         return ( 
           <div>
-            <Button type="button" colorPalette="red" onClick={() => handleDeleteLineClick(props.value)} disabled={completedOrDisabled}>Delete</Button>
+            <Button type="button" colorPalette="red" onClick={() => deleteLineRef.current(props.value)} disabled={completedOrDisabled}>Delete</Button>
           </div>
         );
       }

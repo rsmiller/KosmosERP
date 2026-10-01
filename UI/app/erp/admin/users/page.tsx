@@ -157,6 +157,9 @@ function AdminUserPage() {
     }
     
     useEffect(() => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (auth.authenticated == false) return;
+
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
@@ -171,7 +174,7 @@ function AdminUserPage() {
             }
         });
 
-    }, []);
+    }, [auth.authenticated]);
 
     const treeItemClick = (treeItem: any) => {
         let result = userData?.children?.filter(m => m.id == treeItem.focusedValue);

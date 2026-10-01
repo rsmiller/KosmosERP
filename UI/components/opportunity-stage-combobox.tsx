@@ -103,6 +103,8 @@ const OpportunityStageCombobox = forwardRef<OpportunityStageComboboxRef, Opportu
 
         
         const fetchData = useAsync(async () => {
+            // Wait for auth: on a direct load the token isn't there on the first run.
+            if (!auth.token) return;
             await keyValueService.GetDtoByModule("0c3959c3-15dc-44ab-8e2c-9b9e2773e65f", auth.token || "").then((response) =>
             {
                 if (response.success && response.data !== undefined) {
@@ -110,7 +112,7 @@ const OpportunityStageCombobox = forwardRef<OpportunityStageComboboxRef, Opportu
                     setStages(response.data);
                 }
             });
-        }, [set]);
+        }, [set, auth.token]);
 
         const inputValChange = (inputValue: any) =>
         {

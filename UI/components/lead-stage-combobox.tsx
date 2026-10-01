@@ -104,6 +104,8 @@ const LeadStageCombobox = forwardRef<LeadStageComboboxRef, LeadStageComboboxPara
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("9d624ee2-6433-49f0-bc6c-3e6978e2ac9c", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {

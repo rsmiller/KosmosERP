@@ -104,7 +104,9 @@ function NewProductPage() {
         };
 
         loadProduct();
-    }, [setValue]);
+        // auth.authenticated: on a direct load auth isn't ready on the first run,
+        // so the effect must run again once it is.
+    }, [setValue, auth.authenticated]);
 
     const handleDeleteClick = async () => {
         // For new product, delete is not applicable

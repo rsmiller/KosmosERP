@@ -104,6 +104,8 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
     
             
             const fetchData = useAsync(async () => {
+                // Wait for auth: on a direct load the token isn't there on the first run.
+                if (!auth.token) return;
                 await keyValueService.GetDtoByModule("f6e28b05-265d-4416-b5fd-48399036493a", auth.token || "").then((response) =>
                 {
                     if (response.success && response.data !== undefined) {
@@ -111,7 +113,7 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
                         setStages(response.data);
                     }
                 });
-            }, [set]);
+            }, [set, auth.token]);
     
             const inputValChange = (inputValue: any) =>
             {

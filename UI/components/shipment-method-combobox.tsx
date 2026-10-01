@@ -104,6 +104,8 @@ const ShipmentMethodCombobox = forwardRef<ShipmentMethodComboboxRef, ShipmentMet
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("9da95117-2792-44e5-996a-e91a244b0384", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
@@ -111,7 +113,7 @@ const ShipmentMethodCombobox = forwardRef<ShipmentMethodComboboxRef, ShipmentMet
                 setShipmentMethodOptions(response.data);
             }
         });
-    }, [set]);
+    }, [set, auth.token]);
 
     const inputValChange = (inputValue: any) =>
     {

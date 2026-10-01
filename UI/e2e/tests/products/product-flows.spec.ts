@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test';
+import type { MockApi } from '../../mocks/mock-api';
 import { ok } from '../../mocks/envelope';
 import { ProductCategoryKeys } from '../../factories/lookups';
 import { buildWorld, type World } from '../../factories/world';
@@ -7,15 +8,9 @@ import { mockWorld } from '../../mocks/kits/world';
 import { chooseOption, editGridCell, searchAndChoose } from '../../pages/controls';
 
 test.describe('new product', () => {
-  test('creates a product and opens it for editing', async ({ page, api }) => {
-    const world = mockWorld(api, buildWorld());
+  /** Fill in the new product form, save, and check what was sent and where the page went. */
+  async function createProduct(page: Page, api: MockApi, world: World) {
     const vendor = world.vendors[1];
-    api.on('POST', '/Product/CreateProduct', (req) => ok({ ...world.products[0], ...(req.body as object) }));
-
-    // Arrive the way users do. Loading /erp/products/new directly leaves Save
-    // disabled forever (BUG-023; pinned in known-bugs.spec.ts).
-    await page.goto('/erp/products');
-    await page.getByRole('button', { name: 'New Product' }).click();
     await page.getByRole('textbox', { name: 'Product Name' }).fill('DDR5 64GB Kit');
     await searchAndChoose(page, page.getByRole('combobox', { name: 'Vendor' }), 'Cont', vendor.vendor_name!);
     await page.getByRole('textbox', { name: 'Product Class' }).fill('Component');
@@ -50,6 +45,27 @@ test.describe('new product', () => {
       is_retired: false,
     });
     await expect(page).toHaveURL(`/erp/products/edit/${world.products[0].guid}`);
+  }
+
+  test('creates a product from the list\'s New Product button', async ({ page, api }) => {
+    const world = mockWorld(api, buildWorld());
+    api.on('POST', '/Product/CreateProduct', (req) => ok({ ...world.products[0], ...(req.body as object) }));
+
+    await page.goto('/erp/products');
+    await page.getByRole('button', { name: 'New Product' }).click();
+
+    await createProduct(page, api, world);
+  });
+
+  test('creates a product after loading the page directly', async ({ page, api }) => {
+    // Regression for BUG-023: on a direct load (URL, bookmark, refresh) the
+    // permission check ran before auth was ready, so Save never enabled.
+    const world = mockWorld(api, buildWorld());
+    api.on('POST', '/Product/CreateProduct', (req) => ok({ ...world.products[0], ...(req.body as object) }));
+
+    await page.goto('/erp/products/new');
+
+    await createProduct(page, api, world);
   });
 });
 
