@@ -10,39 +10,21 @@ import { expect, type Locator, type Page } from '@playwright/test';
  * Opens with ArrowDown instead of typing: most lookup comboboxes filter on the
  * hidden key, not the label (BUG-007 in bugs.md).
  */
-export async function chooseOption(
-  page: Page,
-  combobox: Locator,
-  option: string,
-  { inModal = false }: { inModal?: boolean } = {},
-): Promise<void> {
+export async function chooseOption(page: Page, combobox: Locator, option: string): Promise<void> {
   await combobox.click();
   await combobox.press('ArrowDown');
-  await optionLocator(page, option, inModal).click();
+  await optionLocator(page, option).click();
 }
 
-/** See `inModal` on searchAndChoose: options portaled out of a modal have no accessible name (BUG-016). */
-function optionLocator(page: Page, option: string, inModal: boolean): Locator {
-  return inModal
-    ? page.locator('[role="option"]').filter({ hasText: new RegExp(`^\\s*${escapeRegExp(option)}\\s*$`) })
-    : page.getByRole('option', { name: option, exact: true });
+function optionLocator(page: Page, option: string): Locator {
+  return page.getByRole('option', { name: option, exact: true });
 }
 
 /**
  * Pick from a server-searched combobox (customer, product, vendor...): typing
  * three or more characters triggers the Find call, then the option is clicked.
- *
- * `inModal`: comboboxes inside a modal dialog portal their options outside it,
- * where the modal hides them from assistive tech, so they have no accessible
- * name (BUG-016). Those are matched by role attribute and exact text instead.
  */
-export async function searchAndChoose(
-  page: Page,
-  combobox: Locator,
-  search: string,
-  option: string,
-  { inModal = false }: { inModal?: boolean } = {},
-): Promise<void> {
+export async function searchAndChoose(page: Page, combobox: Locator, search: string, option: string): Promise<void> {
   await combobox.click();
   // Typing fires a Find request whose results replace the option list. Clicking
   // an option from the stale list races that re-render and loses the selection,
@@ -50,7 +32,7 @@ export async function searchAndChoose(
   const searched = page.waitForResponse((r) => /\/api\/v1\/[^/]+\/Find[^/?]*/i.test(r.url()));
   await combobox.fill(search);
   await searched;
-  await optionLocator(page, option, inModal).click();
+  await optionLocator(page, option).click();
   // Synchronization, not a test assertion: wait until the pick has landed.
   await expect(combobox).toHaveValue(option);
 }

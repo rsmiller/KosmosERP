@@ -38,6 +38,8 @@ export class NewAddressBlockParams
     name?: string;
     error?: FieldError;
     onValidationChange?: (response: NewAddressBlockResponse) => void;
+    /** Set false inside a Dialog, so the options render inside it (BUG-016). */
+    portalled?: boolean;
 }
 
 export interface NewAddressBlockRef {
@@ -46,7 +48,7 @@ export interface NewAddressBlockRef {
 }
 
 const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
-    ({address_id, onChange, control, name, error=null, onValidationChange}, ref) => {
+    ({address_id, onChange, control, name, error=null, onValidationChange, portalled = true}, ref) => {
     const { contains } = useFilter({ sensitivity: "base" })
     
     const userId = SessionStorage.getUserId();
@@ -540,7 +542,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
                                     <Combobox.Trigger />
                                 </Combobox.IndicatorGroup>
                                 </Combobox.Control>
-                                <Portal>
+                                <Portal disabled={!portalled}>
                                     <Combobox.Positioner>
                                         <Combobox.Content >
                                         <Combobox.Empty>No items found</Combobox.Empty>
@@ -575,7 +577,7 @@ const NewAddressBlock = forwardRef<NewAddressBlockRef, NewAddressBlockParams>(
                                         <Combobox.Trigger />
                                     </Combobox.IndicatorGroup>
                                     </Combobox.Control>
-                                    <Portal>
+                                    <Portal disabled={!portalled}>
                                         <Combobox.Positioner>
                                             <Combobox.Content>
                                             <Combobox.Empty>No items found</Combobox.Empty>

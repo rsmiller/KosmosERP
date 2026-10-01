@@ -314,7 +314,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                         >
                           <GridItem colSpan={2}>
                             <Field.Root invalid={!!errors.activity_type}>
-                              <ActivityTypeCombobox
+                              <ActivityTypeCombobox portalled={false}
                                 ref={activityTypeComboboxRef}
                                 dbKey={watch('activity_type') || ''}
                                 title="Activity Type"
@@ -326,7 +326,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                           </GridItem>
                           <GridItem colSpan={2}>
                             <Field.Root invalid={!!errors.status}>
-                              <ActivityStatusCombobox
+                              <ActivityStatusCombobox portalled={false}
                                 ref={activityStatusComboboxRef}
                                 dbKey={watch('status') || ''}
                                 title="Activity Status"
@@ -379,7 +379,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                           </GridItem>
                           <GridItem colSpan={2}>
                             <Field.Root invalid={!!errors.priority}>
-                              <PriorityCombobox
+                              <PriorityCombobox portalled={false}
                                 ref={priorityComboboxRef}
                                 dbKey={watch('priority') || ''}
                                 title="Priority"

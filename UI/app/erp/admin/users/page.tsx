@@ -710,7 +710,8 @@ function AdminUserPage() {
                                     <Combobox.Trigger />
                                 </Combobox.IndicatorGroup>
                                 </Combobox.Control>
-                                <Portal>
+                                {/* Not portaled: inside a Dialog the options must render inside it (BUG-016). */}
+                                <Portal disabled>
                                     <Combobox.Positioner>
                                         <Combobox.Content>
                                         <Combobox.Empty>No items found</Combobox.Empty>

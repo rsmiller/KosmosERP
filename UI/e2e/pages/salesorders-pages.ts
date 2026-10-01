@@ -64,7 +64,7 @@ export class SalesOrderFormPage {
   async addOrderLine({ product, description, quantity }: { product: string; description: string; quantity: number }) {
     await this.addLine.click();
     const dialog = this.page.getByRole('dialog', { name: 'Add Order Line' });
-    await searchAndChoose(this.page, dialog.getByRole('combobox', { name: 'Product' }), product.slice(0, 4), product, { inModal: true });
+    await searchAndChoose(this.page, dialog.getByRole('combobox', { name: 'Product' }), product.slice(0, 4), product);
     await dialog.getByRole('textbox', { name: 'Description' }).fill(description);
     await dialog.getByRole('spinbutton', { name: 'Quantity' }).fill(String(quantity));
     await dialog.getByRole('button', { name: 'Add Line' }).click();

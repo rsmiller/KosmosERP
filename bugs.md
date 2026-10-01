@@ -27,7 +27,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-013](#bug-013) | `/erp/ar/new` is a stub with hard-coded sample data | UI | Low | Open, needs decision |
 | [BUG-014](#bug-014) | Form controls with no accessible name | UI / accessibility | Low | Open |
 | [BUG-015](#bug-015) | Credit memo edit page is titled "New Credit Memo" | UI | Low | Open |
-| [BUG-016](#bug-016) | Combobox options inside modal dialogs are hidden from assistive tech | UI / accessibility | Medium | Open |
+| [BUG-016](#bug-016) | Combobox options inside modal dialogs are hidden from assistive tech | UI / accessibility | Medium | Fixed (uncommitted) |
 | [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Fixed (uncommitted) |
 | [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Fixed (uncommitted) |
 | [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Fixed (uncommitted) |
@@ -336,6 +336,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-016"></a>
 ## BUG-016: Combobox options inside modal dialogs are hidden from assistive tech
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Medium. Screen-reader and voice-control users can't pick a product when adding sales order lines or BOM items.
 - **Where:**
   - `UI/components/product-combobox.tsx`, when used inside `UI/components/dialogs/add-sales-order-line.tsx` and `UI/components/dialogs/add-bom-item.tsx`.
@@ -528,6 +530,22 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-016: dropdowns inside dialogs render their options inside the dialog.**
+  - **Cause:** the comboboxes portaled their option lists to `<body>`, outside the modal. The modal hid them from assistive tech, so they had no accessible name, and clicking one sometimes counted as a click outside, which closed the dialog.
+  - **Fix:** Chakra's guidance is not to portal dropdowns inside a Dialog. Each affected component takes a `portalled` prop (default `true`, so nothing changes elsewhere) and renders `<Portal disabled={!portalled}>`. The dialogs pass `portalled={false}`:
+    - `ProductCombobox`: add sales order, purchase order and opportunity line dialogs, and the BOM item dialog.
+    - `ModuleListCombobox`: Admin → Lists › Add New Entry.
+    - `ActivityStatusCombobox`, `ActivityTypeCombobox`, `PriorityCombobox`: the activities dialog.
+    - `NewAddressBlock` (country and state): `new-address-dialog`.
+    - `SalesOrderSelectorComponent`: the subscription dialog. Its own nested order-picker dialog still portals, as dialogs should.
+    - `AgGridCustomPagination` (page-size select): the AR invoice selector dialog.
+    - Admin → Users: the role combobox in its dialog uses `<Portal disabled>` directly.
+  - **Found beyond the report:** the address, activities, subscription, AR-invoice-selector and users dialogs had the same problem; the report only named the product dialogs.
+  - **Tests:**
+    - The `inModal` fallback is removed from `UI/e2e/pages/controls.ts`, so dialog options are found by role and accessible name like any other.
+    - Full suite passes (170). `lists.spec.ts --repeat-each=20 --retries=0` passed 40 of 40; it failed about 1 in 10 before.
+    - With the fix reverted, the 5 dialog tests fail (BOM component, the Lists entry, 3 sales order line flows).
+  - **Not covered by e2e yet:** the activities, address, subscription, AR invoice selector and users dialogs only get the page-render check. No test opens their dropdowns.
 - **BUG-005: no more hydration errors on production page loads.**
   - **Cause:** with no Emotion cache registry for the App Router, server rendering wrote every Chakra style as an inline `<style data-emotion>` tag in `<body>`. Emotion's client moved them into `<head>` while React was hydrating, so React found markup that didn't match (`#418`).
   - **Fix:**

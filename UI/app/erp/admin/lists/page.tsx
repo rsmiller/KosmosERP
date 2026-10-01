@@ -343,7 +343,7 @@ function AdminListsPage() {
                                 m="auto"
                                 >
                                     <GridItem colSpan={2}>
-                                        <ModuleListCombobox 
+                                        <ModuleListCombobox portalled={false} 
                                             ref={moduleComboboxRef}
                                             dbKey={watch('module_id') ? [watch('module_id') as string] : []}
                                             onChange={handleModuleSelect}

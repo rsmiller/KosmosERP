@@ -19,6 +19,8 @@ export class ProductComboboxParams
     name?: string;
     error?: FieldError;
     onValidationChange?: (isValid: boolean) => void;
+    /** Set false inside a Dialog, so the options render inside it (BUG-016). */
+    portalled?: boolean;
 }
 
 export interface ProductComboboxRef {
@@ -28,7 +30,7 @@ export interface ProductComboboxRef {
 }
 
 const ProductCombobox = forwardRef<ProductComboboxRef, ProductComboboxParams>(
-    ({dbKey, onChange, control, name, error, onValidationChange}, ref) => {
+    ({dbKey, onChange, control, name, error, onValidationChange, portalled = true}, ref) => {
         const auth = useAuth();
 
         const [products, setProducts] = useState<ProductListDto[]>([]);
@@ -206,7 +208,7 @@ const ProductCombobox = forwardRef<ProductComboboxRef, ProductComboboxParams>(
                     <Combobox.Trigger />
                 </Combobox.IndicatorGroup>
                 </Combobox.Control>
-                <Portal>
+                <Portal disabled={!portalled}>
                 <Combobox.Positioner style={{ zIndex: 9999 }}>
                     <Combobox.Content style={{ zIndex: 9999 }}>
                     <Combobox.Empty>

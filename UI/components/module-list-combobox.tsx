@@ -21,6 +21,8 @@ export class ModuleListComboboxParams
     error?: FieldError;
     dataSet?: ModuleObjectDto[];
     onValidationChange?: (isValid: boolean) => void;
+    /** Set false inside a Dialog, so the options render inside it (BUG-016). */
+    portalled?: boolean;
 }
 
 export interface ModuleListComboboxRef {
@@ -30,7 +32,7 @@ export interface ModuleListComboboxRef {
 }
 
 const ModuleListCombobox = forwardRef<ModuleListComboboxRef, ModuleListComboboxParams>(
-    ({dbKey, onChange, control, name, error, dataSet, onValidationChange}, ref) => {
+    ({dbKey, onChange, control, name, error, dataSet, onValidationChange, portalled = true}, ref) => {
 
     const { contains } = useFilter({ sensitivity: "base" })
 
@@ -173,7 +175,7 @@ const ModuleListCombobox = forwardRef<ModuleListComboboxRef, ModuleListComboboxP
                 <Combobox.Trigger />
             </Combobox.IndicatorGroup>
             </Combobox.Control>
-            <Portal>
+            <Portal disabled={!portalled}>
                 <Combobox.Positioner>
                     <Combobox.Content>
                     <Combobox.Empty>No items found</Combobox.Empty>

@@ -129,7 +129,7 @@ const AddPurchaseOrderLineDialog = forwardRef<AddPurchaseOrderLineDialogRef, Add
                             >
                                 <GridItem colSpan={3}>
                                     <div style={{ position: 'relative', zIndex: 1 }}>
-                                        <ProductCombobox 
+                                        <ProductCombobox portalled={false} 
                                             ref={productComboboxRef}
                                             dbKey={watch('product_id') || 0}
                                             control={control}

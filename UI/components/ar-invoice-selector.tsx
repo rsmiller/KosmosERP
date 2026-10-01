@@ -242,7 +242,7 @@ function ARInvoiceSelectorComponent({customer_id, ar_invoice_number, disabled, o
                                         </GridItem>
                                         <GridItem colSpan={3}></GridItem>
                                         <GridItem colSpan={3}>
-                                            <AgGridCustomPagination totalCount={totalCount} onPage={onPageEvent} onSizeChange={onPageSizeEvent}></AgGridCustomPagination>
+                                            <AgGridCustomPagination portalled={false} totalCount={totalCount} onPage={onPageEvent} onSizeChange={onPageSizeEvent}></AgGridCustomPagination>
                                         </GridItem>
                                         </Grid>
                                     </div>

@@ -101,7 +101,7 @@ const AddBOMItemDialog = forwardRef<AddBomItemDialogRef, AddBomItemDialogParams>
                                 <Field.Root>
                                     <Field.Label><Field.RequiredIndicator /> Product</Field.Label>
                                     
-                                    <ProductCombobox
+                                    <ProductCombobox portalled={false}
                                         dbKey={null}
                                         ref={productComboboxRef}
                                         control={control}

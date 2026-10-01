@@ -2,7 +2,8 @@ import { ButtonGroup, createListCollection, IconButton, Pagination, Portal, Sele
 import { useState } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-function AgGridCustomPagination({totalCount, onPage, onSizeChange}: any) {
+/** `portalled`: set false inside a Dialog, so the page-size options render inside it (BUG-016). */
+function AgGridCustomPagination({totalCount, onPage, onSizeChange, portalled = true}: any) {
     const pagination_options = createListCollection({items: [{ label: "20", value: "20" }, { label: "50", value: "50" }, { label: "100", value: "100" },  { label: "200", value: "200" }]});
 
     const [pageSize, setPageSize] = useState<number>(50);
@@ -31,7 +32,7 @@ function AgGridCustomPagination({totalCount, onPage, onSizeChange}: any) {
                         <Select.Indicator />
                         </Select.IndicatorGroup>
                     </Select.Control>
-                    <Portal>
+                    <Portal disabled={!portalled}>
                         <Select.Positioner>
                         <Select.Content>
                             {pagination_options.items.map((po: any) => (

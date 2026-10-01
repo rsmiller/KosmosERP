@@ -11,7 +11,7 @@ test.describe('admin lists', () => {
     await page.goto('/erp/admin/lists');
     await page.getByRole('button', { name: 'Add New Entry' }).click();
     const dialog = page.getByRole('dialog', { name: 'Add New Entry' });
-    await chooseOption(page, dialog.getByRole('combobox'), 'Payment Term', { inModal: true });
+    await chooseOption(page, dialog.getByRole('combobox'), 'Payment Term');
     await dialog.getByRole('textbox', { name: 'Key' }).fill('payment_terms_net_90');
     await dialog.getByRole('textbox', { name: 'Value' }).fill('Net 90');
     await dialog.getByRole('spinbutton', { name: 'Number' }).fill('90');

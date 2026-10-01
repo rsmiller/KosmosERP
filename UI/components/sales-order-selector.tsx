@@ -27,10 +27,12 @@ export class SalesOrderSelectorComponentParams
     customer_id: any;
     order_header_id: any;
     onChange?: (SalesOrderSelectorForm: any) => void;
+    /** Set false inside a Dialog, so the options render inside it (BUG-016). */
+    portalled?: boolean;
 }
 
 
-function SalesOrderSelectorComponent({customer_id, order_header_id, onChange}: SalesOrderSelectorComponentParams) {
+function SalesOrderSelectorComponent({customer_id, order_header_id, onChange, portalled = true}: SalesOrderSelectorComponentParams) {
     const { contains } = useFilter({ sensitivity: "base" })
     
     const [selectedValue, setSelectedValue] = useState<string>();
@@ -176,7 +178,7 @@ function SalesOrderSelectorComponent({customer_id, order_header_id, onChange}: S
                                 <Combobox.Trigger />
                             </Combobox.IndicatorGroup>
                             </Combobox.Control>
-                            <Portal>
+                            <Portal disabled={!portalled}>
                                 <Combobox.Positioner>
                                     <Combobox.Content>
                                     <Combobox.Empty>No items found</Combobox.Empty>

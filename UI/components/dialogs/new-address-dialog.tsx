@@ -74,7 +74,7 @@ const AddAddressDialog = forwardRef<AddAddressDialogRef, AddAddressDialogParams>
                     </Dialog.Header>
                     <Dialog.Body style={{ overflow: 'visible' }}>
                         <div style={{ position: 'relative', zIndex: 1 }}>
-                            <NewAddressBlock
+                            <NewAddressBlock portalled={false}
                                 ref={addressBlockRef}
                                 address_id={null}
                                 control={control}
