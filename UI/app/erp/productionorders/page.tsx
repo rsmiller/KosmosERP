@@ -172,7 +172,9 @@ function ProductionOrdersPage() {
   };
 
   // Column Definitions: Defines & controls grid columns.
-  const [colDefs, setColDefs] = useState<ColDef<ProductionOrderHeaderListDto>[]>([
+  // Memoized on hasEditPermission: the Edit button reads it, and it is only known
+  // after auth loads (BUG-027: as useState, the first render's false stuck).
+  const colDefs = useMemo<ColDef<ProductionOrderHeaderListDto>[]>(() => [
     { field: "order_number", headerName: "Order #"},
     { field: "priority_id", headerName: "Priority"},
     { field: "status_name", headerName: "Status Name" },
@@ -209,13 +211,13 @@ function ProductionOrdersPage() {
       cellRenderer: (props: any) => {
           return ( 
             <div>
-              <Button hidden={!hasEditPermission} type="button" colorPalette="green" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>&nbsp;
-              <Button type="button" colorPalette="gray" variant="outline" onClick={() => window.open(`/docs/api/?url=${encodeURIComponent('/docs/productionorder/' + props.value)}`, "_blank") }><FaRegFilePdf /></Button>
+              <Button hidden={!hasEditPermission} type="button" colorPalette="green" aria-label="Edit" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>&nbsp;
+              <Button type="button" colorPalette="gray" variant="outline" aria-label="Print" onClick={() => window.open(`/docs/api/?url=${encodeURIComponent('/docs/productionorder/' + props.value)}`, "_blank") }><FaRegFilePdf /></Button>
             </div>
           );
       }
     }
-  ]);
+  ], [hasEditPermission]);
 
   const defaultColDef: ColDef = {
     flex: 1,

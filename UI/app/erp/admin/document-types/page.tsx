@@ -127,7 +127,7 @@ function AdminDocumentTypePage() {
             cellRenderer: (props: any) => {
                 return ( 
                     <div>
-                        <Button type="button" colorPalette="green" onClick={() => doTagDialogOpen(props.data.id)}>Edit Tags</Button>&nbsp;<Button type="button" colorPalette="red" onClick={() => handleDeleteClick(props.data.id)}>Delete</Button>
+                        <Button type="button" colorPalette="green" onClick={() => tagDialogOpenRef.current(props.data.id)}>Edit Tags</Button>&nbsp;<Button type="button" colorPalette="red" onClick={() => handleDeleteClick(props.data.id)}>Delete</Button>
                     </div>
                 );
             }
@@ -255,6 +255,12 @@ function AdminDocumentTypePage() {
             }
         });
     }
+
+    // colDefs are created on the first render, which on a direct load is before
+    // auth is ready. Edit Tags calls through this ref so it always uses the
+    // current handler (and token), not the first render's (BUG-027).
+    const tagDialogOpenRef = useRef(doTagDialogOpen);
+    tagDialogOpenRef.current = doTagDialogOpen;
 
     const doTagsSave = () => {
         setIsWorking(true);

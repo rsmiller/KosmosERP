@@ -38,7 +38,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Fixed (uncommitted) |
 | [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Open |
 | [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Fixed (uncommitted) |
-| [BUG-027](#bug-027) | Grid buttons send an empty token after a direct load | UI | Medium | Open |
+| [BUG-027](#bug-027) | Grid buttons send an empty token after a direct load | UI | Medium | Fixed (uncommitted) |
 
 Also see [Needs verification](#needs-verification) for suspected issues that haven't been confirmed.
 
@@ -496,6 +496,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-027"></a>
 ## BUG-027: Grid buttons send an empty token after a direct load
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Medium. After loading one of these pages by URL, bookmark or refresh, its grid's Delete (or tag) button calls the API with no token. The real API answers 401 and nothing happens. Arriving through the app works, because auth is already ready on the first render.
 - **Where:** each page keeps its grid `colDefs` in `useState`, so the cell renderers keep the handler from the **first** render. On a direct load that render runs before auth is ready, so `auth.token` is `""`:
   - `UI/app/erp/admin/document-types/page.tsx`: `handleDeleteClick`, `handleTagDelete`, `doTagDialogOpen`
@@ -534,6 +536,23 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-027: grid buttons work after a direct load, and admins see Edit on every list.**
+  - **Verified by test, not by reading.** A new spec loads each page by URL and clicks its grid buttons. The api fixture's token check flags any call without a token.
+  - **Real bugs, fixed:**
+    - Purchase Order edit, line **Delete**: sent no token (on the delete and the reload). It now calls through a ref, as sales orders do since BUG-023.
+    - Document Types, **Edit Tags**: loaded the tags with no token. Same fix.
+    - **Vendors and Production Orders lists:** the Edit button was **hidden for admins even when arriving through the app**, not just after a refresh. Their columns were `useState`, so `hidden={!hasEditPermission}` kept the first render's `false`. They now use `useMemo` on `hasEditPermission`, like the other list pages. Their icon-only buttons got accessible names (View, Edit, Print).
+  - **Listed in the report, but fine:**
+    - Lists, Opportunity line and Document Type deletes, and the tag delete, only open a confirm dialog through a state setter; the call runs in the page body.
+    - Credit Memo line Delete rebuilds its columns after the GL accounts load, which is after auth.
+    - All are now covered by the spec anyway.
+  - **Tests:** new `UI/e2e/tests/pages/grid-actions.spec.ts` (8 tests, every page loaded directly):
+    - line Delete on purchase orders, credit memos and opportunities
+    - Lists delete
+    - Document Types: Edit Tags, tag delete, and document type delete
+    - Edit on the Vendors and Production Orders lists
+    - It fails on the old code for the 4 real bugs. Full suite: 178 passed.
+  - **Still to check:** the Leads list item under "Needs verification" (its permission effect sets `hasInitialized` before the auth check) wasn't part of this.
 - **BUG-011: date-only values show the stored day.**
   - **Cause, wider than reported:** both `new Date("2026-04-01")` **and** date-fns 4's `format("2026-04-01", …)` read a bare date as UTC midnight, which is the previous day in US time zones. So the pages' own `format(dateString)` helpers had the bug too, not just `new Date`. Strings with a time part (`…T00:00:00`) and the grid's `DateOnlyRender` were already right.
   - **Fix:** new `UI/lib/date-only.ts` with `parseDateOnly` and `formatDateOnly`, which read `yyyy-MM-dd` as a local calendar day. Each page keeps its existing display format. Used for every `DateOnly` field (the 12 in the API DTOs) that was read through a UTC-parsing path:
