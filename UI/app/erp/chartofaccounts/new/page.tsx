@@ -113,11 +113,9 @@ function NewChartOfAccountPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={false}
-                showSave={hasWritePermission} 
-                saveDisabled={!formValid}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
+                saveDisabled={!formValid || !hasWritePermission}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onSave={handleSaveClick} 
             />
             <Grid

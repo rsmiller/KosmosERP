@@ -31,8 +31,8 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Fixed (uncommitted) |
 | [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Fixed (uncommitted) |
 | [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Fixed (uncommitted) |
-| [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Open |
-| [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Open |
+| [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Fixed (uncommitted) |
+| [BUG-021](#bug-021) | Journal entry "Account" column is a free-text internal id | UI / UX | Medium | Fixed (uncommitted) |
 | [BUG-022](#bug-022) | BOM item dialog is titled "Add Address" | UI | Low | Open |
 | [BUG-023](#bug-023) | New Product can't be saved after a direct load or refresh | UI | High | Fixed (uncommitted) |
 | [BUG-024](#bug-024) | Production order edits are never saved | UI | High | Fixed (uncommitted) |
@@ -403,6 +403,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-020"></a>
 ## BUG-020: Journal entry and chart of accounts pages pass props PageActions ignores
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** Medium. Users get no success or failure feedback on these pages, and posted journal entries still show Save and "Delete Record".
 - **Where:** `UI/app/erp/chartofaccounts/new/page.tsx`, `chartofaccounts/edit/[id]/page.tsx`, `journalentries/new/page.tsx` and `journalentries/edit/[id]/page.tsx` pass `showDelete`, `showSave`, `showSaveSuccess` and `showSaveFailed` to `UI/components/page-actions.tsx`. That component takes `canDelete`, `hidden`, `successSaved` and `failedSaved`.
 - **Symptom:**
@@ -415,6 +417,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 <a id="bug-021"></a>
 ## BUG-021: Journal entry "Account" column is a free-text internal id
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
 
 - **Severity:** Medium. To enter a journal entry, users have to know and type the database id of each account.
 - **Where:** `UI/app/erp/journalentries/new/page.tsx` and `journalentries/edit/[id]/page.tsx`. The line grid's `chart_of_account_id` column uses `agTextCellEditor`.
@@ -536,6 +540,28 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-020: journal entry and chart of accounts pages give save feedback, and posted entries can't be edited or deleted.**
+  - The four pages (`chartofaccounts/new`, `chartofaccounts/edit/[id]`, `journalentries/new`, `journalentries/edit/[id]`) now pass the button bar's real props: `successSaved`, `failedSaved`, `canDelete`, and the new `canSave`.
+  - **`canSave` (new, default `true`)** in `UI/components/page-actions.tsx` hides Save but keeps the saved/failed alerts. `hidden` would have hidden the alerts too.
+  - **A posted journal entry** shows neither Save nor Delete Record, only Reverse.
+  - **Chart of accounts edit** now hides Delete without the delete permission (noted under BUG-006). The API already enforced it.
+  - **Tests:**
+    - `journal-entries.spec.ts`: a successful post shows "Record saved!"; a failed post shows the error; a posted entry has no Save or Delete; a draft has both.
+    - `chart-of-accounts.spec.ts`: a save shows "Record saved!"; a refused save shows the error.
+    - The BUG-020 known-bug test is retired.
+- **BUG-021: journal entry lines pick their account from the chart of accounts.**
+  - **New `UI/components/ag-grid/chart-of-account-cell-editor.tsx`:**
+    - A popup combobox of active accounts (up to 1,000, by number), filtered as you type on "number - name", so accounts are found by number or name.
+    - It stores the account id and shows "1010 - Operating Cash" in the cell.
+    - It focuses its input just after mount: with `autoFocus` the combobox missed the focus and typing never opened the list.
+    - It doesn't reuse `gl-account-cell-editor.tsx`, which is a stub with four hard-coded accounts.
+  - **New entry page:** the free-text id cell is replaced by the picker.
+  - **Edit page:** worse than reported. Account # and Name were read-only, so **lines added on the edit page could never get an account** (and so could never balance). The Account column is now the picker while the entry is a draft.
+  - **Tests:**
+    - `UI/e2e/pages/journal-entry-pages.ts` `chooseAccount`/`fillLine` type the account number and pick "number - name".
+    - `journal-entries.spec.ts`: an account can be found by name, and a line added to a draft can be given an account (`UpdateJournalEntryLine` gets its `chart_of_account_id`).
+  - **Full suite:** 181 passed. With the fix reverted, the new-entry flows, the post feedback and the chart of accounts feedback tests fail.
+  - **Not changed:** the journal entry pages' `CheckFormValidity` reads `lines` from before the update. It only works because ag-grid edits the row objects in place. Worth deriving validity from `lines` if those pages change again.
 - **BUG-027: grid buttons work after a direct load, and admins see Edit on every list.**
   - **Verified by test, not by reading.** A new spec loads each page by URL and clicks its grid buttons. The api fixture's token check flags any call without a token.
   - **Real bugs, fixed:**

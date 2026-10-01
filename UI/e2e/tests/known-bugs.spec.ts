@@ -1,5 +1,4 @@
 import { test, expect } from '../fixtures/test';
-import { fail } from '../mocks/envelope';
 import { buildWorld } from '../factories/world';
 import { mockWorld } from '../mocks/kits/world';
 
@@ -13,18 +12,6 @@ import { mockWorld } from '../mocks/kits/world';
  * (and check it fails for the reason in its BUG entry, not something else).
  */
 const knownBug = (reason: string) => test.fail(!process.env.E2E_SHOW_KNOWN_BUGS, reason);
-
-test('BUG-020: a failed journal entry post shows an error', async ({ page, api }) => {
-  knownBug('BUG-020: journal entry and chart of accounts pages pass showSaveFailed/showDelete/... props PageActionsComponent ignores');
-
-  const world = mockWorld(api, buildWorld());
-  api.on('POST', '/JournalEntry/PostJournalEntry', fail(-6, 'Fiscal period closed'));
-  await page.goto(`/erp/journalentries/edit/${world.journalEntries[0].guid}`);
-
-  await page.getByRole('button', { name: 'Post Entry' }).click();
-
-  await expect(page.getByText('Record could not be saved!')).toBeVisible();
-});
 
 test('BUG-025: a completed production order\'s lines are read-only', async ({ page, api }) => {
   knownBug('BUG-025: colDefs live in useState, so editable: !completedOrDisabled is fixed at mount (before the order loads)');

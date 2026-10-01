@@ -13,7 +13,8 @@ import { useEffect, useState } from "react"
 
 // Delete is only offered when the page passes an onDelete handler, so create
 // pages (nothing to delete yet) don't show a button that has nothing to call.
-function PageActionsComponent({saveDisabled=false, onSave, onDelete, canDelete=Boolean(onDelete), saveText="Save Record", successSaved, failedSaved, deleteText="Delete Record", hidden=false}: any) {
+// canSave=false hides Save but keeps the saved/failed alerts (e.g. a posted journal entry).
+function PageActionsComponent({saveDisabled=false, canSave=true, onSave, onDelete, canDelete=Boolean(onDelete), saveText="Save Record", successSaved, failedSaved, deleteText="Delete Record", hidden=false}: any) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isWorking, setIsWorking] = useState(false);
 
@@ -54,7 +55,9 @@ function PageActionsComponent({saveDisabled=false, onSave, onDelete, canDelete=B
                 </Alert.Root>
             </GridItem>
             <hr style={{ width: "100%", marginBottom: "25px"}}/>
-            <Button type="button" colorPalette="blue" onClick={() => onSave()} disabled={saveDisabled}>{saveText}</Button>
+            {canSave && (
+               <Button type="button" colorPalette="blue" onClick={() => onSave()} disabled={saveDisabled}>{saveText}</Button>
+            )}
             {canDelete && (
                <Button type="button" colorPalette="red" onClick={() => setIsDeleteDialogOpen(true)} className={"page-action-dlt-btn"}>{deleteText}</Button>
             )}

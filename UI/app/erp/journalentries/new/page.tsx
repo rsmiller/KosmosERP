@@ -31,13 +31,16 @@ import { permissionsService, ERPModules, ERPModulePermission } from '@/services/
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { MdDelete } from 'react-icons/md';
+import ChartOfAccountCellEditor, { accountLabel } from '@/components/ag-grid/chart-of-account-cell-editor';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface LineItem {
   id: number;
   chart_of_account_id?: number;
-  account_display?: string;
+  // Set by the account picker, for display only.
+  account_number?: string;
+  account_name?: string;
   debit_amount: number;
   credit_amount: number;
   description?: string;
@@ -127,7 +130,6 @@ function NewJournalEntryPage() {
         setLines([...lines, {
             id: nextLineId,
             chart_of_account_id: undefined,
-            account_display: '',
             debit_amount: 0,
             credit_amount: 0,
             description: ''
@@ -168,10 +170,13 @@ function NewJournalEntryPage() {
 
     const colDefs = useMemo<ColDef<LineItem>[]>(() => [
         { 
+            // Picked from the chart of accounts, shown as "1010 - Operating Cash" (BUG-021).
             field: "chart_of_account_id", 
             headerName: "Account",
             editable: true,
-            cellEditor: 'agTextCellEditor'
+            cellEditor: ChartOfAccountCellEditor,
+            cellEditorPopup: true,
+            valueFormatter: (params) => accountLabel(params.data ?? {}),
         },
         { 
             field: "debit_amount", 
@@ -217,11 +222,9 @@ function NewJournalEntryPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={false}
-                showSave={hasWritePermission} 
-                saveDisabled={!formValid}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
+                saveDisabled={!formValid || !hasWritePermission}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onSave={handleSaveClick} 
             />
             <Grid

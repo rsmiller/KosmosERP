@@ -38,6 +38,7 @@ import { permissionsService, ERPModules, ERPModulePermission } from '@/services/
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { MdDelete } from 'react-icons/md';
+import ChartOfAccountCellEditor, { accountLabel } from '@/components/ag-grid/chart-of-account-cell-editor';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -296,12 +297,14 @@ function EditJournalEntryPage() {
 
     const colDefs = useMemo<ColDef<JournalEntryLineDto>[]>(() => [
         { 
-            field: "account_number", 
-            headerName: "Account #",
-        },
-        { 
-            field: "account_name", 
-            headerName: "Account Name",
+            // Picked from the chart of accounts, shown as "1010 - Operating Cash" (BUG-021).
+            // Before, lines added here had no way to get an account at all.
+            field: "chart_of_account_id", 
+            headerName: "Account",
+            editable: !entry?.is_posted,
+            cellEditor: ChartOfAccountCellEditor,
+            cellEditorPopup: true,
+            valueFormatter: (params) => accountLabel(params.data ?? {}),
         },
         { 
             field: "debit_amount", 
@@ -369,11 +372,11 @@ function EditJournalEntryPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={hasDeletePermission && !entry.is_posted}
-                showSave={hasEditPermission && !entry.is_posted} 
+                canSave={hasEditPermission && !entry.is_posted}
+                canDelete={hasDeletePermission && !entry.is_posted}
                 saveDisabled={!formValid}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onDelete={handleDeleteClick} 
                 onSave={handleSaveClick} 
             />

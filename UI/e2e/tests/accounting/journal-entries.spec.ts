@@ -27,8 +27,8 @@ test.describe('new journal entry', () => {
     await form.description.fill('Cash sale correction');
     await form.addLine.click();
     await form.addLine.click();
-    await form.fillLine(0, { accountId: cash.id, debit: 250, description: 'Cash in' });
-    await form.fillLine(1, { accountId: revenue.id, credit: 250, description: 'Revenue' });
+    await form.fillLine(0, { account: cash, debit: 250, description: 'Cash in' });
+    await form.fillLine(1, { account: revenue, credit: 250, description: 'Revenue' });
 
     await expect(form.balance).toHaveText(/✓ Balanced/);
     await expect(form.save).toBeEnabled();
@@ -50,16 +50,26 @@ test.describe('new journal entry', () => {
 
     await form.addLine.click();
     await form.addLine.click();
-    await form.fillLine(0, { accountId: cash.id, debit: 300, description: 'Cash in' });
-    await form.fillLine(1, { accountId: revenue.id, credit: 250, description: 'Revenue' });
+    await form.fillLine(0, { account: cash, debit: 300, description: 'Cash in' });
+    await form.fillLine(1, { account: revenue, credit: 250, description: 'Revenue' });
 
     await expect(form.balance).toHaveText(/✗ Out of Balance/);
     await expect(form.save).toBeDisabled();
   });
 
+  test('an account can be found by its name', async () => {
+    // Regression for BUG-021: the Account cell was a free-text box for the internal id.
+    const [revenue] = world.chartOfAccounts;
+    await form.addLine.click();
+
+    await form.chooseAccount(0, revenue, 'sales rev');
+
+    await expect(form.save).toBeDisabled();
+  });
+
   test('a single line cannot be saved', async () => {
     await form.addLine.click();
-    await form.fillLine(0, { accountId: world.chartOfAccounts[1].id, debit: 100, description: 'Lonely line' });
+    await form.fillLine(0, { account: world.chartOfAccounts[1], debit: 100, description: 'Lonely line' });
 
     await expect(form.save).toBeDisabled();
   });
@@ -83,6 +93,42 @@ test.describe('existing journal entry', () => {
     expect(request.body).toMatchObject({ id: entry.id });
     await expect(form.reverse).toBeVisible();
     await expect(form.post).toBeHidden();
+    await expect(form.savedAlert).toBeVisible();
+    // A posted entry can't be edited or deleted, only reversed (BUG-020).
+    await expect(form.save).toBeHidden();
+    await expect(form.deleteRecord).toBeHidden();
+  });
+
+  test('a draft offers Save and Delete Record', async ({ page, api }) => {
+    const world = mockWorld(api, buildWorld());
+    const form = new JournalEntryFormPage(page);
+
+    await page.goto(`/erp/journalentries/edit/${world.journalEntries[0].guid}`);
+
+    await expect(form.save).toBeVisible();
+    await expect(form.deleteRecord).toBeVisible();
+  });
+
+  test('a line added to a draft can be given an account', async ({ page, api }) => {
+    // BUG-021: lines added on the edit page had no way to get an account.
+    const world = mockWorld(api, buildWorld());
+    const entry = world.journalEntries[0];
+    const [revenue] = world.chartOfAccounts;
+    // Like the API: a created line gets an id, an updated one comes back with its account.
+    api.on('POST', '/JournalEntry/CreateJournalEntryLine', (req) => ok({ ...(req.body as object), id: 9001 }));
+    api.on('PUT', '/JournalEntry/UpdateJournalEntryLine', (req) => {
+      const body = req.body as { chart_of_account_id: number };
+      const account = world.chartOfAccounts.find((a) => a.id === body.chart_of_account_id);
+      return ok({ ...body, account_number: account?.account_number, account_name: account?.account_name });
+    });
+    const form = new JournalEntryFormPage(page);
+    await page.goto(`/erp/journalentries/edit/${entry.guid}`);
+
+    await form.addLine.click();
+    await form.chooseAccount(entry.lines!.length, revenue);
+
+    const request = await api.waitForRequest('PUT', '/JournalEntry/UpdateJournalEntryLine');
+    expect(request.body).toMatchObject({ id: 9001, chart_of_account_id: revenue.id });
   });
 
   test('reversing a posted entry opens the reversing entry', async ({ page, api }) => {
@@ -98,6 +144,8 @@ test.describe('existing journal entry', () => {
 
     await page.goto(`/erp/journalentries/edit/${entry.guid}`);
     await expect(form.post).toBeHidden();
+    await expect(form.save).toBeHidden();
+    await expect(form.deleteRecord).toBeHidden();
     await form.reverse.click();
 
     const request = await api.waitForRequest('POST', '/JournalEntry/ReverseJournalEntry');
@@ -116,6 +164,7 @@ test.describe('existing journal entry', () => {
     await api.waitForRequest('POST', '/JournalEntry/PostJournalEntry');
     await expect(form.post).toBeVisible();
     await expect(form.reverse).toBeHidden();
-    // The page never shows the failure message (BUG-020; pinned in known-bugs.spec.ts).
+    // Regression for BUG-020: the page passed props the button bar ignored, so no message showed.
+    await expect(form.failedAlert).toBeVisible();
   });
 });

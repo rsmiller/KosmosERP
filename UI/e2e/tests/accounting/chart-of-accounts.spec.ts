@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/test';
-import { ok } from '../../mocks/envelope';
+import { fail, ok } from '../../mocks/envelope';
 import { buildWorld } from '../../factories/world';
 import { mockWorld } from '../../mocks/kits/world';
 
@@ -69,6 +69,22 @@ test.describe('existing account', () => {
       account_name: 'Product Sales Revenue',
       account_type: Number(AccountType.Revenue),
     });
+    await expect(page.getByText('Record saved!')).toBeVisible();
+  });
+
+  test('a refused save shows the error', async ({ page, api }) => {
+    // Regression for BUG-020: the page passed props the button bar ignored, so no message showed.
+    const world = mockWorld(api, buildWorld());
+    const account = world.chartOfAccounts[0];
+    api.on('PUT', '/ChartOfAccount/UpdateChartOfAccount', fail(-2, 'Account number already exists'));
+
+    await page.goto(`/erp/chartofaccounts/edit/${account.guid}`);
+    await page.getByRole('textbox', { name: 'Account Name' }).fill('Product Sales Revenue');
+    await page.getByRole('button', { name: 'Save Record' }).click();
+
+    await api.waitForRequest('PUT', '/ChartOfAccount/UpdateChartOfAccount');
+    await expect(page.getByText('Record could not be saved!')).toBeVisible();
+    await expect(page.getByText('Record saved!')).toBeHidden();
   });
 
   test('deletes an account after confirmation', async ({ page, api }) => {

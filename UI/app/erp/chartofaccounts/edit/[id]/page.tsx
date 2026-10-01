@@ -181,11 +181,11 @@ function EditChartOfAccountPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={hasDeletePermission}
-                showSave={hasEditPermission} 
+                canSave={hasEditPermission}
+                canDelete={hasDeletePermission}
                 saveDisabled={!formValid}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onDelete={handleDeleteClick} 
                 onSave={handleSaveClick} 
             />
