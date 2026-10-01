@@ -28,7 +28,7 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-014](#bug-014) | Form controls with no accessible name | UI / accessibility | Low | Open |
 | [BUG-015](#bug-015) | Credit memo edit page is titled "New Credit Memo" | UI | Low | Open |
 | [BUG-016](#bug-016) | Combobox options inside modal dialogs are hidden from assistive tech | UI / accessibility | Medium | Open |
-| [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Open, needs decision |
+| [BUG-017](#bug-017) | Shipment line "Delete" button marks the line shipped | UI | High | Fixed (uncommitted) |
 | [BUG-018](#bug-018) | Non-taxable customers' invoice lines default to taxable | UI | High | Fixed (uncommitted) |
 | [BUG-019](#bug-019) | Invoicing crashes unless payment terms are named "NETxx" | UI | High | Fixed (uncommitted) |
 | [BUG-020](#bug-020) | Journal entry and chart of accounts pages pass props PageActions ignores | UI | Medium | Open |
@@ -344,6 +344,8 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 <a id="bug-017"></a>
 ## BUG-017: Shipment line "Delete" button marks the line shipped
 
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
 - **Severity:** High. A user removing a line records it as shipped instead, which changes shipment and inventory data.
 - **Where:** `UI/app/erp/shipments/edit/[id]/page.tsx`. The line grid's Actions column renders a red **"Delete"** button whose `onClick` is `handleShipLineClick`.
 - **Symptom:** clicking "Delete" sends `PUT /ShipmentLine/UpdateShipmentLine` with `units_shipped = units_to_ship` and `is_complete: true`, then reloads the shipment.
@@ -500,6 +502,24 @@ These were fixed during the same session and sit in the working tree, not commit
 
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
+- **BUG-017: the shipment line "Delete" button deletes the line.**
+  - **Decision:** Delete. The old "ship" handler only set `units_shipped` and `is_complete`; inventory moves when the shipment is released, which skips deleted lines.
+  - **UI** (`UI/app/erp/shipments/edit/[id]/page.tsx`):
+    - Delete opens a "Remove line?" confirmation. Remove calls `DeleteShipmentLine` and drops the line from the grid, so a later Save doesn't send it. Cancel does nothing.
+    - A failed delete shows "Record could not be saved!" and keeps the line.
+    - The button is disabled without the shipping Delete permission (the endpoint requires it), and on released or completed shipments.
+    - Each button is labelled "Delete line <description>".
+    - `handleShipLineClick` is removed. The cell renderer only calls a state setter, since `colDefs` are captured once.
+  - **API** (`ShipmentModule.DeleteLine`):
+    - Refuses lines on a released shipment (`DataValidationError`), like `EditLine`.
+    - Header `Delete` still removes all its lines through a private `SoftDeleteLine`, as before, and now loads `order_line` like `GetLineAsync` did.
+  - **Tests:**
+    - .NET: `ShipmentModuleTests.DeleteLine_OnReleasedShipment_IsRefused` and `Delete_ReleasedShipment_StillDeletesItsLines`.
+    - e2e: `shipments/shipments.spec.ts` › "shipment line Delete":
+      - Confirm removes the line and a later Save leaves it out.
+      - Cancel keeps it.
+      - An API refusal shows the error.
+      - The button is disabled on released shipments and for read-only users.
 - **BUG-024: production order line status changes are saved.**
   - **UI** (`UI/app/erp/productionorders/edit/[id]/page.tsx`):
     - Changing a line's status marks that line as unsaved, and Save turns on.

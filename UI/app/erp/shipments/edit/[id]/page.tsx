@@ -50,6 +50,9 @@ function NewARFromCustomerPage() {
   const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
 
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false);
+  // The line awaiting delete confirmation, if any.
+  const [lineToDelete, setLineToDelete] = useState<ShipmentLineDto | null>(null);
+  const [deletingLine, setDeletingLine] = useState(false);
 
   const [addressModel, setAddressModel] = useState<AddressDto>({} as AddressDto);
   const [rowData, setRowData] = useState<ShipmentLineDto[]>([]);
@@ -276,35 +279,31 @@ function NewARFromCustomerPage() {
     }
   };
 
-  const handleShipLineClick = async (id: number) => {
-    // Find the line to update
-    const lineToUpdate = rowData.find(line => line.id === id);
-    if (!lineToUpdate) return;
+  const handleDeleteLineConfirm = async () => {
+    if (!lineToDelete?.id) return;
 
-    // Update the shipped units to match units to ship
-    const updatedLine: ShipmentLineEditCommand = {
-      id: lineToUpdate.id,
-      order_line_id: lineToUpdate.order_line_id,
-      units_to_ship: lineToUpdate.units_to_ship,
-      units_shipped: lineToUpdate.units_to_ship, // Set shipped to match to_ship
-      is_complete: true,
-      is_canceled: false,
-    };
+    let command = new ShipmentLineDeleteCommand();
+    command.id = lineToDelete.id;
 
+    setDeletingLine(true);
     try {
-      await shipmentService.updateLine(updatedLine, auth.token || "").then(async (response) => {
-        if (response.success) {
-          // Reload the shipment to get updated data
-          const shipmentResponse = await shipmentService.get(shipment?.id || 0, auth.token || "");
-          if (shipmentResponse.success && shipmentResponse.data && shipmentResponse.data.shipment_lines) {
-            RenderLines(shipmentResponse.data.shipment_lines);
-          }
-        }
-      });
+      const response = await shipmentService.deleteLine(command, auth.token || "");
+      if (response.success) {
+        // Deleted lines are left out of the release, so drop it from the grid too.
+        setRowData(prev => prev.filter(line => line.id !== lineToDelete.id));
+        setFailedSaved(false);
+      } else {
+        console.error(response);
+        setSuccessSaved(false);
+        setFailedSaved(true);
+      }
     } catch (e) {
       console.error(e);
       setSuccessSaved(false);
       setFailedSaved(true);
+    } finally {
+      setDeletingLine(false);
+      setLineToDelete(null);
     }
   };
 
@@ -361,14 +360,17 @@ function NewARFromCustomerPage() {
       field: "id",
       headerName: "Actions",
       cellRenderer: (props: any) => {
-        const { completedOrDisabled } = props.context;
+        const { completedOrDisabled, canDeleteLines } = props.context;
         return (
           <div>
             <Button 
               type="button" 
               colorPalette="red" 
-              onClick={() => handleShipLineClick(props.value)}
-              disabled={completedOrDisabled || props.data.is_complete || props.data.is_released}
+              aria-label={`Delete line ${props.data.line_description}`}
+              // Opens the confirmation dialog. colDefs are captured once, so only a
+              // state setter (always current) may be called from here.
+              onClick={() => setLineToDelete(props.data)}
+              disabled={completedOrDisabled || !canDeleteLines || props.data.is_complete || props.data.is_released}
             >
               Delete
             </Button>
@@ -493,7 +495,7 @@ function NewARFromCustomerPage() {
               rowData={rowData}
               columnDefs={colDefs}
               defaultColDef={defaultColDef}
-              context={{ completedOrDisabled }}
+              context={{ completedOrDisabled, canDeleteLines: hasDeletePermission }}
             />
           </div>
         </GridItem>
@@ -527,6 +529,32 @@ function NewARFromCustomerPage() {
                   <Button variant="outline" onClick={() => setIsReleaseDialogOpen(false)}>No</Button>
                 </Dialog.ActionTrigger>
                 <Button colorPalette="green" onClick={() => doRelease()}>Release</Button>
+              </Dialog.Footer>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="sm" />
+              </Dialog.CloseTrigger>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+      <Dialog.Root open={lineToDelete !== null} onOpenChange={(details) => { if (!details.open) setLineToDelete(null); }} role="alertdialog">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Remove line?</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <p>
+                  Remove "{lineToDelete?.line_description}" from this shipment? It will not be shipped when the shipment is released.
+                </p>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="outline" disabled={deletingLine}>Cancel</Button>
+                </Dialog.ActionTrigger>
+                <Button colorPalette="red" onClick={() => handleDeleteLineConfirm()} disabled={deletingLine}>Remove</Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />

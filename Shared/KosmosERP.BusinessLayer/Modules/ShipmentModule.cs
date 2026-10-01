@@ -516,14 +516,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             await _Context.SaveChangesAsync();
 
 
-            var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == existingEntity.id).ToListAsync();
+            var lines = await _Context.ShipmentLines.Include("order_line").Where(m => m.shipment_header_id == existingEntity.id).ToListAsync();
             foreach (var line in lines)
             {
-                await this.DeleteLine(new ShipmentLineDeleteCommand()
-                {
-                    calling_user_id = commandModel.calling_user_id,
-                    id = line.id,
-                });
+                await this.SoftDeleteLine(line, commandModel.calling_user_id);
             }
 
 
@@ -555,10 +551,20 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (existingEntity == null)
             return new Response<ShipmentLineDto>("Shipment Line not found", ResultCode.NotFound);
 
+        // Like EditLine: a released shipment has already shipped its lines.
+        var existingHeaderEntity = await GetAsync(existingEntity.shipment_header_id);
+        if (existingHeaderEntity?.is_released == true)
+            return new Response<ShipmentLineDto>("Shipment header has been released and lines can not be deleted", ResultCode.DataValidationError);
+
+        return await SoftDeleteLine(existingEntity, commandModel.calling_user_id);
+    }
+
+    private async Task<Response<ShipmentLineDto>> SoftDeleteLine(ShipmentLine existingEntity, string calling_user_id)
+    {
         try
         {
             // Delete line
-            existingEntity = CommonDataHelper<ShipmentLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+            existingEntity = CommonDataHelper<ShipmentLine>.FillDeleteFields(existingEntity, calling_user_id);
 
             _Context.ShipmentLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -571,7 +577,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 {
                     object_reference_id = existingEntity.shipment_header_id,
                     object_sub_reference_id = existingEntity.id,
-                    calling_user_id = commandModel.calling_user_id,
+                    calling_user_id = calling_user_id,
                 })
             }, _MessagePublisherSettings!.transaction_movement_topic!);
 

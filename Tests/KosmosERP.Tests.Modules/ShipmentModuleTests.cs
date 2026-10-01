@@ -604,6 +604,74 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
         Assert.That(response.Data.deleted_on_timezone, Is.Not.Null);
     }
 
+    [Test]
+    public async Task DeleteLine_OnReleasedShipment_IsRefused()
+    {
+        // A released shipment has shipped its lines (BUG-017 made the edit page's Delete button real).
+        var shipment = await CreateReleasedShipment();
+        var line_id = shipment.shipment_lines[0].id;
+
+        var response = await _Module.DeleteLine(new ShipmentLineDeleteCommand()
+        {
+            calling_user_id = _User.external_id,
+            id = line_id,
+        });
+
+        Assert.That(response.Success, Is.False);
+        Assert.That(response.ResultCode, Is.EqualTo(ResultCode.DataValidationError));
+        Assert.That((await _Context.ShipmentLines.SingleAsync(m => m.id == line_id)).is_deleted, Is.False);
+    }
+
+    [Test]
+    public async Task Delete_ReleasedShipment_StillDeletesItsLines()
+    {
+        // Header delete bypasses the line guard above, as it did before.
+        var shipment = await CreateReleasedShipment();
+
+        var response = await _Module.Delete(new ShipmentHeaderDeleteCommand()
+        {
+            calling_user_id = _User.external_id,
+            id = shipment.id,
+        });
+
+        Assert.That(response.Success, Is.True);
+        var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == shipment.id).ToListAsync();
+        Assert.That(lines, Is.Not.Empty);
+        Assert.That(lines.All(m => m.is_deleted), Is.True);
+    }
+
+    private async Task<ShipmentHeaderDto> CreateReleasedShipment()
+    {
+        var create_result = await _Module.Create(new ShipmentHeaderCreateCommand()
+        {
+            calling_user_id = _User.external_id,
+            ship_attn = "Bob",
+            freight_carrier = "Yellow Truck",
+            order_header_id = _SalesOrderHeader.id,
+            freight_charge_amount = 1000,
+            address_id = _Address.id,
+            ship_via = "Frieght",
+            tax = 100,
+            shipment_lines = new List<ShipmentLineCreateCommand>()
+            {
+                new ShipmentLineCreateCommand()
+                {
+                    calling_user_id = _User.external_id,
+                    order_line_id = _SalesOrderLine.id,
+                    units_to_ship = 10,
+                    units_shipped = 10
+                }
+            }
+        });
+        Assert.That(create_result.Success, Is.True);
+
+        var header = await _Context.ShipmentHeaders.SingleAsync(m => m.id == create_result.Data.id);
+        header.is_released = true;
+        await _Context.SaveChangesAsync();
+
+        return create_result.Data;
+    }
+
 
     [Test]
     public async Task GetReadyToShip()

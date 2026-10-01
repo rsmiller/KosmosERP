@@ -2,6 +2,8 @@ import { test, expect } from '../../fixtures/test';
 import { fail, ok } from '../../mocks/envelope';
 import { buildWorld, type World } from '../../factories/world';
 import { FreightCarrierKeys, ShipmentMethodKeys } from '../../factories/lookups';
+import { buildShipmentLine } from '../../factories/sales';
+import { users } from '../../fixtures/users';
 import { mockWorld } from '../../mocks/kits/world';
 import { ShipmentFormPage, ShipmentsListPage } from '../../pages/shipments-pages';
 
@@ -138,5 +140,95 @@ test.describe('edit shipment', () => {
     await expect(form.shipAttention).toBeDisabled();
     await expect(form.freightCarrier).toBeDisabled();
     await expect(form.save).toBeDisabled();
+  });
+});
+
+test.describe('shipment line Delete', () => {
+  /** A world whose first shipment has a second line, so removing one leaves one. */
+  function worldWithTwoLines(): { world: World; kept: string; removed: string } {
+    const world = buildWorld();
+    const shipment = world.shipments[0];
+    const extra = buildShipmentLine({ shipment_header_id: shipment.id, line_description: 'Spare power supply', line_number: 2 });
+    shipment.shipment_lines = [...shipment.shipment_lines!, extra];
+    return { world, kept: shipment.shipment_lines[0].line_description!, removed: extra.line_description! };
+  }
+
+  test('removes the line after confirmation', async ({ page, api }) => {
+    // Regression for BUG-017: the "Delete" button used to mark the line shipped.
+    const { world, kept, removed } = worldWithTwoLines();
+    mockWorld(api, world);
+    const shipment = world.shipments[0];
+    const removedLine = shipment.shipment_lines![1];
+    const form = new ShipmentFormPage(page);
+    await page.goto(`/erp/shipments/edit/${shipment.guid}`);
+
+    await form.deleteLineButton(removed).click();
+    await expect(form.removeLineDialog).toContainText(removed);
+    await form.removeLineDialog.getByRole('button', { name: 'Remove' }).click();
+
+    const request = await api.waitForRequest('POST', '/ShipmentLine/DeleteShipmentLine');
+    expect(request.body).toEqual({ id: removedLine.id });
+    await expect(form.line(removed)).toHaveCount(0);
+    await expect(form.line(kept)).toBeVisible();
+    expect(api.requestsTo('PUT', '/ShipmentLine/UpdateShipmentLine')).toHaveLength(0);
+
+    // Saving afterwards no longer sends the removed line.
+    await form.save.click();
+    const update = await api.waitForRequest('PUT', '/Shipment/UpdateShipmentHeader');
+    const lineIds = (update.body as { shipment_lines: { id: number }[] }).shipment_lines.map((l) => l.id);
+    expect(lineIds).toEqual([shipment.shipment_lines![0].id]);
+  });
+
+  test('Cancel keeps the line', async ({ page, api }) => {
+    const { world, removed } = worldWithTwoLines();
+    mockWorld(api, world);
+    const form = new ShipmentFormPage(page);
+    await page.goto(`/erp/shipments/edit/${world.shipments[0].guid}`);
+
+    await form.deleteLineButton(removed).click();
+    await form.removeLineDialog.getByRole('button', { name: 'Cancel' }).click();
+
+    await expect(form.removeLineDialog).toBeHidden();
+    await expect(form.line(removed)).toBeVisible();
+    expect(api.requestsTo('POST', '/ShipmentLine/DeleteShipmentLine')).toHaveLength(0);
+  });
+
+  test('keeps the line and shows an error when the API refuses', async ({ page, api }) => {
+    const { world, removed } = worldWithTwoLines();
+    mockWorld(api, world);
+    api.on('POST', '/ShipmentLine/DeleteShipmentLine', fail(-4, 'Shipment header has been released and lines can not be deleted'));
+    const form = new ShipmentFormPage(page);
+    await page.goto(`/erp/shipments/edit/${world.shipments[0].guid}`);
+
+    await form.deleteLineButton(removed).click();
+    await form.removeLineDialog.getByRole('button', { name: 'Remove' }).click();
+
+    await expect(form.failedAlert).toBeVisible();
+    await expect(form.removeLineDialog).toBeHidden();
+    await expect(form.line(removed)).toBeVisible();
+  });
+
+  test('is disabled on a released shipment', async ({ page, api }) => {
+    const world = buildWorld();
+    world.shipments[0].is_released = true;
+    mockWorld(api, world);
+    const form = new ShipmentFormPage(page);
+
+    await page.goto(`/erp/shipments/edit/${world.shipments[0].guid}`);
+
+    await expect(form.deleteLineButton(world.shipments[0].shipment_lines![0].line_description!)).toBeDisabled();
+  });
+
+  test.describe('without delete permission', () => {
+    test.use({ storageState: users.readOnly.storageState });
+
+    test('is disabled', async ({ page, api }) => {
+      const world = mockWorld(api, buildWorld());
+      const form = new ShipmentFormPage(page);
+
+      await page.goto(`/erp/shipments/edit/${world.shipments[0].guid}`);
+
+      await expect(form.deleteLineButton(world.shipments[0].shipment_lines![0].line_description!)).toBeDisabled();
+    });
   });
 });
