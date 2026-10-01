@@ -7,15 +7,7 @@ import { MockApi } from '../mocks/mock-api';
  * `known-issue` annotation instead of failing every test. Keep this list short
  * and remove an entry as soon as the underlying bug is fixed.
  */
-const KNOWN_PAGE_ERRORS: { pattern: RegExp; reason: string }[] = [
-  {
-    // Chakra/Emotion writes <style data-emotion> tags inline in the SSR body (no
-    // Emotion cache registry in app/layout.tsx); Emotion's client hoists them to
-    // <head>, racing React hydration.
-    pattern: /Minified React error #(418|423|425)\b|Hydration failed/,
-    reason: 'React hydration mismatch from inline Emotion <style> tags (no Emotion SSR registry)',
-  },
-];
+const KNOWN_PAGE_ERRORS: { pattern: RegExp; reason: string }[] = [];
 
 type Fixtures = {
   /** Mocked KosmosERP API. Installed for every test; strict unless `allowEmptyFallback()` is called. */
