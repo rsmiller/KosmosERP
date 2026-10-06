@@ -1,7 +1,7 @@
 import { FaHome, FaCogs, FaMoneyBill, FaChartBar, FaCubes, FaFileAlt, FaTruckMoving,
           FaUserFriends, FaCity, FaBoxOpen, FaDollarSign, FaListAlt, FaReceipt, FaTh,
           FaClipboardList, FaUsers, FaUserPlus, FaRegIdCard, FaCashRegister,
-          FaBoxes, FaAddressBook} from "react-icons/fa";
+          FaBoxes, FaAddressBook, FaChevronDown, FaChevronRight, FaCog } from "react-icons/fa";
 import { CiMemoPad } from "react-icons/ci";
 import { Link as ChakraLink, Menu, Portal, VStack } from "@chakra-ui/react";
 import NextLink from "next/link";
@@ -68,8 +68,8 @@ function SidebarComponent({ onNavigate } : any)
 
             <NavLink href="/erp"><FaHome style={{ marginRight: 6 }} />Home</NavLink>
             <Menu.Root positioning={{ placement: "right-start" }} size="md">
-                <Menu.Trigger asChild hidden={!hasAccountingAcccess()}>
-                    <ChakraLink as="button"><FaCashRegister style={{ marginRight: 6 }} />Accounting</ChakraLink>
+                <Menu.Trigger asChild hidden={!hasAccountingAcccess()} >
+                    <ChakraLink as="button"><FaCashRegister style={{ marginRight: 6}} className="chakra-link" />Accounting <FaChevronRight style={{ marginLeft: 55 }} /></ChakraLink>
                 </Menu.Trigger>
                 <Portal>
                     <Menu.Positioner>
@@ -91,7 +91,7 @@ function SidebarComponent({ onNavigate } : any)
             <NavLink href="/erp/productionorders" hidden={!canRead(ERPModules.ProductionOrderModule)}><FaClipboardList style={{ marginRight: 6 }} />Production Orders</NavLink>
             <Menu.Root positioning={{ placement: "right-start" }} size="md">
                 <Menu.Trigger asChild hidden={!hasCRMAccess()}>
-                    <ChakraLink as="button"><FaListAlt style={{ marginRight: 6 }} />CRM</ChakraLink>
+                    <ChakraLink as="button"><FaListAlt style={{ marginRight: 6 }} />CRM <FaChevronRight style={{ marginLeft: 100 }} /></ChakraLink>
                 </Menu.Trigger>
                 <Portal>
                     <Menu.Positioner>
@@ -99,7 +99,7 @@ function SidebarComponent({ onNavigate } : any)
                         <NavMenuItem value="opportunities" href="/erp/opportunities" hidden={!canRead(ERPModules.OpportunityModule)}><FaRegIdCard style={{ marginRight: 6 }} />Opportunities</NavMenuItem>
                         <NavMenuItem value="contacts" href="/erp/contacts" hidden={!canRead(ERPModules.ContactModule)}><FaUsers style={{ marginRight: 6 }} />Contacts</NavMenuItem>
                         <NavMenuItem value="leads" href="/erp/leads" hidden={!canRead(ERPModules.LeadModule)}><FaUserPlus style={{ marginRight: 6 }} />Leads</NavMenuItem>
-                        <NavMenuItem value="activities" href="/erp/activities" hidden={!canRead(ERPModules.ActivityModule)}><FaUserPlus style={{ marginRight: 6 }} />Activities</NavMenuItem>
+                        <NavMenuItem value="activities" href="/erp/activities" hidden={!canRead(ERPModules.ActivityModule)}><FaCog style={{ marginRight: 6 }} />Activities</NavMenuItem>
                     </Menu.Content>
                     </Menu.Positioner>
                 </Portal>

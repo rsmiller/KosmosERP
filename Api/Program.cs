@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Hangfire;
 using Hangfire.MySql;
@@ -221,6 +222,9 @@ builder.Services.AddAuthorization(options =>
 // [ERPAuthorize] checks database users against their role permissions; users not in
 // the database (e.g. Keycloak) fall back to the attribute's role-claim check.
 builder.Services.AddScoped<IERPAuthorizationHandler, ErpCustomAuthorizationHandler>();
+
+// Adds the caller's User.guid as a claim; controllers read it as CurrentUserId.
+builder.Services.AddScoped<IClaimsTransformation, ErpUserClaimsTransformation>();
 
 
 var app = builder.Build();

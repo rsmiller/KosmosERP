@@ -35,7 +35,7 @@ export function buildOrder(overrides: Partial<OrderHeaderDto> = {}): OrderHeader
     shipping_method_name: 'Common Carrier',
     pay_method: PaymentMethodKeys.NetTerms,
     pay_method_name: 'Net Terms',
-    order_type: 'sales',
+    order_type: 'Q',
     revision_number: 1,
     order_date: DATE_ONLY,
     required_date: DUE_DATE_ONLY,

@@ -42,7 +42,7 @@ public class ChartOfAccountModule : BaseERPModule, IChartOfAccountModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Chart of Account Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

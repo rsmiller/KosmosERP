@@ -67,6 +67,13 @@ public partial class UserModule : BaseERPModule, IUserModule
 
     public override void SeedPermissions()
     {
+        // The non-login account system writes are stamped with (see SystemUsers).
+        if (!_IContext.Users.Any(m => m.guid == SystemUsers.ServiceUserGuid))
+        {
+            _IContext.Users.Add(ServiceUserFactory.Create());
+            _IContext.SaveChanges();
+        }
+
         var admin_role = _IContext.Roles.Any(m => m.name == "Administrators");
         var system_user = _IContext.Users.Any(m => m.username == "system");
 
@@ -75,7 +82,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             _IContext.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _IContext.SaveChanges();
 
@@ -105,7 +112,7 @@ public partial class UserModule : BaseERPModule, IUserModule
                 password = password.HashedPassword,
                 password_salt = password.Salt,
                 is_admin = true,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _IContext.SaveChanges();
 
@@ -116,7 +123,7 @@ public partial class UserModule : BaseERPModule, IUserModule
             {
                 role_id = role_id,
                 user_id = user_id,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _IContext.SaveChanges();
         }
@@ -452,7 +459,7 @@ public partial class UserModule : BaseERPModule, IUserModule
         {
             user_id = commandModel.user_id,
             role_id = commandModel.role_id,
-        }, commandModel.user_id));
+        }, commandModel.calling_user_id));
 
         await _IContext.SaveChangesAsync();
 
@@ -1083,8 +1090,8 @@ public partial class UserModule : BaseERPModule, IUserModule
                 write = true,
                 edit = true,
                 id = 0,
-                created_by = "1",
-                updated_by = "1",
+                created_by = SystemUsers.ServiceUserGuid,
+                updated_by = SystemUsers.ServiceUserGuid,
                 created_on = DateTime.UtcNow,
                 updated_on = DateTime.UtcNow,
                 is_deleted = false

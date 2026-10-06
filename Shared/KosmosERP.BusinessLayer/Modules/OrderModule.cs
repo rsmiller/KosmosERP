@@ -93,7 +93,7 @@ public class OrderModule : BaseERPModule, IOrderModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Sales Order Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -114,7 +114,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 value = "Cash",
                 module_id = KeyValueIds.PayMethods.ToString(),
                 int_value = 1
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -127,7 +127,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 value = "Check",
                 module_id = KeyValueIds.PayMethods.ToString(),
                 int_value = 2
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -140,7 +140,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 value = "Card",
                 module_id = KeyValueIds.PayMethods.ToString(),
                 int_value = 3
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -152,7 +152,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                 key = "payment_method_po",
                 value = "PO",
                 module_id = KeyValueIds.PayMethods.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -174,7 +174,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                     edit = false,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -186,7 +186,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                     edit = false,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -198,7 +198,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                     edit = true,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -210,7 +210,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                     edit = false,
                     delete = true,
                     is_active = true
-                }, 1)
+                }, SystemUsers.ServiceUserGuid)
             });
 
             _Context.SaveChanges();
@@ -405,7 +405,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                             quantity = db_line.quantity,
                             status = ProductionOrderStatus.Submitted,
                             production_lead_minutes = manufactured_product.manufacture_time_minutes,
-                            calling_user_id = "1"
+                            calling_user_id = commandModel.calling_user_id
                         });
                     }
                 }
@@ -634,7 +634,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                                 quantity = add_line.quantity,
                                 status = ProductionOrderStatus.Submitted,
                                 production_lead_minutes = manufactured_product.manufacture_time_minutes,
-                                calling_user_id = "1"
+                                calling_user_id = commandModel.calling_user_id
                             });
                         }
                     }
@@ -679,7 +679,7 @@ public class OrderModule : BaseERPModule, IOrderModule
                                 quantity = edit_response.Data.quantity,
                                 status = ProductionOrderStatus.Submitted,
                                 production_lead_minutes = manufactured_product.manufacture_time_minutes,
-                                calling_user_id = "1",
+                                calling_user_id = commandModel.calling_user_id,
                             });
                         }
                     }
@@ -1379,7 +1379,7 @@ public class OrderModule : BaseERPModule, IOrderModule
         };
 
         dto.customer_name = await context.Customers.Where(m => m.id == databaseModel.customer_id).Select(m => m.customer_name).SingleOrDefaultAsync();
-        dto.created_by_name = await context.Users.Where(m => m.external_id == databaseModel.created_by).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.created_by_name = await UserNameHelper.GetFullName(context, databaseModel.created_by);
 
 
         return dto;

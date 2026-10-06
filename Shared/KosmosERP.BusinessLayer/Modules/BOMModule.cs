@@ -42,11 +42,11 @@ public class BOMModule : BaseERPModule, IBOMModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "BOM Administrators",
-                created_by = "1",
+                created_by = SystemUsers.ServiceUserGuid,
                 created_on = DateTime.UtcNow,
-                updated_by = "1",
+                updated_by = SystemUsers.ServiceUserGuid,
                 updated_on = DateTime.UtcNow,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

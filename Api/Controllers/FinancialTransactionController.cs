@@ -56,6 +56,8 @@ public class FinancialTransactionController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> GetAccountBalance([FromBody] AccountBalanceFindCommand command)
     {
+        command.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.GetAccountBalance(command);
 
         if (!result.Success)

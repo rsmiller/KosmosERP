@@ -65,7 +65,9 @@ namespace KosmosERP.BusinessLayer.AuthenticiationProviders
 
             // Todo: Add auto-provisioning logic here if the user does not exist in the database
 
-            var token = TokenModule.CreateSecurityToken(userId, _AuthenticationSettings.APIPrivateKey);
+            // The token identifies the user by username, like database logins, so the API
+            // can resolve the database user (and its id) the same way for every provider.
+            var token = TokenModule.CreateSecurityToken(user.username, _AuthenticationSettings.APIPrivateKey);
 
             var dto = new AuthenticatedUserDto()
             {

@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -33,12 +34,12 @@ public class InventoryReportTests
             company_city = "Springfield", company_state = "IL", company_zip = "62701", company_country = "USA",
             company_phone = "555-0100", company_general_email = "info@kosmos.example", company_ar_email = "ar@kosmos.example",
             company_website = "kosmos.example", tax_id = "12-3456789", fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         AddProduct(1, "FG-1", "Gearbox Assembly", "Finished Goods", 5m);
         AddProduct(2, "RM-2", "Gear, 12-tooth", "Components", 20m);
         _Context.BOMs.Add(CommonDataHelper<BOM>.FillCommonFields(new BOM
-        { id = 50, parent_product_id = 1, product_id = 2, order_number = 1, quantity = 4 }, 1));
+        { id = 50, parent_product_id = 1, product_id = 2, order_number = 1, quantity = 4 }, SystemUsers.ServiceUserGuid));
 
         AddInventory(1, "Gearbox Assembly", onHand: 100, reorder: 5, toOrder: 0);
         AddInventory(2, "Gear, 12-tooth", onHand: 2, reorder: 10, toOrder: 8);   // low stock
@@ -63,7 +64,7 @@ public class InventoryReportTests
             product_name = name,
             internal_description = name,
             unit_cost = unitCost,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
     }
 
     private void AddInventory(int productId, string name, int onHand, int reorder, int toOrder)

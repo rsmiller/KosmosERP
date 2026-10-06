@@ -35,7 +35,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CustomerCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_name = "Cool customer",
             customer_description = "Super cool customer guy",
             phone = "567-554-1234",
@@ -62,7 +62,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
     {
         var create_command = new CustomerCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_name = "Cool customer123123",
             customer_description = "Super cool customer guy123123",
             phone = "999-554-1234",
@@ -96,7 +96,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CustomerCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_name = "Cool customer1777",
             customer_description = "Super cool customer guy1545",
             phone = "999-666-5655",
@@ -115,7 +115,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
 
         var edit_command = new CustomerEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             customer_name = "Cool customer000",
             customer_description = "Super cool customer guy000",
@@ -151,7 +151,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CustomerCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_name = "Cool customer000",
             customer_description = "Super cool customer guy000",
             phone = "999-666-0000",
@@ -170,7 +170,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new CustomerDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -187,7 +187,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CustomerCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_name = "Cool customer4322",
             customer_description = "Super cool customer guy3231",
             phone = "544-889-9778",
@@ -206,7 +206,7 @@ public class CustomerModuleTests : BaseTestModule<CustomerModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new CustomerFindCommand() { calling_user_id = _User.external_id, wildcard = "customer4322" });
+                        new CustomerFindCommand() { calling_user_id = _User.guid, wildcard = "customer4322" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

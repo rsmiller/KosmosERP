@@ -52,6 +52,8 @@ public class KeyValueController : ControllerBase
     [ProducesResponseType(500)]
     public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] KeyValueFindCommand command)
     {
+        command.calling_user_id = User.GetUserGuid();
+
         try
         {
             if (command != null)
@@ -79,6 +81,8 @@ public class KeyValueController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] KeyValueCreateCommand createCommand)
     {
+        createCommand.calling_user_id = User.GetUserGuid();
+
         var result = await _Module.Create(createCommand);
 
         if (!result.Success)
@@ -93,6 +97,8 @@ public class KeyValueController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] KeyValueEditCommand editCommand)
     {
+        editCommand.calling_user_id = User.GetUserGuid();
+
         var result = await _Module.Edit(editCommand);
 
         if (!result.Success)
@@ -107,6 +113,8 @@ public class KeyValueController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] KeyValueDeleteCommand deleteCommand)
     {
+        deleteCommand.calling_user_id = User.GetUserGuid();
+
         var result = await _Module.Delete(deleteCommand);
 
         if (!result.Success)

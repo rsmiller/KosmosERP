@@ -78,7 +78,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Shipping Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -102,7 +102,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "Pickup",
                 module_id = KeyValueIds.ShippingMethods.ToString(),
                 int_value = 1
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -115,7 +115,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "Carrier",
                 module_id = KeyValueIds.ShippingMethods.ToString(),
                 int_value = 2
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -128,7 +128,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "Dispatch",
                 module_id = KeyValueIds.ShippingMethods.ToString(),
                 int_value = 3
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -141,7 +141,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "UPS",
                 module_id = KeyValueIds.FreightCarriers.ToString(),
                 int_value = 1
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -154,7 +154,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "FedEx",
                 module_id = KeyValueIds.FreightCarriers.ToString(),
                 int_value = 2
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -167,7 +167,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "DHL",
                 module_id = KeyValueIds.FreightCarriers.ToString(),
                 int_value = 3
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -1021,7 +1021,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             freight_charge_amount = createCommandModel.freight_charge_amount,
             tax = createCommandModel.tax,
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         return shipment_header;
     }

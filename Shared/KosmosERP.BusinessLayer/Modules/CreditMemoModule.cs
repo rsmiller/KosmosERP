@@ -43,7 +43,7 @@ public class CreditMemoModule : BaseERPModule, ICreditMemoModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Credit Memo Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

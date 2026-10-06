@@ -33,7 +33,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -43,7 +43,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -60,7 +60,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             payment_terms = "Net 30",
             is_taxable = true,
             tax_rate = 0.08m,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(_Customer);
         await _Context.SaveChangesAsync();
@@ -77,7 +77,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             is_approved = false,
             is_applied = false,
             guid = Guid.NewGuid().ToString(),
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CreditMemoHeaders.Add(_CreditMemoHeader);
         await _Context.SaveChangesAsync();
@@ -91,7 +91,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             gl_account_id = "TEST",
             description = "Test credit memo line",
             guid = Guid.NewGuid().ToString(),
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CreditMemoLines.Add(_CreditMemoLine);
         await _Context.SaveChangesAsync();
@@ -106,7 +106,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -121,7 +121,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -136,7 +136,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -151,7 +151,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -173,7 +173,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
     {
         var command = new CreditMemoHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_id = _Customer.id,
             credit_memo_date = DateTime.UtcNow,
             credit_memo_due_date = DateTime.UtcNow.AddDays(30),
@@ -186,7 +186,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             {
                 new CreditMemoLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     line_number = 1,
                     line_total = 200.00m,
                     qty_credited = 2,
@@ -209,7 +209,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
     {
         var command = new CreditMemoHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = _CreditMemoHeader.id,
             memo = "Updated memo",
             is_approved = true
@@ -228,7 +228,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
     {
         var command = new CreditMemoHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = _CreditMemoHeader.id
         };
 
@@ -244,7 +244,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
     {
         var createCommand = new CreditMemoHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_id = _Customer.id,
             credit_memo_date = DateTime.UtcNow,
             credit_memo_due_date = DateTime.UtcNow.AddDays(30),
@@ -257,7 +257,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
             {
                 new CreditMemoLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     line_number = 1,
                     line_total = 200.00m,
                     qty_credited = 2,
@@ -274,7 +274,7 @@ public class CreditMemoModuleTests : BaseTestModule<CreditMemoModule>, IModuleTe
 
         var command = new CreditMemoHeaderFindCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             wildcard = createResult.Data.credit_memo_number.ToString()
         };
 

@@ -40,7 +40,7 @@ public class NotificationModuleTests
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -53,7 +53,7 @@ public class NotificationModuleTests
             object_name = "customer",
             alert_text = "A new customer",
             user_id = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Notifications.Add(notification);
         await _Context.SaveChangesAsync();

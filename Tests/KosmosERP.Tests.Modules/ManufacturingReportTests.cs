@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -40,7 +41,7 @@ public class ManufacturingReportTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         // Explicit ids — transactional headers use HasPrincipalKey(c => c.id), which disables
         // EF InMemory key generation (production MySQL auto-increment is unaffected).
@@ -52,7 +53,7 @@ public class ManufacturingReportTests
             identifier1 = "GBX-001",
             product_name = "Gearbox Assembly",
             internal_description = "Complete gearbox",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         var component = CommonDataHelper<Product>.FillCommonFields(new Product
         {
             id = 2,
@@ -61,7 +62,7 @@ public class ManufacturingReportTests
             identifier1 = "GEAR-12",
             product_name = "Gear, 12-tooth",
             internal_description = "Steel gear",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Products.AddRange(finished, component);
 
         _Context.BOMs.Add(CommonDataHelper<BOM>.FillCommonFields(new BOM
@@ -71,7 +72,7 @@ public class ManufacturingReportTests
             product_id = component.id,
             order_number = 1,
             quantity = 4,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         var order = CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader
         {
@@ -81,12 +82,12 @@ public class ManufacturingReportTests
             billing_address_id = 0,
             ship_to_address_id = 0,
             shipping_method = "Ground",
-            order_type = "Standard",
+            order_type = "Q",
             pay_method = "Net Terms",
             order_date = new DateOnly(2026, 9, 1),
             required_date = new DateOnly(2026, 9, 15),
             price = 1000m,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.OrderHeaders.Add(order);
         _Context.OrderLines.Add(CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine
         {
@@ -97,7 +98,7 @@ public class ManufacturingReportTests
             line_description = "Gearbox Assembly",
             quantity = 10,
             unit_price = 100m,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         _Po = CommonDataHelper<ProductionOrderHeader>.FillCommonFields(new ProductionOrderHeader
@@ -107,7 +108,7 @@ public class ManufacturingReportTests
             status = "Released",
             planned_start_date = new DateOnly(2026, 9, 2),
             planned_complete_date = new DateOnly(2026, 9, 10),
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.ProductionOrderHeaders.Add(_Po);
         await _Context.SaveChangesAsync();
 
@@ -119,7 +120,7 @@ public class ManufacturingReportTests
             line_number = 1,
             quantity = 10,
             status = "Pending",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         var generators = new IReportGenerator[] { new ProductionOrderTravelerReport(_Context) };

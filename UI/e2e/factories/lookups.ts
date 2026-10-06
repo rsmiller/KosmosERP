@@ -6,11 +6,6 @@ import type { KeyValueDto } from '@/models/key-value-models';
  * (Tools/KosmosERP.Seeder/DatabaseSeeder.Sales.cs).
  *
  * Freight carriers come from ShipmentModule (KeyValueIds.FreightCarriers), which
- * creates them when the API starts.
- *
- * Note: the UI asks for production statuses under an id the backend doesn't
- * populate (it uses 97dd4b13…), so that dropdown is empty against real data
- * (BUG-003 in bugs.md). The mocks follow the UI.
  */
 export const KeyValueModules = {
   PaymentTerm: '93bf02ec-5578-4aa4-a45b-f82962adf4bd',

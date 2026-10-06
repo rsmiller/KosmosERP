@@ -39,6 +39,8 @@ App bugs found while building the Playwright e2e suite (`UI/e2e`) and the DB see
 | [BUG-025](#bug-025) | Completed production orders stay editable | UI | Low | Fixed (uncommitted) |
 | [BUG-026](#bug-026) | API endpoints with no authorization (Settings writable anonymously) | API / security | High | Fixed (uncommitted) |
 | [BUG-027](#bug-027) | Grid buttons send an empty token after a direct load | UI | Medium | Fixed (uncommitted) |
+| [BUG-028](#bug-028) | Real API saves have no calling user under database login (now: audit fields hold the user guid) | API / auth | High | Fixed (uncommitted) |
+| [BUG-029](#bug-029) | Order Type / PO Type shows blank for seeded orders | Data / API validation | Medium | Fixed (uncommitted) |
 
 Also see [Needs verification](#needs-verification) for suspected issues that haven't been confirmed.
 
@@ -536,6 +538,27 @@ A few bugs are already fixed in the working tree but not committed yet. They're 
 
 ---
 
+## BUG-028: Real API saves have no calling user under database login
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
+- **Severity:** High. With `AuthenticationProvider: "database"`, every create, edit and delete through the real API got `calling_user_id = null`. Creates fail because `created_by` is required. Edits and deletes save null `updated_by`/`deleted_by`.
+- **Where:** `ERPApiController.CurrentUserId` (`Shared/KosmosERP.Models/ERPApiController.cs`) read the Keycloak `sub` / `NameIdentifier` claim. Database-login tokens (`TokenModule.CreateSecurityToken`) only carry the username, so it was always null. Under Keycloak it held the Keycloak id (`User.external_id`), which isn't what `calling_user_id` should be: it must identify the database user (now its `User.guid`). SAML tokens put `external_id` in the Name claim, so SAML users couldn't be found by username either.
+- **Related:** created-by/owner names (`comment_by_name`, `created_by_name`, `po_by`, Opportunity `owner_name`) and the Top Salespeople / Top Opportunities reports looked users up by `external_id`.
+- **Why e2e missed it:** Playwright fulfills every `/api/v1/**` call from the MockApi fixture, so the real API never runs.
+
+---
+
+## BUG-029: Order Type / PO Type shows blank for seeded orders
+
+> **Fixed (uncommitted).** See [Fixed (uncommitted)](#fixed-uncommitted). The original report follows for reference.
+
+- **Severity:** Medium. On the sales order and purchase order edit/view pages, the type dropdown shows "Choose Type" for almost every record.
+- **Cause:** the dropdown (`UI/components/header-type-selector.tsx`) only knows `Q` (Quote) and `R` (Release), but the seeder wrote `order_type = "SO"` and `po_type = "PO"`. The API accepted any string; it only treats `r`/`R` as Release. On the dev database, 24 of 25 sales orders were `SO` and all 15 POs were `PO`. Module tests also created orders as `D`, `St` and `Standard` and POs as "Build Material", "INTERNAL" and so on.
+- **Not a UI bug:** real Quote and Release orders load correctly. This was checked in e2e and on the running UI (order #31000 shows "Release", disabled by design). The edit page also treats an unknown type as valid, because `"SO"` is truthy, so such orders could be saved unchanged.
+
+---
+
 <a id="needs-verification"></a>
 ## Needs verification
 
@@ -558,6 +581,24 @@ These were seen in the mocked e2e pages but not confirmed as app bugs. They migh
 
 These were fixed during the same session and sit in the working tree, not committed yet. They're listed here so nobody re-opens them.
 
+- **BUG-029: order and PO types are validated as Q/R.**
+  - New `HeaderTypes` (`Shared/KosmosERP.BusinessLayer/Models/HeaderTypes.cs`: `Q` = Quote, `R` = Release). `OrderHeaderCreate/EditCommand.order_type` and `PurchaseOrderHeaderCreate/EditCommand.po_type` reject anything else (`[RegularExpression("^[QR]$")]`, which returns a 400 / `DataValidationError`).
+  - Seeder: non-canceled sales orders (the ones with production, shipments and invoices) are `R`, and canceled ones are `Q`. 3 extra open Quote orders with no downstream records keep editable orders in the dataset. POs with receipts are `R`, open ones `Q`.
+  - Tests: module tests use `Q` where they used `D`/`St`/`Standard`/"Build Material"/"INTERNAL"/"Office Use". New `OrderModuleTests.Create_InvalidOrderType_IsRejected` (`SO`, `D`, lowercase `q`) and `PurchaseOrderModuleTests.Create_InvalidPoType_IsRejected`. The e2e factories default to `Q`.
+  - **Existing data isn't migrated** (by choice). The dev database still has `SO`/`PO` rows; reseed with `dotnet run --project Tools/KosmosERP.Seeder -- --reset`. Until then, those orders show a blank type, and editing them now fails validation unless a type is picked.
+  - **Follow-up:** `PurchaseOrderModule.SeedPermissions` still creates "Build Material" / "Office Use" PO-type lookups that nothing uses now; remove them or repurpose them as a PO category.
+- **BUG-028: `calling_user_id` and the audit fields hold the caller's `User.guid`, for every login type.**
+  - **How the caller is identified:** new `Api/Authorization/ErpUserClaimsTransformation.cs` (registered in `Api/Program.cs`) runs after the token is validated. It looks the user up by username (same lookup as `ErpCustomAuthorizationHandler`; active users only) and adds a `kosmos_user_guid` claim (`ERPClaimTypes.UserGuid`). `ERPApiController.CurrentUserId` and the new `User.GetUserGuid()` extension (for controllers that don't derive from `ERPApiController`) read it. Tokens don't change, so already-issued tokens work.
+  - **Audit values are guids:** `created_by`, `updated_by`, `deleted_by` and `posted_by` hold `User.guid`. `CommonDataHelper` lost its `int` overloads, so ids can't slip back in. Domain user references stay on `User.id`: Lead/Activity `owner_id`, Opportunity `owner_id` (still a string column), and `user_id` foreign keys.
+  - **System writes use a service account:** startup seeding, Hangfire jobs, automatic postings and EF seed data are stamped with `SystemUsers.ServiceUserGuid`. That's a dedicated `kosmos-service` user, created disabled with a throwaway password by `UserModule.SeedPermissions` and by the seeder (`ServiceUserFactory`). It can't sign in, and the claims transformation never gives it a claim. The guid is a fixed constant, which is fine because the API never takes the caller's identity from a request. The `system` admin stays an ordinary login.
+  - **Caller can no longer be spoofed through the request body:** 33 actions passed body commands to modules without stamping `calling_user_id`, so the client's value reached the audit fields. These were in `UserController` (10), `KeyValueController` (4), `SettingsController` (4), `SubscriptionController` (4), `PaymentController` (5 Stripe actions), `FinancialTransactionController.GetAccountBalance`, `GlobalSearchController` and `NotificationController` (which hard-coded `"1"`). They now all stamp it server-side. The UI no longer sends `calling_user_id` (sales order edit, PO new, PO receive, opportunity edit). Also fixed: `UserModule.AssignUserRole` stamped the role assignment with the *assignee's* id; it now uses the caller's.
+  - **Other changes:** `SAMLAuthenticationProvider` issues its token with the username instead of `external_id`. Matching the IdP's NameID to `external_id` at SAML login is the only `external_id` user lookup left. Name lookups (`comment_by_name`, `created_by_name`, `po_by`) use `UserNameHelper.GetFullName` (by guid). Top Salespeople resolves by guid. Opportunity owner names and the Top Opportunities owner column use `User.id`.
+  - **Data migration `20261004220205_AuditUserGuids`:** for the 57 audited tables (plus `posted_by` on AP/AR invoice headers and journal entries), every audit value that is a numeric `users.id` becomes that user's guid. Unmatched values (old external ids, nulls) are left as they are. It also repoints the EF seed rows to the service account. `Down` reverses the mapping. Rows the system wrote as `"1"` map to user 1 (the `system` admin), because past system writes can't be told apart. **Not yet run against a real MySQL:** the Docker daemon wasn't running. Try it on a copy of the dev DB before the shared one.
+  - **Seeder:** stamps rows with the service guid and salesperson orders with the salesperson's guid. It no longer sets `external_id`, and opportunity `owner_id` is the salesperson's `User.id`.
+  - **Tests:** module tests pass `_User.guid` as `calling_user_id` and stamp fixtures with `SystemUsers.ServiceUserGuid`. `ErpUserClaimsTransformationTests` has 7 tests, including that the service account gets no claim and can't sign in. .NET: 49 shared + 213 module tests passed.
+  - **Verified against the running API before the guid switch** (dev database, `system` user): `PUT /Customer/UpdateCustomer` on customer 61 saved with `updated_by` set to the caller (it was null before the fix). One wrong-password attempt on the dev `admin` user counted a `login_attempt`.
+  - **Found while verifying (not fixed):** `CustomerModule.Edit` replaces string fields with whatever is sent, so a partial update (e.g. only `{ id, phone }`) nulls `category` and fails with a 500. The UI sends full records, so it isn't affected. This is the same update behavior suspected under "Releasing a shipment sends a near-empty update" in Needs verification. Also, `UserModule.AssignUserRole` checks `permission == null` where it means `user_role != null`, so duplicate role assignments aren't rejected.
+  - **Follow-ups (not done):** `opportunities.owner_id` is a string column while Lead and Activity use `int` (needs a migration). `ERPApiController.ModuleIdentifier` is a static that every controller constructor overwrites. `Shared/KosmosERP.Module/ERPApiController.cs` is an unused duplicate. There's no automated guard yet that every controller stamps `calling_user_id`; the scan was done by hand.
 - **Missing module GUIDs in `ERPModulesId`.** Database-auth users could never reach Subscriptions, Chart of Accounts, Journal Entries, Financial Transactions or Admin. Fixed in `UI/services/permissions-service.tsx` and `UI/lib/auth/role-mapping.ts`: `is_admin` now grants everything.
 - **Inverted Save enable logic on edit pages.** A valid edit disabled Save and an invalid one enabled it. Fixed across the edit pages, and `page-actions.tsx` now takes `saveDisabled`.
 - **Low bugs (BUG-007, 008, 010, 012, 013, 014, 015, 022, 025), plus case-insensitive login.** Full e2e suite: 181 passed. .NET: 42 shared + 213 module tests passed.

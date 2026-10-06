@@ -75,7 +75,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "AR Invoice Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -102,7 +102,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "NET 15",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
                 int_value = 15
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -115,7 +115,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "NET 30",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
                 int_value = 30
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -128,7 +128,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "NET 45",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
                 int_value = 45
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -141,7 +141,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "NET 60",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
                 int_value = 60
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -155,7 +155,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Cash - 1000001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1000001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -168,7 +168,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Checking - 1000002",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1000002
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -181,7 +181,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Payroll - 1005001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1005001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -194,7 +194,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Sales - 1003001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1003001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -207,7 +207,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "General Expenses - 1007001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1007001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -225,7 +225,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_accounts_receivable",
                 value = "1100",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -237,7 +237,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_accounts_payable",
                 value = "2010",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -249,7 +249,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_sales_revenue",
                 value = "4010",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -261,7 +261,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_purchases",
                 value = "5010",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }

@@ -59,7 +59,7 @@ public class NotificationController : Controller
         {
             if (command != null)
             {
-                command.calling_user_id = "1";
+                command.calling_user_id = User.GetUserGuid();
                 var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
 
                 var result = await _Module.GetNotifications(sortingParams, command);

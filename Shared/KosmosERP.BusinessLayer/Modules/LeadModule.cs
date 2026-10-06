@@ -41,7 +41,7 @@ public class LeadModule : BaseERPModule, ILeadModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "CRM Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -64,7 +64,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_new",
                 value = "New",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -76,7 +76,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_contacted",
                 value = "Contacted",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -88,7 +88,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_qualified",
                 value = "Qualified",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -100,7 +100,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_unqualified",
                 value = "Unqualified",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -112,7 +112,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_working",
                 value = "Working",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -124,7 +124,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_reopen",
                 value = "Reopen",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -136,7 +136,7 @@ public class LeadModule : BaseERPModule, ILeadModule
                 key = "lead_stage_lost",
                 value = "Lost",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }

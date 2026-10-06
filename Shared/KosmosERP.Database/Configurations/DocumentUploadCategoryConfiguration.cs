@@ -30,8 +30,8 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
                     created_on_timezone = GetTimezoneAsString(now),
                     updated_on_string = now.ToString("u"),
                     updated_on_timezone = GetTimezoneAsString(now),
-                    created_by = "1",
-                    updated_by = "1"
+                    created_by = SeedUsers.ServiceUserGuid,
+                    updated_by = SeedUsers.ServiceUserGuid
                 },
                 new DocumentUploadCategory()
                 {
@@ -45,8 +45,8 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
                     created_on_timezone = GetTimezoneAsString(now),
                     updated_on_string = now.ToString("u"),
                     updated_on_timezone = GetTimezoneAsString(now),
-                    created_by = "1",
-                    updated_by = "1"
+                    created_by = SeedUsers.ServiceUserGuid,
+                    updated_by = SeedUsers.ServiceUserGuid
                 },
                 new DocumentUploadCategory()
                 {
@@ -60,8 +60,8 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
                     created_on_timezone = GetTimezoneAsString(now),
                     updated_on_string = now.ToString("u"),
                     updated_on_timezone = GetTimezoneAsString(now),
-                    created_by = "1",
-                    updated_by = "1"
+                    created_by = SeedUsers.ServiceUserGuid,
+                    updated_by = SeedUsers.ServiceUserGuid
                 },
                 new DocumentUploadCategory()
                 {
@@ -75,8 +75,8 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
                     created_on_timezone = GetTimezoneAsString(now),
                     updated_on_string = now.ToString("u"),
                     updated_on_timezone = GetTimezoneAsString(now),
-                    created_by = "1",
-                    updated_by = "1"
+                    created_by = SeedUsers.ServiceUserGuid,
+                    updated_by = SeedUsers.ServiceUserGuid
                 },
                 new DocumentUploadCategory()
                 {
@@ -90,8 +90,8 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
                     created_on_timezone = GetTimezoneAsString(now),
                     updated_on_string = now.ToString("u"),
                     updated_on_timezone = GetTimezoneAsString(now),
-                    created_by = "1",
-                    updated_by = "1"
+                    created_by = SeedUsers.ServiceUserGuid,
+                    updated_by = SeedUsers.ServiceUserGuid
                 },
                 new DocumentUploadCategory()
                 {
@@ -105,8 +105,8 @@ public class DocumentUploadCategoryConfiguration : IEntityTypeConfiguration<Docu
                     created_on_timezone = GetTimezoneAsString(now),
                     updated_on_string = now.ToString("u"),
                     updated_on_timezone = GetTimezoneAsString(now),
-                    created_by = "1",
-                    updated_by = "1"
+                    created_by = SeedUsers.ServiceUserGuid,
+                    updated_by = SeedUsers.ServiceUserGuid
                 }
         );
     }

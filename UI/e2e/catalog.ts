@@ -17,13 +17,7 @@ export interface CatalogPage {
   ready: (page: Page, world: World) => Locator;
   /** What the page must show once loaded: rows, field values, button states. */
   checks?: Check[];
-  /**
-   * The record can be deleted from this page: an admin sees Delete Record (or
-   * this label, when the page renames it). Every other page must not show
-   * Delete Record (BUG-006: create pages showed one that crashed).
-   */
   deletable?: true | string;
-  /** Pages known to be broken: skipped with this reason until fixed (see bugs.md). */
   fixme?: string;
 }
 

@@ -1,4 +1,5 @@
 ﻿using KosmosERP.Models;
+using KosmosERP.BusinessLayer.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace KosmosERP.BusinessLayer.Models.Module.Order.Command.Edit;
@@ -15,6 +16,7 @@ public class OrderHeaderEditCommand : DataCommand
     public string? pay_method { get; set; }
     public int? opportunity_id { get; set; }
     [MaxLength(2)]
+    [RegularExpression(HeaderTypes.Pattern, ErrorMessage = HeaderTypes.ErrorMessage)]
     public string? order_type { get; set; }
     public DateOnly? order_date { get; set; }
     public DateOnly? required_date { get; set; }

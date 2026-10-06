@@ -4,12 +4,6 @@ import { expect, type Locator, type Page } from '@playwright/test';
  * Helpers for the app's Chakra/ark comboboxes and react-datepicker inputs.
  * They drive the controls the way a user does and leave assertions to specs.
  */
-
-/**
- * Open a combobox with a fixed option list and pick an option by its label.
- * Opens with ArrowDown instead of typing: most lookup comboboxes filter on the
- * hidden key, not the label (BUG-007 in bugs.md).
- */
 export async function chooseOption(page: Page, combobox: Locator, option: string): Promise<void> {
   await combobox.click();
   await combobox.press('ArrowDown');

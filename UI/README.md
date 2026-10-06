@@ -159,7 +159,6 @@ The browser runs in `America/Chicago` (`timezoneId` in `playwright.config.ts`), 
 
 - Locate elements the way users do: `getByRole` / `getByLabel` / `getByText`. If an element has no accessible name (for example an icon-only button), give it an `aria-label` in the app rather than reaching for CSS or `data-testid`. Keep `data-testid` for cases with no sensible accessible name.
 - Use web-first assertions (`await expect(locator).toBeVisible()`), never `waitForTimeout`.
-- Known app bugs are tracked in `bugs.md` at the repo root. Pin one with `knownBug('BUG-0xx: …')` in `tests/known-bugs.spec.ts` (the test asserts the *correct* behavior), or with `fixme` on a catalog entry. The report then shows it, and the test flags itself once the bug is fixed. `E2E_SHOW_KNOWN_BUGS=1` turns the markers off so you can check each one fails for the reason its entry gives.
 - Drive app controls with the helpers in `e2e/pages/controls.ts`:
   - `chooseOption` for lookup comboboxes
   - `searchAndChoose` for server-searched pickers; it waits for the search response before clicking

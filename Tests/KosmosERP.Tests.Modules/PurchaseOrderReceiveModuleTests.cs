@@ -45,7 +45,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -54,7 +54,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -69,7 +69,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -84,7 +84,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -99,7 +99,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -114,7 +114,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -137,7 +137,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         await _Context.SaveChangesAsync();
@@ -154,7 +154,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -174,7 +174,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             vendor_name = "Super Vendor",
             vendor_description = "I am a vendor and junk",
             vendor_number = 121212
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Vendors.Add(vendor);
         await _Context.SaveChangesAsync();
@@ -184,10 +184,10 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
         var purchase_order_header = CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader()
         {
             po_number = 123123,
-            po_type = "INTERNAL",
+            po_type = "Q",
             vendor_id = vendor.id,
             revision_number = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.PurchaseOrderHeaders.Add(purchase_order_header);
         await _Context.SaveChangesAsync();
@@ -206,7 +206,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
             revision_number = 1,
             tax = 1,
             is_taxable = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
 
         _Context.PurchaseOrderLines.Add(purchase_order_line);
@@ -218,7 +218,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
         {
             internal_name = "AR_Invoice",
             friendly_name = "AR Invoice",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.DocumentUploadObjects.Add(document_upload_object);
         await _Context.SaveChangesAsync();
@@ -247,7 +247,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
         {
             document_object_id = _DocumentUploadObject.id,
             rev_num = 1
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.DocumentUploads.Add(document_upload);
         await _Context.SaveChangesAsync();
@@ -260,14 +260,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var new_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -288,14 +288,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -311,14 +311,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var old_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -328,13 +328,13 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
 
         var edit_command = new PurchaseOrderReceiveHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             received_lines = new List<PurchaseOrderReceiveLineEditCommand>()
             {
                 new PurchaseOrderReceiveLineEditCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     units_received = 110,
                 }
@@ -353,14 +353,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var new_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -373,7 +373,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
 
         var delete_result = await _Module.Delete(new PurchaseOrderReceiveHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -391,14 +391,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var new_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -413,7 +413,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new PurchaseOrderReceiveHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = "" });
+                        new PurchaseOrderReceiveHeaderFindCommand() { calling_user_id = _User.guid, wildcard = "" });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -430,14 +430,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var create_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -452,7 +452,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
 
         var create_command = new PurchaseOrderReceiveLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_line_id = _PurchaseOrderLine.id,
             purchase_order_receive_header_id = _PurchaseOrderHeader.id,
             units_received = 101
@@ -473,14 +473,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var create_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -495,7 +495,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
 
         var edit_command = new PurchaseOrderReceiveLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.received_lines[0].id,
             purchase_order_line_id = _PurchaseOrderLine.id,
             units_received = 1012
@@ -515,14 +515,14 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
     {
         var create_result = await _Module.Create(new PurchaseOrderReceiveHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_id = _PurchaseOrderHeader.id,
             document_upload_id = _DocumentUpload.id,
             received_lines = new List<PurchaseOrderReceiveLineCreateCommand>()
             {
                 new PurchaseOrderReceiveLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     purchase_order_line_id = _PurchaseOrderLine.id,
                     purchase_order_receive_header_id = _PurchaseOrderHeader.id,
                     units_received = 10
@@ -536,7 +536,7 @@ public class PurchaseOrderReceiveModuleTests : BaseTestModule<PurchaseOrderRecei
 
         var response = await _Module.DeleteLine(new PurchaseOrderReceiveLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.received_lines[0].id,
         });
 

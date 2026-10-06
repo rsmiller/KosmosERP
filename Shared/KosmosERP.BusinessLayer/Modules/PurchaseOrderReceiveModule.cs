@@ -68,7 +68,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Purchase Order Receive Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -865,7 +865,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
 
 
         dto.po_number = databaseModel.purchase_order.po_number;
-        dto.po_by = await _Context.Users.Where(m => m.external_id == databaseModel.purchase_order.created_by).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.po_by = await UserNameHelper.GetFullName(_Context, databaseModel.purchase_order.created_by);
 
 
         return dto;
@@ -902,7 +902,7 @@ public class PurchaseOrderReceiveModule : BaseERPModule, IPurchaseOrderReceiveMo
         };
 
         dto.po_number = databaseModel.purchase_order.po_number;
-        dto.po_by = await _Context.Users.Where(m => m.external_id == databaseModel.purchase_order.created_by).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.po_by = await UserNameHelper.GetFullName(_Context, databaseModel.purchase_order.created_by);
 
         return dto;
     }

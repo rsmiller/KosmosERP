@@ -45,7 +45,6 @@ function EditSalesOrderPage() {
   const params = useParams();
   const router = useRouter();
 
-  const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
@@ -262,7 +261,6 @@ function EditSalesOrderPage() {
       line_description: line.line_description,
       quantity: line.quantity,
       unit_price: line.unit_price,
-      calling_user_id: Number(userId),
       token: sessionId?.toString(),
     }));
 

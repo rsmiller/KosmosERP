@@ -38,8 +38,7 @@ export default defineConfig({
 
   use: {
     baseURL: BASE_URL,
-    // Pin the time zone so dates render identically on dev machines, in Docker
-    // and in CI (a US zone also reproduces BUG-011 in bugs.md). Don't add
+    // Pin the time zone so dates render identically on dev machines, in Docker Don't add
     // `locale` here: on Windows it made the first page in each worker take
     // 20s+ and time out; the default (en-US) is what we want anyway.
     timezoneId: 'America/Chicago',

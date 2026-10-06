@@ -1,4 +1,5 @@
 ﻿using KosmosERP.Models;
+using KosmosERP.BusinessLayer.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace KosmosERP.BusinessLayer.Models.Module.PurchaseOrder.Command.Edit;
@@ -9,6 +10,7 @@ public class PurchaseOrderHeaderEditCommand : DataCommand
     public int id { get; set; }
 
     public int? vendor_id { get; set; }
+    [RegularExpression(HeaderTypes.Pattern, ErrorMessage = HeaderTypes.ErrorMessage)]
     public string? po_type { get; set; }
     public string? deleted_reason { get; set; }
     public string? canceled_reason { get; set; }

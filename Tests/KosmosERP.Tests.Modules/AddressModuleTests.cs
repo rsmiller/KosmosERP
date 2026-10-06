@@ -31,7 +31,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -40,7 +40,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -55,7 +55,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -70,7 +70,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -85,7 +85,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -100,7 +100,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -117,7 +117,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -128,7 +128,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
     {
         var new_result = await _Module.Create(new AddressCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             street_address1 = "11005 Chicken Nugget Lane",
             street_address2 = "Unit 12",
             city = "Temple",
@@ -150,7 +150,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
     {
         var result = await _Module.Create(new AddressCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             street_address1 = "11005 Chicken Nugget Lane",
             street_address2 = "Unit 12",
             city = "Temple",
@@ -167,7 +167,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
     {
         var result = await _Module.Edit(new AddressEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = 1,
             street_address1 = "sdfsdfsdf",
             street_address2 = "123123",
@@ -185,7 +185,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
     {
         var new_result = await _Module.Create(new AddressCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             street_address1 = "11005 Chicken Nugget Lane",
             street_address2 = "Unit 12",
             city = "Temple",
@@ -199,7 +199,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new AddressDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -216,7 +216,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
     {
         var new_result = await _Module.Create(new AddressCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             street_address1 = "123 Some St",
             street_address2 = "",
             city = "Temple",
@@ -230,7 +230,7 @@ public class AddressModuleTests : BaseTestModule<AddressModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new AddressFindCommand() { calling_user_id = _User.external_id, wildcard = "TX" });
+                        new AddressFindCommand() { calling_user_id = _User.guid, wildcard = "TX" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

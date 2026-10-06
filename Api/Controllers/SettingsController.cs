@@ -72,6 +72,8 @@ public class SettingsController : ERPApiController
     [ProducesResponseType(500)]
     public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] SettingsFindCommand command)
     {
+        command.calling_user_id = this.CurrentUserId;
+
         try
         {
             if (command != null)
@@ -99,6 +101,8 @@ public class SettingsController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] SettingsCreateCommand createCommand)
     {
+        createCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Create(createCommand);
 
         if (!result.Success)
@@ -113,6 +117,8 @@ public class SettingsController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] SettingsEditCommand editCommand)
     {
+        editCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Edit(editCommand);
 
         if (!result.Success)
@@ -127,6 +133,8 @@ public class SettingsController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] SettingsDeleteCommand deleteCommand)
     {
+        deleteCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Delete(deleteCommand);
 
         if (!result.Success)

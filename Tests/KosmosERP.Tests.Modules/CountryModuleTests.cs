@@ -31,7 +31,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -40,7 +40,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -55,7 +55,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -70,7 +70,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -85,7 +85,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -96,7 +96,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CountryCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso3 = "US",
             country_name = "United States",
             currency = "Dollar",
@@ -118,7 +118,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
     {
         var result = await _Module.Create(new CountryCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso3 = "US",
             country_name = "United States",
             currency = "Dollar",
@@ -135,7 +135,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CountryCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso3 = "US",
             country_name = "United States",
             currency = "Dollar",
@@ -149,7 +149,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
 
         var edit_command = new CountryEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             iso3 = "EU",
             country_name = "Europe",
@@ -176,7 +176,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CountryCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso3 = "US",
             country_name = "United States",
             currency = "Dollar",
@@ -190,7 +190,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new CountryDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -207,7 +207,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
     {
         var new_result = await _Module.Create(new CountryCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso3 = "US",
             country_name = "United States",
             currency = "Dollar",
@@ -221,7 +221,7 @@ public class CountryModuleTests : BaseTestModule<CountryModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new CountryFindCommand() { calling_user_id = _User.external_id, wildcard = "US" });
+                        new CountryFindCommand() { calling_user_id = _User.guid, wildcard = "US" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

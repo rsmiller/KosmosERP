@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -40,7 +41,7 @@ public class SalesReportTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         // Explicit ids: the transactional headers configure relationships with
         // HasPrincipalKey(c => c.id), which suppresses EF InMemory key generation (production
@@ -54,7 +55,7 @@ public class SalesReportTests
             accounting_email = "ap@acme.example",
             category = "Business",
             payment_terms = "NET 30",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Customers.Add(customer);
 
         var billTo = CommonDataHelper<Address>.FillCommonFields(new Address
@@ -65,7 +66,7 @@ public class SalesReportTests
             state = "IL",
             postal_code = "60601",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         var shipTo = CommonDataHelper<Address>.FillCommonFields(new Address
         {
             id = 11,
@@ -74,7 +75,7 @@ public class SalesReportTests
             state = "IN",
             postal_code = "46402",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Addresses.AddRange(billTo, shipTo);
         await _Context.SaveChangesAsync();
 
@@ -86,7 +87,7 @@ public class SalesReportTests
             billing_address_id = billTo.id,
             ship_to_address_id = shipTo.id,
             shipping_method = "Ground",
-            order_type = "Standard",
+            order_type = "Q",
             pay_method = "Net Terms",
             po_number = "PO-ABC-123",
             order_date = new DateOnly(2026, 9, 1),
@@ -94,7 +95,7 @@ public class SalesReportTests
             price = 1500m,
             tax = 120m,
             shipping_cost = 45m,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.OrderHeaders.Add(_Order);
         await _Context.SaveChangesAsync();
 
@@ -107,7 +108,7 @@ public class SalesReportTests
             line_description = "Widget, Standard",
             quantity = 10,
             unit_price = 100m,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         _Context.OrderLines.Add(CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine
         {
             id = 1002,
@@ -117,7 +118,7 @@ public class SalesReportTests
             line_description = "Widget, Deluxe",
             quantity = 5,
             unit_price = 100m,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         var generators = new IReportGenerator[] { new SalesOrderAcknowledgementReport(_Context) };

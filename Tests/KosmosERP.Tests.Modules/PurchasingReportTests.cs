@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -40,7 +41,7 @@ public class PurchasingReportTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         // Explicit ids — the PO header configures relationships with HasPrincipalKey(c => c.id),
         // which disables EF InMemory key generation (production MySQL auto-increment is unaffected).
@@ -52,7 +53,7 @@ public class PurchasingReportTests
             state = "IL",
             postal_code = "61601",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Addresses.Add(address);
 
         var vendor = CommonDataHelper<Vendor>.FillCommonFields(new Vendor
@@ -64,7 +65,7 @@ public class PurchasingReportTests
             phone = "555-7000",
             general_email = "sales@globalcomponents.example",
             category = "Raw Materials",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Vendors.Add(vendor);
         await _Context.SaveChangesAsync();
 
@@ -72,11 +73,11 @@ public class PurchasingReportTests
         {
             id = 200,
             vendor_id = vendor.id,
-            po_type = "Standard",
+            po_type = "Q",
             po_number = 4001,
             price = 750m,
             tax = 60m,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.PurchaseOrderHeaders.Add(_Po);
         await _Context.SaveChangesAsync();
 
@@ -89,7 +90,7 @@ public class PurchasingReportTests
             description = "Steel Rod, 10mm",
             quantity = 50,
             unit_price = 10m,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         _Context.PurchaseOrderLines.Add(CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine
         {
             id = 2002,
@@ -99,7 +100,7 @@ public class PurchasingReportTests
             description = "Bearing Assembly",
             quantity = 25,
             unit_price = 10m,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         var generators = new IReportGenerator[] { new PurchaseOrderReport(_Context) };

@@ -1,4 +1,5 @@
 using System.Reflection;
+using KosmosERP.Models;
 using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNetCore.Authorization;
@@ -255,7 +256,7 @@ public class AuthorizationTests
             guid = Guid.NewGuid().ToString(),
             external_id = Guid.NewGuid().ToString(),
             is_admin = isAdmin,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Users.Add(user);
         _Context.SaveChanges();
         return user;
@@ -263,7 +264,7 @@ public class AuthorizationTests
 
     private UserRole GrantRole(User user, Guid moduleId, bool read = false, bool write = false, bool edit = false, bool delete = false)
     {
-        var role = CommonDataHelper<Role>.FillCommonFields(new Role { name = "role-" + Guid.NewGuid() }, 1);
+        var role = CommonDataHelper<Role>.FillCommonFields(new Role { name = "role-" + Guid.NewGuid() }, SystemUsers.ServiceUserGuid);
         _Context.Roles.Add(role);
         _Context.SaveChanges();
 
@@ -275,9 +276,9 @@ public class AuthorizationTests
             write = write,
             edit = edit,
             delete = delete,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
-        var userRole = CommonDataHelper<UserRole>.FillCommonFields(new UserRole { user_id = user.id, role_id = role.id }, 1);
+        var userRole = CommonDataHelper<UserRole>.FillCommonFields(new UserRole { user_id = user.id, role_id = role.id }, SystemUsers.ServiceUserGuid);
         _Context.UserRoles.Add(userRole);
         _Context.SaveChanges();
         return userRole;

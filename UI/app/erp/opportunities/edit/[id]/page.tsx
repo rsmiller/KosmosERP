@@ -52,7 +52,6 @@ function EditOpportunityPage() {
     const [hasEditPermission, setHasEditPermission] = useState(false);
     const [hasDeletePermission, setHasDeletePermission] = useState(false);
 
-    const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
 
     const [opportunity, setOpportunity] = useState<OpportunityDto | null>(null);
@@ -259,7 +258,6 @@ function EditOpportunityPage() {
                   description: line.description,
                   quantity: line.quantity,
                   unit_price: line.unit_price,
-                  calling_user_id: Number(userId),
                   token: sessionId?.toString(),
                 }));
             

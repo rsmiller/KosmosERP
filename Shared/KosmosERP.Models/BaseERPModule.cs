@@ -1,4 +1,5 @@
 ﻿using KosmosERP.Database;
+using KosmosERP.Models;
 using KosmosERP.Database.Models;
 using KosmosERP.Models.Interfaces;
 
@@ -47,8 +48,8 @@ public class BaseERPModule : IBaseERPModule, IDisposable
                 updated_on_string = DateTime.UtcNow.ToString("u"),
                 created_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
                 updated_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
-                created_by = "1",
-                updated_by = "1",
+                created_by = SystemUsers.ServiceUserGuid,
+                updated_by = SystemUsers.ServiceUserGuid,
             });
             _Context.SaveChanges();
         }
@@ -83,8 +84,8 @@ public class BaseERPModule : IBaseERPModule, IDisposable
                 updated_on_string = DateTime.UtcNow.ToString("u"),
                 created_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
                 updated_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
-                created_by = "1",
-                updated_by = "1",
+                created_by = SystemUsers.ServiceUserGuid,
+                updated_by = SystemUsers.ServiceUserGuid,
             });
         }
 
@@ -111,8 +112,8 @@ public class BaseERPModule : IBaseERPModule, IDisposable
                     updated_on_string = DateTime.UtcNow.ToString("u"),
                     created_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
                     updated_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
-                    created_by = "1",
-                    updated_by = "1",
+                    created_by = SystemUsers.ServiceUserGuid,
+                    updated_by = SystemUsers.ServiceUserGuid,
                 },
                 new ModulePermission()
                 {
@@ -131,8 +132,8 @@ public class BaseERPModule : IBaseERPModule, IDisposable
                     updated_on_string = DateTime.UtcNow.ToString("u"),
                     created_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
                     updated_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
-                    created_by = "1",
-                    updated_by = "1",
+                    created_by = SystemUsers.ServiceUserGuid,
+                    updated_by = SystemUsers.ServiceUserGuid,
                 },
                 new ModulePermission()
                 {
@@ -151,8 +152,8 @@ public class BaseERPModule : IBaseERPModule, IDisposable
                     updated_on_string = DateTime.UtcNow.ToString("u"),
                     created_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
                     updated_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
-                    created_by = "1",
-                    updated_by = "1",
+                    created_by = SystemUsers.ServiceUserGuid,
+                    updated_by = SystemUsers.ServiceUserGuid,
                 },
                 new ModulePermission()
                 {
@@ -171,8 +172,8 @@ public class BaseERPModule : IBaseERPModule, IDisposable
                     updated_on_string = DateTime.UtcNow.ToString("u"),
                     created_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
                     updated_on_timezone = GetTimezoneAsString(DateTime.UtcNow),
-                    created_by = "1",
-                    updated_by = "1",
+                    created_by = SystemUsers.ServiceUserGuid,
+                    updated_by = SystemUsers.ServiceUserGuid,
                 }
             };
 

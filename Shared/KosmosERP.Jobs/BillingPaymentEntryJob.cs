@@ -1,4 +1,5 @@
 using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.Models;
 using KosmosERP.BusinessLayer.Models.Module.Order.Command.Edit;
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Database;
@@ -49,14 +50,14 @@ public class BillingPaymentEntryJob : IBillingPaymentEntryJob
                 var entry = CommonDataHelper<SubscriptionEntry>.FillCommonFields(new SubscriptionEntry()
                 {
                     billing_subscription_id = subscription.id,
-                }, 1);
+                }, SystemUsers.ServiceUserGuid);
 
                 await _Context.SubscriptionEntries.AddAsync(entry);
                 await _Context.SaveChangesAsync();
 
 
 
-                var updated_sub = CommonDataHelper<Subscription>.FillUpdateFields(subscription, 1);
+                var updated_sub = CommonDataHelper<Subscription>.FillUpdateFields(subscription, SystemUsers.ServiceUserGuid);
                 updated_sub.next_date = today.AddDays(subscription.cycle_days);
 
                 _Context.Subscriptions.Update(updated_sub);
@@ -85,7 +86,7 @@ public class BillingPaymentEntryJob : IBillingPaymentEntryJob
             {
                 var now = DateTime.UtcNow;
 
-                var order_response = await _OrderModule.DuplicateOrder(entry.sub.order_header_id, entry.sub.customer_id, "1");
+                var order_response = await _OrderModule.DuplicateOrder(entry.sub.order_header_id, entry.sub.customer_id, SystemUsers.ServiceUserGuid);
 
                 if (order_response.Success)
                 {
@@ -94,14 +95,14 @@ public class BillingPaymentEntryJob : IBillingPaymentEntryJob
                     {
                         id = order_response.Data.id,
                         order_type = "R",
-                        calling_user_id = "1"
+                        calling_user_id = SystemUsers.ServiceUserGuid
                     });
 
                     SubscriptionEntry update_entry = entry.entry;
 
                     update_entry.order_header_id = order_response.Data.id;
 
-                    CommonDataHelper<SubscriptionEntry>.FillUpdateFields(update_entry, 1);
+                    CommonDataHelper<SubscriptionEntry>.FillUpdateFields(update_entry, SystemUsers.ServiceUserGuid);
 
                     _Context.SubscriptionEntries.Update(update_entry);
                     await _Context.SaveChangesAsync();

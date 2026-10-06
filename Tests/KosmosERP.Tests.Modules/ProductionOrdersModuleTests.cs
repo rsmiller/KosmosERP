@@ -59,7 +59,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         _Context.SaveChanges();
@@ -76,7 +76,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         _Context.SaveChanges();
@@ -96,7 +96,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             tax_rate = 10,
             is_taxable = true,
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         _Context.SaveChanges();
@@ -109,7 +109,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.Physical,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_address);
         _Context.SaveChanges();
@@ -119,7 +119,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.ShipTo,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_shipto_address);
         _Context.SaveChanges();
@@ -139,7 +139,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             po_number = "ASDSD",
             price = 1002,
             tax = 123
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderHeaders.Add(sales_order_header);
         _Context.SaveChanges();
@@ -155,7 +155,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             line_number = 1,
             unit_price = 100,
             quantity = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLines.Add(sales_order_receive_line);
         _Context.SaveChanges();
@@ -168,14 +168,14 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             order_line_id = _SalesOrderLine.id,
             attribute_name = "Length",
             attribute_value = "10ft",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var line_attribute_2 = CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
             order_line_id = _SalesOrderLine.id,
             attribute_name = "Material",
             attribute_value = "Plastic"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLineAttributes.Add(line_attribute_1);
         _Context.OrderLineAttributes.Add(line_attribute_2);
@@ -220,7 +220,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var new_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -234,7 +234,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -252,7 +252,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -266,7 +266,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -279,7 +279,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var old_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -293,14 +293,14 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
 
         var edit_command = new ProductionOrderHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(9)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(14)),
@@ -327,7 +327,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var new_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -341,7 +341,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -351,7 +351,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var delete_result = await _Module.Delete(new ProductionOrderHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -369,7 +369,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var new_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -383,7 +383,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -395,7 +395,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new ProductionOrderHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = _SalesOrderHeader.order_number.ToString() });
+                        new ProductionOrderHeaderFindCommand() { calling_user_id = _User.guid, wildcard = _SalesOrderHeader.order_number.ToString() });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -412,7 +412,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var create_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -426,7 +426,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -439,7 +439,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var create_command = new ProductionOrderLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             production_order_header_id = create_result.Data.id,
             quantity = 12323,
             line_number = 2,
@@ -465,7 +465,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var create_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -479,7 +479,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -492,7 +492,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var edit_command = new ProductionOrderLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.production_order_lines[0].id,
             quantity = 111,
             line_number = 2,
@@ -520,7 +520,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = line.id,
             status = ProductionOrderStatus.PartsPulled,
         });
@@ -538,7 +538,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = line.id,
             quantity = 5,
         });
@@ -555,7 +555,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var result = await _Module.Edit(new ProductionOrderHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = order.id,
             priority_id = 2,
         });
@@ -569,7 +569,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
@@ -583,7 +583,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = lineStatus,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -598,7 +598,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var create_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
@@ -612,7 +612,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
                     status = ProductionOrderStatus.Submitted,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -623,7 +623,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var response = await _Module.DeleteLine(new ProductionOrderLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.production_order_lines[0].id,
         });
 

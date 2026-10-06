@@ -56,7 +56,7 @@ public class VendorModule : BaseERPModule, IVendorModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Vendor Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -74,7 +74,7 @@ public class VendorModule : BaseERPModule, IVendorModule
                 value = "General",
                 int_value = 1,
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }

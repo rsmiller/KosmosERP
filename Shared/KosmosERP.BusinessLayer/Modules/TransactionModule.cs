@@ -48,7 +48,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Transaction Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -80,7 +80,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Inbound",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 1
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -93,7 +93,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Outbound",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 2
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -106,7 +106,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Planned",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 3
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -119,7 +119,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Commited",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 5
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -132,7 +132,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Reserved",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 6
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -145,7 +145,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Move",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 7
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -158,7 +158,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                 value = "Adjustment",
                 module_id = this.ModuleIdentifier.ToString(),
                 int_value = 8
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -180,7 +180,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                     edit = false,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -192,7 +192,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                     edit = false,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -204,7 +204,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                     edit = true,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -216,7 +216,7 @@ public class TransactionModule : BaseERPModule, ITransactionModule
                     edit = false,
                     delete = true,
                     is_active = true
-                }, 1)
+                }, SystemUsers.ServiceUserGuid)
             });
 
             _Context.SaveChanges();

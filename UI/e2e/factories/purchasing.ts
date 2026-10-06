@@ -29,7 +29,7 @@ export function buildPurchaseOrder(overrides: Partial<PurchaseOrderHeaderDto> = 
     ...baseDto('pord', id),
     vendor_id: 1,
     vendor_name: 'Vendor',
-    po_type: 'standard',
+    po_type: 'Q',
     revision_number: 1,
     po_number: 30000 + id,
     price: 950,

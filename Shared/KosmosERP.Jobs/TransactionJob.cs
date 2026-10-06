@@ -82,7 +82,7 @@ public class TransactionJob : ITransactionJob
                         units_received = createCommandModel.units_received,
                         purchased_unit_cost = createCommandModel.purchased_unit_cost,
                         sold_unit_price = createCommandModel.sold_unit_price,
-                    }, 1);
+                    }, SystemUsers.ServiceUserGuid);
 
                     await _Context.Transactions.AddAsync(transaction);
                     await _Context.SaveChangesAsync();
@@ -105,7 +105,7 @@ public class TransactionJob : ITransactionJob
                         units_received = createCommandModel.units_received,
                         purchased_unit_cost = createCommandModel.purchased_unit_cost,
                         sold_unit_price = createCommandModel.sold_unit_price,
-                    }, 1);
+                    }, SystemUsers.ServiceUserGuid);
 
                     await _Context.Transactions.AddAsync(transaction);
                     await _Context.SaveChangesAsync();
@@ -126,7 +126,7 @@ public class TransactionJob : ITransactionJob
                             trans.transaction_type = TransactionType.Adjustment;
                             trans.is_deleted = true;
 
-                            var transaction = CommonDataHelper<Transaction>.FillDeleteFields(trans, 1);
+                            var transaction = CommonDataHelper<Transaction>.FillDeleteFields(trans, SystemUsers.ServiceUserGuid);
 
                             _Context.Transactions.Update(transaction);
                             await _Context.SaveChangesAsync();  
@@ -143,7 +143,7 @@ public class TransactionJob : ITransactionJob
                             trans_line.transaction_type = TransactionType.Adjustment;
                             trans_line.is_deleted = true;
 
-                            var transaction = CommonDataHelper<Transaction>.FillDeleteFields(trans_line, 1);
+                            var transaction = CommonDataHelper<Transaction>.FillDeleteFields(trans_line, SystemUsers.ServiceUserGuid);
 
                             _Context.Transactions.Update(transaction);
                             await _Context.SaveChangesAsync();  

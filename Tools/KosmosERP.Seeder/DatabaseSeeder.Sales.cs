@@ -1,4 +1,5 @@
 using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.BusinessLayer.Models;
 using KosmosERP.Database.Models;
 using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
@@ -108,14 +109,18 @@ public partial class DatabaseSeeder
 
     private async Task SeedUsersAndRolesAsync()
     {
-        // (first, last, externalId, isManagement, isSalesperson)
-        var users = new (string First, string Last, string ExternalId, bool Mgmt, bool Sales)[]
+        // (first, last, username, isManagement, isSalesperson)
+        var users = new (string First, string Last, string Username, bool Mgmt, bool Sales)[]
         {
             ("System", "Admin", "admin", true, false),
             ("Jordan", "Pike", "ext-jordan", false, true),
             ("Riley", "Vance", "ext-riley", false, true),
             ("Morgan", "Lee", "ext-morgan", true, true),
         };
+
+        // The system service account every seeded row is stamped with (the API creates it too).
+        if (!_context.Users.Any(m => m.guid == SystemUsers.ServiceUserGuid))
+            _context.Users.Add(ServiceUserFactory.Create());
 
         var index = 0;
         var addedUsers = new List<User>();
@@ -128,12 +133,11 @@ public partial class DatabaseSeeder
             {
                 first_name = u.First,
                 last_name = u.Last,
-                username = u.ExternalId,
+                username = u.Username,
                 password = passwordHash,
                 password_salt = passwordSalt,
                 employee_number = $"E{100 + index++}",
-                external_id = u.ExternalId,
-                is_admin = u.ExternalId == "admin",
+                is_admin = u.Username == "admin",
                 is_management = u.Mgmt,
             });
             _context.Users.Add(user);
@@ -144,10 +148,13 @@ public partial class DatabaseSeeder
 
         // Map only the users we just added (avoids colliding with pre-existing rows in the DB).
         foreach (var user in addedUsers)
-            _userIdByExternalId[user.external_id] = user.id;
+        {
+            _userIdByUsername[user.username] = user.id;
+            _userGuidById[user.id] = user.guid;
+        }
 
         foreach (var u in users.Where(x => x.Sales))
-            _salespersonExternalIds.Add(u.ExternalId);
+            _salespersonUserIds.Add(_userIdByUsername[u.Username]);
 
         // Minimal admin role + membership.
         var adminRole = Stamp(new Role { name = "Administrators" });
@@ -159,7 +166,7 @@ public partial class DatabaseSeeder
             role_id = adminRole.id, module_id = "*",
             read = true, write = true, edit = true, delete = true, requires_admin = true,
         }));
-        if (_userIdByExternalId.TryGetValue("admin", out var adminId))
+        if (_userIdByUsername.TryGetValue("admin", out var adminId))
             _context.UserRoles.Add(Stamp(new UserRole { user_id = adminId, role_id = adminRole.id }));
 
         await _context.SaveChangesAsync();
@@ -248,7 +255,7 @@ public partial class DatabaseSeeder
         var contactsByCustomer = _context.Contacts.Where(c => !c.is_deleted).ToList()
             .GroupBy(c => c.customer_id).ToDictionary(g => g.Key, g => g.First().id);
         var customers = AddressableCustomers().Where(c => contactsByCustomer.ContainsKey(c.id)).ToList();
-        var userIds = _userIdByExternalId.Values.ToList();
+        var userIds = _userIdByUsername.Values.ToList();
         var finishedIds = _productById.Values.Where(p => p.product_class == Cls.Finished).Select(p => p.id).ToList();
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -271,7 +278,7 @@ public partial class DatabaseSeeder
             }));
         }
 
-        // Opportunities (~10). owner_id is a User.external_id (string); mix of open + closed.
+        // Opportunities (~10). owner_id is a User.id stored as a string; mix of open + closed.
         var stages = new[]
         {
             Kv.StageProspecting, Kv.StageQualifying, Kv.StageProposal, Kv.StageNegotiation,
@@ -297,7 +304,7 @@ public partial class DatabaseSeeder
                 stage = stage,
                 win_chance = winByStage[stage],
                 expected_close = today.AddDays(15 + i * 10),
-                owner_id = _salespersonExternalIds[i % _salespersonExternalIds.Count],
+                owner_id = _salespersonUserIds[i % _salespersonUserIds.Count].ToString(),
             });
             _context.Opportunities.Add(opp);
             await _context.SaveChangesAsync();
@@ -355,16 +362,22 @@ public partial class DatabaseSeeder
 
         var orderNumber = DatabaseStartNumbers.Orders;
 
-        for (var i = 0; i < 25; i++)
+        // 25 released orders feed production, shipping and invoicing; the last few are open
+        // quotes with no downstream records, so there are always orders to edit.
+        const int releasedOrders = 25;
+        const int quoteOrders = 3;
+
+        for (var i = 0; i < releasedOrders + quoteOrders; i++)
         {
             var customer = customers[i % customers.Count];
-            var salesperson = _salespersonExternalIds[i % _salespersonExternalIds.Count];
+            var salesperson = _salespersonUserIds[i % _salespersonUserIds.Count];
             var orderDate = today.AddDays(-(i * 12 + Rng.Next(0, 8)));   // spread across ~10 months
             var addressId = _addressIdByCustomerId[customer.id];
 
-            // status mix: mostly complete, some open, a few canceled.
-            var canceled = i % 11 == 10;
-            var complete = !canceled && i % 4 != 0;
+            // status mix: mostly complete, some open, a few canceled, plus the open quotes.
+            var quote = i >= releasedOrders;
+            var canceled = !quote && i % 11 == 10;
+            var complete = !quote && !canceled && i % 4 != 0;
 
             var header = StampAs(new OrderHeader
             {
@@ -374,7 +387,8 @@ public partial class DatabaseSeeder
                 billing_address_id = addressId,
                 shipping_method = shipMethods[i % shipMethods.Length],
                 pay_method = payMethods[i % payMethods.Length],
-                order_type = "SO",
+                // Released orders are the ones in production/shipping; canceled ones never were.
+                order_type = quote || canceled ? HeaderTypes.Quote : HeaderTypes.Release,
                 order_date = orderDate,
                 required_date = orderDate.AddDays(14),
                 tax = 0m,
@@ -382,14 +396,14 @@ public partial class DatabaseSeeder
                 is_complete = complete,
                 is_canceled = canceled,
                 canceled_reason = canceled ? "Customer canceled" : null,
-            }, salesperson);
+            }, _userGuidById[salesperson]);
             _context.OrderHeaders.Add(header);
             await _context.SaveChangesAsync();
 
             var seeded = new SeededOrder
             {
                 Id = header.id, CustomerId = customer.id, OrderDate = orderDate,
-                Complete = complete, Canceled = canceled, SalespersonExternalId = salesperson,
+                Complete = complete, Canceled = canceled, SalespersonUserId = salesperson,
             };
 
             var lineCount = 1 + (i % 3);
@@ -406,7 +420,7 @@ public partial class DatabaseSeeder
                     line_description = product.product_name,
                     quantity = qty,
                     unit_price = product.sales_price,
-                }, salesperson);
+                }, _userGuidById[salesperson]);
                 _context.OrderLines.Add(line);
                 total += qty * product.sales_price;
                 seeded.Lines.Add(new SeededOrderLine { ProductId = product.id, Qty = qty, UnitPrice = product.sales_price });
@@ -424,9 +438,10 @@ public partial class DatabaseSeeder
             _context.OrderHeaders.Update(header);
             await _context.SaveChangesAsync();
 
-            _orders.Add(seeded);
+            if (!quote)
+                _orders.Add(seeded);
         }
 
-        Console.WriteLine($"  Sales orders seeded ({_orders.Count}).");
+        Console.WriteLine($"  Sales orders seeded ({_orders.Count} released/canceled + {quoteOrders} open quotes).");
     }
 }

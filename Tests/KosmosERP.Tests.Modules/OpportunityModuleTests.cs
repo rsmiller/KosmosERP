@@ -37,7 +37,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -46,7 +46,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -61,7 +61,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -76,7 +76,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -91,7 +91,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -106,7 +106,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -124,7 +124,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -141,7 +141,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
             email = "email@bob.com",
             phone = "123-123-1234",
             title = "FAFO",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Contacts.Add(contact);
         await _Context.SaveChangesAsync();
@@ -154,7 +154,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
     {
         var new_result = await _Module.Create(new OpportunityCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             opportunity_name = "Opportunity 11123",
             customer_id = _Customer.id,
             contact_id = _Contact.id,
@@ -177,7 +177,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
     {
         var result = await _Module.Create(new OpportunityCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             opportunity_name = "Opportunity 1",
             customer_id = _Customer.id,
             contact_id = _Contact.id,
@@ -195,7 +195,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
     {
         var new_result = await _Module.Create(new OpportunityCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             opportunity_name = "Opportunity 12",
             customer_id = _Customer.id,
             contact_id = _Contact.id,
@@ -210,7 +210,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
 
         var edit_command = new OpportunityEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             opportunity_name = "Opportunity 22",
             customer_id = _Customer.id,
@@ -237,7 +237,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
     {
         var new_result = await _Module.Create(new OpportunityCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             opportunity_name = "Opportunity dd",
             customer_id = _Customer.id,
             contact_id = _Contact.id,
@@ -252,7 +252,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
 
         var delete_result = await _Module.Delete(new OpportunityDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -269,7 +269,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
     {
         var new_result = await _Module.Create(new OpportunityCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             opportunity_name = "The Best",
             customer_id = _Customer.id,
             contact_id = _Contact.id,
@@ -284,7 +284,7 @@ public class OpportunityModuleTests : BaseTestModule<OpportunityModule>, IModule
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new OpportunityFindCommand() { calling_user_id = _User.external_id, wildcard = "Best" });
+                        new OpportunityFindCommand() { calling_user_id = _User.guid, wildcard = "Best" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

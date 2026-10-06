@@ -34,7 +34,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -43,7 +43,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -58,7 +58,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -73,7 +73,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -88,7 +88,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -104,7 +104,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
             currency_symbol = "$",
             phonecode = "+1",
             region = "North America",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Countries.Add(country);
         await _Context.SaveChangesAsync();
@@ -117,7 +117,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
     {
         var new_result = await _Module.Create(new StateCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso2 = "TX",
             state_name = "Texas",
             country_id = _Country.id,
@@ -136,7 +136,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
     {
         var result = await _Module.Create(new StateCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso2 = "TX",
             state_name = "Texas",
             country_id = _Country.id,
@@ -150,7 +150,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
     {
         var new_result = await _Module.Create(new StateCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso2 = "TX",
             state_name = "Texas",
             country_id = _Country.id,
@@ -161,7 +161,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
 
         var edit_command = new StateEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             iso2 = "OK",
             state_name = "Oklahoma",
@@ -182,7 +182,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
     {
         var new_result = await _Module.Create(new StateCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso2 = "TX",
             state_name = "Texas",
             country_id = _Country.id,
@@ -193,7 +193,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new StateDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -210,7 +210,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
     {
         var new_result = await _Module.Create(new StateCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             iso2 = "TX",
             state_name = "Texas",
             country_id = _Country.id,
@@ -222,7 +222,7 @@ public class StateModuleTests : BaseTestModule<StateModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new StateFindCommand() { calling_user_id = _User.external_id, wildcard = "TX" });
+                        new StateFindCommand() { calling_user_id = _User.guid, wildcard = "TX" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

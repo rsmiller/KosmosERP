@@ -72,7 +72,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Purchase Order Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -91,7 +91,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 value = "Build Material",
                 int_value = 1,
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -104,7 +104,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
                 value = "Office Use",
                 int_value = 2,
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -724,7 +724,7 @@ public class PurchaseOrderModule : BaseERPModule, IPurchaseOrderModule
         else
             dto.vendor_name = await _Context.Vendors.Where(m => m.id == databaseModel.vendor_id).Select(m => m.vendor_name).SingleOrDefaultAsync();
 
-        dto.po_by = await _Context.Users.Where(m => m.external_id == databaseModel.created_by).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.po_by = await UserNameHelper.GetFullName(_Context, databaseModel.created_by);
 
         return dto;
     }

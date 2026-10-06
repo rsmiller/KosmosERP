@@ -58,7 +58,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "CRM Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -90,7 +90,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_prospecting",
                 value = "Prospecting",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -102,7 +102,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_qualifying",
                 value = "Qualifying",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -114,7 +114,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_analysis",
                 value = "Analysis",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -126,7 +126,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_proposition",
                 value = "Proposition",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -138,7 +138,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_proposal",
                 value = "Proposal",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -150,7 +150,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_closed_won",
                 value = "Closed Won",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -162,7 +162,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
                 key = "opporunity_stage_closed_lost",
                 value = "Closed Lost",
                 module_id = this.ModuleIdentifier.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -580,7 +580,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
 
         dto.customer_name = databaseModel.customer.customer_name;
         dto.contact_name = databaseModel.contact.first_name + " " + databaseModel.contact.last_name;
-        dto.owner_name = await _Context.Users.Where(m => m.external_id == databaseModel.owner_id).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.owner_name = await UserNameHelper.GetFullNameById(_Context, databaseModel.owner_id);
 
         var stage_val = await _KVMemoryService.GetKeyValue(databaseModel.stage);
         if (stage_val != null)
@@ -637,7 +637,7 @@ public class OpportunityModule : BaseERPModule, IOpportunityModule
         }
 
 
-        dto.owner_name = await _Context.Users.Where(m => m.external_id == databaseModel.owner_id).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.owner_name = await UserNameHelper.GetFullNameById(_Context, databaseModel.owner_id);
 
         var stage_val = await _KVMemoryService.GetKeyValue(databaseModel.stage);
         if (stage_val != null)

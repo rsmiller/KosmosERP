@@ -32,7 +32,6 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 function NewPurchaseOrdersPage() {
   const router = useRouter();
 
-  const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
   const auth = useAuth();
   const [hasAccess, setHasAccess] = useState(true);
@@ -120,7 +119,6 @@ function NewPurchaseOrdersPage() {
       is_taxable: line.is_taxable || false,
       is_complete: line.is_complete || false,
       is_canceled: line.is_canceled || false,
-      calling_user_id: Number(userId),
       token: sessionId?.toString(),
       product_name: line.product_name || "",
     }));

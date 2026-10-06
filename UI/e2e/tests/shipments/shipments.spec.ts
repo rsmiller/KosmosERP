@@ -66,7 +66,6 @@ test.describe('new shipment from an order', () => {
 
     // Freight Charge is marked required but defaults to "0", which passes the
     // page's truthiness check, so choosing a carrier is enough (see
-    // "Needs verification" in bugs.md).
     await form.chooseFreightCarrier('FedEx');
     await expect(form.save).toBeEnabled();
   });

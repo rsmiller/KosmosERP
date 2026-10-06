@@ -64,7 +64,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Production Order Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -95,7 +95,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
                 key = key,
                 value = value,
                 module_id = KeyValueIds.ProductionStatuses,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }

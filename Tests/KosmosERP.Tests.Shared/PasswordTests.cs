@@ -109,7 +109,7 @@ public class PasswordTests
             password_salt = salt,
             employee_number = "E100",
             guid = Guid.NewGuid().ToString(),
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         _Context.SaveChanges();
     }
 }

@@ -24,6 +24,8 @@ public class GlobalSearchController : ControllerBase
     [ProducesResponseType(400)]
     public async Task<ActionResult> GlobalSeach([FromBody] GlobalSearchFindCommand commandModel)
     {
+        commandModel.calling_user_id = User.GetUserGuid();
+
         var result = await _Module.GlobalSearch(commandModel);
 
         if (!result.Success)

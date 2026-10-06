@@ -55,7 +55,7 @@ public class JournalEntryModule : BaseERPModule, IJournalEntryModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Journal Entry Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

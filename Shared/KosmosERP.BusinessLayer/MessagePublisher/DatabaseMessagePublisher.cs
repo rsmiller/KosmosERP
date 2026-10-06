@@ -3,6 +3,7 @@ using KosmosERP.BusinessLayer.Interfaces;
 using KosmosERP.BusinessLayer.Models;
 using KosmosERP.Database;
 using KosmosERP.Database.Models;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -29,7 +30,7 @@ public class DatabaseMessagePublisher : IMessagePublisher, IAsyncDisposable
             {
                 queue = topic_or_queue,
                 body = JsonSerializer.Serialize(message),
-            }, 1);
+            }, SystemUsers.ServiceUserGuid);
 
             await _Context.MessageQueues.AddAsync(entry);
             await _Context.SaveChangesAsync();
