@@ -59,7 +59,7 @@ public class ModuleUserTests
             department = "1",
             guid = Guid.NewGuid().ToString(),
             is_admin = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
@@ -78,12 +78,12 @@ public class ModuleUserTests
         var editRoleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "EditRole",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var createRoleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "CreateRole",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(editRoleModel);
         _Context.Roles.Add(createRoleModel);
@@ -92,7 +92,7 @@ public class ModuleUserTests
         _EditRoleId = editRoleModel.id;
         _CreateRoleId = createRoleModel.id;
 
-        _UserId = baseUser.external_id;
+        _UserId = baseUser.guid;
 
     }
 

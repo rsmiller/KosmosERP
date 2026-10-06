@@ -31,13 +31,16 @@ import { permissionsService, ERPModules, ERPModulePermission } from '@/services/
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { MdDelete } from 'react-icons/md';
+import ChartOfAccountCellEditor, { accountLabel } from '@/components/ag-grid/chart-of-account-cell-editor';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface LineItem {
   id: number;
   chart_of_account_id?: number;
-  account_display?: string;
+  // Set by the account picker, for display only.
+  account_number?: string;
+  account_name?: string;
   debit_amount: number;
   credit_amount: number;
   description?: string;
@@ -51,7 +54,7 @@ function NewJournalEntryPage() {
     const [hasWritePermission, setHasWritePermission] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [entryDate, setEntryDate] = useState<Date | null>(new Date());
@@ -88,10 +91,6 @@ function NewJournalEntryPage() {
         }
         setHasWritePermission(true);
     }, [auth.authenticated]);
-
-    const handleDeleteClick = async () => {
-        router.push("/erp/journalentries/");
-    };
 
     const handleSaveClick = async () => {
         setSuccessSaved(false);
@@ -131,7 +130,6 @@ function NewJournalEntryPage() {
         setLines([...lines, {
             id: nextLineId,
             chart_of_account_id: undefined,
-            account_display: '',
             debit_amount: 0,
             credit_amount: 0,
             description: ''
@@ -163,7 +161,7 @@ function NewJournalEntryPage() {
         const hasLines = lines.length >= 2;
         const allLinesHaveAccounts = lines.every(line => line.chart_of_account_id);
         const hasAmounts = lines.every(line => line.debit_amount > 0 || line.credit_amount > 0);
-        canSave(!(hasLines && allLinesHaveAccounts && hasAmounts && isBalanced()));
+        setFormValid(hasLines && allLinesHaveAccounts && hasAmounts && isBalanced());
     };
 
     const formatCurrency = (value: number) => {
@@ -172,10 +170,13 @@ function NewJournalEntryPage() {
 
     const colDefs = useMemo<ColDef<LineItem>[]>(() => [
         { 
+            // Picked from the chart of accounts, shown as "1010 - Operating Cash" (BUG-021).
             field: "chart_of_account_id", 
             headerName: "Account",
             editable: true,
-            cellEditor: 'agTextCellEditor'
+            cellEditor: ChartOfAccountCellEditor,
+            cellEditorPopup: true,
+            valueFormatter: (params) => accountLabel(params.data ?? {}),
         },
         { 
             field: "debit_amount", 
@@ -221,12 +222,9 @@ function NewJournalEntryPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={false}
-                showSave={hasWritePermission} 
-                canSave={saveable}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
-                onDelete={handleDeleteClick} 
+                saveDisabled={!formValid || !hasWritePermission}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onSave={handleSaveClick} 
             />
             <Grid
@@ -243,8 +241,8 @@ function NewJournalEntryPage() {
                 
                 <Stack gap="4" align="flex-start" maxW="md">
                     <Field.Root required>
-                        <Field.Label>Entry Date</Field.Label>
-                        <DatePicker 
+                        <Field.Label id="new-entry-date-label">Entry Date</Field.Label>
+                        <DatePicker ariaLabelledBy="new-entry-date-label" 
                             selected={entryDate}
                             onChange={(date) => { setEntryDate(date); CheckFormValidity(); }}
                             className="chakra-input"

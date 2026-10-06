@@ -41,7 +41,7 @@ public class CommentModule : BaseERPModule, ICommentModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Comment Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -264,7 +264,7 @@ public class CommentModule : BaseERPModule, ICommentModule
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
-        dto.comment_by_name = await _Context.Users.Where(m => m.external_id == databaseModel.created_by).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.comment_by_name = await UserNameHelper.GetFullName(_Context, databaseModel.created_by);
 
         return dto;
     }
@@ -292,7 +292,7 @@ public class CommentModule : BaseERPModule, ICommentModule
             deleted_on_timezone = databaseModel.deleted_on_timezone,
         };
 
-        dto.comment_by_name = await _Context.Users.Where(m => m.external_id == databaseModel.created_by).Select(m => m.first_name + " " + m.last_name).SingleOrDefaultAsync();
+        dto.comment_by_name = await UserNameHelper.GetFullName(_Context, databaseModel.created_by);
 
         return dto;
     }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using KosmosERP.Api.Models;
+using KosmosERP.Api.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Notification.Command.Find;
 using KosmosERP.BusinessLayer.Models.Module.Notification.Dto;
@@ -8,7 +10,6 @@ using KosmosERP.Models;
 
 namespace KosmosERP.Api.Controllers;
 
-//[Authorize]
 [ApiController]
 [Route("api/v1/[controller]")]
 public class NotificationController : Controller
@@ -20,6 +21,7 @@ public class NotificationController : Controller
         _Module = module;
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetNotification", Name = "GetNotification")]
     [ProducesResponseType(typeof(Response<NotificationDto>), 200)]
     [ProducesResponseType(400)]
@@ -33,6 +35,7 @@ public class NotificationController : Controller
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetNotificationByGuid", Name = "GetNotificationByGuid")]
     [ProducesResponseType(typeof(Response<NotificationDto>), 200)]
     [ProducesResponseType(400)]
@@ -46,6 +49,7 @@ public class NotificationController : Controller
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpPost("FindNotification", Name = "FindNotification")]
     [ProducesResponseType(typeof(PagingResult<NotificationDto>), 200)]
     [ProducesResponseType(500)]
@@ -55,7 +59,7 @@ public class NotificationController : Controller
         {
             if (command != null)
             {
-                command.calling_user_id = "1";
+                command.calling_user_id = User.GetUserGuid();
                 var sortingParams = new PagingSortingParameters(listProfile.Start, listProfile.ResultCount, listProfile.SortOrder);
 
                 var result = await _Module.GetNotifications(sortingParams, command);

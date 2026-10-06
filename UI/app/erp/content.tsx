@@ -90,7 +90,7 @@ function ContentComponent({
                     <GridItem colSpan={1}>
                         <Menu.Root>
                         <Menu.Trigger asChild>
-                            <Box cursor="pointer">
+                            <Box as="button" aria-label="User menu" cursor="pointer">
                                 <Avatar.Root colorPalette="blue" justifySelf="end">
                                 <Avatar.Fallback name={userFullName} />
                                 </Avatar.Root>

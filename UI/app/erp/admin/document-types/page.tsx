@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from 'next/navigation';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import '../../../styles/page.component.css'
 
@@ -16,6 +18,24 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminDocumentTypePage() {
     const auth = useAuth();
+    const router = useRouter();
+    const [hasAccess, setHasAccess] = useState(true);
+
+    // Administration pages are for admins only (the API enforces the same rule).
+    useEffect(() => {
+        if (auth.authenticated == false) return;
+
+        const hasPermission = permissionsService.HasPermission(
+            ERPModules.Admin,
+            ERPModulePermission.Read,
+            auth.roles || []
+        );
+
+        if (!hasPermission) {
+            setHasAccess(false);
+            router.push('/erp');
+        }
+    }, [auth.authenticated]);
 
 
     const [rowData, setRowData] = useState<DocumentUploadObjectDto[]>([]);
@@ -107,7 +127,7 @@ function AdminDocumentTypePage() {
             cellRenderer: (props: any) => {
                 return ( 
                     <div>
-                        <Button type="button" colorPalette="green" onClick={() => doTagDialogOpen(props.data.id)}>Edit Tags</Button>&nbsp;<Button type="button" colorPalette="red" onClick={() => handleDeleteClick(props.data.id)}>Delete</Button>
+                        <Button type="button" colorPalette="green" onClick={() => tagDialogOpenRef.current(props.data.id)}>Edit Tags</Button>&nbsp;<Button type="button" colorPalette="red" onClick={() => handleDeleteClick(props.data.id)}>Delete</Button>
                     </div>
                 );
             }
@@ -236,6 +256,12 @@ function AdminDocumentTypePage() {
         });
     }
 
+    // colDefs are created on the first render, which on a direct load is before
+    // auth is ready. Edit Tags calls through this ref so it always uses the
+    // current handler (and token), not the first render's (BUG-027).
+    const tagDialogOpenRef = useRef(doTagDialogOpen);
+    tagDialogOpenRef.current = doTagDialogOpen;
+
     const doTagsSave = () => {
         setIsWorking(true);
 
@@ -306,6 +332,10 @@ function AdminDocumentTypePage() {
                 doTagDialogOpen(selectedLineId);
             }
         });
+    }
+
+    if (!hasAccess) {
+        return <div>Redirecting...</div>;
     }
 
     return (

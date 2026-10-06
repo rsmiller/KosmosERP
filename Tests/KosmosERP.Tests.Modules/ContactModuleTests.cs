@@ -33,7 +33,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -42,7 +42,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -57,7 +57,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -72,7 +72,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -87,7 +87,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -102,7 +102,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -120,7 +120,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -133,7 +133,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ContactCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_id = _Customer.id,
             first_name = "Bob",
             last_name = "Builder",
@@ -156,7 +156,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
     {
         var result = await _Module.Create(new ContactCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_id = _Customer.id,
             first_name = "Bob",
             last_name = "Builder",
@@ -174,7 +174,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ContactCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             customer_id = _Customer.id,
             first_name = "Bob",
             last_name = "Builder",
@@ -189,7 +189,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
 
         var edit_command = new ContactEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             first_name = "Bob123",
             last_name = "Builder333",
@@ -216,7 +216,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ContactCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             first_name = "Bob123",
             last_name = "Builder333",
             title = "Guy111",
@@ -230,7 +230,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new ContactDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -247,7 +247,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ContactCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             first_name = "Bob123",
             last_name = "Builder333",
             title = "Guy111",
@@ -261,7 +261,7 @@ public class ContactModuleTests : BaseTestModule<ContactModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new ContactFindCommand() { calling_user_id = _User.external_id, wildcard = "Bob" });
+                        new ContactFindCommand() { calling_user_id = _User.guid, wildcard = "Bob" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

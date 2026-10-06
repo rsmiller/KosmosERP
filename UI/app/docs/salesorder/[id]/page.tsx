@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { format } from 'date-fns';
 import { settingsService } from '@/services/settings-service';
 import { SettingsDto } from '@/models/settings-models';
+import { formatDateOnly } from '@/lib/date-only';
 
 
 function DocSalesOrder() {
@@ -58,7 +59,7 @@ function DocSalesOrder() {
     {
         if(date)
         {
-            return format(date, 'MM-dd-yyyy');
+            return formatDateOnly(date, 'MM-dd-yyyy');
         }
         else
         {

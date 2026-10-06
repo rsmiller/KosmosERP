@@ -46,7 +46,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         await _Context.SaveChangesAsync();
@@ -69,7 +69,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
             is_taxable = true,
             is_shippable = true,
             is_material = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product2);
         await _Context.SaveChangesAsync();
@@ -81,7 +81,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
         {
             parent_product_id = _Product1.id,
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.BOMs.Add(BOM1);
         await _Context.SaveChangesAsync();
@@ -93,7 +93,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
             quantity = 100,
             instructions = "Cut 100 feet of wirerope",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.BOMs.Add(BOM2);
 
@@ -105,7 +105,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
     {
         var new_result = await _Module.Create(new BOMCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             parent_product_id = _Product1.id,
             quantity = 100,
             instructions = "Do stuff and things"
@@ -124,7 +124,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
     {
         var result = await _Module.Create(new BOMCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             parent_product_id = _Product1.id,
             quantity = 100,
             instructions = "Do stuff and things",
@@ -133,7 +133,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
                 parent_product_id = _Product2.id,
                 quantity = 1,
                 instructions = "This is a sub item",
-                calling_user_id = _User.external_id
+                calling_user_id = _User.guid
             }
         });
 
@@ -148,7 +148,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
     {
         var new_result = await _Module.Create(new BOMCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             parent_product_id = _Product1.id,
             quantity = 100,
             instructions = "Do stuff and things",
@@ -157,7 +157,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
                 parent_product_id = _Product2.id,
                 quantity = 1,
                 instructions = "This is a sub item",
-                calling_user_id = _User.external_id
+                calling_user_id = _User.guid
             }
         });
 
@@ -166,7 +166,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
 
         var edit_command = new BOMEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             parent_product_id = _Product2.id,
             quantity = 11,
@@ -188,7 +188,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
     {
         var new_result = await _Module.Create(new BOMCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             parent_product_id = _Product1.id,
             quantity = 100,
             instructions = "Do stuff and things",
@@ -197,7 +197,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
                 parent_product_id = _Product2.id,
                 quantity = 1,
                 instructions = "This is a sub item",
-                calling_user_id = _User.external_id
+                calling_user_id = _User.guid
             }
         });
 
@@ -206,7 +206,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new BOMDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -223,7 +223,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
     {
         var new_result = await _Module.Create(new BOMCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             parent_product_id = _Product1.id,
             product_id = _Product2.id,
             quantity = 100,
@@ -235,7 +235,7 @@ public class BOMModuleTests : BaseTestModule<BOMModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new BOMFindCommand() { calling_user_id = _User.external_id, parent_product_id = _Product1.id });
+                        new BOMFindCommand() { calling_user_id = _User.guid, parent_product_id = _Product1.id });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

@@ -1,6 +1,7 @@
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
 using KosmosERP.Database.Models;
+using KosmosERP.Models;
 
 namespace KosmosERP.Seeder;
 
@@ -16,21 +17,26 @@ public partial class DatabaseSeeder
 {
     private readonly ERPDbContext _context;
 
+    /// <summary>Password for every seeded user (dev data only). Override with --user-password.</summary>
+    public const string DefaultUserPassword = "Kosmos-Dev-1";
+    private readonly string _userPassword;
+
     // The Settings.company_name that marks this dataset as already seeded.
     private const string SeedCompanyName = "Kosmos Computer Works";
 
-    // The calling user id stamped on every seeded row's created_by/updated_by.
-    private const int SystemUserId = 1;
+    // The user guid stamped on every seeded row's created_by/updated_by: the system service account.
+    private const string SystemUserGuid = SystemUsers.ServiceUserGuid;
 
-    // External ids of the seeded salespeople (used for order attribution + reference loading).
-    private static readonly string[] SeedSalespersonExternalIds = { "ext-jordan", "ext-riley", "ext-morgan" };
+    // Usernames of the seeded salespeople (used for order attribution + reference loading).
+    private static readonly string[] SeedSalespersonUsernames = { "ext-jordan", "ext-riley", "ext-morgan" };
 
     // Cross-milestone lookups populated as we insert, so later tiers can resolve FKs.
     private readonly Dictionary<string, int> _vendorIdByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _productIdBySku = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<int, Product> _productById = new();
-    private readonly Dictionary<string, int> _userIdByExternalId = new(StringComparer.OrdinalIgnoreCase);
-    private readonly List<string> _salespersonExternalIds = new();
+    private readonly Dictionary<string, int> _userIdByUsername = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<int, string> _userGuidById = new();
+    private readonly List<int> _salespersonUserIds = new();
     private readonly Dictionary<int, int> _addressIdByCustomerId = new();
     private readonly Dictionary<int, int> _firstContactByCustomer = new();
     private readonly List<Customer> _customers = new();
@@ -38,9 +44,10 @@ public partial class DatabaseSeeder
     private readonly List<SeededOrder> _orders = new();
     private readonly List<SeededPO> _purchaseOrders = new();
 
-    public DatabaseSeeder(ERPDbContext context)
+    public DatabaseSeeder(ERPDbContext context, string? userPassword = null)
     {
         _context = context;
+        _userPassword = string.IsNullOrEmpty(userPassword) ? DefaultUserPassword : userPassword;
     }
 
     public async Task SeedAsync()
@@ -88,15 +95,16 @@ public partial class DatabaseSeeder
         Console.WriteLine($"  AP invoices:    {_context.APInvoiceHeaders.Count()}");
         Console.WriteLine($"  Inventory rows: {_context.InventoryCounts.Count()}");
         Console.WriteLine($"  GL postings:    {_context.FinancialTransactions.Count()}");
+        Console.WriteLine($"  Users:          {string.Join(", ", _userIdByUsername.Keys)} (password: {_userPassword})");
     }
 
     /// <summary>Stamps audit fields (created/updated by + timestamps) on a row before insert.</summary>
     private static T Stamp<T>(T model) where T : BaseDatabaseModel
-        => CommonDataHelper<T>.FillCommonFields(model, SystemUserId);
+        => CommonDataHelper<T>.FillCommonFields(model, SystemUserGuid);
 
-    /// <summary>Stamps audit fields with a specific created_by/updated_by (e.g. a salesperson's external id).</summary>
-    private static T StampAs<T>(T model, string userId) where T : BaseDatabaseModel
-        => CommonDataHelper<T>.FillCommonFields(model, userId);
+    /// <summary>Stamps audit fields with a specific created_by/updated_by (e.g. a salesperson's User.guid).</summary>
+    private static T StampAs<T>(T model, string userGuid) where T : BaseDatabaseModel
+        => CommonDataHelper<T>.FillCommonFields(model, userGuid);
 
     /// <summary>
     /// Populates the in-memory vendor/product lookups from rows already in the database, so
@@ -114,12 +122,16 @@ public partial class DatabaseSeeder
             _productById[product.id] = product;
         }
 
-        foreach (var user in _context.Users.Where(u => u.external_id != null).ToList())
-            _userIdByExternalId[user.external_id] = user.id;
+        // Disabled users (e.g. the system service account) never own or create seeded records.
+        foreach (var user in _context.Users.Where(u => !u.is_deleted && !u.is_disabled).ToList())
+        {
+            _userIdByUsername[user.username] = user.id;
+            _userGuidById[user.id] = user.guid;
+        }
 
-        foreach (var ext in SeedSalespersonExternalIds)
-            if (_userIdByExternalId.ContainsKey(ext) && !_salespersonExternalIds.Contains(ext))
-                _salespersonExternalIds.Add(ext);
+        foreach (var username in SeedSalespersonUsernames)
+            if (_userIdByUsername.TryGetValue(username, out var salespersonId) && !_salespersonUserIds.Contains(salespersonId))
+                _salespersonUserIds.Add(salespersonId);
 
         foreach (var ca in _context.CustomerAddresses.Where(c => !c.is_deleted).ToList())
             if (!_addressIdByCustomerId.ContainsKey(ca.customer_id))
@@ -130,7 +142,7 @@ public partial class DatabaseSeeder
                 _firstContactByCustomer[contact.customer_id] = contact.id;
 
         Console.WriteLine($"  Loaded reference data: {_vendorIdByName.Count} vendors, {_productById.Count} products, " +
-                          $"{_userIdByExternalId.Count} users, {_addressIdByCustomerId.Count} customer addresses.");
+                          $"{_userIdByUsername.Count} users, {_addressIdByCustomerId.Count} customer addresses.");
     }
 
     /// <summary>Customers that have a resolvable ship-to address — the safe set for orders/CRM.</summary>
@@ -146,7 +158,7 @@ public partial class DatabaseSeeder
         public DateOnly OrderDate;
         public bool Complete;
         public bool Canceled;
-        public string SalespersonExternalId;
+        public int SalespersonUserId;
         public readonly List<SeededOrderLine> Lines = new();
     }
 

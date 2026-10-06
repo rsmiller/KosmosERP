@@ -115,7 +115,7 @@ const AddOpportunityLineDialog = forwardRef<AddOpportunityLineDialogRef, AddOppo
                                     <GridItem colSpan={2}>
                                         <Field.Root>
                                             <Field.Label>Product</Field.Label>
-                                            <ProductCombobox 
+                                            <ProductCombobox portalled={false} 
                                                 ref={productComboboxRef}
                                                 dbKey={watch('product_id') || 0}
                                                 control={control}

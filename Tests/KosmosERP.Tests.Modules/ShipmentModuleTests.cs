@@ -46,7 +46,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -55,7 +55,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -70,7 +70,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -85,7 +85,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -100,7 +100,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -115,7 +115,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -138,7 +138,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         await _Context.SaveChangesAsync();
@@ -155,7 +155,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -172,7 +172,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -185,7 +185,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.Physical,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_address);
         await _Context.SaveChangesAsync();
@@ -195,7 +195,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.ShipTo,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_shipto_address);
         await _Context.SaveChangesAsync();
@@ -218,7 +218,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             po_number = "ASDSD",
             price = 1002,
             tax = 123
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderHeaders.Add(sales_order_header);
         await _Context.SaveChangesAsync();
@@ -234,7 +234,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             line_number = 1,
             unit_price = 100,
             quantity = 1
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLines.Add(sales_order_line);
         await _Context.SaveChangesAsync();
@@ -248,7 +248,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -260,7 +260,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -281,7 +281,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -293,7 +293,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -309,7 +309,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var old_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -321,7 +321,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -331,7 +331,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
 
         var edit_command = new ShipmentHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             ship_attn = "Sara",
             freight_carrier = "UPS",
@@ -357,7 +357,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -369,7 +369,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -382,7 +382,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new ShipmentHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -396,11 +396,33 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     }
 
     [Test]
+    public async Task SeedPermissions_CreatesFreightCarriers_Once()
+    {
+        // SetupModule already ran SeedPermissions once; running it again must not duplicate.
+        _Module.SeedPermissions();
+
+        var carriers = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.FreightCarriers)
+            .OrderBy(m => m.int_value)
+            .ToListAsync();
+
+        Assert.That(carriers.Select(m => m.key), Is.EqualTo(new[] { "freight_carrier_ups", "freight_carrier_fedex", "freight_carrier_dhl" }));
+        Assert.That(carriers.Select(m => m.value), Is.EqualTo(new[] { "UPS", "FedEx", "DHL" }));
+
+        // Carriers are their own lookup, not shipping methods.
+        var shippingMethodKeys = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.ShippingMethods)
+            .Select(m => m.key)
+            .ToListAsync();
+        Assert.That(shippingMethodKeys, Has.None.StartsWith("freight_carrier_"));
+    }
+
+    [Test]
     public async Task Find()
     {
         var new_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -412,7 +434,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -427,7 +449,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new ShipmentHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = new_result.Data.shipment_number.ToString() });
+                        new ShipmentHeaderFindCommand() { calling_user_id = _User.guid, wildcard = new_result.Data.shipment_number.ToString() });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -444,7 +466,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var create_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -456,7 +478,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -471,7 +493,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
 
         var create_command = new ShipmentLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             shipment_header_id = create_result.Data.id,
             order_line_id = _SalesOrderLine.id,
             units_to_ship = 20,
@@ -493,7 +515,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var create_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -505,7 +527,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -520,7 +542,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
 
         var edit_command = new ShipmentLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.shipment_lines[0].id,
             order_line_id = _SalesOrderLine.id,
             units_to_ship = 90,
@@ -543,7 +565,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
     {
         var create_result = await _Module.Create(new ShipmentHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ship_attn = "Bob",
             freight_carrier = "Yellow Truck",
             order_header_id = _SalesOrderHeader.id,
@@ -555,7 +577,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
             {
                 new ShipmentLineCreateCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     order_line_id = _SalesOrderLine.id,
                     units_to_ship = 10,
                     units_shipped = 10
@@ -569,7 +591,7 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
 
         var response = await _Module.DeleteLine(new ShipmentLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.shipment_lines[0].id,
         });
 
@@ -582,22 +604,90 @@ public class ShipmentModuleTests : BaseTestModule<ShipmentModule>, IModuleTest
         Assert.That(response.Data.deleted_on_timezone, Is.Not.Null);
     }
 
+    [Test]
+    public async Task DeleteLine_OnReleasedShipment_IsRefused()
+    {
+        // A released shipment has shipped its lines (BUG-017 made the edit page's Delete button real).
+        var shipment = await CreateReleasedShipment();
+        var line_id = shipment.shipment_lines[0].id;
+
+        var response = await _Module.DeleteLine(new ShipmentLineDeleteCommand()
+        {
+            calling_user_id = _User.guid,
+            id = line_id,
+        });
+
+        Assert.That(response.Success, Is.False);
+        Assert.That(response.ResultCode, Is.EqualTo(ResultCode.DataValidationError));
+        Assert.That((await _Context.ShipmentLines.SingleAsync(m => m.id == line_id)).is_deleted, Is.False);
+    }
+
+    [Test]
+    public async Task Delete_ReleasedShipment_StillDeletesItsLines()
+    {
+        // Header delete bypasses the line guard above, as it did before.
+        var shipment = await CreateReleasedShipment();
+
+        var response = await _Module.Delete(new ShipmentHeaderDeleteCommand()
+        {
+            calling_user_id = _User.guid,
+            id = shipment.id,
+        });
+
+        Assert.That(response.Success, Is.True);
+        var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == shipment.id).ToListAsync();
+        Assert.That(lines, Is.Not.Empty);
+        Assert.That(lines.All(m => m.is_deleted), Is.True);
+    }
+
+    private async Task<ShipmentHeaderDto> CreateReleasedShipment()
+    {
+        var create_result = await _Module.Create(new ShipmentHeaderCreateCommand()
+        {
+            calling_user_id = _User.guid,
+            ship_attn = "Bob",
+            freight_carrier = "Yellow Truck",
+            order_header_id = _SalesOrderHeader.id,
+            freight_charge_amount = 1000,
+            address_id = _Address.id,
+            ship_via = "Frieght",
+            tax = 100,
+            shipment_lines = new List<ShipmentLineCreateCommand>()
+            {
+                new ShipmentLineCreateCommand()
+                {
+                    calling_user_id = _User.guid,
+                    order_line_id = _SalesOrderLine.id,
+                    units_to_ship = 10,
+                    units_shipped = 10
+                }
+            }
+        });
+        Assert.That(create_result.Success, Is.True);
+
+        var header = await _Context.ShipmentHeaders.SingleAsync(m => m.id == create_result.Data.id);
+        header.is_released = true;
+        await _Context.SaveChangesAsync();
+
+        return create_result.Data;
+    }
+
 
     [Test]
     public async Task GetReadyToShip()
     {
         _Context.ProductionOrderLines.AddRange(
-            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 1, quantity = 3, status = "production_order_status_ready_to_ship" }, 1),
-            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 2, quantity = 2, status = "production_order_status_ready_to_ship" }, 1),
-            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 3, quantity = 7, status = "production_order_status_wip" }, 1),
-            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 4, quantity = 9, status = "production_order_status_ready_to_ship", is_deleted = true }, 1));
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 1, quantity = 3, status = "production_order_status_ready_to_ship" }, SystemUsers.ServiceUserGuid),
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 2, quantity = 2, status = "production_order_status_ready_to_ship" }, SystemUsers.ServiceUserGuid),
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 3, quantity = 7, status = "production_order_status_wip" }, SystemUsers.ServiceUserGuid),
+            CommonDataHelper<ProductionOrderLine>.FillCommonFields(new ProductionOrderLine() { order_line_id = _SalesOrderLine.id, line_number = 4, quantity = 9, status = "production_order_status_ready_to_ship", is_deleted = true }, SystemUsers.ServiceUserGuid));
 
         // Multiple shipments against the same order line must sum; canceled and deleted lines must not count.
         _Context.ShipmentLines.AddRange(
-            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 1, units_shipped = 1 }, 1),
-            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 2, units_shipped = 2 }, 1),
-            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 5, units_shipped = 5, is_canceled = true }, 1),
-            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 6, units_shipped = 6, is_deleted = true }, 1));
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 1, units_shipped = 1 }, SystemUsers.ServiceUserGuid),
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 2, units_shipped = 2 }, SystemUsers.ServiceUserGuid),
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 5, units_shipped = 5, is_canceled = true }, SystemUsers.ServiceUserGuid),
+            CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine() { order_line_id = _SalesOrderLine.id, units_to_ship = 6, units_shipped = 6, is_deleted = true }, SystemUsers.ServiceUserGuid));
 
         await _Context.SaveChangesAsync();
 

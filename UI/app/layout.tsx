@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider"
+import { EmotionRegistry } from "@/components/ui/emotion-registry"
 import { Metadata } from "next";
 
 const geistSans = Geist({
@@ -35,7 +36,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Provider>{children}</Provider>
+        {/* Must wrap Provider: Chakra's styles go through this Emotion cache. */}
+        <EmotionRegistry>
+          <Provider>{children}</Provider>
+        </EmotionRegistry>
       </body>
     </html>
   );

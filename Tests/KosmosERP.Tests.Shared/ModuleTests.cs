@@ -38,7 +38,7 @@ public class ModuleTests
             department = "1",
             guid = Guid.NewGuid().ToString(),
             is_admin = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
@@ -59,13 +59,13 @@ public class ModuleTests
         var roleModel1 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ExampleRole",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var roleModel2 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "AnotherRole",
 
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(roleModel1);
         _Context.Roles.Add(roleModel2);
@@ -75,13 +75,13 @@ public class ModuleTests
         {
             role_id = roleModel1.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var userRole2 = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             role_id = roleModel2.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(userRole1);
         _Context.UserRoles.Add(userRole2);
@@ -99,7 +99,7 @@ public class ModuleTests
             delete = false,
             write = false,
             is_active = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var moduleEditModel = CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
         {
@@ -112,7 +112,7 @@ public class ModuleTests
             delete = false,
             write = false,
             is_active = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.ModulePermissions.Add(moduleReadModel);
         _Context.ModulePermissions.Add(moduleEditModel);
@@ -128,14 +128,14 @@ public class ModuleTests
             module_id = _ModuleId,
             role_id = role.id,
             read = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var rolePermissionEditModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_id = _ModuleId,
             role_id = role.id,
             edit = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
 
         _Context.RolePermissions.Add(rolePermissionReadModel);

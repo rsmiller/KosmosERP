@@ -203,7 +203,7 @@ function ARInvoiceSelectorComponent({customer_id, ar_invoice_number, disabled, o
                 <Stack gap="0" maxW="md">
                     <Field.Root invalid={IsDirty('invoice_number')} required={true} disabled>
                         <Field.Label>&nbsp;</Field.Label>
-                        <Button type="button" colorPalette="blue" onClick={() => handleSearchClick()} disabled={disabled}><FaSearch /></Button>
+                        <Button type="button" colorPalette="blue" aria-label="Search AR invoices" onClick={() => handleSearchClick()} disabled={disabled}><FaSearch /></Button>
                     </Field.Root>
                 </Stack>
                 <Dialog.Root open={isDialogOpen} onOpenChange={(details) => setDialogOpen(details.open)} role="alertdialog">
@@ -242,7 +242,7 @@ function ARInvoiceSelectorComponent({customer_id, ar_invoice_number, disabled, o
                                         </GridItem>
                                         <GridItem colSpan={3}></GridItem>
                                         <GridItem colSpan={3}>
-                                            <AgGridCustomPagination totalCount={totalCount} onPage={onPageEvent} onSizeChange={onPageSizeEvent}></AgGridCustomPagination>
+                                            <AgGridCustomPagination portalled={false} totalCount={totalCount} onPage={onPageEvent} onSizeChange={onPageSizeEvent}></AgGridCustomPagination>
                                         </GridItem>
                                         </Grid>
                                     </div>

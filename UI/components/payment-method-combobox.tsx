@@ -46,7 +46,8 @@ const PaymentMethodCombobox = forwardRef<PaymentMethodComboboxRef, PaymentMethod
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: paymentMethodOptions,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 
@@ -105,6 +106,8 @@ const PaymentMethodCombobox = forwardRef<PaymentMethodComboboxRef, PaymentMethod
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("83156a35-d140-4442-8fbf-699658bf65e9", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
@@ -112,7 +115,7 @@ const PaymentMethodCombobox = forwardRef<PaymentMethodComboboxRef, PaymentMethod
                 setPaymentMethodOptions(response.data);
             }
         });
-    }, [set]);
+    }, [set, auth.token]);
 
     const inputValChange = (inputValue: any) =>
     {

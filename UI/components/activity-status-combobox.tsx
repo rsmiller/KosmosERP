@@ -22,6 +22,8 @@ export class ActivityStatusComboboxParams
     title: string = "";
     disabled: boolean = false;
     onValidationChange?: (isValid: boolean) => void;
+    /** Set false inside a Dialog, so the options render inside it (BUG-016). */
+    portalled?: boolean;
 }
 
 export interface ActivityStatusComboboxRef {
@@ -32,7 +34,7 @@ export interface ActivityStatusComboboxRef {
 
 
 const ActivityStatusCombobox = forwardRef<ActivityStatusComboboxRef, ActivityStatusComboboxParams>(
-    ({dbKey, onChange, control, name, error, title, disabled, onValidationChange}, ref) => {
+    ({dbKey, onChange, control, name, error, title, disabled, onValidationChange, portalled = true}, ref) => {
     const { contains } = useFilter({ sensitivity: "base" })
 
     const [selectedValue, setSelectedValue] = useState<string>();
@@ -158,7 +160,7 @@ const ActivityStatusCombobox = forwardRef<ActivityStatusComboboxRef, ActivitySta
                     <Combobox.Trigger />
                 </Combobox.IndicatorGroup>
                 </Combobox.Control>
-                <Portal>
+                <Portal disabled={!portalled}>
                 <Combobox.Positioner>
                     <Combobox.Content>
                     <Combobox.Empty>No items found</Combobox.Empty>

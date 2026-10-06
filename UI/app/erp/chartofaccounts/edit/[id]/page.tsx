@@ -34,7 +34,7 @@ function EditChartOfAccountPage() {
     const [account, setAccount] = useState<ChartOfAccountDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     
@@ -159,7 +159,7 @@ function EditChartOfAccountPage() {
 
     const CheckFormValidity = () => {
         const hasRequiredFields = Boolean(watch('account_number') && watch('account_name'));
-        canSave(!hasRequiredFields);
+        setFormValid(hasRequiredFields);
     };
 
     if (loading) {
@@ -181,11 +181,11 @@ function EditChartOfAccountPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={hasDeletePermission}
-                showSave={hasEditPermission} 
-                canSave={saveable}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
+                canSave={hasEditPermission}
+                canDelete={hasDeletePermission}
+                saveDisabled={!formValid}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onDelete={handleDeleteClick} 
                 onSave={handleSaveClick} 
             />

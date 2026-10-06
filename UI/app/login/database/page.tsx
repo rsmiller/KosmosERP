@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Box, Button, Heading, Input, Stack, Text } from '@chakra-ui/react'
+import { Box, Button, Field, Heading, Input, Stack, Text } from '@chakra-ui/react'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Toaster, toaster } from '@/components/ui/toaster'
 import { userService } from '@/services/user-service'
@@ -44,10 +44,10 @@ const DatabaseLoginPage = () => {
       if (auth.token?.refresh_token) SessionStorage.setRefreshToken(auth.token.refresh_token)
       SessionStorage.setSession(auth.session?.session_id || '')
       SessionStorage.setUserId(String(auth.id))
-      // Normalize API roles to the permissionsService string scheme (empty for now).
+      // Normalize API roles to the permissionsService string scheme.
 
       //console.log(auth.roles);
-      SessionStorage.setRoles(rolesToPermissionStrings(auth.roles))
+      SessionStorage.setRoles(rolesToPermissionStrings(auth.roles, auth.user?.is_admin))
 
       const fullName = auth.user
         ? `${auth.user.first_name ?? ''} ${auth.user.last_name ?? ''}`.trim()
@@ -77,24 +77,24 @@ const DatabaseLoginPage = () => {
 
         <form onSubmit={handleSubmit}>
           <Stack gap={4}>
-            <Stack gap={1}>
-              <Text fontSize="sm" fontWeight="medium">Username</Text>
+            <Field.Root gap={1}>
+              <Field.Label fontSize="sm" fontWeight="medium">Username</Field.Label>
               <Input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
                 autoFocus
               />
-            </Stack>
+            </Field.Root>
 
-            <Stack gap={1}>
-              <Text fontSize="sm" fontWeight="medium">Password</Text>
+            <Field.Root gap={1}>
+              <Field.Label fontSize="sm" fontWeight="medium">Password</Field.Label>
               <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
               />
-            </Stack>
+            </Field.Root>
 
             <Button type="submit" colorPalette="blue" loading={submitting} loadingText="Signing in…">
               Sign in

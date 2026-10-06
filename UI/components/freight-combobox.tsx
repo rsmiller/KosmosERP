@@ -46,7 +46,8 @@ const FreightCombobox = forwardRef<FreightComboboxRef, FreightComboboxParams>(
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: freightOptions,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 
@@ -107,6 +108,8 @@ const FreightCombobox = forwardRef<FreightComboboxRef, FreightComboboxParams>(
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("2a2d1004-5283-40ef-96fd-8cc30c65cefa", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
@@ -114,7 +117,7 @@ const FreightCombobox = forwardRef<FreightComboboxRef, FreightComboboxParams>(
                 setFreightOptions(response.data);
             }
         });
-    }, [set]);
+    }, [set, auth.token]);
 
     const inputValChange = (inputValue: any) =>
     {

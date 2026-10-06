@@ -67,10 +67,6 @@ function AccountsReceivablePage() {
     getTablePartialData();
   }, [auth.authenticated]);
 
-  const handleNewClick = () => {
-    router.push("/erp/ar/new");
-  };
-
   const handleViewClick = (guid: any) => {
     router.push("/erp/ar/view/" + guid);
   };

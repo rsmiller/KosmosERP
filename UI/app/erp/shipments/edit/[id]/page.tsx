@@ -44,12 +44,15 @@ function NewARFromCustomerPage() {
   const [shipment, setShipment] = useState<ShipmentHeaderDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
 
   const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false);
+  // The line awaiting delete confirmation, if any.
+  const [lineToDelete, setLineToDelete] = useState<ShipmentLineDto | null>(null);
+  const [deletingLine, setDeletingLine] = useState(false);
 
   const [addressModel, setAddressModel] = useState<AddressDto>({} as AddressDto);
   const [rowData, setRowData] = useState<ShipmentLineDto[]>([]);
@@ -139,7 +142,7 @@ function NewARFromCustomerPage() {
           // If this is completed we can't edit this
           if (response.data.is_complete || response.data.is_released) {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           }
           else
           {
@@ -199,11 +202,11 @@ function NewARFromCustomerPage() {
     //console.log("allValid: ", allValid);
     
     if (completedOrDisabled == false) {
-      canSave(allValid);
+      setFormValid(allValid);
     }
     else
     {
-      canSave(false);
+      setFormValid(false);
     }
   };
 
@@ -276,35 +279,31 @@ function NewARFromCustomerPage() {
     }
   };
 
-  const handleShipLineClick = async (id: number) => {
-    // Find the line to update
-    const lineToUpdate = rowData.find(line => line.id === id);
-    if (!lineToUpdate) return;
+  const handleDeleteLineConfirm = async () => {
+    if (!lineToDelete?.id) return;
 
-    // Update the shipped units to match units to ship
-    const updatedLine: ShipmentLineEditCommand = {
-      id: lineToUpdate.id,
-      order_line_id: lineToUpdate.order_line_id,
-      units_to_ship: lineToUpdate.units_to_ship,
-      units_shipped: lineToUpdate.units_to_ship, // Set shipped to match to_ship
-      is_complete: true,
-      is_canceled: false,
-    };
+    let command = new ShipmentLineDeleteCommand();
+    command.id = lineToDelete.id;
 
+    setDeletingLine(true);
     try {
-      await shipmentService.updateLine(updatedLine, auth.token || "").then(async (response) => {
-        if (response.success) {
-          // Reload the shipment to get updated data
-          const shipmentResponse = await shipmentService.get(shipment?.id || 0, auth.token || "");
-          if (shipmentResponse.success && shipmentResponse.data && shipmentResponse.data.shipment_lines) {
-            RenderLines(shipmentResponse.data.shipment_lines);
-          }
-        }
-      });
+      const response = await shipmentService.deleteLine(command, auth.token || "");
+      if (response.success) {
+        // Deleted lines are left out of the release, so drop it from the grid too.
+        setRowData(prev => prev.filter(line => line.id !== lineToDelete.id));
+        setFailedSaved(false);
+      } else {
+        console.error(response);
+        setSuccessSaved(false);
+        setFailedSaved(true);
+      }
     } catch (e) {
       console.error(e);
       setSuccessSaved(false);
       setFailedSaved(true);
+    } finally {
+      setDeletingLine(false);
+      setLineToDelete(null);
     }
   };
 
@@ -361,14 +360,17 @@ function NewARFromCustomerPage() {
       field: "id",
       headerName: "Actions",
       cellRenderer: (props: any) => {
-        const { completedOrDisabled } = props.context;
+        const { completedOrDisabled, canDeleteLines } = props.context;
         return (
           <div>
             <Button 
               type="button" 
               colorPalette="red" 
-              onClick={() => handleShipLineClick(props.value)}
-              disabled={completedOrDisabled || props.data.is_complete || props.data.is_released}
+              aria-label={`Delete line ${props.data.line_description}`}
+              // Opens the confirmation dialog. colDefs are captured once, so only a
+              // state setter (always current) may be called from here.
+              onClick={() => setLineToDelete(props.data)}
+              disabled={completedOrDisabled || !canDeleteLines || props.data.is_complete || props.data.is_released}
             >
               Delete
             </Button>
@@ -432,8 +434,10 @@ function NewARFromCustomerPage() {
         <Stack gap="1" align="flex-start" maxW="md">
           <Field.Root invalid={!!errors.ship_via} disabled={true}>
             <Field.Label>Ship Via</Field.Label>
+            {/* Shows the label (BUG-012); the form keeps the key in ship_via for saving. */}
             <Input 
-              {...register('ship_via')}
+              value={shipment.ship_via_name || shipment.ship_via || ''}
+              readOnly
               disabled={true}
             />
           </Field.Root>
@@ -493,14 +497,14 @@ function NewARFromCustomerPage() {
               rowData={rowData}
               columnDefs={colDefs}
               defaultColDef={defaultColDef}
-              context={{ completedOrDisabled }}
+              context={{ completedOrDisabled, canDeleteLines: hasDeletePermission }}
             />
           </div>
         </GridItem>
 
         <GridItem colSpan={5}>
           <PageActionsComponent 
-            canSave={!saveable || !hasEditPermission} 
+            saveDisabled={!formValid || !hasEditPermission} 
             canDelete={hasDeletePermission}
             onSave={handleSaveClick} 
             onDelete={handleDeleteClick}
@@ -527,6 +531,32 @@ function NewARFromCustomerPage() {
                   <Button variant="outline" onClick={() => setIsReleaseDialogOpen(false)}>No</Button>
                 </Dialog.ActionTrigger>
                 <Button colorPalette="green" onClick={() => doRelease()}>Release</Button>
+              </Dialog.Footer>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="sm" />
+              </Dialog.CloseTrigger>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+      <Dialog.Root open={lineToDelete !== null} onOpenChange={(details) => { if (!details.open) setLineToDelete(null); }} role="alertdialog">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Remove line?</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <p>
+                  Remove "{lineToDelete?.line_description}" from this shipment? It will not be shipped when the shipment is released.
+                </p>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="outline" disabled={deletingLine}>Cancel</Button>
+                </Dialog.ActionTrigger>
+                <Button colorPalette="red" onClick={() => handleDeleteLineConfirm()} disabled={deletingLine}>Remove</Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />

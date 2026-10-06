@@ -14,6 +14,8 @@ public class ShipmentHeaderDto : BaseDto
     public bool is_canceled { get; set; }
     public bool is_released { get; set; }
     public string ship_via { get; set; }
+    /// <summary>The shipping method's label for ship_via (e.g. "Common Carrier").</summary>
+    public string? ship_via_name { get; set; }
     public string? ship_attn { get; set; }
     public string? freight_carrier { get; set; }
     public decimal freight_charge_amount { get; set; }

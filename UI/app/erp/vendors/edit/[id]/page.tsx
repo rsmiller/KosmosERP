@@ -44,7 +44,7 @@ function EditVendorsPage() {
   const [vendor, setVendor] = useState<VendorDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [addressResponse, setAddressResponse] = useState<NewAddressBlockResponse | null>(null);
@@ -111,7 +111,7 @@ function EditVendorsPage() {
     //console.log("PAGE addressBlock", addressBlockValid)
     //console.log("PAGE allValid: ", allValid);
 
-    canSave(allValid)
+    setFormValid(allValid)
   };
 
   useEffect(() => {
@@ -406,8 +406,8 @@ function EditVendorsPage() {
         </Stack>
         <Stack gap="4" align="flex-start" maxW="md">
           <Field.Root invalid={IsDirty('approved_on')}>
-            <Field.Label>Approved Date</Field.Label>
-            <DatePicker 
+            <Field.Label id="edit-approved-date-label">Approved Date</Field.Label>
+            <DatePicker ariaLabelledBy="edit-approved-date-label" 
               selected={getApprovedDate()}
               onChange={handleApprovedDateChange}
               dateFormat="MM/dd/yyyy"
@@ -417,8 +417,8 @@ function EditVendorsPage() {
         </Stack>
         <Stack gap="4" align="flex-start" maxW="md">
           <Field.Root invalid={IsDirty('audit_on')}>
-            <Field.Label>Audit Date</Field.Label>
-            <DatePicker 
+            <Field.Label id="edit-audit-date-label">Audit Date</Field.Label>
+            <DatePicker ariaLabelledBy="edit-audit-date-label" 
               selected={getAuditDate()}
               onChange={handleAuditDateChange}
               dateFormat="MM/dd/yyyy"
@@ -428,8 +428,8 @@ function EditVendorsPage() {
         </Stack>
         <Stack gap="4" align="flex-start" maxW="md">
           <Field.Root>
-            <Field.Label>Retired Date</Field.Label>
-            <DatePicker 
+            <Field.Label id="edit-retired-date-label">Retired Date</Field.Label>
+            <DatePicker ariaLabelledBy="edit-retired-date-label" 
               selected={getRetiredDate()}
               onChange={handleRetiredDateChange}
               dateFormat="MM/dd/yyyy"
@@ -472,7 +472,7 @@ function EditVendorsPage() {
 
         <GridItem colSpan={5}>
           <PageActionsComponent 
-            canSave={!saveable || !hasEditPermission} 
+            saveDisabled={!formValid || !hasEditPermission} 
             canDelete={hasDeletePermission}
             onSave={handleSaveClick} 
             onDelete={handleDeleteClick} 

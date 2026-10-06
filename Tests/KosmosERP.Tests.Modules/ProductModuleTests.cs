@@ -52,7 +52,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -61,7 +61,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -78,7 +78,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -95,7 +95,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -112,7 +112,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -127,7 +127,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -145,7 +145,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
             vendor_name = "Coolest vendor ever",
             vendor_description = "Supplies us with toliet paper",
             website = "google.com",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Vendors.Add(vendor);
         await _Context.SaveChangesAsync();
@@ -158,7 +158,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -200,7 +200,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -236,7 +236,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -265,7 +265,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
 
         var edit_command = new ProductEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             product_name = "Some wire2",
             product_class = "Copper1",
@@ -309,7 +309,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -330,7 +330,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new ProductDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -347,7 +347,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -368,7 +368,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new ProductFindCommand() { calling_user_id = _User.external_id, wildcard = "PO-CU-100" });
+                        new ProductFindCommand() { calling_user_id = _User.guid, wildcard = "PO-CU-100" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -384,7 +384,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -413,7 +413,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
 
         var attribute_result = await _Module.CreateAttribute(new ProductAttributeCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             attribute_name = "Length",
             attribute_value = "100000",
             product_id = result.Data.id
@@ -429,7 +429,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -462,7 +462,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
 
         var edit_command = new ProductAttributeEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = attribute_to_edit.id,
             attribute_name = "Length",
             attribute_value = "100000",
@@ -482,7 +482,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
     {
         var result = await _Module.Create(new ProductCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             product_name = "Some wire",
             product_class = "Copper",
             category = "Spool",
@@ -514,7 +514,7 @@ public class ProductModuleTests : BaseTestModule<ProductModule>, IModuleTest
 
         var attribute_result = await _Module.DeleteAttribute(new ProductAttributeDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = attribute_to_edit.id,
         });
 

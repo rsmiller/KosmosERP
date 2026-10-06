@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
+using KosmosERP.Api.Models;
+using KosmosERP.Api.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KosmosERP.Api.Controllers;
@@ -13,6 +16,8 @@ public class DiagnosticsController : ControllerBase
         _logger = logger;
     }
 
+    // Public: liveness probe for load balancers and Kubernetes.
+    [AllowAnonymous]
     [HttpGet("health")]
     public IActionResult Health()
     {
@@ -24,6 +29,7 @@ public class DiagnosticsController : ControllerBase
         });
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("test-binding")]
     public IActionResult TestBinding([FromBody] TestModel model)
     {
@@ -43,6 +49,7 @@ public class DiagnosticsController : ControllerBase
         });
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("test-simple")]
     public IActionResult TestSimple()
     {

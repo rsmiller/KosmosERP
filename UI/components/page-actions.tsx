@@ -11,7 +11,10 @@ import {
 } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 
-function PageActionsComponent({canSave=true, canDelete=true, onSave, onDelete, saveText="Save Record", successSaved, failedSaved, deleteText="Delete Record", hidden=false}: any) {
+// Delete is only offered when the page passes an onDelete handler, so create
+// pages (nothing to delete yet) don't show a button that has nothing to call.
+// canSave=false hides Save but keeps the saved/failed alerts (e.g. a posted journal entry).
+function PageActionsComponent({saveDisabled=false, canSave=true, onSave, onDelete, canDelete=Boolean(onDelete), saveText="Save Record", successSaved, failedSaved, deleteText="Delete Record", hidden=false}: any) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isWorking, setIsWorking] = useState(false);
 
@@ -19,10 +22,18 @@ function PageActionsComponent({canSave=true, canDelete=true, onSave, onDelete, s
         setIsWorking(false);
     }, []);
 
-    const doDelete = () => 
+    const doDelete = async () =>
     {
         setIsWorking(true);
-        onDelete()
+        try {
+            await onDelete();
+        } finally {
+            // On success the page usually navigates away. On failure, close the
+            // dialog so the page's error alert is visible, and don't leave the
+            // buttons disabled behind a spinner.
+            setIsWorking(false);
+            setIsDeleteDialogOpen(false);
+        }
     };
 
     return (
@@ -44,7 +55,9 @@ function PageActionsComponent({canSave=true, canDelete=true, onSave, onDelete, s
                 </Alert.Root>
             </GridItem>
             <hr style={{ width: "100%", marginBottom: "25px"}}/>
-            <Button type="button" colorPalette="blue" onClick={() => onSave()} disabled={canSave}>{saveText}</Button>
+            {canSave && (
+               <Button type="button" colorPalette="blue" onClick={() => onSave()} disabled={saveDisabled}>{saveText}</Button>
+            )}
             {canDelete && (
                <Button type="button" colorPalette="red" onClick={() => setIsDeleteDialogOpen(true)} className={"page-action-dlt-btn"}>{deleteText}</Button>
             )}

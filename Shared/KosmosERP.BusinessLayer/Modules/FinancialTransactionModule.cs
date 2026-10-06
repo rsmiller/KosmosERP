@@ -56,7 +56,7 @@ public class FinancialTransactionModule : BaseERPModule, IFinancialTransactionMo
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Financial Transaction Viewers",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

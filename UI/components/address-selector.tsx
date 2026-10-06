@@ -92,6 +92,9 @@ const AddressSelectorCombobox = forwardRef<AddressSelectorComboboxRef, AddressSe
         }, [selectedItem, onValidationChange]);
 
         useEffect(() => {
+            // Wait for auth: on a direct load the token isn't there on the first run.
+            if (!auth.token) return;
+
             if (dbKey) {
                 fetchAddress(dbKey).then( (response) => {
                     if(response != undefined)
@@ -119,7 +122,7 @@ const AddressSelectorCombobox = forwardRef<AddressSelectorComboboxRef, AddressSe
                 // If no value get some values to select
                 fetchAddresses('');
             }
-        }, [dbKey]);
+        }, [dbKey, auth.token]);
 
         const fetchAddress = async (id: number): Promise<AddressDto | undefined> => {
             try {

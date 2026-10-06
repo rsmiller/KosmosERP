@@ -34,7 +34,6 @@ function NewPOReceivePage() {
     const [poNumber, setPoNumber] = useState<string>('');
     const [isAlertOpen, setIsAlertOpen] = useState(false);
 
-    const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
 
     const [isWorking, setIsWorking] = useState(false);
@@ -222,7 +221,6 @@ function NewPOReceivePage() {
             // Upload document first
             const documentUploadRevision: DocumentUploadRevisionTagCreateCommand = 
             {
-                calling_user_id: Number(userId),
                 token: sessionId?.toString(),
                 document_upload_object_tag_id: 10,
                 tag_name: "PO Number",
@@ -231,7 +229,6 @@ function NewPOReceivePage() {
 
             const documentUploadCreate: DocumentUploadCreateCommand = {
                 document_object_id: 5, // TODO: Don't hardcode this. This doc id = po_receive_upload
-                calling_user_id: Number(userId),
                 token: sessionId?.toString(),
                 revision_tags: [documentUploadRevision],
                 document_name: selectedFile.name 
@@ -252,7 +249,6 @@ function NewPOReceivePage() {
             const lines: PurchaseOrderReceiveLineCreateCommand[] = rowWorkingData
                 .filter(r => (r.units_to_receive ?? 0) > 0)
                 .map(r => ({
-                    calling_user_id: Number(userId),
                     token: sessionId?.toString(),
                     purchase_order_line_id: r.purchase_order_line_id,
                     units_received: r.units_to_receive
@@ -261,7 +257,6 @@ function NewPOReceivePage() {
             if (!lines.length) { setIsWorking(false); return; }
 
             const headerCreate: PurchaseOrderReceiveHeaderCreateCommand = {
-                calling_user_id: Number(userId),
                 token: sessionId?.toString(),
                 purchase_order_id: purchaseOrder.id,
                 document_upload_id: docResponse.data.id,

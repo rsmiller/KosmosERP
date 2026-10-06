@@ -8,7 +8,7 @@ namespace KosmosERP.Reporting.Reports.Sales;
 /// Top Salespeople — order totals aggregated per salesperson over a date range, ranked by total
 /// sales, with order count and average order value. Orders are attributed by <c>created_by</c>
 /// (the user who entered the order; orders carry no dedicated salesperson field), resolved to a
-/// display name via <c>User.external_id</c>. Parameters: <c>date_from</c>, <c>date_to</c>.
+/// display name via <c>User.guid</c>. Parameters: <c>date_from</c>, <c>date_to</c>.
 /// </summary>
 public sealed class TopSalespeopleReport : ReportGeneratorBase
 {
@@ -46,14 +46,14 @@ public sealed class TopSalespeopleReport : ReportGeneratorBase
             .Select(g => new { CreatedBy = g.Key, Orders = g.Count(), Total = g.Sum(x => x.price) })
             .ToList();
 
-        var userKeys = grouped.Select(g => g.CreatedBy).Distinct().ToList();
+        var userGuids = grouped.Select(g => g.CreatedBy).Distinct().ToList();
         var users = await Context.Users
             .AsNoTracking()
-            .Where(u => userKeys.Contains(u.external_id))
-            .Select(u => new { u.external_id, u.first_name, u.last_name })
+            .Where(u => userGuids.Contains(u.guid))
+            .Select(u => new { u.guid, u.first_name, u.last_name })
             .ToListAsync();
         var userNames = users
-            .GroupBy(u => u.external_id)
+            .GroupBy(u => u.guid)
             .ToDictionary(g => g.Key, g => $"{g.First().first_name} {g.First().last_name}".Trim());
 
         var rows = grouped

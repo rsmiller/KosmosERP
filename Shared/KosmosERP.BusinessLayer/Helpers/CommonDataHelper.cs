@@ -4,14 +4,8 @@ namespace KosmosERP.BusinessLayer.Helpers
 {
     public class CommonDataHelper<T> where T : BaseDatabaseModel
     {
-        public static T FillCommonFields(T model, int calling_user_id)
-        {
-            model.created_by = calling_user_id.ToString();
-            model.updated_by = calling_user_id.ToString();
-
-            return FillCommonFields(model);
-        }
-
+        // calling_user_id is the acting user's User.guid (SystemUsers.ServiceUserGuid for
+        // system writes). There are deliberately no int overloads.
         public static T FillCommonFields(T model, string calling_user_id)
         {
             model.created_by = calling_user_id;
@@ -43,31 +37,6 @@ namespace KosmosERP.BusinessLayer.Helpers
             model.deleted_on = now;
             model.deleted_on_string = now.ToString("u");
             model.deleted_on_timezone = GetTimezoneAsString(now);
-
-            return model;
-        }
-
-        public static T FillDeleteFields(T model, int calling_user_id)
-        {
-            var now = DateTime.UtcNow;
-
-            model.is_deleted = true;
-            model.deleted_by = calling_user_id.ToString();
-            model.deleted_on = now;
-            model.deleted_on_string = now.ToString("u");
-            model.deleted_on_timezone = GetTimezoneAsString(now);
-
-            return model;
-        }
-
-        public static T FillUpdateFields(T model, int calling_user_id)
-        {
-            var now = DateTime.UtcNow;
-
-            model.updated_by = calling_user_id.ToString();
-            model.updated_on = now;
-            model.updated_on_string = now.ToString("u");
-            model.updated_on_timezone = GetTimezoneAsString(now);
 
             return model;
         }

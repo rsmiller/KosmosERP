@@ -40,7 +40,7 @@ function EditPurchaseOrdersPage() {
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderHeaderDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -99,7 +99,7 @@ function EditPurchaseOrdersPage() {
           if(response.data.po_type == 'R')
           {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           }
 
         } else {
@@ -180,7 +180,7 @@ function EditPurchaseOrdersPage() {
 
     if(completedOrDisabled == false)
     {
-      canSave(allValid);
+      setFormValid(allValid);
     }
     
   };
@@ -299,6 +299,12 @@ function EditPurchaseOrdersPage() {
   };
 
 
+  // colDefs below are created on the first render, which on a direct load is
+  // before auth is ready. The Delete button calls through this ref so it always
+  // uses the current handler (and token), not the first render's (BUG-027).
+  const deleteLineRef = useRef(handleDeleteLineClick);
+  deleteLineRef.current = handleDeleteLineClick;
+
   const handleTypeSelect = (value: any) => {
     setValue('po_type', value?.value || '');
     CheckFormValidity();
@@ -377,7 +383,7 @@ function EditPurchaseOrdersPage() {
         const { completedOrDisabled } = props.context;
         return ( 
           <div>
-            <Button type="button" colorPalette="red" onClick={() => handleDeleteLineClick(props.data.id, props.data.purchase_order_header_id)} disabled={completedOrDisabled}>Delete</Button>
+            <Button type="button" colorPalette="red" onClick={() => deleteLineRef.current(props.data.id, props.data.purchase_order_header_id)} disabled={completedOrDisabled}>Delete</Button>
           </div>
         );
       }
@@ -463,7 +469,7 @@ function EditPurchaseOrdersPage() {
 
             <GridItem colSpan={5} >
               <PageActionsComponent 
-                canSave={!saveable || !hasEditPermission} 
+                saveDisabled={!formValid || !hasEditPermission} 
                 canDelete={hasDeletePermission}
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick}

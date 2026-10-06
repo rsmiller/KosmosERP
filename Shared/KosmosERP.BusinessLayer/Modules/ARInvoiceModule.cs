@@ -75,7 +75,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "AR Invoice Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -93,7 +93,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         var gl_account_sales = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.GLAccounts && m.key == "gl_account_sales").SingleOrDefault();
         var gl_account_general_expenses = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.GLAccounts && m.key == "gl_account_general_expenses").SingleOrDefault();
 
-
+        // Payment terms store their length in days in int_value (NET 30 -> 30).
         if (payment_terms_net_15 == null)
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
@@ -101,21 +101,21 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "payment_terms_net_15",
                 value = "NET 15",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 1
-            }, 1));
+                int_value = 15
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
 
-        if (payment_terms_net_15 == null)
+        if (payment_terms_net_30 == null)
         {
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
                 key = "payment_terms_net_30",
                 value = "NET 30",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 2
-            }, 1));
+                int_value = 30
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -127,8 +127,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "payment_terms_net_45",
                 value = "NET 45",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 3
-            }, 1));
+                int_value = 45
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -140,8 +140,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "payment_terms_net_60",
                 value = "NET 60",
                 module_id = KeyValueIds.PaymentTerms.ToString(),
-                int_value = 4
-            }, 1));
+                int_value = 60
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -155,7 +155,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Cash - 1000001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1000001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -168,7 +168,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Checking - 1000002",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1000002
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -181,7 +181,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Payroll - 1005001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1005001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -194,7 +194,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "Sales - 1003001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1003001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -207,7 +207,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 value = "General Expenses - 1007001",
                 module_id = KeyValueIds.GLAccounts.ToString(),
                 int_value = 1007001
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -225,7 +225,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_accounts_receivable",
                 value = "1100",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -237,7 +237,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_accounts_payable",
                 value = "2010",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -249,7 +249,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_sales_revenue",
                 value = "4010",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -261,7 +261,7 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
                 key = "gl_account_purchases",
                 value = "5010",
                 module_id = KeyValueIds.GLAccounts.ToString()
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -339,6 +339,14 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         var customer = await _Context.Customers.SingleOrDefaultAsync(m => m.id == commandModel.customer_id && !m.is_deleted);
         if(customer == null)
             return new Response<ARInvoiceHeaderDto>("Customer not found", ResultCode.DataValidationError);
+
+        // A tax-exempt customer is never taxed, whatever the client sent.
+        if (!customer.is_taxable)
+        {
+            commandModel.is_taxable = false;
+            foreach (var line in commandModel.ar_invoice_lines)
+                line.is_taxable = false;
+        }
 
         try
         {
@@ -963,7 +971,8 @@ public class ARInvoiceModule : BaseERPModule, IARInvoiceModule
         // Order qty
         line.order_qty = order_line.quantity;
 
-        // Tax
+        // Tax. A tax-exempt customer's lines are never taxable.
+        line.is_taxable = line.is_taxable && customer_tax.is_taxable;
         if (line.is_taxable)
             line.line_tax = Math.Floor(((order_line.unit_price * customer_tax.tax_rate) * 100) * createCommand.invoice_qty) / 100;
         else

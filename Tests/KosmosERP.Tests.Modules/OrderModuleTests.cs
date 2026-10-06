@@ -62,7 +62,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         await _Context.SaveChangesAsync();
@@ -79,7 +79,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -99,7 +99,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
             tax_rate = 10,
             is_taxable = true,
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -112,7 +112,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.Physical,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_address);
         await _Context.SaveChangesAsync();
@@ -122,7 +122,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.ShipTo,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_shipto_address);
         await _Context.SaveChangesAsync();
@@ -133,13 +133,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     {
         var new_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "123456",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
             shipping_cost = 12,
@@ -151,20 +151,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id
+                            calling_user_id = _User.guid
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id
+                            calling_user_id = _User.guid
                         }
                     }
                 }
@@ -183,18 +183,41 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
         Assert.That(result.Data.tax == expected_tax);
     }
 
+    [TestCase("SO")]
+    [TestCase("D")]
+    [TestCase("q")]
+    public async Task Create_InvalidOrderType_IsRejected(string orderType)
+    {
+        // The UI's type dropdown only knows Q and R; anything else showed as a blank type.
+        var result = await _Module.Create(new OrderHeaderCreateCommand()
+        {
+            calling_user_id = _User.guid,
+            order_date = DateOnly.FromDateTime(DateTime.Now),
+            required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
+            customer_id = _Customer.id,
+            ship_to_address_id = _Address.id,
+            order_type = orderType,
+            shipping_method = "shipping_method_pickup",
+            pay_method = "payment_method_cash",
+        });
+
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ResultCode, Is.EqualTo(ResultCode.DataValidationError));
+        Assert.That(_Context.OrderHeaders.Count(), Is.EqualTo(0));
+    }
+
     [Test]
     public async Task Create()
     {
         var result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "556644",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
             shipping_cost = 12,
@@ -227,17 +250,58 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     }
 
     [Test]
+    public async Task Create_ManufacturedProduct_CreatesSubmittedProductionOrder()
+    {
+        // Regression for BUG-003: these used to start on the retired production_status_new key.
+        _Product.is_manufactured = true;
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.Create(new OrderHeaderCreateCommand()
+        {
+            calling_user_id = _User.guid,
+            order_date = DateOnly.FromDateTime(DateTime.Now),
+            required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
+            customer_id = _Customer.id,
+            po_number = "556645",
+            ship_to_address_id = _Address.id,
+            // Released ("R") orders are the ones that create production orders.
+            order_type = "R",
+            shipping_method = "shipping_method_pickup",
+            pay_method = "payment_method_cash",
+            shipping_cost = 12,
+            order_lines = new List<OrderLineCreateCommand>() {
+                new OrderLineCreateCommand()
+                {
+                    quantity = 2,
+                    unit_price = 10,
+                    line_number = 1,
+                    line_description = "Built to order",
+                    product_id = _Product.id,
+                    attributes = new List<OrderLineAttributeCreateCommand>(),
+                }
+            }
+        });
+
+        Assert.That(result.Success, Is.True);
+        var production_order = await _Context.ProductionOrderHeaders.SingleAsync(m => m.order_header_id == result.Data!.id);
+        Assert.That(production_order.status, Is.EqualTo(ProductionOrderStatus.Submitted));
+        var lines = await _Context.ProductionOrderLines.Where(m => m.production_order_header_id == production_order.id).ToListAsync();
+        Assert.That(lines, Is.Not.Empty);
+        Assert.That(lines.Select(m => m.status), Is.All.EqualTo(ProductionOrderStatus.Submitted));
+    }
+
+    [Test]
     public async Task Edit()
     {
         var old_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "1112323",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 12,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -249,20 +313,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         }
                     }
                 }
@@ -271,11 +335,11 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
 
         var edit_command = new OrderHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             po_number = "23232323",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 1232,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -301,13 +365,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     {
         var new_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "9677563",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 12,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -319,20 +383,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         }
                     }
                 }
@@ -344,7 +408,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new OrderHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -362,13 +426,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     {
         var new_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "234234443",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 12,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -380,20 +444,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id
+                            calling_user_id = _User.guid
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         }
                     }
                 }
@@ -407,7 +471,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new OrderHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = "234234443" });
+                        new OrderHeaderFindCommand() { calling_user_id = _User.guid, wildcard = "234234443" });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -424,13 +488,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     {
         var create_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "1231242141234",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 12,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -442,20 +506,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         }
                     }
                 }
@@ -469,7 +533,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
 
         var create_command = new OrderLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = create_result.Data.id,
             quantity = 111,
             unit_price = 111,
@@ -482,13 +546,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     {
                         attribute_name = "Length",
                         attribute_value = "10ft",
-                        calling_user_id = _User.external_id,
+                        calling_user_id = _User.guid,
                     },
                     new OrderLineAttributeCreateCommand()
                     {
                         attribute_name = "Material",
                         attribute_value = "Plastic",
-                        calling_user_id = _User.external_id,
+                        calling_user_id = _User.guid,
                     }
                 }
         };
@@ -508,13 +572,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     {
         var create_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "3478955588",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 12,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -526,20 +590,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         }
                     }
                 }
@@ -553,7 +617,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
 
         var edit_command = new OrderLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.order_lines[0].id,
             quantity = 111,
             unit_price = 111,
@@ -566,13 +630,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     {
                         attribute_name = "Adding",
                         attribute_value = "1231231",
-                        calling_user_id = _User.external_id,
+                        calling_user_id = _User.guid,
                     },
                     new OrderLineAttributeEditCommand()
                     {
                         attribute_name = "Material",
                         attribute_value = "Plastic",
-                        calling_user_id = _User.external_id,
+                        calling_user_id = _User.guid,
                     }
                 }
         };
@@ -595,13 +659,13 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
     {
         var create_result = await _Module.Create(new OrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_date = DateOnly.FromDateTime(DateTime.Now),
             required_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             customer_id = _Customer.id,
             po_number = "1231243550",
             ship_to_address_id = _Address.id,
-            order_type = "D",
+            order_type = "Q",
             shipping_cost = 12,
             shipping_method = "shipping_method_pickup",
             pay_method = "payment_method_cash",
@@ -613,20 +677,20 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
                     line_number = 1,
                     line_description = "Super cool line",
                     product_id = _Product.id,
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     attributes = new List<OrderLineAttributeCreateCommand>()
                     {
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Length",
                             attribute_value = "10ft",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         },
                         new OrderLineAttributeCreateCommand()
                         {
                             attribute_name = "Material",
                             attribute_value = "Plastic",
-                            calling_user_id = _User.external_id,
+                            calling_user_id = _User.guid,
                         }
                     }
                 }
@@ -639,7 +703,7 @@ public class OrderModuleTests : BaseTestModule<OrderModule>, IModuleTest
 
         var response = await _Module.DeleteLine(new OrderLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.order_lines[0].id,
         });
 

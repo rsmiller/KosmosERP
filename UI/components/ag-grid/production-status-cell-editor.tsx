@@ -1,7 +1,7 @@
 import { useImperativeHandle, forwardRef, useState, useEffect } from "react";
 import { CustomCellEditorProps } from "ag-grid-react";
 import { KeyValueDto } from "@/models/key-value-models";
-import { keyValueService } from "@/services/keyvalue-service";
+import { keyValueService, KeyValueModuleIds } from "@/services/keyvalue-service";
 import {
     Combobox,
     Portal,
@@ -21,13 +21,14 @@ const ProductionStatusCellEditor = forwardRef<any, CustomCellEditorProps>((props
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: stages,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 
     const fetchData = async () => {
         try {
-            const response = await keyValueService.GetDtoByModule("f157469e-5e5c-4a5b-b071-89a28b2a0310", auth.token || "");
+            const response = await keyValueService.GetDtoByModule(KeyValueModuleIds.ProductionStatuses, auth.token || "");
             if (response.success && response.data !== undefined) {
                 set(response.data);
                 setStages(response.data);

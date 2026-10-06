@@ -55,7 +55,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -64,7 +64,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -79,7 +79,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -94,7 +94,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -109,7 +109,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -124,7 +124,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -147,7 +147,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         await _Context.SaveChangesAsync();
@@ -164,7 +164,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -184,7 +184,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             vendor_name = "Super Vendor",
             vendor_description = "I am a vendor and junk",
             vendor_number = 121212
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Vendors.Add(vendor);
         await _Context.SaveChangesAsync();
@@ -203,7 +203,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -216,7 +216,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.Physical,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_address);
         await _Context.SaveChangesAsync();
@@ -226,7 +226,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.ShipTo,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_shipto_address);
         await _Context.SaveChangesAsync();
@@ -236,10 +236,10 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
         var purchase_order_header = CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader()
         {
             po_number = 123123,
-            po_type = "INTERNAL",
+            po_type = "Q",
             vendor_id = vendor.id,
             revision_number = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.PurchaseOrderHeaders.Add(purchase_order_header);
         await _Context.SaveChangesAsync();
@@ -258,7 +258,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             revision_number = 1,
             tax = 1,
             is_taxable = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
 
         _Context.PurchaseOrderLines.Add(purchase_order_line);
@@ -273,7 +273,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             units_ordered = 1,
             units_received = 1,
             is_complete = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.PurchaseOrderReceiveHeaders.Add(purchase_order_receive_header);
         await _Context.SaveChangesAsync();
@@ -289,7 +289,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             units_received = 1,
             is_complete = true,
             purchase_order_line_id = _PurchaseOrderLine.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.PurchaseOrderReceiveLines.Add(purchase_order_receive_line);
         await _Context.SaveChangesAsync();
@@ -312,7 +312,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             po_number = "ASDSD",
             price = 1002,
             tax = 123
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderHeaders.Add(sales_order_header);
         await _Context.SaveChangesAsync();
@@ -328,7 +328,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             line_number = 1,
             unit_price = 100,
             quantity = 1
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLines.Add(sales_order_receive_line);
         await _Context.SaveChangesAsync();
@@ -346,7 +346,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             order_header_id = _SalesOrderHeader.id,
             payment_terms = "payment_terms_net_15",
             tax_percentage = 6,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.ARInvoiceHeaders.Add(ar_invoice_header);
         await _Context.SaveChangesAsync();
@@ -365,7 +365,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
             order_line_id = _SalesOrderLine.id,
             order_qty = 1,
             line_total = 100,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.ARInvoiceLines.Add(ar_invoice_line);
         await _Context.SaveChangesAsync();
@@ -379,7 +379,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var new_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D1230",
             invoice_date = DateTime.Now,
@@ -418,7 +418,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D1230",
             invoice_date = DateTime.Now,
@@ -452,7 +452,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var old_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D1230",
             invoice_date = DateTime.Now,
@@ -480,7 +480,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var edit_command = new APInvoiceHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             invoice_total = 1000,
             invoice_date = DateTime.Now.AddDays(-10),
@@ -505,7 +505,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var new_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D1230",
             invoice_date = DateTime.Now,
@@ -536,7 +536,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new APInvoiceHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -554,7 +554,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var new_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D1230",
             invoice_date = DateTime.Now,
@@ -587,7 +587,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new APInvoiceHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = "D1230" });
+                        new APInvoiceHeaderFindCommand() { calling_user_id = _User.guid, wildcard = "D1230" });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -603,7 +603,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var purchase_order_create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6230",
             invoice_date = DateTime.Now,
@@ -635,7 +635,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var ap_invoice_create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6231",
             invoice_date = DateTime.Now,
@@ -670,7 +670,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var sales_order_results = await _Module.GetAssociations(new APInvoiceAssociationsFindCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ap_invoice_object_id = ap_invoice_create_result.Data.id,
             
         });
@@ -684,7 +684,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var ar_invoice_create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6234",
             invoice_date = DateTime.Now,
@@ -719,7 +719,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var ar_ionvoice_results = await _Module.GetAssociations(new APInvoiceAssociationsFindCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ap_invoice_object_id = ar_invoice_create_result.Data.id,
         });
 
@@ -736,7 +736,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6239",
             invoice_date = DateTime.Now,
@@ -761,7 +761,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var associate_results = await _Module.AssociateReceivedPO(new APInvoiceAssociatePOCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ap_invoice_object_id = create_result.Data.id,
             purchase_order_receive_header_id = _PurchaseOrderReceiveHeader.id,
         });
@@ -776,7 +776,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6283",
             invoice_date = DateTime.Now,
@@ -803,7 +803,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var associate_response = await _Module.AssociateHeaderObject(new APInvoiceAssoicationCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ap_invoice_object_id = create_result.Data.ap_invoice_lines[0].id,
             association_object_id = _PurchaseOrderHeader.id,
             association_is_purchase_order = true
@@ -818,7 +818,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var associate_line_response = await _Module.AssociateLineObject(new APInvoiceAssoicationCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ap_invoice_object_id = create_result.Data.ap_invoice_lines[0].id,
             association_object_id = _PurchaseOrderLine.id,
             association_is_purchase_order = true,
@@ -835,7 +835,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6283",
             invoice_date = DateTime.Now,
@@ -862,7 +862,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var create_command = new APInvoiceLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ap_invoice_header_id = create_result.Data.id,
             gl_account = "gl_account_cash",
             description = "A line",
@@ -888,7 +888,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6283",
             invoice_date = DateTime.Now,
@@ -915,7 +915,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var edit_command = new APInvoiceLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.ap_invoice_lines[0].id,
             gl_account = "gl_account_check",
             description = "asdasd",
@@ -942,7 +942,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new APInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_id = _Vendor.id,
             invoice_number = "D6283",
             invoice_date = DateTime.Now,
@@ -968,7 +968,7 @@ public class APInvoiceModuleTests : BaseTestModule<APInvoiceModule>, IModuleTest
 
         var response = await _Module.DeleteLine(new APInvoiceLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.ap_invoice_lines[0].id,
         });
 

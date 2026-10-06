@@ -47,7 +47,7 @@ public class ActivityModule : BaseERPModule, IActivityModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Activity Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

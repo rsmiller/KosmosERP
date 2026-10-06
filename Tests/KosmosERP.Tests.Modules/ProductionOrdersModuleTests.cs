@@ -59,7 +59,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         _Context.SaveChanges();
@@ -76,7 +76,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         _Context.SaveChanges();
@@ -96,7 +96,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             tax_rate = 10,
             is_taxable = true,
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         _Context.SaveChanges();
@@ -109,7 +109,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.Physical,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_address);
         _Context.SaveChanges();
@@ -119,7 +119,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.ShipTo,
             address_id = _Address.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.CustomerAddresses.Add(customer_shipto_address);
         _Context.SaveChanges();
@@ -139,7 +139,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             po_number = "ASDSD",
             price = 1002,
             tax = 123
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderHeaders.Add(sales_order_header);
         _Context.SaveChanges();
@@ -155,7 +155,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             line_number = 1,
             unit_price = 100,
             quantity = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLines.Add(sales_order_receive_line);
         _Context.SaveChanges();
@@ -168,30 +168,51 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
             order_line_id = _SalesOrderLine.id,
             attribute_name = "Length",
             attribute_value = "10ft",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var line_attribute_2 = CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
             order_line_id = _SalesOrderLine.id,
             attribute_name = "Material",
             attribute_value = "Plastic"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLineAttributes.Add(line_attribute_1);
         _Context.OrderLineAttributes.Add(line_attribute_2);
         _Context.SaveChanges();
 
+    }
 
-        var status = CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+    [Test]
+    public async Task SeedPermissions_CreatesTheProductionStatuses()
+    {
+        // SetupModule already ran SeedPermissions. BUG-003: one list, under KeyValueIds.ProductionStatuses.
+        var keys = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.ProductionStatuses)
+            .Select(m => m.key)
+            .ToListAsync();
+
+        Assert.That(keys, Is.EquivalentTo(new[]
         {
-            module_id = "f157469e-5e5c-4a5b-b071-89a28b2a0310",
-            key = "Planned",
-            value = "Planned",
-            int_value = 1
-        }, 1);
+            ProductionOrderStatus.Submitted, ProductionOrderStatus.PartsPulled, ProductionOrderStatus.WorkInProgress,
+            ProductionOrderStatus.QualityCheck, ProductionOrderStatus.Complete, ProductionOrderStatus.ReadyToShip,
+            ProductionOrderStatus.Canceled,
+        }));
+    }
 
-        _Context.KeyValueStores.Add(status);
-        _Context.SaveChanges();
+    [Test]
+    public async Task SeedPermissions_AddsOnlyMissingStatuses()
+    {
+        // An admin's rename is kept; a missing status (Canceled, on databases seeded before it existed) is added.
+        var submitted = await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == ProductionOrderStatus.Submitted);
+        submitted.value = "Queued";
+        _Context.KeyValueStores.Remove(await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == ProductionOrderStatus.Canceled));
+        await _Context.SaveChangesAsync();
+
+        _Module.SeedPermissions();
+
+        Assert.That((await _Context.KeyValueStores.SingleAsync(m => m.key == ProductionOrderStatus.Submitted)).value, Is.EqualTo("Queued"));
+        Assert.That(await _Context.KeyValueStores.CountAsync(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == ProductionOrderStatus.Canceled), Is.EqualTo(1));
     }
 
     [Test]
@@ -199,12 +220,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var new_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -212,8 +233,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -231,12 +252,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -244,8 +265,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -258,12 +279,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var old_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -271,20 +292,20 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
 
         var edit_command = new ProductionOrderHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(9)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(14)),
             priority_id = 2,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
             actual_completed_on = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
             is_complete = true,
         };
@@ -306,12 +327,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var new_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -319,8 +340,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -330,7 +351,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var delete_result = await _Module.Delete(new ProductionOrderHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -348,12 +369,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var new_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -361,8 +382,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -374,7 +395,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new ProductionOrderHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = _SalesOrderHeader.order_number.ToString() });
+                        new ProductionOrderHeaderFindCommand() { calling_user_id = _User.guid, wildcard = _SalesOrderHeader.order_number.ToString() });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -391,12 +412,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var create_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -404,8 +425,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -418,12 +439,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var create_command = new ProductionOrderLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             production_order_header_id = create_result.Data.id,
             quantity = 12323,
             line_number = 2,
             order_line_id = _SalesOrderLine.id,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
             started_on = DateTime.Now,
         };
 
@@ -444,12 +465,12 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
     {
         var create_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             order_header_id = _SalesOrderHeader.id,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
                 new ProductionOrderLineCreateCommand()
@@ -457,8 +478,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -471,11 +492,11 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var edit_command = new ProductionOrderLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.production_order_lines[0].id,
             quantity = 111,
             line_number = 2,
-            status = "production_status_picking",
+            status = ProductionOrderStatus.PartsPulled,
             started_on = DateTime.Now,
         };
 
@@ -491,17 +512,97 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
         Assert.That(edit_line_response.Data.started_on == edit_command.started_on);
     }
 
+    [Test]
+    public async Task EditLine_StatusOnly_ChangesJustTheStatus()
+    {
+        // What the production order edit page sends (BUG-024).
+        var line = (await CreateOrderWithLineStatus(ProductionOrderStatus.Submitted)).production_order_lines[0];
+
+        var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
+        {
+            calling_user_id = _User.guid,
+            id = line.id,
+            status = ProductionOrderStatus.PartsPulled,
+        });
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.status, Is.EqualTo(ProductionOrderStatus.PartsPulled));
+        Assert.That(result.Data.quantity, Is.EqualTo(line.quantity));
+    }
+
+    [Test]
+    public async Task EditLine_WithoutStatus_KeepsStatus()
+    {
+        // Regression: an edit that didn't send a status wiped it.
+        var line = (await CreateOrderWithLineStatus(ProductionOrderStatus.Submitted)).production_order_lines[0];
+
+        var result = await _Module.EditLine(new ProductionOrderLineEditCommand()
+        {
+            calling_user_id = _User.guid,
+            id = line.id,
+            quantity = 5,
+        });
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.quantity, Is.EqualTo(5));
+        Assert.That(result.Data.status, Is.EqualTo(ProductionOrderStatus.Submitted));
+    }
+
+    [Test]
+    public async Task Edit_WithoutStatus_KeepsStatus()
+    {
+        var order = await CreateOrderWithLineStatus(ProductionOrderStatus.Submitted);
+
+        var result = await _Module.Edit(new ProductionOrderHeaderEditCommand()
+        {
+            calling_user_id = _User.guid,
+            id = order.id,
+            priority_id = 2,
+        });
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.priority_id, Is.EqualTo(2));
+        Assert.That(result.Data.status, Is.EqualTo(ProductionOrderStatus.Submitted));
+    }
+
+    private async Task<ProductionOrderHeaderDto> CreateOrderWithLineStatus(string lineStatus)
+    {
+        var result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
+        {
+            calling_user_id = _User.guid,
+            order_header_id = _SalesOrderHeader.id,
+            planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
+            planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
+            priority_id = 1,
+            status = ProductionOrderStatus.Submitted,
+            production_order_lines = new List<ProductionOrderLineCreateCommand>()
+            {
+                new ProductionOrderLineCreateCommand()
+                {
+                    line_number = _SalesOrderLine.line_number,
+                    quantity = _SalesOrderLine.quantity,
+                    order_line_id = _SalesOrderLine.id,
+                    status = lineStatus,
+                    calling_user_id = _User.guid
+                }
+            }
+        });
+
+        Assert.That(result.Success, Is.True);
+        return result.Data;
+    }
+
 
     [Test]
     public async Task DeleteLine()
     {
         var create_result = await _Module.Create(new ProductionOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             planned_start_date = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
             planned_complete_date = DateOnly.FromDateTime(DateTime.Now.AddDays(4)),
             priority_id = 1,
-            status = "production_status_new",
+            status = ProductionOrderStatus.Submitted,
             order_header_id = _SalesOrderHeader.id,
             production_order_lines = new List<ProductionOrderLineCreateCommand>()
             {
@@ -510,8 +611,8 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
                     line_number = _SalesOrderLine.line_number,
                     quantity = _SalesOrderLine.quantity,
                     order_line_id = _SalesOrderLine.id,
-                    status = "production_status_new",
-                    calling_user_id = _User.external_id
+                    status = ProductionOrderStatus.Submitted,
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -522,7 +623,7 @@ public class ProductionOrderModuleTests : BaseTestModule<ProductionOrderModule>,
 
         var response = await _Module.DeleteLine(new ProductionOrderLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.production_order_lines[0].id,
         });
 

@@ -36,7 +36,7 @@ function NewContactPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -106,7 +106,7 @@ function NewContactPage() {
 
       const allValid = isValid && customerValid && hasRequiredFields;
 
-      canSave(allValid);
+      setFormValid(allValid);
     };
 
     const IsDirty = (formName: any) => {
@@ -219,9 +219,8 @@ function NewContactPage() {
                 <GridItem colSpan={1}></GridItem>
                 <GridItem colSpan={6}>
                     <PageActionsComponent 
-                        canSave={!saveable || !hasWritePermission} 
+                        saveDisabled={!formValid || !hasWritePermission} 
                         onSave={handleSaveClick} 
-                        onDelete={undefined} 
                         successSaved={successSaved}
                         failedSaved={failedSaved}
                     />

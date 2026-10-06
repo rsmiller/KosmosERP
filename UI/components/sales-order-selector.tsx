@@ -5,6 +5,7 @@ import { FaSearch } from "react-icons/fa";
 import SalesOrdersSelectListComponent from "./lists/sales-orders-select-list-component";
 import DatePicker from "react-datepicker";
 import { format } from 'date-fns';
+import { parseDateOnly } from '@/lib/date-only';
 
 export class SalesOrderSelectorForm
 {
@@ -27,10 +28,12 @@ export class SalesOrderSelectorComponentParams
     customer_id: any;
     order_header_id: any;
     onChange?: (SalesOrderSelectorForm: any) => void;
+    /** Set false inside a Dialog, so the options render inside it (BUG-016). */
+    portalled?: boolean;
 }
 
 
-function SalesOrderSelectorComponent({customer_id, order_header_id, onChange}: SalesOrderSelectorComponentParams) {
+function SalesOrderSelectorComponent({customer_id, order_header_id, onChange, portalled = true}: SalesOrderSelectorComponentParams) {
     const { contains } = useFilter({ sensitivity: "base" })
     
     const [selectedValue, setSelectedValue] = useState<string>();
@@ -94,7 +97,7 @@ function SalesOrderSelectorComponent({customer_id, order_header_id, onChange}: S
 
     const getStartDate = () => {
         const startDate = watch('start_date');
-        return startDate ? new Date(startDate) : undefined;
+        return parseDateOnly(startDate);
     };
 
     const handleStartDateChange = (date: Date | null) => {
@@ -176,7 +179,7 @@ function SalesOrderSelectorComponent({customer_id, order_header_id, onChange}: S
                                 <Combobox.Trigger />
                             </Combobox.IndicatorGroup>
                             </Combobox.Control>
-                            <Portal>
+                            <Portal disabled={!portalled}>
                                 <Combobox.Positioner>
                                     <Combobox.Content>
                                     <Combobox.Empty>No items found</Combobox.Empty>
@@ -195,8 +198,8 @@ function SalesOrderSelectorComponent({customer_id, order_header_id, onChange}: S
 
                 <GridItem colSpan={1}>
                     <Field.Root invalid={IsDirty('start_date')} required={true}>
-                        <Field.Label><Field.RequiredIndicator /> Start Date</Field.Label>
-                        <DatePicker 
+                        <Field.Label id="components-start-date-label"><Field.RequiredIndicator /> Start Date</Field.Label>
+                        <DatePicker ariaLabelledBy="components-start-date-label" 
                             selected={getStartDate()}
                             onChange={handleStartDateChange}
                             dateFormat="MM/dd/yyyy"

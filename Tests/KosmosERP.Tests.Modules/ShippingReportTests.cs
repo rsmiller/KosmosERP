@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -40,7 +41,7 @@ public class ShippingReportTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         // Explicit ids — the shipment/order headers use HasPrincipalKey(c => c.id), which
         // disables EF InMemory key generation (production MySQL auto-increment is unaffected).
@@ -53,7 +54,7 @@ public class ShippingReportTests
             accounting_email = "ap@acme.example",
             category = "Business",
             payment_terms = "NET 30",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Customers.Add(customer);
 
         var shipAddress = CommonDataHelper<Address>.FillCommonFields(new Address
@@ -64,7 +65,7 @@ public class ShippingReportTests
             state = "IN",
             postal_code = "46402",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Addresses.Add(shipAddress);
 
         var order = CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader
@@ -75,12 +76,12 @@ public class ShippingReportTests
             billing_address_id = shipAddress.id,
             ship_to_address_id = shipAddress.id,
             shipping_method = "Ground",
-            order_type = "Standard",
+            order_type = "Q",
             pay_method = "Net Terms",
             order_date = new DateOnly(2026, 9, 1),
             required_date = new DateOnly(2026, 9, 15),
             price = 1000m,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.OrderHeaders.Add(order);
 
         _Context.OrderLines.AddRange(
@@ -93,7 +94,7 @@ public class ShippingReportTests
                 line_description = "Widget, Standard",
                 quantity = 10,
                 unit_price = 100m,
-            }, 1),
+            }, SystemUsers.ServiceUserGuid),
             CommonDataHelper<OrderLine>.FillCommonFields(new OrderLine
             {
                 id = 1002,
@@ -103,7 +104,7 @@ public class ShippingReportTests
                 line_description = "Widget, Deluxe",
                 quantity = 5,
                 unit_price = 100m,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         _Shipment = CommonDataHelper<ShipmentHeader>.FillCommonFields(new ShipmentHeader
@@ -116,7 +117,7 @@ public class ShippingReportTests
             ship_attn = "Receiving Dept",
             freight_carrier = "UPS",
             units_shipped = 15,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.ShipmentHeaders.Add(_Shipment);
         await _Context.SaveChangesAsync();
 
@@ -128,7 +129,7 @@ public class ShippingReportTests
                 order_line_id = 1001,
                 units_to_ship = 10,
                 units_shipped = 10,
-            }, 1),
+            }, SystemUsers.ServiceUserGuid),
             CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine
             {
                 id = 3002,
@@ -136,7 +137,7 @@ public class ShippingReportTests
                 order_line_id = 1002,
                 units_to_ship = 5,
                 units_shipped = 5,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         var generators = new IReportGenerator[] { new PackingSlipReport(_Context) };

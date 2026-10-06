@@ -6,10 +6,15 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:typecheck": "tsc -p e2e/tsconfig.json --noEmit",
+    "test:e2e:docker": "docker compose -f docker-compose.e2e.yml run --rm e2e"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.24.1",
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@react-keycloak/web": "^3.4.0",
     "@react-pdf/renderer": "^4.3.0",
@@ -29,12 +34,13 @@
     "react-use": "^17.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-big-calendar": "^1.16.2",
     "@types/react-dom": "^19",
-    "playwright": "^1.55.0",
+    "playwright": "1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

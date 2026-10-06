@@ -31,7 +31,7 @@ function NewChartOfAccountPage() {
     const [hasWritePermission, setHasWritePermission] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     
@@ -72,10 +72,6 @@ function NewChartOfAccountPage() {
         setValue('normal_balance', NormalBalance.Debit);
     }, [setValue, auth.authenticated]);
 
-    const handleDeleteClick = async () => {
-        router.push("/erp/chartofaccounts/");
-    };
-
     const handleSaveClick = async () => {
         setSuccessSaved(false);
 
@@ -107,7 +103,7 @@ function NewChartOfAccountPage() {
 
     const CheckFormValidity = () => {
         const hasRequiredFields = Boolean(watch('account_number') && watch('account_name'));
-        canSave(!hasRequiredFields);
+        setFormValid(hasRequiredFields);
     };
 
     if (!hasAccess) {
@@ -117,12 +113,9 @@ function NewChartOfAccountPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={false}
-                showSave={hasWritePermission} 
-                canSave={saveable}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
-                onDelete={handleDeleteClick} 
+                saveDisabled={!formValid || !hasWritePermission}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onSave={handleSaveClick} 
             />
             <Grid

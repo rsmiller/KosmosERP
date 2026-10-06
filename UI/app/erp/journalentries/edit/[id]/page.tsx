@@ -38,6 +38,7 @@ import { permissionsService, ERPModules, ERPModulePermission } from '@/services/
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { MdDelete } from 'react-icons/md';
+import ChartOfAccountCellEditor, { accountLabel } from '@/components/ag-grid/chart-of-account-cell-editor';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -52,7 +53,7 @@ function EditJournalEntryPage() {
     const [entry, setEntry] = useState<JournalEntryHeaderDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
     const [entryDate, setEntryDate] = useState<Date | null>(null);
@@ -286,7 +287,7 @@ function EditJournalEntryPage() {
         const hasLines = lines.length >= 2;
         const allLinesHaveAccounts = lines.every(line => line.chart_of_account_id);
         const hasAmounts = lines.every(line => (line.debit_amount || 0) > 0 || (line.credit_amount || 0) > 0);
-        canSave(!(hasLines && allLinesHaveAccounts && hasAmounts && isBalanced()));
+        setFormValid(hasLines && allLinesHaveAccounts && hasAmounts && isBalanced());
     };
 
     const formatCurrency = (value: number | undefined) => {
@@ -296,12 +297,14 @@ function EditJournalEntryPage() {
 
     const colDefs = useMemo<ColDef<JournalEntryLineDto>[]>(() => [
         { 
-            field: "account_number", 
-            headerName: "Account #",
-        },
-        { 
-            field: "account_name", 
-            headerName: "Account Name",
+            // Picked from the chart of accounts, shown as "1010 - Operating Cash" (BUG-021).
+            // Before, lines added here had no way to get an account at all.
+            field: "chart_of_account_id", 
+            headerName: "Account",
+            editable: !entry?.is_posted,
+            cellEditor: ChartOfAccountCellEditor,
+            cellEditorPopup: true,
+            valueFormatter: (params) => accountLabel(params.data ?? {}),
         },
         { 
             field: "debit_amount", 
@@ -369,11 +372,11 @@ function EditJournalEntryPage() {
     return (
         <form onSubmit={handleSubmit(handleSaveClick)}>
             <PageActionsComponent 
-                showDelete={hasDeletePermission && !entry.is_posted}
-                showSave={hasEditPermission && !entry.is_posted} 
-                canSave={saveable}
-                showSaveSuccess={successSaved}
-                showSaveFailed={failedSaved}
+                canSave={hasEditPermission && !entry.is_posted}
+                canDelete={hasDeletePermission && !entry.is_posted}
+                saveDisabled={!formValid}
+                successSaved={successSaved}
+                failedSaved={failedSaved}
                 onDelete={handleDeleteClick} 
                 onSave={handleSaveClick} 
             />
@@ -408,8 +411,8 @@ function EditJournalEntryPage() {
                 </Stack>
                 <Stack gap="4" align="flex-start" maxW="md">
                     <Field.Root required>
-                        <Field.Label>Entry Date</Field.Label>
-                        <DatePicker 
+                        <Field.Label id="edit-entry-date-label">Entry Date</Field.Label>
+                        <DatePicker ariaLabelledBy="edit-entry-date-label" 
                             selected={entryDate}
                             onChange={(date) => { setEntryDate(date); CheckFormValidity(); }}
                             className="chakra-input"

@@ -45,7 +45,8 @@ const CustomerPaymentTermsCombobox = forwardRef<CustomerPaymentTermsComboboxRef,
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: paymentTerms,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 
@@ -105,6 +106,8 @@ const CustomerPaymentTermsCombobox = forwardRef<CustomerPaymentTermsComboboxRef,
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("93bf02ec-5578-4aa4-a45b-f82962adf4bd", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {
@@ -112,7 +115,7 @@ const CustomerPaymentTermsCombobox = forwardRef<CustomerPaymentTermsComboboxRef,
                 setPaymentTerms(response.data);
             }
         });
-    }, [set]);
+    }, [set, auth.token]);
 
 
     //useEffect(() => {

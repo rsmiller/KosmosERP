@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Models;
 using KosmosERP.BusinessLayer.Models.Module.Reports.Dto;
@@ -46,6 +47,7 @@ public class ReportsController : ERPApiController
     /// how to call each report. Document-style reports that need a specific entity id are
     /// intentionally excluded (they are served from their own document screens).
     /// </summary>
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("Catalog", Name = "GetReportCatalog")]
     [ProducesResponseType(typeof(Response<List<ReportCategoryDto>>), 200)]
     public ActionResult Catalog()
@@ -58,6 +60,7 @@ public class ReportsController : ERPApiController
     /// product categories as value/label pairs: <c>value</c> is the stored category key the
     /// report filters on, <c>label</c> is the display name shown to the user.
     /// </summary>
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("ProductCategories", Name = "GetReportProductCategories")]
     [ProducesResponseType(typeof(Response<List<ReportOptionDto>>), 200)]
     public async Task<ActionResult> ProductCategories()

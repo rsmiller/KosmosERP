@@ -87,7 +87,7 @@ const AddBOMItemDialog = forwardRef<AddBomItemDialogRef, AddBomItemDialogParams>
                 <Dialog.Positioner>
                 <Dialog.Content>
                     <Dialog.Header>
-                    <Dialog.Title>Add Address</Dialog.Title>
+                    <Dialog.Title>Add BOM Item</Dialog.Title>
                     </Dialog.Header>
                     <Dialog.Body style={{ overflow: 'visible' }}>
                         <Grid 
@@ -101,7 +101,7 @@ const AddBOMItemDialog = forwardRef<AddBomItemDialogRef, AddBomItemDialogParams>
                                 <Field.Root>
                                     <Field.Label><Field.RequiredIndicator /> Product</Field.Label>
                                     
-                                    <ProductCombobox
+                                    <ProductCombobox portalled={false}
                                         dbKey={null}
                                         ref={productComboboxRef}
                                         control={control}

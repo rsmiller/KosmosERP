@@ -12,10 +12,17 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+/blob-report/
+/e2e/.auth/
+/.next-e2e/
 
 # next.js
 /.next/
 /out/
+/.next-hydration/
+/.next-e2e*/
 
 # production
 /build

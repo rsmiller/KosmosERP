@@ -46,7 +46,8 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
             const { collection, filter, set } = useListCollection<KeyValueDto>({
                 initialItems: stages,
                 filter: contains,
-                itemToString: (item) => item.key,
+                // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+                itemToString: (item) => item.value,
                 itemToValue: (item) => item.value,
             });
     
@@ -104,6 +105,8 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
     
             
             const fetchData = useAsync(async () => {
+                // Wait for auth: on a direct load the token isn't there on the first run.
+                if (!auth.token) return;
                 await keyValueService.GetDtoByModule("f6e28b05-265d-4416-b5fd-48399036493a", auth.token || "").then((response) =>
                 {
                     if (response.success && response.data !== undefined) {
@@ -111,7 +114,7 @@ const ProductCategoryCombobox = forwardRef<ProductCategoryComboboxRef, ProductCa
                         setStages(response.data);
                     }
                 });
-            }, [set]);
+            }, [set, auth.token]);
     
             const inputValChange = (inputValue: any) =>
             {

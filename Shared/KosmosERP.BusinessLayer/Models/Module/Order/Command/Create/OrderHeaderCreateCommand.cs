@@ -1,4 +1,5 @@
 ﻿using KosmosERP.Models;
+using KosmosERP.BusinessLayer.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace KosmosERP.BusinessLayer.Models.Module.Order.Command.Create;
@@ -20,6 +21,7 @@ public class OrderHeaderCreateCommand : DataCommand
 
     [Required]
     [MaxLength(2)]
+    [RegularExpression(HeaderTypes.Pattern, ErrorMessage = HeaderTypes.ErrorMessage)]
     public string order_type { get; set; }
 
     [Required]

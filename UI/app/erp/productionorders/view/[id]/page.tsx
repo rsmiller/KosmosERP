@@ -18,6 +18,7 @@ import { PurchaseOrderLineDto } from '@/models/purchase-order-models';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import PageActionsComponent from '@/components/page-actions';
+import { formatDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -30,7 +31,7 @@ function ViewProductionOrderPage() {
     const [loading, setLoading] = useState(true);
 
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
 
     const [productionOrder, setProductionOrder] = useState<ProductionOrderHeaderDto | null>(null);
@@ -65,7 +66,7 @@ function ViewProductionOrderPage() {
 
                 if(response.data.is_complete) {
                     setCompletedOrDisabled(true);
-                    canSave(false);
+                    setFormValid(false);
                 } else {
                     CheckFormValidity();
                 }
@@ -112,7 +113,7 @@ function ViewProductionOrderPage() {
             return "";
         }
 
-        return format(dateString || "", 'MM-dd-yyyy');
+        return formatDateOnly(dateString, 'MM-dd-yyyy');
     }
 
     const CheckFormValidity = () => {
@@ -209,7 +210,7 @@ function ViewProductionOrderPage() {
 
                 <GridItem colSpan={8}>
                     <PageActionsComponent 
-                        canSave={false}
+                        saveDisabled={false}
                         saveText="Print Production Order"
                         canDelete={false}
                         onSave={Print} 

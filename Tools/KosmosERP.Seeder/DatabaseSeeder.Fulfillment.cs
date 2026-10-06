@@ -1,3 +1,4 @@
+using KosmosERP.BusinessLayer.Models;
 using KosmosERP.Database.Models;
 using KosmosERP.Models;
 
@@ -37,7 +38,8 @@ public partial class DatabaseSeeder
             var header = Stamp(new PurchaseOrderHeader
             {
                 vendor_id = vendorId,
-                po_type = "PO",
+                // Open POs are still quotes; anything received from has been released.
+                po_type = mode == 0 ? HeaderTypes.Quote : HeaderTypes.Release,
                 po_number = poNumber++,
                 tax = 0m,
                 is_complete = complete,

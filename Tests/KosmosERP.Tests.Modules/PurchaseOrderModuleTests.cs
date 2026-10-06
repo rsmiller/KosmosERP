@@ -49,7 +49,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         _Context.SaveChanges();
@@ -66,7 +66,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         _Context.SaveChanges();
@@ -86,7 +86,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
             vendor_name = "Super Vendor",
             vendor_description = "I am a vendor and junk",
             vendor_number = 121212
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Vendors.Add(vendor);
         _Context.SaveChanges();
@@ -99,8 +99,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var new_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -112,7 +112,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -126,12 +126,27 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     }
 
     [Test]
+    public async Task Create_InvalidPoType_IsRejected()
+    {
+        // po_type uses the same Q/R types as sales orders; the seeder used to write "PO".
+        var result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
+        {
+            calling_user_id = _User.guid,
+            po_type = "PO",
+            vendor_id = _Vendor.id,
+        });
+
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ResultCode, Is.EqualTo(ResultCode.DataValidationError));
+    }
+
+    [Test]
     public async Task Create()
     {
         var result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -143,7 +158,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -161,8 +176,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var old_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -174,21 +189,21 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
 
         var edit_command = new PurchaseOrderHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
-            po_type = "Office Use",
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineEditCommand>() {
                 new PurchaseOrderLineEditCommand()
                 {
-                    calling_user_id = _User.external_id,
+                    calling_user_id = _User.guid,
                     description = "Paper",
                     product_id = _Product.id,
                     quantity = 1,
@@ -215,8 +230,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var new_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -228,7 +243,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -238,7 +253,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
 
         var delete_result = await _Module.Delete(new PurchaseOrderHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -256,8 +271,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var new_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -269,7 +284,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -281,7 +296,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new PurchaseOrderHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = new_result.Data.po_number.ToString() });
+                        new PurchaseOrderHeaderFindCommand() { calling_user_id = _User.guid, wildcard = new_result.Data.po_number.ToString() });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -298,8 +313,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var create_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -311,7 +326,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -323,7 +338,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
 
         var create_command = new PurchaseOrderLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             purchase_order_header_id = create_result.Data.id,
             description = "Copper",
             product_id = _Product.id,
@@ -352,8 +367,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var create_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -365,7 +380,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -377,7 +392,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
 
         var edit_command = new PurchaseOrderLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.purchase_order_lines[0].id,
             description = "Copper",
             product_id = _Product.id,
@@ -408,8 +423,8 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
     {
         var create_result = await _Module.Create(new PurchaseOrderHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
-            po_type = "Build Material",
+            calling_user_id = _User.guid,
+            po_type = "Q",
             vendor_id = _Vendor.id,
             purchase_order_lines = new List<PurchaseOrderLineCreateCommand>() {
                 new PurchaseOrderLineCreateCommand()
@@ -421,7 +436,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
                     line_number = 1,
                     tax = 1,
                     is_taxable = true,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -432,7 +447,7 @@ public class PurchaseOrderModuleTests : BaseTestModule<PurchaseOrderModule>, IMo
 
         var response = await _Module.DeleteLine(new PurchaseOrderLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.purchase_order_lines[0].id,
         });
 

@@ -117,7 +117,9 @@ function VendorsPage() {
   };
 
   // Column Definitions: Defines & controls grid columns.
-  const [colDefs, setColDefs] = useState<ColDef<VendorListDto>[]>([
+  // Memoized on hasEditPermission: the Edit button reads it, and it is only known
+  // after auth loads (BUG-027: as useState, the first render's false stuck).
+  const colDefs = useMemo<ColDef<VendorListDto>[]>(() => [
     { field: "vendor_number", headerName: "Vendor #" },
     { field: "vendor_name", headerName: "Vendor Name" },
     { field: "category", headerName: "Category" },
@@ -144,13 +146,13 @@ function VendorsPage() {
       cellRenderer: (props: any) => {
           return ( 
             <div>
-              <Button type="button" colorPalette="black" variant="subtle" onClick={() => handleViewClick(props.value)}><MdOutlinePageview /></Button>&nbsp;
-              <Button hidden={!hasEditPermission} type="button" colorPalette="green" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>
+              <Button type="button" colorPalette="black" variant="subtle" aria-label="View" onClick={() => handleViewClick(props.value)}><MdOutlinePageview /></Button>&nbsp;
+              <Button hidden={!hasEditPermission} type="button" colorPalette="green" aria-label="Edit" onClick={() => handleEditClick(props.value)}><MdEditDocument /></Button>
             </div>
           );
       }
     }
-  ]);
+  ], [hasEditPermission]);
 
   const defaultColDef: ColDef = {
     flex: 1,

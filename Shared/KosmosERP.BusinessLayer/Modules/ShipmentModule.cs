@@ -78,7 +78,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Shipping Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -90,6 +90,9 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var carrier_shipping_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.key == "shipping_method_carrier").SingleOrDefault();
         var dispatch_shipping_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.ShippingMethods && m.key == "shipping_method_dispatch").SingleOrDefault();
 
+        var ups_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "freight_carrier_ups").SingleOrDefault();
+        var fedex_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "freight_carrier_fedex").SingleOrDefault();
+        var dhl_freight_method = _Context.KeyValueStores.Where(m => m.module_id == KeyValueIds.FreightCarriers && m.key == "freight_carrier_dhl").SingleOrDefault();
 
         if (pickup_shipping_method == null)
         {
@@ -99,7 +102,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "Pickup",
                 module_id = KeyValueIds.ShippingMethods.ToString(),
                 int_value = 1
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -112,7 +115,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "Carrier",
                 module_id = KeyValueIds.ShippingMethods.ToString(),
                 int_value = 2
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -125,12 +128,50 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 value = "Dispatch",
                 module_id = KeyValueIds.ShippingMethods.ToString(),
                 int_value = 3
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
+
+            _Context.SaveChanges();
+        }
+
+        if (ups_freight_method == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "freight_carrier_ups",
+                value = "UPS",
+                module_id = KeyValueIds.FreightCarriers.ToString(),
+                int_value = 1
+            }, SystemUsers.ServiceUserGuid));
+
+            _Context.SaveChanges();
+        }
+
+        if (fedex_freight_method == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "freight_carrier_fedex",
+                value = "FedEx",
+                module_id = KeyValueIds.FreightCarriers.ToString(),
+                int_value = 2
+            }, SystemUsers.ServiceUserGuid));
+
+            _Context.SaveChanges();
+        }
+
+        if (dhl_freight_method == null)
+        {
+            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
+            {
+                key = "freight_carrier_dhl",
+                value = "DHL",
+                module_id = KeyValueIds.FreightCarriers.ToString(),
+                int_value = 3
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
     }
-
 
     public ShipmentHeader? Get(int object_id)
     {
@@ -475,14 +516,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             await _Context.SaveChangesAsync();
 
 
-            var lines = await _Context.ShipmentLines.Where(m => m.shipment_header_id == existingEntity.id).ToListAsync();
+            var lines = await _Context.ShipmentLines.Include("order_line").Where(m => m.shipment_header_id == existingEntity.id).ToListAsync();
             foreach (var line in lines)
             {
-                await this.DeleteLine(new ShipmentLineDeleteCommand()
-                {
-                    calling_user_id = commandModel.calling_user_id,
-                    id = line.id,
-                });
+                await this.SoftDeleteLine(line, commandModel.calling_user_id);
             }
 
 
@@ -514,10 +551,20 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (existingEntity == null)
             return new Response<ShipmentLineDto>("Shipment Line not found", ResultCode.NotFound);
 
+        // Like EditLine: a released shipment has already shipped its lines.
+        var existingHeaderEntity = await GetAsync(existingEntity.shipment_header_id);
+        if (existingHeaderEntity?.is_released == true)
+            return new Response<ShipmentLineDto>("Shipment header has been released and lines can not be deleted", ResultCode.DataValidationError);
+
+        return await SoftDeleteLine(existingEntity, commandModel.calling_user_id);
+    }
+
+    private async Task<Response<ShipmentLineDto>> SoftDeleteLine(ShipmentLine existingEntity, string calling_user_id)
+    {
         try
         {
             // Delete line
-            existingEntity = CommonDataHelper<ShipmentLine>.FillDeleteFields(existingEntity, commandModel.calling_user_id);
+            existingEntity = CommonDataHelper<ShipmentLine>.FillDeleteFields(existingEntity, calling_user_id);
 
             _Context.ShipmentLines.Update(existingEntity);
             await _Context.SaveChangesAsync();
@@ -530,7 +577,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
                 {
                     object_reference_id = existingEntity.shipment_header_id,
                     object_sub_reference_id = existingEntity.id,
-                    calling_user_id = commandModel.calling_user_id,
+                    calling_user_id = calling_user_id,
                 })
             }, _MessagePublisherSettings!.transaction_movement_topic!);
 
@@ -654,7 +701,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         {
             // Units produced per order line, counting only production lines that are ready to ship.
             var produced = _Context.ProductionOrderLines
-                .Where(m => m.status == "production_order_status_ready_to_ship" && !m.is_deleted)
+                .Where(m => m.status == ProductionOrderStatus.ReadyToShip && !m.is_deleted)
                 .GroupBy(m => m.order_line_id)
                 .Select(g => new { order_line_id = g.Key, produced_quantity = g.Sum(m => m.quantity) });
 
@@ -756,6 +803,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         if (freight_carrier_val != null)
             dto.freight_carrier_name = freight_carrier_val.value;
 
+        var ship_via_val = await _KVMemoryService.GetKeyValue(databaseModel.ship_via);
+        if (ship_via_val != null)
+            dto.ship_via_name = ship_via_val.value;
+
         var address_result = await _AddressModule!.GetDto(databaseModel.address_id);
         if (address_result.Success && address_result.Data != null)
             dto.address = address_result.Data;
@@ -811,6 +862,10 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
         var lines = await _Context.ShipmentLines.Include("order_line").Where(m => m.shipment_header_id == databaseModel.id && m.is_deleted == false).ToListAsync();
         foreach(var line in lines)
             dto.shipment_lines.Add(await this.MapToLineDto(line));
+
+        var ship_via_val = await _KVMemoryService.GetKeyValue(databaseModel.ship_via);
+        if (ship_via_val != null)
+            dto.ship_via_name = ship_via_val.value;
 
 
         var address_result = await _AddressModule!.GetDto(databaseModel.address_id);
@@ -966,7 +1021,7 @@ public class ShipmentModule : BaseERPModule, IShipmentModule
             freight_charge_amount = createCommandModel.freight_charge_amount,
             tax = createCommandModel.tax,
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         return shipment_header;
     }

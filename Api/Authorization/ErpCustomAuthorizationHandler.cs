@@ -6,65 +6,55 @@ using System.Security.Principal;
 namespace KosmosERP.Api.Authorization;
 
 /// <summary>
-/// Placeholder for the custom authorization path. It currently returns
-/// <c>null</c>, which defers every request to <see cref="ERPAuthorizeAttribute"/>'s
-/// default claim/role check — so behavior is unchanged until you implement it.
+/// Authorizes database users against their own role permissions.
 ///
-/// To turn on custom authorization, resolve the calling user (e.g. from the
-/// token's NameIdentifier/session), load their permissions via
-/// UserRole -> Role -> RolePermission, map those to the <paramref name="requiredRoles"/>
-/// scheme (e.g. "customers_read"), and return true/false. Return null for any
-/// case you want handled by the default check (e.g. Keycloak realm roles).
+///   - Users not found in the database (e.g. Keycloak users) return <c>null</c>,
+///     deferring to <see cref="ERPAuthorizeAttribute"/>'s claim/role check.
+///   - <c>is_admin</c> users are allowed everything.
+///   - An "admin" role on the attribute makes the action admin-only.
+///   - No required permissions means any signed-in user is allowed.
+///   - Otherwise every required permission must be granted, for the controller's
+///     module, by at least one of the calling user's roles.
 /// </summary>
 public class ErpCustomAuthorizationHandler : IERPAuthorizationHandler
 {
-    public async Task<bool?> AuthorizeAsync(HttpContext context, IIdentity user, Guid? moduleId, IBaseERPContext dbContext, IReadOnlyList<ERPPermission> permissions)
+    public const string AdminRole = "admin";
+
+    public async Task<bool?> AuthorizeAsync(HttpContext context, IIdentity user, Guid? moduleId, IBaseERPContext dbContext,
+                                            IReadOnlyList<ERPPermission> permissions, IReadOnlyList<string> roles)
     {
         var dbUser = await dbContext.Users.FirstOrDefaultAsync(u => u.username == user.Name && u.is_deleted == false && u.is_disabled == false);
 
-        if(dbUser == null || moduleId == null)
-            return false;
+        if (dbUser == null)
+            return null;
 
         if (dbUser.is_admin)
             return true;
 
-        var rolePermissions = await (from u in dbContext.Users
-                            join ur in dbContext.UserRoles on u.id equals ur.user_id
-                            join rp in dbContext.RolePermissions on ur.role_id equals rp.role_id
-                            where rp.module_id == moduleId.ToString()
-                            select rp ).ToListAsync();
-
-        if (rolePermissions.Any())
-        {
-            bool found = false;
-            foreach (var permission in permissions)
-            {
-                switch (permission)
-                {
-                    case ERPPermission.Read:
-                        if (!rolePermissions.Any(rp => rp.read))
-                            found = true;
-                        break;
-                    case ERPPermission.Write:
-                        if (!rolePermissions.Any(rp => rp.write))
-                            found = true;
-                        break;
-                    case ERPPermission.Edit:
-                        if (!rolePermissions.Any(rp => rp.edit))
-                            found = true;
-                        break;
-                    case ERPPermission.Delete:
-                        if (!rolePermissions.Any(rp => rp.delete))
-                            found = true;
-                        break;
-                }
-            }
-
-            return found;
-        }
-        else
-        {
+        if (roles.Any(r => string.Equals(r, AdminRole, StringComparison.OrdinalIgnoreCase)))
             return false;
-        }
+
+        if (permissions.Count == 0)
+            return true;
+
+        if (moduleId == null)
+            return false;
+
+        var rolePermissions = await (from ur in dbContext.UserRoles
+                                     join r in dbContext.Roles on ur.role_id equals r.id
+                                     join rp in dbContext.RolePermissions on r.id equals rp.role_id
+                                     where ur.user_id == dbUser.id
+                                        && rp.module_id == moduleId.ToString()
+                                        && !ur.is_deleted && !r.is_deleted && !rp.is_deleted
+                                     select rp).ToListAsync();
+
+        return permissions.All(permission => permission switch
+        {
+            ERPPermission.Read => rolePermissions.Any(rp => rp.read),
+            ERPPermission.Write => rolePermissions.Any(rp => rp.write),
+            ERPPermission.Edit => rolePermissions.Any(rp => rp.edit),
+            ERPPermission.Delete => rolePermissions.Any(rp => rp.delete),
+            _ => false,
+        });
     }
 }

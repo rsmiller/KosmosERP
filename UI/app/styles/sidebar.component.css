@@ -4,7 +4,20 @@
     color: black;
 }
 
+.sidebar-menu button
+{
+    padding: 10px;
+    color: black;
+}
+
 .sidebar-menu a:hover
+{
+    color: white;
+    background-color: black;
+    border-radius: 4px;
+}
+
+.sidebar-menu button:hover
 {
     color: white;
     background-color: black;

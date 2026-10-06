@@ -47,7 +47,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             is_management = false,
             is_guest = false,
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Users.Add(_Owner);
         await _Context.SaveChangesAsync();
@@ -62,7 +62,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             is_taxable = true,
             tax_rate = 0.08m,
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(_Customer);
         await _Context.SaveChangesAsync();
@@ -81,7 +81,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             owner_id = _Owner.id,
             start_date = DateTime.UtcNow.AddDays(1),
             priority = 1,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var createResult = await _Module.Create(createCommand);
@@ -107,7 +107,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             start_date = DateTime.UtcNow.AddDays(1),
             priority = 2,
             customer_id = _Customer.id,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var result = await _Module.Create(createCommand);
@@ -133,7 +133,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             owner_id = _Owner.id,
             start_date = DateTime.UtcNow.AddDays(1),
             priority = 2,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var createResult = await _Module.Create(createCommand);
@@ -148,7 +148,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             activity_type = "Meeting",
             status = "Completed",
             priority = 1,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var editResult = await _Module.Edit(editCommand);
@@ -170,7 +170,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             owner_id = _Owner.id,
             start_date = DateTime.UtcNow.AddDays(1),
             priority = 2,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var createResult = await _Module.Create(createCommand);
@@ -180,7 +180,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
         var deleteCommand = new ActivityDeleteCommand()
         {
             id = createResult.Data.id,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var deleteResult = await _Module.Delete(deleteCommand);
@@ -206,7 +206,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             owner_id = _Owner.id,
             start_date = DateTime.UtcNow.AddDays(1),
             priority = 2,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var createCommand2 = new ActivityCreateCommand()
@@ -218,7 +218,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
             owner_id = _Owner.id,
             start_date = DateTime.UtcNow.AddDays(2),
             priority = 3,
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         await _Module.Create(createCommand1);
@@ -228,7 +228,7 @@ public class ActivityModuleTests : BaseTestModule<ActivityModule>, IModuleTest
         var findCommand = new ActivityFindCommand()
         {
             activity_type = "Task",
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
         };
 
         var findResult = await _Module.Find(new PagingSortingParameters(0, 10, "id"), findCommand);

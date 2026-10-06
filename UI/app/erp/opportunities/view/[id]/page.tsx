@@ -31,6 +31,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { useRouter } from 'next/navigation';
+import { parseDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -126,7 +127,7 @@ function ViewOpportunityPage() {
     const getExpirationDate = () => {
         const expectedClose = watch('expected_close');
         if(expectedClose != undefined && expectedClose != null) {
-            return expectedClose;
+            return parseDateOnly(expectedClose);
         }
 
         return new Date();
@@ -251,8 +252,8 @@ function ViewOpportunityPage() {
 
             <Stack gap="4" align="flex-start" maxW="md">
                 <Field.Root>
-                    <Field.Label>Expected Close</Field.Label>
-                    <DatePicker 
+                    <Field.Label id="view-expected-close-label">Expected Close</Field.Label>
+                    <DatePicker ariaLabelledBy="view-expected-close-label" 
                         selected={getExpirationDate()}
                         onChange={() => {}}
                         dateFormat="MM/dd/yyyy"

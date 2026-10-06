@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using KosmosERP.Models;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
 using KosmosERP.Database.Models;
@@ -35,7 +36,7 @@ public class BaseTestModule<T> where T : IBaseERPModule
             guid = Guid.NewGuid().ToString(),
             external_id = Guid.NewGuid().ToString(),
             is_admin = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();

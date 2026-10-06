@@ -19,7 +19,7 @@ import StatesCombobox, { StatesComboboxRef } from '@/components/states-combobox'
 import { countryService } from '@/services/country-service';
 import { CountryFindCommand } from '@/models/country-models';
 import { useAuth } from '@/lib/auth/auth-context';
-import { permissionsService, ERPModules } from '@/services/permissions-service';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 
 
 function AdminSettingsPage() {
@@ -33,7 +33,7 @@ function AdminSettingsPage() {
     const [settings, setSetting] = useState<SettingsDto | null>(null);
 
     const [loading, setLoading] = useState(true);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -57,7 +57,7 @@ function AdminSettingsPage() {
         const realmRoles = auth.roles || [];
         const hasPermission = permissionsService.HasPermission(
           ERPModules.Admin,
-          '',
+          ERPModulePermission.Read,
           realmRoles
         );
         if (!hasPermission) {
@@ -65,7 +65,11 @@ function AdminSettingsPage() {
           router.push('/erp');
           return;
         }
-        setHasEditPermission(true);
+        setHasEditPermission(permissionsService.HasPermission(
+          ERPModules.Admin,
+          ERPModulePermission.Edit,
+          realmRoles
+        ));
 
         if (hasInitialized.current) return;
         hasInitialized.current = true;
@@ -145,7 +149,7 @@ function AdminSettingsPage() {
         //console.log("PAGE addressBlock", addressBlockValid)
         //console.log("PAGE allValid: ", allValid);
 
-        canSave(hasRequiredFields)
+        setFormValid(hasRequiredFields)
     };
 
 
@@ -242,8 +246,8 @@ function AdminSettingsPage() {
                         <GridItem colSpan={1}>
                             <Stack gap="4" align="flex-start" maxW="md">
                                 <Field.Root invalid={IsDirty('vendor_description')} required={true}>
-                                    <Field.Label><Field.RequiredIndicator />Fiscal Year Start</Field.Label>
-                                    <DatePicker 
+                                    <Field.Label id="settings-fiscal-year-start-label"><Field.RequiredIndicator />Fiscal Year Start</Field.Label>
+                                    <DatePicker ariaLabelledBy="settings-fiscal-year-start-label" 
                                         selected={getStartDate()}
                                         onChange={handleStartDateChange}
                                         dateFormat="MM/dd/yyyy"
@@ -379,7 +383,7 @@ function AdminSettingsPage() {
 
                         <GridItem colSpan={4}>
                             <PageActionsComponent 
-                                canSave={!saveable || !hasEditPermission} 
+                                saveDisabled={!formValid || !hasEditPermission} 
                                 deleteable={false}
                                 onSave={handleSaveClick} 
                                 successSaved={successSaved}

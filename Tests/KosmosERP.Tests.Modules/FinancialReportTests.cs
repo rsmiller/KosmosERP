@@ -51,7 +51,7 @@ public class FinancialReportTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         // Chart of accounts (explicit ids; FinancialTransaction references these).
         AddAccount(1000, "1000", "Cash", AccountType.Asset, NormalBalance.Debit);
@@ -96,7 +96,7 @@ public class FinancialReportTests
             account_type = type,
             normal_balance = normal,
             is_active = true,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
     }
 
     private void AddTxn(DateTime date, int accountId, decimal debit, decimal credit)
@@ -112,7 +112,7 @@ public class FinancialReportTests
             chart_of_account_id = accountId,
             debit_amount = debit,
             credit_amount = credit,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
     }
 
     [TearDown]

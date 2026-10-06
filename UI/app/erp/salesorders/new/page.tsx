@@ -45,7 +45,7 @@ function NewSalesOrderPage() {
   const [hasWritePermission, setHasWritePermission] = useState(false);
 
 
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -93,7 +93,7 @@ function NewSalesOrderPage() {
     //console.log("order_type: ", watch('order_type'))
     //console.log("required_date: ", watch('required_date'))
     //console.log("allValid: ", allValid)
-    canSave(allValid);
+    setFormValid(allValid);
   };
 
   const handleSaveClick = async () => {
@@ -310,8 +310,8 @@ function NewSalesOrderPage() {
             </Stack>
             <Stack gap="4" align="flex-start" maxW="md">
               <Field.Root invalid={!!errors.required_date}>
-                <Field.Label>Required Date</Field.Label>
-                <DatePicker
+                <Field.Label id="new-required-date-label">Required Date</Field.Label>
+                <DatePicker ariaLabelledBy="new-required-date-label"
                   selected={getRequiredDate()}
                   onChange={requiredDaySelected}
                   disabled={false}
@@ -385,7 +385,7 @@ function NewSalesOrderPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 onDelete={() => {}} // No delete for new orders
-                canSave={!saveable || !hasWritePermission}
+                saveDisabled={!formValid || !hasWritePermission}
                 canDelete={false}
                 successSaved={successSaved}
                 failedSaved={failedSaved}

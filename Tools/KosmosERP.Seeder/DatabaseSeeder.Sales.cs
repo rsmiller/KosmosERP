@@ -1,3 +1,5 @@
+using KosmosERP.BusinessLayer.Helpers;
+using KosmosERP.BusinessLayer.Models;
 using KosmosERP.Database.Models;
 using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
@@ -35,10 +37,13 @@ public partial class DatabaseSeeder
         public const string ProdQc = "production_order_status_qc";
         public const string ProdComplete = "production_order_status_complete";
         public const string ProdReadyToShip = "production_order_status_ready_to_ship";
+        public const string ProdCanceled = "production_order_status_canceled";
 
-        public const string CarrierUps = "carrier_ups";
-        public const string CarrierFedex = "carrier_fedex";
-        public const string CarrierDhl = "carrier_dhl";
+        // Freight carrier keys. The rows themselves are created by ShipmentModule
+        // (KeyValueIds.FreightCarriers) when the API starts, not by this seeder.
+        public const string CarrierUps = "freight_carrier_ups";
+        public const string CarrierFedex = "freight_carrier_fedex";
+        public const string CarrierDhl = "freight_carrier_dhl";
 
         // Opportunity stage keys keep the repo's original spelling ("opporunity").
         public const string StageProspecting = "opporunity_stage_prospecting";
@@ -54,11 +59,11 @@ public partial class DatabaseSeeder
 
     private async Task SeedLookupsAsync()
     {
-        void AddKv(string key, string value, string moduleId)
+        void AddKv(string key, string value, string moduleId, int? intValue = null)
         {
             if (_context.KeyValueStores.Any(k => k.module_id == moduleId && k.key == key))
                 return;
-            _context.KeyValueStores.Add(Stamp(new KeyValueStore { key = key, value = value, module_id = moduleId }));
+            _context.KeyValueStores.Add(Stamp(new KeyValueStore { key = key, value = value, module_id = moduleId, int_value = intValue }));
         }
 
         AddKv(Kv.ShipPickup, "Customer Pickup", KeyValueIds.ShippingMethods);
@@ -70,10 +75,11 @@ public partial class DatabaseSeeder
         AddKv(Kv.PayCheck, "Check", KeyValueIds.PayMethods);
         AddKv(Kv.PayWire, "Wire Transfer", KeyValueIds.PayMethods);
 
-        AddKv(Kv.TermsNet15, "Net 15", KeyValueIds.PaymentTerms);
-        AddKv(Kv.TermsNet30, "Net 30", KeyValueIds.PaymentTerms);
-        AddKv(Kv.TermsNet45, "Net 45", KeyValueIds.PaymentTerms);
-        AddKv(Kv.TermsNet60, "Net 60", KeyValueIds.PaymentTerms);
+        // Payment terms carry their length in days in int_value (the AR invoice page uses it).
+        AddKv(Kv.TermsNet15, "Net 15", KeyValueIds.PaymentTerms, 15);
+        AddKv(Kv.TermsNet30, "Net 30", KeyValueIds.PaymentTerms, 30);
+        AddKv(Kv.TermsNet45, "Net 45", KeyValueIds.PaymentTerms, 45);
+        AddKv(Kv.TermsNet60, "Net 60", KeyValueIds.PaymentTerms, 60);
 
         AddKv(Kv.ProdSubmitted, "Submitted", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdPulled, "Parts Pulled", KeyValueIds.ProductionStatuses);
@@ -81,11 +87,7 @@ public partial class DatabaseSeeder
         AddKv(Kv.ProdQc, "Quality Check", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdComplete, "Complete", KeyValueIds.ProductionStatuses);
         AddKv(Kv.ProdReadyToShip, "Ready To Ship", KeyValueIds.ProductionStatuses);
-
-        // Freight carriers — resolved by key regardless of group.
-        AddKv(Kv.CarrierUps, "UPS", KeyValueIds.ShippingMethods);
-        AddKv(Kv.CarrierFedex, "FedEx", KeyValueIds.ShippingMethods);
-        AddKv(Kv.CarrierDhl, "DHL", KeyValueIds.ShippingMethods);
+        AddKv(Kv.ProdCanceled, "Canceled", KeyValueIds.ProductionStatuses);
 
         // Opportunity stages (display names shown on the Top Opportunities report).
         AddKv(Kv.StageProspecting, "Prospecting", OpportunityModuleId);
@@ -102,13 +104,13 @@ public partial class DatabaseSeeder
         AddKv("gl_account_purchases", "5010", KeyValueIds.GLAccounts);
 
         await _context.SaveChangesAsync();
-        Console.WriteLine("  Lookups seeded (shipping/pay/terms/production/carriers/stages/GL).");
+        Console.WriteLine("  Lookups seeded (shipping/pay/terms/production/stages/GL).");
     }
 
     private async Task SeedUsersAndRolesAsync()
     {
-        // (first, last, externalId, isManagement, isSalesperson)
-        var users = new (string First, string Last, string ExternalId, bool Mgmt, bool Sales)[]
+        // (first, last, username, isManagement, isSalesperson)
+        var users = new (string First, string Last, string Username, bool Mgmt, bool Sales)[]
         {
             ("System", "Admin", "admin", true, false),
             ("Jordan", "Pike", "ext-jordan", false, true),
@@ -116,20 +118,26 @@ public partial class DatabaseSeeder
             ("Morgan", "Lee", "ext-morgan", true, true),
         };
 
+        // The system service account every seeded row is stamped with (the API creates it too).
+        if (!_context.Users.Any(m => m.guid == SystemUsers.ServiceUserGuid))
+            _context.Users.Add(ServiceUserFactory.Create());
+
         var index = 0;
         var addedUsers = new List<User>();
         foreach (var u in users)
         {
+            // A real hash and salt, made the way the API makes them, so these users can sign in
+            // at /login/database (BUG-009: "seeded"/"seeded" made login throw).
+            var (passwordHash, passwordSalt) = PasswordHasher.Create(_userPassword);
             var user = Stamp(new User
             {
                 first_name = u.First,
                 last_name = u.Last,
-                username = u.ExternalId,
-                password = "seeded",
-                password_salt = "seeded",
+                username = u.Username,
+                password = passwordHash,
+                password_salt = passwordSalt,
                 employee_number = $"E{100 + index++}",
-                external_id = u.ExternalId,
-                is_admin = u.ExternalId == "admin",
+                is_admin = u.Username == "admin",
                 is_management = u.Mgmt,
             });
             _context.Users.Add(user);
@@ -140,10 +148,13 @@ public partial class DatabaseSeeder
 
         // Map only the users we just added (avoids colliding with pre-existing rows in the DB).
         foreach (var user in addedUsers)
-            _userIdByExternalId[user.external_id] = user.id;
+        {
+            _userIdByUsername[user.username] = user.id;
+            _userGuidById[user.id] = user.guid;
+        }
 
         foreach (var u in users.Where(x => x.Sales))
-            _salespersonExternalIds.Add(u.ExternalId);
+            _salespersonUserIds.Add(_userIdByUsername[u.Username]);
 
         // Minimal admin role + membership.
         var adminRole = Stamp(new Role { name = "Administrators" });
@@ -155,7 +166,7 @@ public partial class DatabaseSeeder
             role_id = adminRole.id, module_id = "*",
             read = true, write = true, edit = true, delete = true, requires_admin = true,
         }));
-        if (_userIdByExternalId.TryGetValue("admin", out var adminId))
+        if (_userIdByUsername.TryGetValue("admin", out var adminId))
             _context.UserRoles.Add(Stamp(new UserRole { user_id = adminId, role_id = adminRole.id }));
 
         await _context.SaveChangesAsync();
@@ -244,7 +255,7 @@ public partial class DatabaseSeeder
         var contactsByCustomer = _context.Contacts.Where(c => !c.is_deleted).ToList()
             .GroupBy(c => c.customer_id).ToDictionary(g => g.Key, g => g.First().id);
         var customers = AddressableCustomers().Where(c => contactsByCustomer.ContainsKey(c.id)).ToList();
-        var userIds = _userIdByExternalId.Values.ToList();
+        var userIds = _userIdByUsername.Values.ToList();
         var finishedIds = _productById.Values.Where(p => p.product_class == Cls.Finished).Select(p => p.id).ToList();
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -267,7 +278,7 @@ public partial class DatabaseSeeder
             }));
         }
 
-        // Opportunities (~10). owner_id is a User.external_id (string); mix of open + closed.
+        // Opportunities (~10). owner_id is a User.id stored as a string; mix of open + closed.
         var stages = new[]
         {
             Kv.StageProspecting, Kv.StageQualifying, Kv.StageProposal, Kv.StageNegotiation,
@@ -293,7 +304,7 @@ public partial class DatabaseSeeder
                 stage = stage,
                 win_chance = winByStage[stage],
                 expected_close = today.AddDays(15 + i * 10),
-                owner_id = _salespersonExternalIds[i % _salespersonExternalIds.Count],
+                owner_id = _salespersonUserIds[i % _salespersonUserIds.Count].ToString(),
             });
             _context.Opportunities.Add(opp);
             await _context.SaveChangesAsync();
@@ -341,32 +352,8 @@ public partial class DatabaseSeeder
         Console.WriteLine("  CRM seeded (8 leads, 10 opportunities, 15 activities).");
     }
 
-    /// <summary>
-    /// Works around an app schema bug: order_headers.id was created without AUTO_INCREMENT
-    /// (order_number is also ValueGeneratedOnAdd, and MySQL allows one auto-increment column per
-    /// table, so the migration dropped identity from id). Without this, inserting an order fails
-    /// with "Field 'id' doesn't have a default value". Idempotent — a no-op if id is already
-    /// AUTO_INCREMENT. The proper fix is in OrderHeaderConfiguration + a new migration.
-    /// </summary>
-    private async Task EnsureOrderHeaderIdentityAsync()
-    {
-        // The column is referenced by FKs, so this MODIFY is only permitted with FK checks off —
-        // which the seeder already holds off for the whole session (see Program.Main).
-        try
-        {
-            await _context.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE order_headers MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("  WARNING: could not ensure order_headers.id AUTO_INCREMENT: " + ex.Message);
-        }
-    }
-
     private async Task SeedSalesOrdersAsync()
     {
-        await EnsureOrderHeaderIdentityAsync();
-
         var customers = AddressableCustomers();
         var finished = _productById.Values.Where(p => p.product_class == Cls.Finished).ToList();
         var shipMethods = new[] { Kv.ShipCarrier, Kv.ShipDispatch, Kv.ShipPickup };
@@ -375,16 +362,22 @@ public partial class DatabaseSeeder
 
         var orderNumber = DatabaseStartNumbers.Orders;
 
-        for (var i = 0; i < 25; i++)
+        // 25 released orders feed production, shipping and invoicing; the last few are open
+        // quotes with no downstream records, so there are always orders to edit.
+        const int releasedOrders = 25;
+        const int quoteOrders = 3;
+
+        for (var i = 0; i < releasedOrders + quoteOrders; i++)
         {
             var customer = customers[i % customers.Count];
-            var salesperson = _salespersonExternalIds[i % _salespersonExternalIds.Count];
+            var salesperson = _salespersonUserIds[i % _salespersonUserIds.Count];
             var orderDate = today.AddDays(-(i * 12 + Rng.Next(0, 8)));   // spread across ~10 months
             var addressId = _addressIdByCustomerId[customer.id];
 
-            // status mix: mostly complete, some open, a few canceled.
-            var canceled = i % 11 == 10;
-            var complete = !canceled && i % 4 != 0;
+            // status mix: mostly complete, some open, a few canceled, plus the open quotes.
+            var quote = i >= releasedOrders;
+            var canceled = !quote && i % 11 == 10;
+            var complete = !quote && !canceled && i % 4 != 0;
 
             var header = StampAs(new OrderHeader
             {
@@ -394,7 +387,8 @@ public partial class DatabaseSeeder
                 billing_address_id = addressId,
                 shipping_method = shipMethods[i % shipMethods.Length],
                 pay_method = payMethods[i % payMethods.Length],
-                order_type = "SO",
+                // Released orders are the ones in production/shipping; canceled ones never were.
+                order_type = quote || canceled ? HeaderTypes.Quote : HeaderTypes.Release,
                 order_date = orderDate,
                 required_date = orderDate.AddDays(14),
                 tax = 0m,
@@ -402,14 +396,14 @@ public partial class DatabaseSeeder
                 is_complete = complete,
                 is_canceled = canceled,
                 canceled_reason = canceled ? "Customer canceled" : null,
-            }, salesperson);
+            }, _userGuidById[salesperson]);
             _context.OrderHeaders.Add(header);
             await _context.SaveChangesAsync();
 
             var seeded = new SeededOrder
             {
                 Id = header.id, CustomerId = customer.id, OrderDate = orderDate,
-                Complete = complete, Canceled = canceled, SalespersonExternalId = salesperson,
+                Complete = complete, Canceled = canceled, SalespersonUserId = salesperson,
             };
 
             var lineCount = 1 + (i % 3);
@@ -426,7 +420,7 @@ public partial class DatabaseSeeder
                     line_description = product.product_name,
                     quantity = qty,
                     unit_price = product.sales_price,
-                }, salesperson);
+                }, _userGuidById[salesperson]);
                 _context.OrderLines.Add(line);
                 total += qty * product.sales_price;
                 seeded.Lines.Add(new SeededOrderLine { ProductId = product.id, Qty = qty, UnitPrice = product.sales_price });
@@ -444,9 +438,10 @@ public partial class DatabaseSeeder
             _context.OrderHeaders.Update(header);
             await _context.SaveChangesAsync();
 
-            _orders.Add(seeded);
+            if (!quote)
+                _orders.Add(seeded);
         }
 
-        Console.WriteLine($"  Sales orders seeded ({_orders.Count}).");
+        Console.WriteLine($"  Sales orders seeded ({_orders.Count} released/canceled + {quoteOrders} open quotes).");
     }
 }

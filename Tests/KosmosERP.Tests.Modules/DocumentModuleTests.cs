@@ -34,7 +34,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -43,7 +43,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -58,7 +58,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -73,7 +73,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -88,7 +88,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -103,7 +103,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -118,7 +118,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
         {
             internal_name = "AR_Invoice",
             friendly_name = "AR Invoice",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.DocumentUploadObjects.Add(document_upload_object);
         await _Context.SaveChangesAsync();
@@ -157,7 +157,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             ContentType = "text"
         }, new DocumentUploadCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             document_name = "A cool document 1",
             document_object_id = _DocumentUploadObject.id,
             revision_tags = new List<DocumentUploadRevisionTagCreateCommand>()
@@ -192,7 +192,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
     {
         var create_command = new DocumentUploadCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             document_name = "A cool document 2",
             document_object_id = _DocumentUploadObject.id,
             revision_tags = new List<DocumentUploadRevisionTagCreateCommand>()
@@ -237,7 +237,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             ContentType = "text"
         }, new DocumentUploadCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             document_name = "Fake file.txt",
             document_object_id = _DocumentUploadObject.id,
             revision_tags = new List<DocumentUploadRevisionTagCreateCommand>()
@@ -264,7 +264,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
 
         var edit_command = new DocumentUploadEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             document_name = "Fake file2.txt",
             document_object_id = _DocumentUploadObject.id,
@@ -316,7 +316,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             ContentType = "text"
         }, new DocumentUploadCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             document_name = "A cool document 99",
             document_object_id = _DocumentUploadObject.id,
         });
@@ -326,7 +326,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
 
         var delete_result = await _Module.Delete(new DocumentUploadDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -348,7 +348,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
             ContentType = "text"
         }, new DocumentUploadCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             document_name = "Fake file.txt",
             document_object_id = _DocumentUploadObject.id,
         });
@@ -358,7 +358,7 @@ public class DocumentUploadModuleTests : BaseTestModule<DocumentUploadModule>, I
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new DocumentUploadFindCommand() { calling_user_id = _User.external_id, wildcard = "Fake file" });
+                        new DocumentUploadFindCommand() { calling_user_id = _User.guid, wildcard = "Fake file" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

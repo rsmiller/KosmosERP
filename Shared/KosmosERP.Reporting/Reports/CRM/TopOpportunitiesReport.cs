@@ -59,15 +59,17 @@ public sealed class TopOpportunitiesReport : ReportGeneratorBase
             .Where(c => customerIds.Contains(c.id))
             .ToDictionaryAsync(c => c.id, c => c.customer_name);
 
-        var ownerIds = ranked.Select(o => o.owner_id).Distinct().ToList();
-        var owners = await Context.Users
+        // owner_id holds the owner's User.id as a string.
+        var ownerIds = ranked
+            .Select(o => int.TryParse(o.owner_id, out var id) ? id : (int?)null)
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+        var ownerNames = await Context.Users
             .AsNoTracking()
-            .Where(u => ownerIds.Contains(u.external_id))
-            .Select(u => new { u.external_id, u.first_name, u.last_name })
-            .ToListAsync();
-        var ownerNames = owners
-            .GroupBy(u => u.external_id)
-            .ToDictionary(g => g.Key, g => $"{g.First().first_name} {g.First().last_name}".Trim());
+            .Where(u => ownerIds.Contains(u.id))
+            .ToDictionaryAsync(u => u.id.ToString(), u => $"{u.first_name} {u.last_name}".Trim());
 
         var stageKeys = ranked.Select(o => o.stage).Distinct().ToList();
         var stageRows = await Context.KeyValueStores

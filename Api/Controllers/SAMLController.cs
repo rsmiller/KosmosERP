@@ -3,10 +3,13 @@ using KosmosERP.BusinessLayer.Models.Module.User.Dto;
 using KosmosERP.BusinessLayer.Modules;
 using KosmosERP.Models;
 using KosmosERP.Module;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KosmosERP.Api.Controllers
 {
+    // Public: SAML single sign-on happens before the user has a session.
+    [AllowAnonymous]
     [ApiController]
     [Route("api/v1/[controller]")]
     public class SAMLController : ERPApiController

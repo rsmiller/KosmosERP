@@ -66,7 +66,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.Products.Add(product);
         _Context.SaveChanges();
@@ -83,7 +83,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.Addresses.Add(address);
         _Context.SaveChanges();
@@ -103,7 +103,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             vendor_name = "Super Vendor",
             vendor_description = "I am a vendor and junk",
             vendor_number = 121212
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.Vendors.Add(vendor);
         _Context.SaveChanges();
@@ -122,7 +122,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.Customers.Add(customer);
         _Context.SaveChanges();
@@ -135,7 +135,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.Physical,
             address_id = _Address.id,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.CustomerAddresses.Add(customer_address);
         _Context.SaveChanges();
@@ -145,7 +145,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             customer_id = _Customer.id,
             address_type_id = CustomerAddressType.ShipTo,
             address_id = _Address.id,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.CustomerAddresses.Add(customer_shipto_address);
         _Context.SaveChanges();
@@ -155,10 +155,10 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
         var purchase_order_header = CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader()
         {
             po_number = 123123,
-            po_type = "INTERNAL",
+            po_type = "Q",
             vendor_id = vendor.id,
             revision_number = 1,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.PurchaseOrderHeaders.Add(purchase_order_header);
         _Context.SaveChanges();
@@ -177,7 +177,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             revision_number = 1,
             tax = 1,
             is_taxable = true
-        }, _User.external_id);
+        }, _User.guid);
 
 
         _Context.PurchaseOrderLines.Add(purchase_order_line);
@@ -192,7 +192,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             units_ordered = 1,
             units_received = 1,
             is_complete = true,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.PurchaseOrderReceiveHeaders.Add(purchase_order_receive_header);
         _Context.SaveChanges();
@@ -208,7 +208,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             units_received = 1,
             is_complete = true,
             purchase_order_line_id = _PurchaseOrderLine.id,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.PurchaseOrderReceiveLines.Add(purchase_order_receive_line);
         _Context.SaveChanges();
@@ -234,7 +234,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             guid = Guid.NewGuid().ToString(),
             is_complete = false,
             is_canceled = false,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.OrderHeaders.Add(sales_order_header);
         _Context.SaveChanges();
@@ -250,7 +250,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             line_number = 1,
             unit_price = 100,
             quantity = 1
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.OrderLines.Add(sales_order_receive_line);
         _Context.SaveChanges();
@@ -268,7 +268,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             order_header_id = _SalesOrderHeader.id,
             payment_terms = "payment_terms_net_15",
             tax_percentage = 6,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.ARInvoiceHeaders.Add(ar_invoice_header);
         _Context.SaveChanges();
@@ -287,7 +287,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
             order_line_id = _SalesOrderLine.id,
             order_qty = 1,
             line_total = 100,
-        }, _User.external_id);
+        }, _User.guid);
 
         _Context.ARInvoiceLines.Add(ar_invoice_line);
         _Context.SaveChanges();
@@ -297,11 +297,119 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     }
 
     [Test]
+    public async Task SeedPermissions_PaymentTermsCarryTheirDays()
+    {
+        // SetupModule already ran SeedPermissions; the AR invoice page reads int_value as days.
+        var terms = await _Context.KeyValueStores
+            .Where(m => m.module_id == KeyValueIds.PaymentTerms)
+            .OrderBy(m => m.int_value)
+            .ToListAsync();
+
+        Assert.That(terms.Select(m => m.key), Is.EqualTo(new[] { "payment_terms_net_15", "payment_terms_net_30", "payment_terms_net_45", "payment_terms_net_60" }));
+        Assert.That(terms.Select(m => m.int_value), Is.EqualTo(new int?[] { 15, 30, 45, 60 }));
+    }
+
+    [Test]
+    public async Task SeedPermissions_CreatesNet30_WhenNet15AlreadyExists()
+    {
+        // Regression: the Net 30 term used to be guarded by the Net 15 check.
+        var net30 = await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.PaymentTerms && m.key == "payment_terms_net_30");
+        _Context.KeyValueStores.Remove(net30);
+        await _Context.SaveChangesAsync();
+
+        _Module.SeedPermissions();
+
+        var recreated = await _Context.KeyValueStores.SingleAsync(m => m.module_id == KeyValueIds.PaymentTerms && m.key == "payment_terms_net_30");
+        Assert.That(recreated.int_value, Is.EqualTo(30));
+    }
+
+    [Test]
+    public async Task Create_TaxesTaxableCustomer()
+    {
+        _Customer.tax_rate = 0.08m;
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.Create(TaxedInvoiceCommand());
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.is_taxable, Is.True);
+        Assert.That(result.Data.invoice_total, Is.EqualTo(108));
+        Assert.That(result.Data.ar_invoice_lines.Single().is_taxable, Is.True);
+        Assert.That(result.Data.ar_invoice_lines.Single().line_tax, Is.EqualTo(8));
+    }
+
+    [Test]
+    public async Task Create_NeverTaxesTaxExemptCustomer()
+    {
+        // Regression for BUG-018: the AR page sent taxable lines for tax-exempt customers, and the API taxed them.
+        _Customer.is_taxable = false;
+        _Customer.tax_rate = 0.08m;
+        await _Context.SaveChangesAsync();
+
+        var result = await _Module.Create(TaxedInvoiceCommand());
+
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.is_taxable, Is.False);
+        Assert.That(result.Data.invoice_total, Is.EqualTo(100));
+        Assert.That(result.Data.ar_invoice_lines.Single().is_taxable, Is.False);
+        Assert.That(result.Data.ar_invoice_lines.Single().line_tax, Is.Zero);
+    }
+
+    [Test]
+    public async Task CreateLine_NeverTaxesTaxExemptCustomer()
+    {
+        _Customer.is_taxable = false;
+        _Customer.tax_rate = 0.08m;
+        await _Context.SaveChangesAsync();
+
+        var line = await _Module.CreateLine(new ARInvoiceLineCreateCommand()
+        {
+            calling_user_id = _User.guid,
+            ar_invoice_header_id = _ARInvoiceHeader.id,
+            order_line_id = _SalesOrderLine.id,
+            line_number = 2,
+            invoice_qty = 1,
+            line_description = _SalesOrderLine.line_description,
+            is_taxable = true,
+            product_id = _SalesOrderLine.product_id,
+        });
+
+        Assert.That(line.Success, Is.True);
+        Assert.That(line.Data.is_taxable, Is.False);
+        Assert.That(line.Data.line_tax, Is.Zero);
+    }
+
+    /// <summary>One unit of the $100 order line, with the header and line both marked taxable at 8%.</summary>
+    private ARInvoiceHeaderCreateCommand TaxedInvoiceCommand() => new ARInvoiceHeaderCreateCommand()
+    {
+        calling_user_id = _User.guid,
+        invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
+        invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
+        customer_id = _Customer.id,
+        order_header_id = _SalesOrderHeader.id,
+        payment_terms = "payment_terms_net_15",
+        is_taxable = true,
+        tax_percentage = 0.08m,
+        ar_invoice_lines = new List<ARInvoiceLineCreateCommand>() {
+            new ARInvoiceLineCreateCommand()
+            {
+                order_line_id = _SalesOrderLine.id,
+                line_number = 1,
+                invoice_qty = 1,
+                line_description = _SalesOrderLine.line_description,
+                is_taxable = true,
+                product_id = _SalesOrderLine.product_id,
+                calling_user_id = _User.guid
+            }
+        }
+    };
+
+    [Test]
     public async Task Get()
     {
         var new_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -318,7 +426,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -336,7 +444,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -353,7 +461,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -366,7 +474,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var old_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -383,14 +491,14 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
 
         var edit_command = new ARInvoiceHeaderEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = old_result.Data.id,
             payment_terms = "payment_terms_net_30",
             tax_percentage = 3,
@@ -415,7 +523,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -432,7 +540,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -442,7 +550,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new ARInvoiceHeaderDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -460,7 +568,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var new_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -477,7 +585,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -489,7 +597,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new ARInvoiceHeaderFindCommand() { calling_user_id = _User.external_id, wildcard = new_result.Data.invoice_number.ToString() });
+                        new ARInvoiceHeaderFindCommand() { calling_user_id = _User.guid, wildcard = new_result.Data.invoice_number.ToString() });
 
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);
@@ -506,7 +614,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -523,7 +631,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -535,7 +643,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
 
         var create_command = new ARInvoiceLineCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             ar_invoice_header_id = create_result.Data.id,
             order_line_id = _SalesOrderLine.id,
             line_number = 2,
@@ -561,7 +669,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -578,7 +686,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -590,7 +698,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
 
         var edit_command = new ARInvoiceLineEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.ar_invoice_lines[0].id,
             line_number = 4,
             is_taxable = false,
@@ -618,7 +726,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
     {
         var create_result = await _Module.Create(new ARInvoiceHeaderCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             invoice_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             invoice_due_date = DateOnly.Parse(DateTime.Now.ToString("MM/dd/yyyy")),
             customer_id = _Customer.id,
@@ -635,7 +743,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
                     line_description = _SalesOrderLine.line_description,
                     is_taxable = true,
                     product_id = _SalesOrderLine.product_id,
-                    calling_user_id = _User.external_id
+                    calling_user_id = _User.guid
                 }
             }
         });
@@ -646,7 +754,7 @@ public class ARInvoiceModuleTests : BaseTestModule<ARInvoiceModule>, IModuleTest
 
         var response = await _Module.DeleteLine(new ARInvoiceLineDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = create_result.Data.ar_invoice_lines[0].id,
         });
 

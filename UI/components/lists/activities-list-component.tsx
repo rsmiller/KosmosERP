@@ -314,7 +314,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                         >
                           <GridItem colSpan={2}>
                             <Field.Root invalid={!!errors.activity_type}>
-                              <ActivityTypeCombobox
+                              <ActivityTypeCombobox portalled={false}
                                 ref={activityTypeComboboxRef}
                                 dbKey={watch('activity_type') || ''}
                                 title="Activity Type"
@@ -326,7 +326,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                           </GridItem>
                           <GridItem colSpan={2}>
                             <Field.Root invalid={!!errors.status}>
-                              <ActivityStatusCombobox
+                              <ActivityStatusCombobox portalled={false}
                                 ref={activityStatusComboboxRef}
                                 dbKey={watch('status') || ''}
                                 title="Activity Status"
@@ -357,8 +357,8 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                           </GridItem>
                           <GridItem colSpan={2}>
                             <Field.Root invalid={IsDirty('start_date')} required={true}>
-                                <Field.Label><Field.RequiredIndicator /> Start Date</Field.Label>
-                                <DatePicker 
+                                <Field.Label id="lists-start-date-label"><Field.RequiredIndicator /> Start Date</Field.Label>
+                                <DatePicker ariaLabelledBy="lists-start-date-label" 
                                     selected={getStartDate()}
                                     onChange={handleStartDateChange}
                                     dateFormat="MM/dd/yyyy"
@@ -369,8 +369,8 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                           </GridItem>
                           <GridItem colSpan={2}>
                             <Field.Root>
-                                <Field.Label>End Date</Field.Label>
-                                <DatePicker 
+                                <Field.Label id="lists-end-date-label">End Date</Field.Label>
+                                <DatePicker ariaLabelledBy="lists-end-date-label" 
                                     onChange={handleEndDateChange}
                                     dateFormat="MM/dd/yyyy"
                                     placeholderText="Select date"
@@ -379,7 +379,7 @@ function ActivitiesListComponent({entity_id, entity_type, onChange}: ActivitiesL
                           </GridItem>
                           <GridItem colSpan={2}>
                             <Field.Root invalid={!!errors.priority}>
-                              <PriorityCombobox
+                              <PriorityCombobox portalled={false}
                                 ref={priorityComboboxRef}
                                 dbKey={watch('priority') || ''}
                                 title="Priority"

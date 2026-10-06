@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using KosmosERP.Api.Authorization;
 using KosmosERP.Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ public class UserController : ERPApiController
         _Module = userModule;
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUser", Name = "GetUser")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -39,6 +41,7 @@ public class UserController : ERPApiController
 
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUserByGuid", Name = "GetUserByGuid")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -53,6 +56,7 @@ public class UserController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUserBySessionId", Name = "GetUserBySessionId")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -93,6 +97,7 @@ public class UserController : ERPApiController
 
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetRolePermissions", Name = "GetRolePermissions")]
     [ProducesResponseType(typeof(Response<List<RolePermissionsDto>>), 200)]
     [ProducesResponseType(400)]
@@ -107,6 +112,7 @@ public class UserController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetPermissionSet", Name = "GetPermissionSet")]
     [ProducesResponseType(typeof(Response<List<UserPermissionsSet>>), 200)]
     [ProducesResponseType(400)]
@@ -120,6 +126,8 @@ public class UserController : ERPApiController
         return Ok(result);
     }
 
+    // Public: this is the database-auth login endpoint.
+    [AllowAnonymous]
     [HttpPost("AuthenticateUser", Name = "AuthenticateUser")]
     [ProducesResponseType(typeof(Response<AuthenticatedUserDto>), 200)]
     [ProducesResponseType(400)]
@@ -134,11 +142,14 @@ public class UserController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("FindUser", Name = "FindUser")]
     [ProducesResponseType(typeof(PagingResult<UserListDto>), 200)]
     [ProducesResponseType(500)]
     public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] UserFindCommand command)
     {
+        command.calling_user_id = this.CurrentUserId;
+
         try
         {
             if (command != null)
@@ -166,6 +177,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] UserCreateCommand createCommand)
     {
+        createCommand.calling_user_id = this.CurrentUserId;
+
         string bearerToken = null;
 
         if (Request?.Headers != null && Request.Headers.ContainsKey("Authorization"))
@@ -191,6 +204,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> CreateRole([FromBody] RoleCreateCommand createCommand)
     {
+        createCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.CreateRole(createCommand);
 
         if (!result.Success)
@@ -205,6 +220,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> AssignUserRole([FromBody] AssignUserRoleCommand createCommand)
     {
+        createCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.AssignUserRole(createCommand);
 
         if (!result.Success)
@@ -220,6 +237,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] UserEditCommand editCommand)
     {
+        editCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Edit(editCommand);
 
         if (!result.Success)
@@ -234,6 +253,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> EditRoleModulePermission([FromBody] RoleModulePermissionEditCommand editCommand)
     {
+        editCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.EditRoleModulePermission(editCommand);
 
         if (!result.Success)
@@ -244,6 +265,7 @@ public class UserController : ERPApiController
 
 
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpGet("GetUsersByDepartment", Name = "GetUsersByDepartment")]
     [ProducesResponseType(typeof(Response<UserDto>), 200)]
     [ProducesResponseType(400)]
@@ -263,6 +285,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] UserDeleteCommand deleteCommand)
     {
+        deleteCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Delete(deleteCommand);
 
         if (!result.Success)
@@ -277,6 +301,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> DeleteRoleModulePermission([FromBody] ModulePermissionDeleteCommand deleteCommand)
     {
+        deleteCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.DeleteRoleModulePermission(deleteCommand);
 
         if (!result.Success)
@@ -291,6 +317,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> DeleteRole([FromBody] RoleDeleteCommand deleteCommand)
     {
+        deleteCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.DeleteRole(deleteCommand);
 
         if (!result.Success)
@@ -305,6 +333,8 @@ public class UserController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> CreateNewRoleModulePermission([FromBody] RoleModulePermissionCreateCommand command)
     {
+        command.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.CreateNewRoleModulePermission(command);
 
         if (!result.Success)

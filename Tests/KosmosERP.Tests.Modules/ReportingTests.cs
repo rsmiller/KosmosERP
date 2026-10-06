@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -45,7 +46,7 @@ public class ReportingTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         var customer = CommonDataHelper<Customer>.FillCommonFields(new Customer
         {
@@ -57,7 +58,7 @@ public class ReportingTests
             payment_terms = "NET 30",
             is_taxable = true,
             tax_rate = 0.08m,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
 
@@ -68,7 +69,7 @@ public class ReportingTests
             state = "IL",
             postal_code = "60601",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
 
@@ -77,7 +78,7 @@ public class ReportingTests
             customer_id = customer.id,
             address_id = address.id,
             address_type_id = 1,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         _Invoice = CommonDataHelper<ARInvoiceHeader>.FillCommonFields(new ARInvoiceHeader
         {
@@ -90,7 +91,7 @@ public class ReportingTests
             invoice_total = 1080.00m,
             tax_percentage = 8m,
             is_taxable = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.ARInvoiceHeaders.Add(_Invoice);
         await _Context.SaveChangesAsync();
 
@@ -104,7 +105,7 @@ public class ReportingTests
             line_total = 500.00m,
             line_tax = 40.00m,
             is_taxable = true,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         _Context.ARInvoiceLines.Add(CommonDataHelper<ARInvoiceLine>.FillCommonFields(new ARInvoiceLine
         {
             ar_invoice_header_id = _Invoice.id,
@@ -115,7 +116,7 @@ public class ReportingTests
             line_total = 500.00m,
             line_tax = 40.00m,
             is_taxable = true,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         var generators = new IReportGenerator[] { new ArInvoiceReport(_Context) };

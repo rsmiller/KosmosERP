@@ -35,7 +35,7 @@ function NewCustomerPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
 
@@ -114,11 +114,11 @@ function NewCustomerPage() {
         const hasRequiredFields = Boolean(watch('customer_name') && watch('general_email') && watch('phone'));
         const allValid = hasRequiredFields && paymentTermsValid && categoryValid;
 
-        canSave(!allValid);
+        setFormValid(Boolean(allValid));
     }
     else
     {
-      canSave(false);
+      setFormValid(false);
     }
   };
 
@@ -277,9 +277,8 @@ function NewCustomerPage() {
 
         <GridItem colSpan={6}>
             <PageActionsComponent 
-                canSave={saveable || !hasWritePermission} 
+                saveDisabled={!formValid || !hasWritePermission} 
                 onSave={handleSaveClick} 
-                onDelete={undefined} 
                 successSaved={successSaved}
                 failedSaved={failedSaved}
             />

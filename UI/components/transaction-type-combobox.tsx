@@ -45,7 +45,8 @@ const TransactionTypeCombobox = forwardRef<TransactionTypeComboboxRef, Transacti
     const { collection, filter, set } = useListCollection<KeyValueDto>({
         initialItems: stages,
         filter: contains,
-        itemToString: (item) => item.key,
+        // Filter on the label users see ("Net 30"), not the stored key (BUG-007).
+        itemToString: (item) => item.value,
         itemToValue: (item) => item.value,
     });
 
@@ -104,6 +105,8 @@ const TransactionTypeCombobox = forwardRef<TransactionTypeComboboxRef, Transacti
 
 
     const fetchData = useAsync(async () => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (!auth.token) return;
         await keyValueService.GetDtoByModule("416786e0-47b3-440a-90da-b7036d72b1f7", auth.token || "").then((response) =>
         {
             if (response.success && response.data !== undefined) {

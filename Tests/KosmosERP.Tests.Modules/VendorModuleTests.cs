@@ -46,7 +46,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
         var admin_role = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "Module Admin",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Roles.Add(admin_role);
         await _Context.SaveChangesAsync();
@@ -55,7 +55,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -70,7 +70,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -85,7 +85,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -95,7 +95,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
             module_id = _AddressModule.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(another_role_module_permission);
         await _Context.SaveChangesAsync();
@@ -110,7 +110,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -125,7 +125,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -142,7 +142,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -155,7 +155,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
     {
         var new_result = await _Module.Create(new VendorCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_name = "Cool vendor",
             vendor_description = "The best vendor in the world",
             category = "General",
@@ -188,7 +188,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
     {
         var result = await _Module.Create(new VendorCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_name = "Cool vendor",
             vendor_description = "The best vendor in the world",
             category = "General",
@@ -216,7 +216,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
     {
         var new_result = await _Module.Create(new VendorCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_name = "Cool vendor",
             vendor_description = "The best vendor in the world",
             category = "General",
@@ -241,7 +241,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
 
         var edit_command = new VendorEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             vendor_name = "Cool vendor21333",
             vendor_description = "The besdfsdfsdf",
@@ -272,7 +272,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
     {
         var new_result = await _Module.Create(new VendorCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_name = "Cool vendor",
             vendor_description = "The best vendor in the world",
             category = "General",
@@ -297,7 +297,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
 
         var delete_result = await _Module.Delete(new VendorDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -314,7 +314,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
     {
         var new_result = await _Module.Create(new VendorCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             vendor_name = "Cool vendor333",
             vendor_description = "The best vendor in the world",
             category = "General",
@@ -339,7 +339,7 @@ public class VendorModuleTests : BaseTestModule<VendorModule>, IModuleTest
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new VendorFindCommand() { calling_user_id = _User.external_id, wildcard = "vendor333" });
+                        new VendorFindCommand() { calling_user_id = _User.guid, wildcard = "vendor333" });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

@@ -1,3 +1,5 @@
+using KosmosERP.Api.Models;
+using KosmosERP.Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using KosmosERP.BusinessLayer.Models.Module.Country.Dto;
@@ -12,7 +14,6 @@ using KosmosERP.BusinessLayer.Models.Module.User.ListProfiles;
 
 namespace KosmosERP.Api.Controllers;
 
-//[Authorize]
 [ApiController]
 [Route("api/v1/[controller]")]
 public class CountryController : ERPApiController
@@ -25,6 +26,7 @@ public class CountryController : ERPApiController
     }
 
     
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetCountry", Name = "GetCountry")]
     [ProducesResponseType(typeof(Response<CountryDto>), 200)]
     [ProducesResponseType(400)]
@@ -38,6 +40,7 @@ public class CountryController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetCountryByGuid", Name = "GetCountryByGuid")]
     [ProducesResponseType(typeof(Response<CountryDto>), 200)]
     [ProducesResponseType(400)]
@@ -51,6 +54,7 @@ public class CountryController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpGet("GetCountryByISOAsync", Name = "GetCountryByISOAsync")]
     [ProducesResponseType(typeof(Response<CountryDto>), 200)]
     [ProducesResponseType(400)]
@@ -65,6 +69,7 @@ public class CountryController : ERPApiController
     }
 
 
+    [ERPAuthorize(new ERPPermission[] { })]
     [HttpPost("FindCountry", Name = "FindCountry")]
     [ProducesResponseType(typeof(PagingResult<CountryListDto>), 200)]
     [ProducesResponseType(400)]
@@ -92,6 +97,7 @@ public class CountryController : ERPApiController
         }
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("CreateCountry", Name = "CreateCountry")]
     [ProducesResponseType(typeof(Response<CountryDto>), 200)]
     [ProducesResponseType(400)]
@@ -106,6 +112,7 @@ public class CountryController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPut("UpdateCountry", Name = "UpdateCountry")]
     [ProducesResponseType(typeof(Response<CountryDto>), 200)]
     [ProducesResponseType(400)]
@@ -120,6 +127,7 @@ public class CountryController : ERPApiController
         return Ok(result);
     }
 
+    [ERPAuthorize(new ERPPermission[] { }, "admin")]
     [HttpPost("DeleteCountry", Name = "DeleteCountry")]
     [ProducesResponseType(typeof(Response<CountryDto>), 200)]
     [ProducesResponseType(400)]

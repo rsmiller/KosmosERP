@@ -43,7 +43,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
         {
             role_id = admin_role.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.UserRoles.Add(user_role);
         await _Context.SaveChangesAsync();
@@ -58,7 +58,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             read = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -73,7 +73,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             write = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -88,7 +88,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             edit = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -103,7 +103,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             module_id = _Module.ModuleIdentifier.ToString(),
             role_id = role.id,
             delete = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.RolePermissions.Add(role_module_permission);
         await _Context.SaveChangesAsync();
@@ -126,7 +126,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             is_taxable = true,
             is_shippable = true,
             is_sales_item = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Products.Add(product);
         await _Context.SaveChangesAsync();
@@ -143,7 +143,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             customer_name = "Some customer",
             website = "google.com",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Customers.Add(customer);
         await _Context.SaveChangesAsync();
@@ -159,7 +159,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             postal_code = "76251",
             country = "USA",
             is_deleted = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Addresses.Add(address);
         await _Context.SaveChangesAsync();
@@ -181,7 +181,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             po_number = "ASDSD",
             price = 1002,
             tax = 123
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderHeaders.Add(sales_order_header);
         await _Context.SaveChangesAsync();
@@ -196,7 +196,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
             line_number = 1,
             unit_price = 100,
             quantity = 1
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.OrderLines.Add(sales_order_line);
         await _Context.SaveChangesAsync();
@@ -209,7 +209,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
     {
         var new_result = await _Module.Create(new TransactionCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             object_reference_id = _SalesOrderHeader.id,
             object_sub_reference_id = _SalesOrderLine.id,
             product_id = _Product.id,
@@ -238,7 +238,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
         {
             var result = await _Module.Create(new TransactionCreateCommand()
             {
-                calling_user_id = _User.external_id,
+                calling_user_id = _User.guid,
                 object_reference_id = _SalesOrderHeader.id,
                 object_sub_reference_id = _SalesOrderLine.id,
                 product_id = _Product.id,
@@ -274,7 +274,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
     {
         var new_result = await _Module.Create(new TransactionCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             object_reference_id = _SalesOrderHeader.id,
             object_sub_reference_id = _SalesOrderLine.id,
             product_id = _Product.id,
@@ -293,7 +293,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
 
         var edit_command = new TransactionEditCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id,
             object_reference_id = _SalesOrderHeader.id,
             object_sub_reference_id = _SalesOrderLine.id,
@@ -327,7 +327,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
     {
         var new_result = await _Module.Create(new TransactionCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             object_reference_id = _SalesOrderHeader.id,
             object_sub_reference_id = _SalesOrderLine.id,
             product_id = _Product.id,
@@ -346,7 +346,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
 
         var delete_result = await _Module.Delete(new TransactionDeleteCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             id = new_result.Data.id
         });
 
@@ -363,7 +363,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
     {
         var new_result = await _Module.Create(new TransactionCreateCommand()
         {
-            calling_user_id = _User.external_id,
+            calling_user_id = _User.guid,
             object_reference_id = _SalesOrderHeader.id,
             object_sub_reference_id = _SalesOrderLine.id,
             product_id = _Product.id,
@@ -382,7 +382,7 @@ public class TransactionModuleTests : BaseTestModule<TransactionModule>, IModule
 
         var results = await _Module.Find(
                         new PagingSortingParameters() { ResultCount = 20, Start = 0 },
-                        new TransactionFindCommand() { calling_user_id = _User.external_id, object_reference_id = _SalesOrderHeader.id });
+                        new TransactionFindCommand() { calling_user_id = _User.guid, object_reference_id = _SalesOrderHeader.id });
         
         Assert.That(results.Success, Is.True);
         Assert.That(results.Data, Is.Not.Null);

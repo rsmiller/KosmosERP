@@ -19,7 +19,9 @@ export const userService = {
       }
       else
       {
-        return { success: false, exception: ex, resultCode: -5, data: undefined};
+        // No response at all (API down, network, CORS): rethrow so the login page can
+        // say the service is unreachable instead of "wrong password" (BUG-008).
+        throw ex;
       }
     }
   },

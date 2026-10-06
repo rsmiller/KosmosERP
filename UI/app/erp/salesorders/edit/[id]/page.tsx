@@ -45,7 +45,6 @@ function EditSalesOrderPage() {
   const params = useParams();
   const router = useRouter();
 
-  const userId = SessionStorage.getUserId();
   const sessionId = SessionStorage.getSession();
   const [hasAccess, setHasAccess] = useState(true);
   const [hasEditPermission, setHasEditPermission] = useState(false);
@@ -54,7 +53,7 @@ function EditSalesOrderPage() {
   const [salesOrder, setSalesOrder] = useState<OrderHeaderDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, canSave] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [completedOrDisabled, setCompletedOrDisabled] = useState(false);
@@ -149,7 +148,7 @@ function EditSalesOrderPage() {
           // If this is completed we can't edit this
           if(response.data.is_complete || response.data.is_canceled) {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           } else {
             CheckFormValidity();
           }
@@ -157,7 +156,7 @@ function EditSalesOrderPage() {
           if(response.data.order_type == 'R')
           {
             setCompletedOrDisabled(true);
-            canSave(false);
+            setFormValid(false);
           }
 
         } else {
@@ -210,7 +209,7 @@ function EditSalesOrderPage() {
 
     if(completedOrDisabled == false)
     {
-      canSave(allValid);
+      setFormValid(allValid);
     }
   };
 
@@ -262,7 +261,6 @@ function EditSalesOrderPage() {
       line_description: line.line_description,
       quantity: line.quantity,
       unit_price: line.unit_price,
-      calling_user_id: Number(userId),
       token: sessionId?.toString(),
     }));
 
@@ -303,6 +301,12 @@ function EditSalesOrderPage() {
       console.error(e);
     }
   };
+
+  // colDefs below are created on the first render, which on a direct load is
+  // before auth is ready. The Delete button calls through this ref so it always
+  // uses the current handler (and token), not the first render's.
+  const deleteLineRef = useRef(handleDeleteLineClick);
+  deleteLineRef.current = handleDeleteLineClick;
 
   const handleEditLineClick = (lineId: number) => {
     // TODO: Implement line editing dialog
@@ -380,14 +384,14 @@ function EditSalesOrderPage() {
   const [colDefs, setColDefs] = useState<ColDef<OrderLineDto>[]>([
     { field: "product_name", headerName: "Product Name"},
     { field: "line_description", headerName: "Description",
-      editable: !completedOrDisabled,
+      editable: (params: any) => !params.context?.completedOrDisabled, // BUG-025: read at edit time
      },
     { field: "quantity", headerName: "Quantity",
-      editable: !completedOrDisabled,
+      editable: (params: any) => !params.context?.completedOrDisabled, // BUG-025: read at edit time
       cellEditor: 'agNumberCellEditor',
      },
     { field: "unit_price", headerName: "Unit Price", 
-      editable: !completedOrDisabled,
+      editable: (params: any) => !params.context?.completedOrDisabled, // BUG-025: read at edit time
       cellEditor: 'agNumberCellEditor',
       cellRenderer: CurrencyFormatter 
     },
@@ -405,7 +409,7 @@ function EditSalesOrderPage() {
         const { completedOrDisabled } = props.context;
         return ( 
           <div>
-            <Button type="button" colorPalette="red" onClick={() => handleDeleteLineClick(props.value)} disabled={completedOrDisabled}>Delete</Button>
+            <Button type="button" colorPalette="red" onClick={() => deleteLineRef.current(props.value)} disabled={completedOrDisabled}>Delete</Button>
           </div>
         );
       }
@@ -483,8 +487,8 @@ function EditSalesOrderPage() {
             </Stack>
             <Stack gap="4" align="flex-start" maxW="md">
               <Field.Root invalid={!!errors.required_date}>
-                <Field.Label>Required Date</Field.Label>
-                <DatePicker
+                <Field.Label id="edit-required-date-label">Required Date</Field.Label>
+                <DatePicker ariaLabelledBy="edit-required-date-label"
                   selected={getRequiredDate()}
                   onChange={requiredDaySelected}
                   disabled={completedOrDisabled}
@@ -570,7 +574,7 @@ function EditSalesOrderPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick}
-                canSave={!saveable || !hasEditPermission}
+                saveDisabled={!formValid || !hasEditPermission}
                 canDelete={hasDeletePermission}
                 successSaved={successSaved}
                 failedSaved={failedSaved}

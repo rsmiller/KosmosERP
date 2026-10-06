@@ -27,6 +27,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 
 
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
+import { formatDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -148,7 +149,7 @@ function AccountsReceivableViewPage() {
             return "";
         }
 
-        return format(dateString || "", 'MM-dd-yyyy');
+        return formatDateOnly(dateString, 'MM-dd-yyyy');
     }
 
     const printInvoice = () => 
@@ -358,7 +359,7 @@ function AccountsReceivableViewPage() {
                 </GridItem>
 
                 <GridItem colSpan={8} >
-                <PageActionsComponent canSave={false} saveText={"Print Invoice"} canDelete={true} onSave={() => { printInvoice() }} onDelete={() => {}}/>
+                <PageActionsComponent saveDisabled={false} saveText={"Print Invoice"} onSave={() => { printInvoice() }}/>
                 </GridItem>
             </Grid>
         </form>

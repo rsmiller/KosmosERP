@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -47,13 +48,13 @@ public class AgingReportTests
             company_website = "kosmos.example",
             tax_id = "12-3456789",
             fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         // Customers
         _Context.Customers.Add(CommonDataHelper<Customer>.FillCommonFields(new Customer
-        { id = 1, customer_number = 1, customer_name = "Acme Widgets LLC", phone = "1", accounting_email = "a@x", category = "B", payment_terms = "NET 30" }, 1));
+        { id = 1, customer_number = 1, customer_name = "Acme Widgets LLC", phone = "1", accounting_email = "a@x", category = "B", payment_terms = "NET 30" }, SystemUsers.ServiceUserGuid));
         _Context.Customers.Add(CommonDataHelper<Customer>.FillCommonFields(new Customer
-        { id = 2, customer_number = 2, customer_name = "Beta Industries", phone = "1", accounting_email = "b@x", category = "B", payment_terms = "NET 30" }, 1));
+        { id = 2, customer_number = 2, customer_name = "Beta Industries", phone = "1", accounting_email = "b@x", category = "B", payment_terms = "NET 30" }, SystemUsers.ServiceUserGuid));
 
         // AR invoices (ids explicit so payments link deterministically).
         AddAr(1001, 1, due: new DateOnly(2026, 9, 30), total: 100m);   // 0 days -> Current
@@ -69,9 +70,9 @@ public class AgingReportTests
 
         // Vendors + AP invoices
         _Context.Vendors.Add(CommonDataHelper<Vendor>.FillCommonFields(new Vendor
-        { id = 10, vendor_number = 10, vendor_name = "Global Components Co.", address_id = 0, phone = "1", category = "RM" }, 1));
+        { id = 10, vendor_number = 10, vendor_name = "Global Components Co.", address_id = 0, phone = "1", category = "RM" }, SystemUsers.ServiceUserGuid));
         _Context.Vendors.Add(CommonDataHelper<Vendor>.FillCommonFields(new Vendor
-        { id = 20, vendor_number = 20, vendor_name = "Zeta Supply", address_id = 0, phone = "1", category = "RM" }, 1));
+        { id = 20, vendor_number = 20, vendor_name = "Zeta Supply", address_id = 0, phone = "1", category = "RM" }, SystemUsers.ServiceUserGuid));
 
         AddAp(10, due: new DateTime(2026, 9, 10), total: 500m, paid: false);  // 20 days -> 1-30
         AddAp(10, due: new DateTime(2026, 9, 5), total: 999m, paid: true);    // paid -> excluded
@@ -95,7 +96,7 @@ public class AgingReportTests
             invoice_date = due.AddDays(-30),
             invoice_due_date = due,
             invoice_total = total,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
     }
 
     private void AddPayment(int arHeaderId, decimal amount)
@@ -108,7 +109,7 @@ public class AgingReportTests
             payment_amount = amount,
             transaction_method = "Card",
             guid = Guid.NewGuid().ToString(),
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
     }
 
     private void AddAp(int vendorId, DateTime due, decimal total, bool paid)
@@ -122,7 +123,7 @@ public class AgingReportTests
             invoice_received_date = due.AddDays(-30),
             invoice_total = total,
             is_paid = paid,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
     }
 
     [TearDown]

@@ -139,6 +139,8 @@ public class PaymentController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> GetStripePaymentIntentFromARInvoce([FromBody] CreateStripePaymentIntentCommand commandModel)
     {
+        commandModel.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.GetStripePaymentIntentFromARInvoce(commandModel);
 
         if (!result.Success)
@@ -154,6 +156,8 @@ public class PaymentController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> GetStripePaymentIntentStatus([FromBody] StripePaymentIntentStatusCommand commandModel)
     {
+        commandModel.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.GetStripePaymentIntentStatus(commandModel);
 
         if (!result.Success)
@@ -168,6 +172,8 @@ public class PaymentController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> GetSavedPaymentMethods([FromBody] GetSavedPaymentMethodsCommand commandModel)
     {
+        commandModel.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.GetSavedPaymentMethods(commandModel);
 
         return Ok(result);
@@ -179,6 +185,8 @@ public class PaymentController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> PayStripePaymentIntent([FromBody] StripePaymentIntentStatusCommand commandModel)
     {
+        commandModel.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.PayStripePaymentIntent(commandModel);
 
         return Ok(result);
@@ -190,6 +198,8 @@ public class PaymentController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> CreateNewCardIntent([FromBody] CreateStripeNewCardIntentCommand commandModel)
     {
+        commandModel.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.CreateNewCardIntent(commandModel);
 
         return Ok(result);

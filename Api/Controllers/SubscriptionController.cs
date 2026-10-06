@@ -60,6 +60,8 @@ public class SubscriptionController : ERPApiController
     [ProducesResponseType(500)]
     public async Task<ActionResult> Find([FromQuery] GeneralListProfile listProfile, [FromBody] SubscriptionFindCommand command)
     {
+        command.calling_user_id = this.CurrentUserId;
+
         try
         {
             if (command != null)
@@ -87,6 +89,8 @@ public class SubscriptionController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Create([FromBody] SubscriptionCreateCommand createCommand)
     {
+        createCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Create(createCommand);
 
         if (!result.Success)
@@ -101,6 +105,8 @@ public class SubscriptionController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Edit([FromBody] SubscriptionEditCommand editCommand)
     {
+        editCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Edit(editCommand);
 
         if (!result.Success)
@@ -115,6 +121,8 @@ public class SubscriptionController : ERPApiController
     [ProducesResponseType(400)]
     public async Task<ActionResult> Delete([FromBody] SubscriptionDeleteCommand deleteCommand)
     {
+        deleteCommand.calling_user_id = this.CurrentUserId;
+
         var result = await _Module.Delete(deleteCommand);
 
         if (!result.Success)

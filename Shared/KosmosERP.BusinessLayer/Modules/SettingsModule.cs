@@ -57,7 +57,7 @@ public class SettingsModule : BaseERPModule, ISettingsModule
                 is_deleted = false
             };
 
-            settings = CommonDataHelper<Settings>.FillCommonFields(settings, 1);
+            settings = CommonDataHelper<Settings>.FillCommonFields(settings, SystemUsers.ServiceUserGuid);
 
             _Context.Settings.Add(settings);
             _Context.SaveChanges();

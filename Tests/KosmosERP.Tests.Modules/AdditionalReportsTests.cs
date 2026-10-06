@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -22,7 +23,8 @@ public class AdditionalReportsTests
     private ERPDbContext _Context = null!;
     private IReportService _Reports = null!;
 
-    private const string SalespersonExternalId = "ext-jane";
+    private const int SalespersonUserId = 1;
+    private const string SalespersonUserGuid = "11111111-2222-4333-8444-555555555555";
 
     [SetUp]
     public async Task Setup()
@@ -40,24 +42,24 @@ public class AdditionalReportsTests
             company_city = "Springfield", company_state = "IL", company_zip = "62701", company_country = "USA",
             company_phone = "555-0100", company_general_email = "info@kosmos.example", company_ar_email = "ar@kosmos.example",
             company_website = "kosmos.example", tax_id = "12-3456789", fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         _Context.Users.Add(CommonDataHelper<User>.FillCommonFields(new User
         {
-            id = 1, first_name = "Jane", last_name = "Seller", username = "jane", password = "x", password_salt = "x",
-            employee_number = "E1", external_id = SalespersonExternalId,
-        }, 1));
+            id = SalespersonUserId, first_name = "Jane", last_name = "Seller", username = "jane", password = "x", password_salt = "x",
+            employee_number = "E1", guid = SalespersonUserGuid,
+        }, SystemUsers.ServiceUserGuid));
 
         _Context.Customers.Add(CommonDataHelper<Customer>.FillCommonFields(new Customer
-        { id = 1, customer_number = 1, customer_name = "Acme Widgets LLC", phone = "1", accounting_email = "a@x", category = "B", payment_terms = "NET 30" }, 1));
+        { id = 1, customer_number = 1, customer_name = "Acme Widgets LLC", phone = "1", accounting_email = "a@x", category = "B", payment_terms = "NET 30" }, SystemUsers.ServiceUserGuid));
 
         _Context.Contacts.Add(CommonDataHelper<Contact>.FillCommonFields(new Contact
-        { id = 1, customer_id = 1, first_name = "Al", last_name = "Buyer", email = "al@x", phone = "1" }, 1));
+        { id = 1, customer_id = 1, first_name = "Al", last_name = "Buyer", email = "al@x", phone = "1" }, SystemUsers.ServiceUserGuid));
 
         AddProduct(1, "FG-1", "Gearbox Assembly", "Finished Goods");
         AddProduct(2, "RM-2", "Gear, 12-tooth", "Components");
 
-        // Two orders attributed to Jane (created_by == her external_id), left open/unshipped-ish.
+        // Two orders attributed to Jane (created_by == her User.guid), left open/unshipped-ish.
         AddOrder(100, 1, new DateOnly(2026, 3, 1), 1000m, (1, 10, 100m), (2, 5, 100m));
         AddOrder(101, 1, new DateOnly(2026, 4, 1), 500m, (1, 5, 100m));
         await _Context.SaveChangesAsync();
@@ -68,33 +70,33 @@ public class AdditionalReportsTests
             id = 300, order_header_id = 100, shipment_number = 6001, address_id = 0,
             ship_via = "Ground", freight_carrier = "carrier_ups", units_shipped = 4,
             is_complete = true, completed_on = new DateTime(2026, 5, 1),
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
         _Context.ShipmentHeaders.Add(shipment);
         await _Context.SaveChangesAsync();
 
         _Context.ShipmentLines.Add(CommonDataHelper<ShipmentLine>.FillCommonFields(new ShipmentLine
-        { id = 3001, shipment_header_id = 300, order_line_id = 1001, units_to_ship = 10, units_shipped = 4 }, 1));
+        { id = 3001, shipment_header_id = 300, order_line_id = 1001, units_to_ship = 10, units_shipped = 4 }, SystemUsers.ServiceUserGuid));
 
         // Carrier display name for Recently Shipped.
         _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore
-        { id = 900, key = "carrier_ups", value = "UPS", module_id = "freight" }, 1));
+        { id = 900, key = "carrier_ups", value = "UPS", module_id = "freight" }, SystemUsers.ServiceUserGuid));
 
         // Opportunities: one open, one closed (should be excluded), plus stage lookup.
         _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore
-        { id = 901, key = "opporunity_stage_proposal", value = "Proposal", module_id = "opp" }, 1));
+        { id = 901, key = "opporunity_stage_proposal", value = "Proposal", module_id = "opp" }, SystemUsers.ServiceUserGuid));
         _Context.Opportunities.AddRange(
             CommonDataHelper<Opportunity>.FillCommonFields(new Opportunity
-            { id = 10, opportunity_name = "Big Deal", customer_id = 1, contact_id = 1, amount = 50000m, stage = "opporunity_stage_proposal", win_chance = 60, expected_close = new DateOnly(2026, 12, 1), owner_id = SalespersonExternalId }, 1),
+            { id = 10, opportunity_name = "Big Deal", customer_id = 1, contact_id = 1, amount = 50000m, stage = "opporunity_stage_proposal", win_chance = 60, expected_close = new DateOnly(2026, 12, 1), owner_id = SalespersonUserId.ToString() }, SystemUsers.ServiceUserGuid),
             CommonDataHelper<Opportunity>.FillCommonFields(new Opportunity
-            { id = 11, opportunity_name = "Old Won Deal", customer_id = 1, contact_id = 1, amount = 90000m, stage = "opporunity_stage_closed_won", win_chance = 100, expected_close = new DateOnly(2026, 1, 1), owner_id = SalespersonExternalId }, 1));
+            { id = 11, opportunity_name = "Old Won Deal", customer_id = 1, contact_id = 1, amount = 90000m, stage = "opporunity_stage_closed_won", win_chance = 100, expected_close = new DateOnly(2026, 1, 1), owner_id = SalespersonUserId.ToString() }, SystemUsers.ServiceUserGuid));
 
         // Purchasing: a critical vendor with an open PO.
         _Context.Vendors.Add(CommonDataHelper<Vendor>.FillCommonFields(new Vendor
-        { id = 30, vendor_number = 30, vendor_name = "Global Components Co.", address_id = 0, phone = "555-1", general_email = "sales@global.example", category = "RM", is_critial_vendor = true }, 1));
+        { id = 30, vendor_number = 30, vendor_name = "Global Components Co.", address_id = 0, phone = "555-1", general_email = "sales@global.example", category = "RM", is_critial_vendor = true }, SystemUsers.ServiceUserGuid));
         _Context.Vendors.Add(CommonDataHelper<Vendor>.FillCommonFields(new Vendor
-        { id = 31, vendor_number = 31, vendor_name = "Non Critical Co.", address_id = 0, phone = "555-2", category = "RM", is_critial_vendor = false }, 1));
+        { id = 31, vendor_number = 31, vendor_name = "Non Critical Co.", address_id = 0, phone = "555-2", category = "RM", is_critial_vendor = false }, SystemUsers.ServiceUserGuid));
         _Context.PurchaseOrderHeaders.Add(CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader
-        { id = 200, vendor_id = 30, po_type = "St", po_number = 4001, price = 750m, tax = 50m, is_complete = false }, 1));
+        { id = 200, vendor_id = 30, po_type = "Q", po_number = 4001, price = 750m, tax = 50m, is_complete = false }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         _Reports = new ReportService(new IReportGenerator[]
@@ -111,18 +113,18 @@ public class AdditionalReportsTests
     private void AddProduct(int id, string sku, string name, string category)
     {
         _Context.Products.Add(CommonDataHelper<Product>.FillCommonFields(new Product
-        { id = id, category = category, product_class = "P", identifier1 = sku, product_name = name, internal_description = name }, 1));
+        { id = id, category = category, product_class = "P", identifier1 = sku, product_name = name, internal_description = name }, SystemUsers.ServiceUserGuid));
     }
 
     private void AddOrder(int id, int customerId, DateOnly date, decimal price, params (int productId, int qty, decimal price)[] lines)
     {
-        // created_by is set to Jane's external_id so Top Salespeople attributes these to her.
+        // created_by is set to Jane's User.guid so Top Salespeople attributes these to her.
         _Context.OrderHeaders.Add(CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader
         {
             id = id, order_number = id, customer_id = customerId, billing_address_id = 0, ship_to_address_id = 0,
-            shipping_method = "Ground", order_type = "St", pay_method = "Net Terms",
+            shipping_method = "Ground", order_type = "Q", pay_method = "Net Terms",
             order_date = date, required_date = date.AddDays(14), price = price,
-        }, SalespersonExternalId));
+        }, SalespersonUserGuid));
 
         var lineNo = 1;
         foreach (var l in lines)
@@ -136,7 +138,7 @@ public class AdditionalReportsTests
                 line_description = $"Line {l.productId}",
                 quantity = l.qty,
                 unit_price = l.price,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
         }
     }
 

@@ -14,6 +14,8 @@ import SessionStorage from "./session-storage";
 
 export class CustomerComboboxParams
 {
+    /** Id of a visible label element that names the input (for pages without a Field.Label). */
+    ariaLabelledBy?: string;
     dbKey: any;
     onChange: any;
     control?: Control<any>;
@@ -30,7 +32,7 @@ export interface CustomerComboboxRef {
 }
 
 const CustomerCombobox = forwardRef<CustomerComboboxRef, CustomerComboboxParams>(
-    ({dbKey, onChange, control, name, error, disabled, onValidationChange}, ref) => {
+    ({dbKey, onChange, control, name, error, disabled, onValidationChange, ariaLabelledBy}, ref) => {
         const userId = SessionStorage.getUserId();
         const sessionId = SessionStorage.getSession();
         const auth = useAuth();
@@ -204,7 +206,7 @@ const CustomerCombobox = forwardRef<CustomerComboboxRef, CustomerComboboxParams>
                 disabled={disabled}
             >
                 <Combobox.Control>
-                <Combobox.Input placeholder="Type to search" />
+                <Combobox.Input placeholder="Type to search" aria-labelledby={ariaLabelledBy} />
                 <Combobox.IndicatorGroup>
                     <Combobox.ClearTrigger />
                     <Combobox.Trigger />

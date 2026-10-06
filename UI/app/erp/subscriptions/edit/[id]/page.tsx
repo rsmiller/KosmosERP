@@ -19,6 +19,7 @@ import { CurrencyHelper } from '@/helpers/CurrencyHelper';
 import PageActionsComponent from '@/components/page-actions';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
+import { formatDateOnly } from '@/lib/date-only';
 
 function EditSubscriptionsPage() {
     const auth = useAuth();
@@ -41,7 +42,7 @@ function EditSubscriptionsPage() {
         
     const [selectedValue, setSelectedValue] = useState<string>();
     const [selectedItem, setSelectedItem] = useState<any[]>([]);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
 
     const thevalues = [
         { label: "7 Days", value: "7" },
@@ -150,7 +151,7 @@ function EditSubscriptionsPage() {
     {
         if(date)
         {
-            return format(date, 'MM-dd-yyyy');
+            return formatDateOnly(date, 'MM-dd-yyyy');
         }
         else
         {
@@ -213,11 +214,11 @@ function EditSubscriptionsPage() {
 
         if(valid)
         {
-            canSave(true);
+            setFormValid(true);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
     }
 
@@ -325,10 +326,10 @@ function EditSubscriptionsPage() {
                 </DataList.Root>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md" className="chunky">
                     <DataList.Item>
-                        <DataList.ItemLabel>Start Date</DataList.ItemLabel>
+                        <DataList.ItemLabel id="edit-start-date-label">Start Date</DataList.ItemLabel>
                         <DataList.ItemValue>
                             <Field.Root invalid={IsDirty('start_date')} required={true}>
-                                <DatePicker 
+                                <DatePicker ariaLabelledBy="edit-start-date-label" 
                                     selected={getStartDate()}
                                     onChange={handleStartDateChange}
                                     dateFormat="MM/dd/yyyy"
@@ -404,7 +405,7 @@ function EditSubscriptionsPage() {
               <PageActionsComponent 
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick}
-                canSave={!saveable || !hasEditPermission}
+                saveDisabled={!formValid || !hasEditPermission}
                 canDelete={hasDeletePermission}
                 successSaved={successSaved}
                 failedSaved={failedSaved}

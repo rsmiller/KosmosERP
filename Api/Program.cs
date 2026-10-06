@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Hangfire;
 using Hangfire.MySql;
 using KosmosERP.Api;
@@ -202,7 +204,6 @@ builder.Services.AddMemoryServices();
 if (authenticationSettings.AuthenticationProvider.ToLower() == AuthenticiationProviders.Keycloak)
 {
     builder.Services.AddKeycloakAuthentication(authenticationSettings);
-    //builder.Services.AddAuthorization();
 }
 else
 {
@@ -211,9 +212,19 @@ else
 
 builder.Services.AddScoped<IAuthenticationFactory, AuthenticationFactory>();
 
-// Custom authorization seam for [ERPAuthorize]. Defers to the default claim/role
-// check until ErpCustomAuthorizationHandler is implemented.
+// Default-deny: every endpoint requires a signed-in user unless it opts out with
+// [AllowAnonymous]. [ERPAuthorize] then applies module/admin permission rules on top.
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+});
+
+// [ERPAuthorize] checks database users against their role permissions; users not in
+// the database (e.g. Keycloak) fall back to the attribute's role-claim check.
 builder.Services.AddScoped<IERPAuthorizationHandler, ErpCustomAuthorizationHandler>();
+
+// Adds the caller's User.guid as a claim; controllers read it as CurrentUserId.
+builder.Services.AddScoped<IClaimsTransformation, ErpUserClaimsTransformation>();
 
 
 var app = builder.Build();
@@ -280,7 +291,8 @@ if (activated_mem_cache != null)
 // Add global exception handler
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
-app.MapOpenApi();
+// The OpenAPI document stays public so Swagger UI can load it (it lists routes, not data).
+app.MapOpenApi().AllowAnonymous();
 app.MapSwagger().RequireAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI(options =>

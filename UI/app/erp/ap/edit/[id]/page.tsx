@@ -62,7 +62,7 @@ function EditAPPage() {
   const [headerModel, setHeaderModel] = useState<APInvoiceHeaderDto>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [saveable, setSaveable] = useState(false);
+  const [formValid, setFormValid] = useState(false);
   const [successSaved, setSuccessSaved] = useState(false);
   const [failedSaved, setFailedSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -271,7 +271,7 @@ function EditAPPage() {
                 setRowAPData(edits);
               }
               
-              setSaveable(true);
+              setFormValid(true);
             } else {
               setError('Failed to load AP invoice');
             }
@@ -548,7 +548,7 @@ function EditAPPage() {
     const hasRequiredFields = Boolean(watch('invoice_number') && watch('vendor_id'));
     const allValid = vendorValid && hasRequiredFields;
 
-    setSaveable(allValid);
+    setFormValid(allValid);
   }
 
 
@@ -614,19 +614,20 @@ function EditAPPage() {
                 <div><h3>Invoice</h3></div>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                   <DataList.Item>
-                    <DataList.ItemLabel>Invoice Number</DataList.ItemLabel>
+                    <DataList.ItemLabel id="ap-invoice-number-label">Invoice Number</DataList.ItemLabel>
                     <DataList.ItemValue>
                       <Field.Root required={true} invalid={IsDirty('invoice_number')}>
-                        <Input  {...register('invoice_number')} />
+                        <Input aria-labelledby="ap-invoice-number-label" {...register('invoice_number')} />
                       </Field.Root>
                     </DataList.ItemValue>
                   </DataList.Item>
                 </DataList.Root>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                   <DataList.Item>
-                    <DataList.ItemLabel>Vendor Name</DataList.ItemLabel>
+                    <DataList.ItemLabel id="ap-vendor-label">Vendor Name</DataList.ItemLabel>
                     <DataList.ItemValue>
                       <VendorCombobox 
+                          ariaLabelledBy="ap-vendor-label"
                           ref={vendorComboboxRef}
                           dbKey={watch('vendor_id') || 0}
                           control={control}
@@ -641,9 +642,9 @@ function EditAPPage() {
                 </DataList.Root>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                   <DataList.Item>
-                    <DataList.ItemLabel>Invoice Date</DataList.ItemLabel>
+                    <DataList.ItemLabel id="ap-invoice-date-label">Invoice Date</DataList.ItemLabel>
                     <DataList.ItemValue>
-                      <DatePicker 
+                      <DatePicker ariaLabelledBy="ap-invoice-date-label" 
                           selected={getInvoiceDate()}
                           onChange={handleInvoiceDateChange}
                           dateFormat="MM/dd/yyyy"
@@ -655,9 +656,9 @@ function EditAPPage() {
                 </DataList.Root>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                   <DataList.Item>
-                    <DataList.ItemLabel>Received Date</DataList.ItemLabel>
+                    <DataList.ItemLabel id="ap-received-date-label">Received Date</DataList.ItemLabel>
                     <DataList.ItemValue>
-                       <DatePicker 
+                       <DatePicker ariaLabelledBy="ap-received-date-label" 
                           selected={getReceivedDate()}
                           onChange={handleReceivedDateChange}
                           dateFormat="MM/dd/yyyy"
@@ -668,9 +669,9 @@ function EditAPPage() {
                 </DataList.Root>
                 <DataList.Root size="lg" orientation="horizontal" divideY="1px" maxW="md">
                   <DataList.Item>
-                    <DataList.ItemLabel>Due Date</DataList.ItemLabel>
+                    <DataList.ItemLabel id="ap-due-date-label">Due Date</DataList.ItemLabel>
                     <DataList.ItemValue>
-                      <DatePicker 
+                      <DatePicker ariaLabelledBy="ap-due-date-label" 
                           selected={getDueDate()}
                           onChange={handleDueDateChange}
                           dateFormat="MM/dd/yyyy"
@@ -789,7 +790,7 @@ function EditAPPage() {
 
             <GridItem colSpan={5} >
               <PageActionsComponent 
-                canSave={!saveable || !hasEditPermission} 
+                saveDisabled={!formValid || !hasEditPermission} 
                 canDelete={hasDeletePermission}
                 onSave={handleSaveClick} 
                 onDelete={handleDeleteClick} 

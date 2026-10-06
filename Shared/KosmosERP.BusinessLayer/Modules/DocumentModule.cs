@@ -67,7 +67,7 @@ public class DocumentUploadModule : BaseERPModule, IDocumentUploadModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Document Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 

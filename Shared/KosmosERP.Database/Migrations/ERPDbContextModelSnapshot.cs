@@ -1694,15 +1694,15 @@ namespace KosmosERP.Database.Migrations
                         {
                             id = 1,
                             category_name = "Accounting",
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             guid = "dc6bd3b8-962b-4d12-8c84-588fd8928695",
                             internal_category_name = "accounting",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
@@ -1710,15 +1710,15 @@ namespace KosmosERP.Database.Migrations
                         {
                             id = 2,
                             category_name = "Sales",
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             guid = "5d3fb88f-43fe-41c4-8807-be244cbebda7",
                             internal_category_name = "sales",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
@@ -1726,15 +1726,15 @@ namespace KosmosERP.Database.Migrations
                         {
                             id = 3,
                             category_name = "Customers",
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             guid = "57225634-3e9f-46c7-bd27-48cbf4511d26",
                             internal_category_name = "customer",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
@@ -1742,15 +1742,15 @@ namespace KosmosERP.Database.Migrations
                         {
                             id = 4,
                             category_name = "Service",
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             guid = "c668a5a9-4c57-4219-be3d-93e8c995a4c9",
                             internal_category_name = "service",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
@@ -1758,15 +1758,15 @@ namespace KosmosERP.Database.Migrations
                         {
                             id = 5,
                             category_name = "Manufacturing",
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             guid = "0a636bf2-51a6-407d-b885-a366f0b2013c",
                             internal_category_name = "manufacturing",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
@@ -1774,15 +1774,15 @@ namespace KosmosERP.Database.Migrations
                         {
                             id = 6,
                             category_name = "Engineering",
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             guid = "c3286967-5285-4ea1-a78e-46f18c9ec2b9",
                             internal_category_name = "engineering",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 312, DateTimeKind.Utc).AddTicks(937),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         });
@@ -1866,8 +1866,8 @@ namespace KosmosERP.Database.Migrations
                         new
                         {
                             id = 1,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "AR Invoice",
@@ -1875,16 +1875,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "ar_invoice",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 2,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "AP Invoice",
@@ -1892,16 +1892,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "ap_invoice",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 3,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "Tax Exempt Form",
@@ -1909,16 +1909,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "tax_exempt_form",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 4,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "Customer EIN/TIN Form",
@@ -1926,16 +1926,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "customer_formation_form",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 5,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "PO Receive Upload",
@@ -1943,16 +1943,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "po_receive_upload",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 6,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "CAD Drawings",
@@ -1960,16 +1960,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "cad_drawings",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 7,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "Service Contracts",
@@ -1977,16 +1977,16 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "service_constracts",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 8,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             friendly_name = "Internal Price Lists",
@@ -1994,8 +1994,8 @@ namespace KosmosERP.Database.Migrations
                             internal_name = "internal_price_listes",
                             is_deleted = false,
                             requires_approval = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 292, DateTimeKind.Utc).AddTicks(1978),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         });
@@ -2069,128 +2069,128 @@ namespace KosmosERP.Database.Migrations
                         new
                         {
                             id = 1,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 1,
                             document_upload_object_id = 1,
                             guid = "bff44e3f-d330-49ea-ae04-a310b30e362c",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 2,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 1,
                             document_upload_object_id = 2,
                             guid = "96bf8fab-3095-4617-87f0-15db6a97f817",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 3,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 3,
                             document_upload_object_id = 3,
                             guid = "dd555129-83da-4b71-a50f-9102792487d1",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 4,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 3,
                             document_upload_object_id = 4,
                             guid = "cdd23bbe-5e33-41c8-9eab-c8c1f383ec02",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 5,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 5,
                             document_upload_object_id = 5,
                             guid = "03230d3a-f849-459a-b444-bcaa4e3abb18",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 6,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 6,
                             document_upload_object_id = 6,
                             guid = "8a20d9ee-5cf2-4402-8310-c4e607457377",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 7,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 4,
                             document_upload_object_id = 7,
                             guid = "906df905-1bd1-4a9f-9ba4-427037998aec",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         },
                         new
                         {
                             id = 8,
-                            created_by = "1",
-                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            created_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            created_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             created_on_string = "2026-09-18 15:20:26Z",
                             created_on_timezone = "-07:00",
                             document_upload_category_id = 2,
                             document_upload_object_id = 8,
                             guid = "264ab60a-6aef-41fd-adcb-fba3265cb572",
                             is_deleted = false,
-                            updated_by = "1",
-                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 310, DateTimeKind.Utc).AddTicks(3450),
+                            updated_by = "6b6f736d-6f73-4000-8000-000000000001",
+                            updated_on = new DateTime(2026, 9, 18, 15, 20, 26, 0, DateTimeKind.Utc),
                             updated_on_string = "2026-09-18 15:20:26Z",
                             updated_on_timezone = "-07:00"
                         });
@@ -3265,6 +3265,73 @@ namespace KosmosERP.Database.Migrations
                     b.HasIndex("read");
 
                     b.ToTable("message_queue", (string)null);
+                });
+
+            modelBuilder.Entity("KosmosERP.Database.Models.Module", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("created_by")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("created_on")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+                    b.Property<string>("created_on_string")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("created_on_timezone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("deleted_by")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("deleted_on")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("deleted_on_string")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("deleted_on_timezone")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("is_deleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("module_id")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("module_name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("updated_by")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("updated_on")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+                    b.Property<string>("updated_on_string")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("updated_on_timezone")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("id");
+
+                    b.ToTable("modules", (string)null);
                 });
 
             modelBuilder.Entity("KosmosERP.Database.Models.ModulePermission", b =>
@@ -6614,13 +6681,6 @@ namespace KosmosERP.Database.Migrations
 
             modelBuilder.Entity("KosmosERP.Database.Models.OrderHeader", b =>
                 {
-                    b.HasOne("KosmosERP.Database.Models.Payment", null)
-                        .WithMany("order_headers")
-                        .HasForeignKey("id")
-                        .HasPrincipalKey("order_header_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("KosmosERP.Database.Models.Address", "ship_to_address")
                         .WithMany()
                         .HasForeignKey("ship_to_address_id")
@@ -6645,6 +6705,15 @@ namespace KosmosERP.Database.Migrations
                         .WithMany("attributes")
                         .HasForeignKey("order_line_id")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KosmosERP.Database.Models.Payment", b =>
+                {
+                    b.HasOne("KosmosERP.Database.Models.OrderHeader", null)
+                        .WithMany()
+                        .HasForeignKey("order_header_id")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -6928,11 +6997,6 @@ namespace KosmosERP.Database.Migrations
             modelBuilder.Entity("KosmosERP.Database.Models.OrderLine", b =>
                 {
                     b.Navigation("attributes");
-                });
-
-            modelBuilder.Entity("KosmosERP.Database.Models.Payment", b =>
-                {
-                    b.Navigation("order_headers");
                 });
 
             modelBuilder.Entity("KosmosERP.Database.Models.Product", b =>

@@ -227,7 +227,7 @@ function SubscriptionListComponent({customer_id, onChange}: SubscriptionListComp
                           <Dialog.Title>New Subscription</Dialog.Title>
                       </Dialog.Header>
                       <Dialog.Body>
-                          <SalesOrderSelectorComponent customer_id={customer_id} order_header_id="" onChange={(model: any) => { receiveSubscriptionModel(model) }}/>
+                          <SalesOrderSelectorComponent portalled={false} customer_id={customer_id} order_header_id="" onChange={(model: any) => { receiveSubscriptionModel(model) }}/>
                       </Dialog.Body>
                       <Dialog.Footer>
                           <Dialog.ActionTrigger asChild>

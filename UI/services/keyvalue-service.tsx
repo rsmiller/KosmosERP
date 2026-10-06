@@ -2,6 +2,13 @@ import { KeyValueCreateCommand, KeyValueDeleteCommand, KeyValueDto, KeyValueEdit
 import axiosInstance from "./axios-instance";
 import { ApiResponse, PagedApiResponse } from "@/models/base-models";
 
+/** Lookup module ids (Shared/KosmosERP.Models/KeyValueIds.cs). */
+export const KeyValueModuleIds = {
+  PaymentTerms: "93bf02ec-5578-4aa4-a45b-f82962adf4bd",
+  /** Production order statuses (KeyValueIds.ProductionStatuses; also the production order module id). */
+  ProductionStatuses: "97dd4b13-ff15-47ff-955d-5e957644cffd",
+} as const;
+
 export const keyValueService = {
   async GetDtoByModule(module_id: string, token: string): Promise<ApiResponse<KeyValueDto[]>> {
     const response = await axiosInstance(token).get<ApiResponse<KeyValueDto[]>>(`/api/v1/KeyValue/GetKeyValuesByModule?module_id=${module_id}`);
@@ -37,16 +44,12 @@ export const keyValueService = {
           module_name: "Product Category"
         },
         {
-          module_id: "f157469e-5e5c-4a5b-b071-89a28b2a0310",
-          module_name: "Production Status"
-        },
-        {
           module_id: "0c3959c3-15dc-44ab-8e2c-9b9e2773e65f",
           module_name: "Opportunity Stage"
         },
         {
           module_id: "2a2d1004-5283-40ef-96fd-8cc30c65cefa",
-          module_name: "Frieght Company"
+          module_name: "Freight Carrier"
         },
         {
           module_id: "eea9df53-1b36-41ea-94fa-31420315ff60",

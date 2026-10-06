@@ -15,6 +15,7 @@ import { MdEditDocument, MdOutlinePageview } from 'react-icons/md';
 import { format } from 'date-fns';
 import { useAuth } from '@/lib/auth/auth-context';
 import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
+import { formatDateOnly } from '@/lib/date-only';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -120,7 +121,7 @@ function SubscriptionsPage() {
           return "";
       }
 
-      return format(dateString || "", 'MM/dd/yyyy');
+      return formatDateOnly(dateString, 'MM/dd/yyyy');
   }
 
   // Column Definitions: Defines & controls grid columns.

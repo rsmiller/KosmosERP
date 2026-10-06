@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using KosmosERP.Models;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
 using KosmosERP.Database.Models;
@@ -36,7 +37,7 @@ public class DatabaseTests
             department = "1",
             guid = Guid.NewGuid().ToString(),
             is_admin = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         _Context.Users.Add(baseUser);
         _Context.SaveChanges();
@@ -56,12 +57,12 @@ public class DatabaseTests
         var roleModel1 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ExampleRole",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var roleModel2 = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "AnotherRole",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Roles.AddAsync(roleModel1);
         await _Context.Roles.AddAsync(roleModel2);
@@ -71,13 +72,13 @@ public class DatabaseTests
         {
             role_id = roleModel1.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var userRole2 = CommonDataHelper<UserRole>.FillCommonFields(new UserRole()
         {
             role_id = roleModel2.id,
             user_id = _User.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.UserRoles.AddAsync(userRole1);
         await _Context.UserRoles.AddAsync(userRole2);
@@ -97,7 +98,7 @@ public class DatabaseTests
         var roleModel = CommonDataHelper<Role>.FillCommonFields(new Role()
         {
             name = "ReadEditModuleRole",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var moduleReadModel = CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
         {
@@ -110,7 +111,7 @@ public class DatabaseTests
             delete = false,
             write = false,
             is_active = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var moduleEditModel = CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
         {
@@ -123,7 +124,7 @@ public class DatabaseTests
             delete = false,
             write = false,
             is_active = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Roles.AddAsync(roleModel);
         await _Context.ModulePermissions.AddAsync(moduleReadModel);
@@ -140,14 +141,14 @@ public class DatabaseTests
             module_id = _ModuleId,
             role_id = role.id,
             read = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var rolePermissionEditModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_id = _ModuleId,
             role_id = role.id,
             edit = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
 
         await _Context.RolePermissions.AddAsync(rolePermissionReadModel);
@@ -181,7 +182,7 @@ public class DatabaseTests
             created_on = DateTime.UtcNow,
             updated_by = _UserId,
             updated_on = DateTime.UtcNow
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var moduleWriteModel = CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
         {
@@ -194,7 +195,7 @@ public class DatabaseTests
             delete = false,
             write = true,
             is_active = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var moduleDeleteModel = CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
         {
@@ -207,7 +208,7 @@ public class DatabaseTests
             delete = true,
             write = false,
             is_active = true
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Roles.AddAsync(roleModel);
         await _Context.ModulePermissions.AddAsync(moduleWriteModel);
@@ -224,14 +225,14 @@ public class DatabaseTests
             module_id = _ModuleId,
             role_id = role.id,
             write = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var rolePermissionDeleteModel = CommonDataHelper<RolePermission>.FillCommonFields(new RolePermission()
         {
             module_id = _ModuleId,
             role_id = role.id,
             delete = true,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
 
         await _Context.RolePermissions.AddAsync(rolePermissionWriteModel);
@@ -265,7 +266,7 @@ public class DatabaseTests
             state = "TX",
             postal_code = "77777",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
@@ -277,7 +278,7 @@ public class DatabaseTests
             phone = "123-456-7890",
             category = "Cat1",
             address_id = address_model.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Vendors.AddAsync(vendor_model);
         await _Context.SaveChangesAsync();
@@ -290,7 +291,7 @@ public class DatabaseTests
             identifier1 = "SKU-1",
             internal_description = "A product description",
             product_name = "A product",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Products.AddAsync(product_model);
         await _Context.SaveChangesAsync();
@@ -300,14 +301,14 @@ public class DatabaseTests
             product_id = product_model.id,
             attribute_name = "Weight",
             attribute_value = "10",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var product_attribute2 = CommonDataHelper<ProductAttribute>.FillCommonFields(new ProductAttribute()
         {
             product_id = product_model.id,
             attribute_name = "Length",
             attribute_value = "12",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.ProductAttributes.AddAsync(product_attribute1);
         await _Context.ProductAttributes.AddAsync(product_attribute2);
@@ -328,7 +329,7 @@ public class DatabaseTests
             phone = "123-456-7890",
             category = "Cat1",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Customers.AddAsync(customer_model);
         await _Context.SaveChangesAsync();
@@ -345,7 +346,7 @@ public class DatabaseTests
             created_on = DateTime.UtcNow,
             updated_by = _UserId,
             updated_on = DateTime.UtcNow
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var address_model2 = CommonDataHelper<Address>.FillCommonFields(new Address()
         {
@@ -354,7 +355,7 @@ public class DatabaseTests
             state = "OK",
             postal_code = "99999",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Addresses.AddAsync(address_model1);
         await _Context.Addresses.AddAsync(address_model2);
@@ -364,7 +365,7 @@ public class DatabaseTests
         {
             customer_id = customer_model.id,
             address_id = address_model1.id,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var customer_address_model2 = CommonDataHelper<CustomerAddress>.FillCommonFields(new CustomerAddress()
         {
@@ -374,7 +375,7 @@ public class DatabaseTests
             created_on = DateTime.UtcNow,
             updated_by = _UserId,
             updated_on = DateTime.UtcNow
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.CustomerAddresses.AddAsync(customer_address_model1);
         await _Context.CustomerAddresses.AddAsync(customer_address_model2);
@@ -395,7 +396,7 @@ public class DatabaseTests
             state = "TX",
             postal_code = "77777",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
@@ -411,7 +412,7 @@ public class DatabaseTests
             required_date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
             price = 1,
             tax = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
@@ -424,7 +425,7 @@ public class DatabaseTests
             line_number = 1,
             unit_price = 10,
             line_description = "ASDASDASDASD",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderLines.AddAsync(order_line);
         await _Context.SaveChangesAsync();
@@ -434,7 +435,7 @@ public class DatabaseTests
             order_line_id = order_line.id,
             attribute_name = "Weight",
             attribute_value = "10",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         var line_attribute2 = CommonDataHelper<OrderLineAttribute>.FillCommonFields(new OrderLineAttribute()
         {
@@ -445,7 +446,7 @@ public class DatabaseTests
             created_on = DateTime.UtcNow,
             updated_by = _UserId,
             updated_on = DateTime.UtcNow
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderLineAttributes.AddAsync(line_attribute1);
         await _Context.OrderLineAttributes.AddAsync(line_attribute2);
@@ -469,7 +470,7 @@ public class DatabaseTests
             invoice_total = 100,
             vendor_id = 1,
             memo = "ASDASDSD",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.APInvoiceHeaders.AddAsync(invoice_header_model);
         await _Context.SaveChangesAsync();
@@ -486,7 +487,7 @@ public class DatabaseTests
             line_total = 100,
             association_object_line_id = 1,
             qty_invoiced = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.APInvoiceLines.AddAsync(invoice_line_model);
         await _Context.SaveChangesAsync();
@@ -510,7 +511,7 @@ public class DatabaseTests
             required_date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
             price = 1,
             tax = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
@@ -523,7 +524,7 @@ public class DatabaseTests
             line_number = 1,
             unit_price = 10,
             line_description = "ASDASDASDASD",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderLines.AddAsync(order_line_model);
         await _Context.SaveChangesAsync();
@@ -536,7 +537,7 @@ public class DatabaseTests
             identifier1 = "SKU-1",
             internal_description = "A product description",
             product_name = "A product",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Products.AddAsync(product_model);
         await _Context.SaveChangesAsync();
@@ -552,7 +553,7 @@ public class DatabaseTests
             paid_on = DateOnly.FromDateTime(DateTime.UtcNow),
             is_taxable = true,
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.ARInvoiceHeaders.AddAsync(invoice_header_model);
         await _Context.SaveChangesAsync();
@@ -568,7 +569,7 @@ public class DatabaseTests
             order_qty = 10,
             invoice_qty = 10,
             line_total = 100,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.ARInvoiceLines.AddAsync(invoice_line_model);
         await _Context.SaveChangesAsync();
@@ -594,7 +595,7 @@ public class DatabaseTests
             required_date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
             price = 1,
             tax = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderHeaders.AddAsync(order_model);
         await _Context.SaveChangesAsync();
@@ -607,7 +608,7 @@ public class DatabaseTests
             line_number = 1,
             unit_price = 10,
             line_description = "ASDASDASDASD",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OrderLines.AddAsync(order_line_model);
         await _Context.SaveChangesAsync();
@@ -619,7 +620,7 @@ public class DatabaseTests
             state = "TX",
             postal_code = "77777",
             country = "USA",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
@@ -635,7 +636,7 @@ public class DatabaseTests
             ship_attn = "Hello",
             address_id = address_model.id,
             freight_charge_amount = 100,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.ShipmentHeaders.AddAsync(shipment_header_model);
         await _Context.SaveChangesAsync();
@@ -647,7 +648,7 @@ public class DatabaseTests
             units_shipped = 0,
             units_to_ship = 10,
 
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.ShipmentLines.AddAsync(shipment_line_model);
         await _Context.SaveChangesAsync();
@@ -673,7 +674,7 @@ public class DatabaseTests
             created_on = DateTime.UtcNow,
             updated_by = _UserId,
             updated_on = DateTime.UtcNow
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Addresses.AddAsync(address_model);
         await _Context.SaveChangesAsync();
@@ -684,7 +685,7 @@ public class DatabaseTests
             address_id = address_model.id,
             phone = "123-456-7890",
             category = "Cat1",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Vendors.AddAsync(vendor_model);
         await _Context.SaveChangesAsync();
@@ -697,7 +698,7 @@ public class DatabaseTests
             identifier1 = "SKU-1",
             internal_description = "A product description",
             product_name = "A product",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Products.AddAsync(product_model);
         await _Context.SaveChangesAsync();
@@ -709,7 +710,7 @@ public class DatabaseTests
             po_type = "R",
             revision_number = 2,
 
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.PurchaseOrderHeaders.AddAsync(purchase_order_model);
         await _Context.SaveChangesAsync();
@@ -725,7 +726,7 @@ public class DatabaseTests
             revision_number = 1,
             is_taxable = true,
             tax = 1.9M,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.PurchaseOrderLines.AddAsync(purchase_order_line);
         await _Context.SaveChangesAsync();
@@ -746,7 +747,7 @@ public class DatabaseTests
             po_number = 10002,
             po_type = "R",
             revision_number = 2,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.PurchaseOrderHeaders.AddAsync(purchase_order_model);
         await _Context.SaveChangesAsync();
@@ -762,7 +763,7 @@ public class DatabaseTests
             revision_number = 1,
             is_taxable = true,
             tax = 1.9M,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.PurchaseOrderLines.AddAsync(purchase_order_line);
         await _Context.SaveChangesAsync();
@@ -773,7 +774,7 @@ public class DatabaseTests
             purchase_order_id = purchase_order_line.id,
             units_ordered = 10,
             units_received = 2,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.PurchaseOrderReceiveHeaders.AddAsync(purchase_order_receive_model);
         await _Context.SaveChangesAsync();
@@ -784,7 +785,7 @@ public class DatabaseTests
             purchase_order_line_id = purchase_order_line.id,
             units_ordered = 10,
             units_received = 2,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.PurchaseOrderReceiveLines.AddAsync(purchase_order_receive_line);
         await _Context.SaveChangesAsync();
@@ -806,7 +807,7 @@ public class DatabaseTests
             phone = "123-456-7890",
             category = "Cat1",
             payment_terms = "payment_terms_net_15"
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Customers.AddAsync(customer_model);
         await _Context.SaveChangesAsync();
@@ -819,7 +820,7 @@ public class DatabaseTests
             title = "CEO",
             email = "test@test.com",
             cell_phone = "555-555-5555",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Contacts.AddAsync(contact_model);
         await _Context.SaveChangesAsync();
@@ -834,7 +835,7 @@ public class DatabaseTests
             stage = "Prospect",
             expected_close = DateOnly.FromDateTime(DateTime.UtcNow),
             owner_id = Guid.NewGuid().ToString(),
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.Opportunities.AddAsync(opportunity_model);
         await _Context.SaveChangesAsync();
@@ -846,7 +847,7 @@ public class DatabaseTests
             unit_price = 100.20M,
             line_number = 1,
             quantity = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.OpportunityLines.AddAsync(oppotunity_line);
         await _Context.SaveChangesAsync();
@@ -866,7 +867,7 @@ public class DatabaseTests
             friendly_name = "AP Invoice",
             internal_name = "ap_invoice",
             requires_approval = false,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.DocumentUploadObjects.AddAsync(document_upload_object);
         await _Context.SaveChangesAsync();
@@ -889,7 +890,7 @@ public class DatabaseTests
         {
             document_object_id = document_upload_object.id,
             rev_num = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.DocumentUploads.AddAsync(document_upload);
         await _Context.SaveChangesAsync();
@@ -901,7 +902,7 @@ public class DatabaseTests
             document_path = "https://asdkasdjasdk.com/Document.jpg",
             document_type = "UPLOAD",
             rev_num = 1,
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.DocumentUploadRevisions.AddAsync(document_revision);
         await _Context.SaveChangesAsync();
@@ -912,7 +913,7 @@ public class DatabaseTests
             document_upload_object_tag_id = document_upload_tag.id,
             tag_name = "PO Number",
             tag_value = "123442",
-        }, 1);
+        }, SystemUsers.ServiceUserGuid);
 
         await _Context.DocumentUploadRevisionsTags.AddAsync(document_revision_tag);
         await _Context.SaveChangesAsync();

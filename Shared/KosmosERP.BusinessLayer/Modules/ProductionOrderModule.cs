@@ -64,7 +64,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Production Order Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -72,88 +72,30 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
         }
 
 
-        var submitted_status = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_submitted").SingleOrDefault();
-        var pulled_status = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_pulled").SingleOrDefault();
-        var pulled_wip = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_wip").SingleOrDefault();
-        var pulled_qc = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_qc").SingleOrDefault();
-        var pulled_complete = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_complete").SingleOrDefault();
-
-        var ready_to_ship = _Context.KeyValueStores.Where(m => m.module_id == this.ModuleIdentifier.ToString()
-                                    && m.key == "production_order_status_ready_to_ship").SingleOrDefault();
-
-        if (submitted_status == null)
+        // Production order statuses, in workflow order (keys: ProductionOrderStatus).
+        // Only missing ones are added, so admins can rename them in Lists.
+        var statuses = new (string key, string value)[]
         {
+            (ProductionOrderStatus.Submitted, "Submitted"),
+            (ProductionOrderStatus.PartsPulled, "Parts Pulled"),
+            (ProductionOrderStatus.WorkInProgress, "Work In Progress"),
+            (ProductionOrderStatus.QualityCheck, "Quality Check"),
+            (ProductionOrderStatus.Complete, "Complete"),
+            (ProductionOrderStatus.ReadyToShip, "Ready To Ship"),
+            (ProductionOrderStatus.Canceled, "Canceled"),
+        };
+
+        foreach (var (key, value) in statuses)
+        {
+            if (_Context.KeyValueStores.Any(m => m.module_id == KeyValueIds.ProductionStatuses && m.key == key))
+                continue;
+
             _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
             {
-                key = "production_order_status_submitted",
-                value = "Submitted",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_status == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_pulled",
-                value = "Parts Pulled",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_wip == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_wip",
-                value = "Work In Progress",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_qc == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_qc",
-                value = "Quality Check",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (pulled_complete == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_complete",
-                value = "Complete",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
-
-            _Context.SaveChanges();
-        }
-
-        if (ready_to_ship == null)
-        {
-            _Context.KeyValueStores.Add(CommonDataHelper<KeyValueStore>.FillCommonFields(new KeyValueStore()
-            {
-                key = "production_order_status_ready_to_ship",
-                value = "Ready To Ship",
-                module_id = this.ModuleIdentifier.ToString(),
-            }, 1));
+                key = key,
+                value = value,
+                module_id = KeyValueIds.ProductionStatuses,
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
         }
@@ -298,7 +240,7 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             return new Response<ProductionOrderHeaderDto>("Production Order Header not found", ResultCode.NotFound);
 
 
-        if (!String.IsNullOrEmpty(existingEntity.status) && existingEntity.status != commandModel.status)
+        if (!String.IsNullOrEmpty(commandModel.status) && existingEntity.status != commandModel.status)
             existingEntity.status = commandModel.status;
 
         if (existingEntity.priority_id != commandModel.priority_id && commandModel.priority_id.HasValue)
@@ -341,13 +283,13 @@ public class ProductionOrderModule : BaseERPModule, IProductionOrderModule
             return new Response<ProductionOrderLineDto>("Production Order Line not found", ResultCode.NotFound);
 
 
-        if (existingEntity.line_number != commandModel.quantity && commandModel.line_number.HasValue)
+        if (existingEntity.line_number != commandModel.line_number && commandModel.line_number.HasValue)
             existingEntity.line_number = commandModel.line_number.Value;
 
         if (existingEntity.quantity != commandModel.quantity && commandModel.quantity.HasValue)
             existingEntity.quantity = commandModel.quantity.Value;
 
-        if (!String.IsNullOrEmpty(existingEntity.status) && existingEntity.status != commandModel.status)
+        if (!String.IsNullOrEmpty(commandModel.status) && existingEntity.status != commandModel.status)
             existingEntity.status = commandModel.status;
 
         if (commandModel.started_on.HasValue && existingEntity.started_on != commandModel.started_on)

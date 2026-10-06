@@ -1,4 +1,5 @@
 using System.Text;
+using KosmosERP.Models;
 using Microsoft.EntityFrameworkCore;
 using KosmosERP.BusinessLayer.Helpers;
 using KosmosERP.Database;
@@ -33,12 +34,12 @@ public class SalesAnalyticsReportTests
             company_city = "Springfield", company_state = "IL", company_zip = "62701", company_country = "USA",
             company_phone = "555-0100", company_general_email = "info@kosmos.example", company_ar_email = "ar@kosmos.example",
             company_website = "kosmos.example", tax_id = "12-3456789", fiscal_year_start = "01-01",
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         _Context.Customers.Add(CommonDataHelper<Customer>.FillCommonFields(new Customer
-        { id = 1, customer_number = 1, customer_name = "Acme Widgets LLC", phone = "1", accounting_email = "a@x", category = "B", payment_terms = "NET 30" }, 1));
+        { id = 1, customer_number = 1, customer_name = "Acme Widgets LLC", phone = "1", accounting_email = "a@x", category = "B", payment_terms = "NET 30" }, SystemUsers.ServiceUserGuid));
         _Context.Customers.Add(CommonDataHelper<Customer>.FillCommonFields(new Customer
-        { id = 2, customer_number = 2, customer_name = "Beta Industries", phone = "1", accounting_email = "b@x", category = "B", payment_terms = "NET 30" }, 1));
+        { id = 2, customer_number = 2, customer_name = "Beta Industries", phone = "1", accounting_email = "b@x", category = "B", payment_terms = "NET 30" }, SystemUsers.ServiceUserGuid));
 
         AddProduct(1, "FG-1", "Gearbox Assembly", "Finished Goods");
         AddProduct(2, "RM-2", "Gear, 12-tooth", "Components");
@@ -50,16 +51,16 @@ public class SalesAnalyticsReportTests
 
         // Purchasing: one open PO with partial receipt.
         _Context.Vendors.Add(CommonDataHelper<Vendor>.FillCommonFields(new Vendor
-        { id = 30, vendor_number = 30, vendor_name = "Global Components Co.", address_id = 0, phone = "1", category = "RM" }, 1));
+        { id = 30, vendor_number = 30, vendor_name = "Global Components Co.", address_id = 0, phone = "1", category = "RM" }, SystemUsers.ServiceUserGuid));
         _Context.PurchaseOrderHeaders.Add(CommonDataHelper<PurchaseOrderHeader>.FillCommonFields(new PurchaseOrderHeader
-        { id = 200, vendor_id = 30, po_type = "Standard", po_number = 4001, price = 750m, tax = 0m, is_complete = false }, 1));
+        { id = 200, vendor_id = 30, po_type = "Q", po_number = 4001, price = 750m, tax = 0m, is_complete = false }, SystemUsers.ServiceUserGuid));
         _Context.PurchaseOrderLines.AddRange(
             CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine
-            { id = 2001, purchase_order_header_id = 200, product_id = 1, line_number = 1, description = "Steel Rod", quantity = 50, unit_price = 10m }, 1),
+            { id = 2001, purchase_order_header_id = 200, product_id = 1, line_number = 1, description = "Steel Rod", quantity = 50, unit_price = 10m }, SystemUsers.ServiceUserGuid),
             CommonDataHelper<PurchaseOrderLine>.FillCommonFields(new PurchaseOrderLine
-            { id = 2002, purchase_order_header_id = 200, product_id = 2, line_number = 2, description = "Bearing", quantity = 25, unit_price = 10m }, 1));
+            { id = 2002, purchase_order_header_id = 200, product_id = 2, line_number = 2, description = "Bearing", quantity = 25, unit_price = 10m }, SystemUsers.ServiceUserGuid));
         _Context.PurchaseOrderReceiveHeaders.Add(CommonDataHelper<PurchaseOrderReceiveHeader>.FillCommonFields(new PurchaseOrderReceiveHeader
-        { id = 500, purchase_order_id = 200, units_ordered = 75, units_received = 30, is_complete = false }, 1));
+        { id = 500, purchase_order_id = 200, units_ordered = 75, units_received = 30, is_complete = false }, SystemUsers.ServiceUserGuid));
         await _Context.SaveChangesAsync();
 
         _Reports = new ReportService(new IReportGenerator[]
@@ -73,7 +74,7 @@ public class SalesAnalyticsReportTests
     private void AddProduct(int id, string sku, string name, string category)
     {
         _Context.Products.Add(CommonDataHelper<Product>.FillCommonFields(new Product
-        { id = id, category = category, product_class = "P", identifier1 = sku, product_name = name, internal_description = name }, 1));
+        { id = id, category = category, product_class = "P", identifier1 = sku, product_name = name, internal_description = name }, SystemUsers.ServiceUserGuid));
     }
 
     private void AddOrder(int id, int customerId, DateOnly date, decimal price, params (int productId, int qty, decimal price)[] lines)
@@ -81,9 +82,9 @@ public class SalesAnalyticsReportTests
         _Context.OrderHeaders.Add(CommonDataHelper<OrderHeader>.FillCommonFields(new OrderHeader
         {
             id = id, order_number = id, customer_id = customerId, billing_address_id = 0, ship_to_address_id = 0,
-            shipping_method = "Ground", order_type = "Standard", pay_method = "Net Terms",
+            shipping_method = "Ground", order_type = "Q", pay_method = "Net Terms",
             order_date = date, required_date = date.AddDays(14), price = price,
-        }, 1));
+        }, SystemUsers.ServiceUserGuid));
 
         var lineNo = 1;
         foreach (var l in lines)
@@ -97,7 +98,7 @@ public class SalesAnalyticsReportTests
                 line_description = $"Line {l.productId}",
                 quantity = l.qty,
                 unit_price = l.price,
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
         }
     }
 

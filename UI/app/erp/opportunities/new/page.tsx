@@ -50,7 +50,7 @@ function NewOpportunityPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -209,11 +209,11 @@ function NewOpportunityPage() {
             //console.log('winChanceValid: ', winChanceValid);
             //console.log('allValid: ', allValid);
 
-            canSave(!allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
     };
 
@@ -406,8 +406,8 @@ function NewOpportunityPage() {
 
                     <Stack gap="4" align="flex-start" maxW="md">
                         <Field.Root invalid={IsDirty('expected_close')} required={true}>
-                            <Field.Label><Field.RequiredIndicator /> Expected Close</Field.Label>
-                            <DatePicker 
+                            <Field.Label id="new-expected-close-label"><Field.RequiredIndicator /> Expected Close</Field.Label>
+                            <DatePicker ariaLabelledBy="new-expected-close-label" 
                                 selected={getExpirationDate()}
                                 onChange={handleExpectedCloseChange}
                                 dateFormat="MM/dd/yyyy"
@@ -446,9 +446,8 @@ function NewOpportunityPage() {
                     </GridItem>
                     <GridItem colSpan={5}></GridItem>
                     <GridItem colSpan={5}>
-                        <PageActionsComponent canSave={saveable && hasWritePermission} 
+                        <PageActionsComponent saveDisabled={!formValid || !hasWritePermission} 
                                                 onSave={handleSaveClick} 
-                                                onDelete={undefined} 
                                                 successSaved={successSaved}
                                                 failedSaved={failedSaved}/>
                     </GridItem>

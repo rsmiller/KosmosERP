@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from 'next/navigation';
+import { permissionsService, ERPModules, ERPModulePermission } from '@/services/permissions-service';
 import { PasswordInput } from '@/components/ui/password-input';
 import '../../../styles/page.component.css'
 import '../../../styles/tree-view.css'
@@ -22,6 +24,24 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 function AdminUserPage() {
     const auth = useAuth();
+    const router = useRouter();
+    const [hasAccess, setHasAccess] = useState(true);
+
+    // Administration pages are for admins only (the API enforces the same rule).
+    useEffect(() => {
+        if (auth.authenticated == false) return;
+
+        const hasPermission = permissionsService.HasPermission(
+            ERPModules.Admin,
+            ERPModulePermission.Read,
+            auth.roles || []
+        );
+
+        if (!hasPermission) {
+            setHasAccess(false);
+            router.push('/erp');
+        }
+    }, [auth.authenticated]);
     const { contains } = useFilter({ sensitivity: "base" })
 
     interface Node {
@@ -46,7 +66,7 @@ function AdminUserPage() {
     const [selectedRoleValue, setSelectedRoleValue] = useState<string>();
     const hasInitialized = useRef(false);
 
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [saveableAssociation, canSaveAssociation] = useState(false);
     
     const [successSaved, setSuccessSaved] = useState(false);
@@ -137,6 +157,9 @@ function AdminUserPage() {
     }
     
     useEffect(() => {
+        // Wait for auth: on a direct load the token isn't there on the first run.
+        if (auth.authenticated == false) return;
+
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
@@ -151,7 +174,7 @@ function AdminUserPage() {
             }
         });
 
-    }, []);
+    }, [auth.authenticated]);
 
     const treeItemClick = (treeItem: any) => {
         let result = userData?.children?.filter(m => m.id == treeItem.focusedValue);
@@ -313,7 +336,7 @@ function AdminUserPage() {
 
         const valid = isSelected && hasRequiredFields;
 
-        canSave(valid);
+        setFormValid(valid);
     }
     
     const IsDirty = (formName: any) => {
@@ -400,6 +423,10 @@ function AdminUserPage() {
         sortable: true
     };
 
+    if (!hasAccess) {
+        return <div>Redirecting...</div>;
+    }
+
     return (
         <div>
             <form onChange={DoValidityCheck}>
@@ -424,7 +451,7 @@ function AdminUserPage() {
                                 <h3>Users</h3>
                             </GridItem>
                             <GridItem colSpan={1} style={{textAlign: "right"}}>
-                                <Button colorPalette="blue" onClick={() => openNewUserDialog()}><MdAddCircle /></Button>
+                                <Button colorPalette="blue" aria-label="New User" onClick={() => openNewUserDialog()}><MdAddCircle /></Button>
                             </GridItem>
                         </Grid>
                         <TreeView.Root collection={collection} maxW="md" size="md" colorPalette="blue" onSelectionChange={treeItemClick}>
@@ -582,7 +609,7 @@ function AdminUserPage() {
                     <GridItem colSpan={5}>
                         <hr style={{ width: "100%", marginBottom: "25px", marginTop: "35px"}}/>
                         <div style={{width: "100%", textAlign: "center"}}>
-                            <Button type="button" colorPalette="blue" disabled={!saveable} onClick={handleSaveClick}>Save User</Button>
+                            <Button type="button" colorPalette="blue" disabled={!formValid} onClick={handleSaveClick}>Save User</Button>
                         </div>
                     </GridItem>
                 </Grid>
@@ -683,7 +710,8 @@ function AdminUserPage() {
                                     <Combobox.Trigger />
                                 </Combobox.IndicatorGroup>
                                 </Combobox.Control>
-                                <Portal>
+                                {/* Not portaled: inside a Dialog the options must render inside it (BUG-016). */}
+                                <Portal disabled>
                                     <Combobox.Positioner>
                                         <Combobox.Content>
                                         <Combobox.Empty>No items found</Combobox.Empty>

@@ -1,4 +1,5 @@
 using KosmosERP.BusinessLayer;
+using KosmosERP.Models;
 using KosmosERP.BusinessLayer.Interfaces;
 using KosmosERP.BusinessLayer.Models.Module.Payment.Command.Create;
 using KosmosERP.BusinessLayer.Modules;
@@ -67,7 +68,7 @@ public class PaymentsJob : IPaymentsJob
                                 {
                                     ar_invoice_header_id = invoice.id,
                                     order_header_id = invoice.order_header_id,
-                                    calling_user_id = "1",
+                                    calling_user_id = SystemUsers.ServiceUserGuid,
                                     payment_amount = payment.amount_received,
                                     transaction_method = payment.transaction_method,
                                     transaction_status = "succeeded",

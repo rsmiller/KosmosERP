@@ -62,7 +62,7 @@ public class ProductModule : BaseERPModule, IProductModule
             _Context.Roles.Add(CommonDataHelper<Role>.FillCommonFields(new Role()
             {
                 name = "Product Administrators",
-            }, 1));
+            }, SystemUsers.ServiceUserGuid));
 
             _Context.SaveChanges();
 
@@ -86,7 +86,7 @@ public class ProductModule : BaseERPModule, IProductModule
                     edit = false,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -98,7 +98,7 @@ public class ProductModule : BaseERPModule, IProductModule
                     edit = false,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -110,7 +110,7 @@ public class ProductModule : BaseERPModule, IProductModule
                     edit = true,
                     delete = false,
                     is_active = true
-                }, 1),
+                }, SystemUsers.ServiceUserGuid),
                 CommonDataHelper<ModulePermission>.FillCommonFields(new ModulePermission()
                 {
                     module_id = this.ModuleIdentifier.ToString(),
@@ -122,7 +122,7 @@ public class ProductModule : BaseERPModule, IProductModule
                     edit = false,
                     delete = true,
                     is_active = true
-                }, 1)
+                }, SystemUsers.ServiceUserGuid)
             });
 
             _Context.SaveChanges();

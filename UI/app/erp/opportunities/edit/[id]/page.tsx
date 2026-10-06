@@ -52,7 +52,6 @@ function EditOpportunityPage() {
     const [hasEditPermission, setHasEditPermission] = useState(false);
     const [hasDeletePermission, setHasDeletePermission] = useState(false);
 
-    const userId = SessionStorage.getUserId();
     const sessionId = SessionStorage.getSession();
 
     const [opportunity, setOpportunity] = useState<OpportunityDto | null>(null);
@@ -60,7 +59,7 @@ function EditOpportunityPage() {
     const [isWorking, setIsWorking] = useState(false);
     
     const [error, setError] = useState<string | null>(null);
-    const [saveable, canSave] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const [successSaved, setSuccessSaved] = useState(false);
     const [failedSaved, setFailedSaved] = useState(false);
 
@@ -259,7 +258,6 @@ function EditOpportunityPage() {
                   description: line.description,
                   quantity: line.quantity,
                   unit_price: line.unit_price,
-                  calling_user_id: Number(userId),
                   token: sessionId?.toString(),
                 }));
             
@@ -315,11 +313,11 @@ function EditOpportunityPage() {
             //console.log('winChanceValid: ', winChanceValid);
             //console.log('allValid: ', allValid);
 
-            canSave(!allValid);
+            setFormValid(allValid);
         }
         else
         {
-            canSave(false);
+            setFormValid(false);
         }
     };
 
@@ -539,8 +537,8 @@ function EditOpportunityPage() {
 
                     <Stack gap="4" align="flex-start" maxW="md">
                         <Field.Root invalid={IsDirty('expected_close')} required={true}>
-                            <Field.Label><Field.RequiredIndicator /> Expected Close</Field.Label>
-                            <DatePicker 
+                            <Field.Label id="edit-expected-close-label"><Field.RequiredIndicator /> Expected Close</Field.Label>
+                            <DatePicker ariaLabelledBy="edit-expected-close-label" 
                                 selected={getExpirationDate()}
                                 onChange={handleExpectedCloseChange}
                                 dateFormat="MM/dd/yyyy"
@@ -586,7 +584,7 @@ function EditOpportunityPage() {
                         </Tabs.Root>
                     </GridItem>
                     <GridItem colSpan={5}>
-                        <PageActionsComponent canSave={saveable && hasEditPermission} 
+                        <PageActionsComponent saveDisabled={!formValid || !hasEditPermission} 
                                                 canDelete={hasDeletePermission}
                                                 onSave={handleSaveClick} 
                                                 onDelete={handleDeleteClick} 
